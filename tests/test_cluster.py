@@ -39,3 +39,14 @@ def test_old_items_outside_window_not_matched(tmp_path):
     cluster.assign_clusters(conn, window_hours=48)
     row = conn.execute("SELECT cluster_id FROM items WHERE id = ?", (b.id,)).fetchone()
     assert row["cluster_id"] == b.id  # month-old story is not "the same story"
+
+
+def test_backlog_old_pending_item_not_a_match_target(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    old = _mk(conn, "fxstreet", "Gold climbs as dollar softens", ts="2026-07-01T00:00:00Z")
+    new = _mk(conn, "kitco", "Gold climbs as dollar softens", ts="2026-07-30T00:00:00Z")
+    joined = cluster.assign_clusters(conn, window_hours=48)
+    assert joined == 0  # old item outside window is not a match target
+    rows = {r["id"]: r["cluster_id"] for r in conn.execute("SELECT id, cluster_id FROM items")}
+    assert rows[old.id] == old.id  # old: own representative
+    assert rows[new.id] == new.id  # new: own cluster (does not join old)

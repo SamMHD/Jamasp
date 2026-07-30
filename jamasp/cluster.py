@@ -22,7 +22,7 @@ def assign_clusters(
         (since,),
     ).fetchall()
     pending = conn.execute(
-        "SELECT id, headline FROM items WHERE cluster_id IS NULL ORDER BY published_at"
+        "SELECT id, headline, published_at FROM items WHERE cluster_id IS NULL ORDER BY published_at"
     ).fetchall()
 
     joined = 0
@@ -40,6 +40,7 @@ def assign_clusters(
         conn.execute(
             "UPDATE items SET cluster_id = ? WHERE id = ?", (cluster_id, item["id"])
         )
-        known.append((item["headline"], cluster_id))
+        if item["published_at"] >= since:
+            known.append((item["headline"], cluster_id))
     conn.commit()
     return joined
