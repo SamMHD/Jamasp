@@ -1,0 +1,26 @@
+[project]
+name = "jamasp"
+version = "0.1.0"
+description = "Jamasp — autonomous gold-market analyst agent toolbox"
+requires-python = ">=3.12"
+dependencies = [
+    "click>=8.1",
+    "httpx>=0.27",
+    "feedparser>=6.0",
+    "trafilatura>=1.9",
+    "rapidfuzz>=3.9",
+    "pyyaml>=6.0",
+]
+
+[project.scripts]
+jamasp = "jamasp.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8.0"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["jamasp"]
