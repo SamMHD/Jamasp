@@ -28,7 +28,7 @@ company's physical position (e.g. −10 kg) into refill-timing advice.
 | Topic | Decision |
 |---|---|
 | Runtime | Always-on Linux VPS, Claude Code headless (`claude -p`) fired by systemd timers |
-| Auth | Claude subscription logged in on the VPS (shared rate limits → token discipline matters; safety cap on runs/day) |
+| Auth | Dedicated Claude Max subscription for Jamasp, logged in on the VPS (own rate limits, not shared with Saman's interactive use; safety cap on runs/day still applies) |
 | Delivery | Phase 1: markdown reports in repo (canonical) + Telegram push. Phase 4: email digest, web dashboard |
 | Language | English canonical reports; Persian summaries/alerts to Telegram |
 | Sources | Free wires/RSS + official calendars + free market-data APIs to start; paid feeds later as drop-in `sources.yaml` entries |
@@ -176,8 +176,9 @@ the same report files; dashboard (phase 4) is a static site generated from
   (15 min brief/deepdive, 5 min scan) → one retry, then plain-text Telegram
   failure notice. Expected-but-missing report file counts as failure.
 - **Rate limits:** dispatcher detects CLI rate-limit errors → defer with
-  backoff to the queue + Telegram notice if a brief is delayed (subscription
-  quota is shared with Saman's interactive use).
+  backoff to the queue + Telegram notice if a brief is delayed. The Max
+  subscription is dedicated to Jamasp, so limits are its own — but heavy
+  deep-dive days can still hit them.
 - **Watchdog (no LLM):** checks ingestion ran within the hour, yesterday's
   brief file exists, wakeup queue is draining; Telegrams on violation. Jamasp
   being down is never silent.
