@@ -35,6 +35,7 @@ company's physical position (e.g. −10 kg) into refill-timing advice.
 | Cadence | Daily Dubai-morning brief + self-scheduled event wakeups + 2-hourly urgent scans during market hours |
 | Position data | Phase 3, manual entry (CLI/Telegram) to start |
 | Ingestion summarization | Batched Haiku pass at ingest time writes uniform one-line ledes and cluster labels |
+| Self-learning | Structured predictions scored against local price history; daily micro-retro inside `/brief`, deep weekly `/retro` (playbook, source quality, gated code-change proposals) |
 
 ## Architecture
 
@@ -53,7 +54,7 @@ Three moving parts on the VPS:
 ```
 Jamasp/
 ├── CLAUDE.md                  # Jamasp persona, rules, tool usage contract
-├── .claude/skills/            # /brief, /scan, /deepdive workflow skills
+├── .claude/skills/            # /brief, /scan, /deepdive, /retro workflow skills
 ├── jamasp/                    # Python package: the CLI toolbox
 │   ├── ingest/                # rss, calendar, prices fetchers
 │   ├── cli.py                 # single `jamasp` entry point
@@ -66,7 +67,10 @@ Jamasp/
 │   ├── watchlist.yaml         # tracked themes/entities, each with `since` date
 │   ├── calendar.yaml          # upcoming events Jamasp cares about
 │   ├── positions.yaml         # phase 3: current book
-│   └── stance.md              # rolling market view, rewritten each brief, ≤1 page
+│   ├── stance.md              # rolling market view, rewritten each brief, ≤1 page
+│   ├── predictions.jsonl      # structured, scoreable forecasts from briefs/deep-dives
+│   ├── playbook.md            # earned heuristics; rewritten only by weekly /retro, capped
+│   └── lessons-inbox.md       # daily micro-retro candidate lessons, consumed weekly
 ├── reports/YYYY/MM/           # dated briefs & deep-dive analyses (archive + long-term memory)
 ├── docs/superpowers/specs/    # design docs (this file)
 ├── ops/                       # systemd units/timers, install script, watchdog
@@ -108,11 +112,16 @@ SQLite; sources dead >24 h surface in the inbox header and the daily brief.
 
 ## Agent runs
 
-Three skills in `.claude/skills/`:
+Four skills in `.claude/skills/`:
 
 ### `/brief` — daily, 07:30 Dubai
-Reads `stance.md`, `watchlist.yaml`, `calendar.yaml`, `positions.yaml`
-(phase 3), wakeup list, inbox delta. Produces:
+Reads `stance.md`, `playbook.md`, `watchlist.yaml`, `calendar.yaml`,
+`positions.yaml` (phase 3), wakeup list, inbox delta. Produces:
+0. **Daily micro-retro (opening step):** score any predictions in
+   `predictions.jsonl` whose horizon matured, against local price history.
+   Hits/misses appear as a short "yesterday's calls" section in the brief;
+   candidate lessons are appended to `lessons-inbox.md`. May adjust
+   `stance.md`; never touches `playbook.md`, skills, or code.
 1. `reports/YYYY/MM/DD-brief.md` (English): what happened, meaning for gold,
    updated outlook, today's watch items (including scheduled wakeups).
 2. Persian summary → Telegram.
@@ -120,7 +129,9 @@ Reads `stance.md`, `watchlist.yaml`, `calendar.yaml`, `positions.yaml`
 4. Calendar maintenance: newly discovered events → `calendar.yaml` **and**
    `jamasp wakeup add` (e.g. transcript analysis 30 min after a speech).
 5. Optional deep-dives dispatched to subagents.
-6. Weekly (first brief of the week): prune stale watchlist entries.
+6. New outlook claims recorded as structured entries in `predictions.jsonl`
+   (`{date, claim, direction, horizon, confidence}`).
+7. Weekly (first brief of the week): prune stale watchlist entries.
 
 ### `/scan` — every 2 h, 09:00–23:00 Dubai
 Reads inbox delta + `stance.md` only. Rule: *if nothing materially changes the
@@ -134,6 +145,24 @@ Focused single-topic run carrying its task text (e.g. "read FOMC statement +
 presser transcript, compare to stance §rates, assess gold impact"). Uses
 `jamasp extract`; output appended to the day's report + Telegram note if the
 stance changes.
+
+### `/retro` — weekly, Sunday evening (markets closed)
+The deep learning run. Consumes the week's scored predictions and
+`lessons-inbox.md`, and:
+1. Writes a weekly scorecard report (calibration by claim type: where is
+   Jamasp reliably right, where does it overweight noise).
+2. Rewrites `playbook.md` — promoting evidence-backed lessons from the inbox,
+   pruning weak or disproven heuristics, keeping it capped. `/retro` is the
+   only run allowed to touch the playbook.
+3. Source-quality analysis (phase 3): signal-vs-noise per source from citation
+   marks in SQLite; proposes `sources.yaml` changes.
+4. Gated self-edits (phase 3): proposed changes to skills, `CLAUDE.md`, or
+   config go to a git branch with a Telegram note; Saman approves the merge.
+   State files (stance, playbook, watchlist) remain freely self-editable;
+   behavioral code requires human sign-off.
+5. Addresses human feedback: Telegram replies from Saman (e.g. "this call was
+   wrong", "more of this") are ingested as feedback items the retro must
+   respond to.
 
 ### Subagent & memory discipline
 - Long documents are read by subagents (Haiku/Sonnet, low effort) that return
@@ -152,6 +181,7 @@ stance changes.
 | ingest | every 15 min | `jamasp ingest` + Haiku digest |
 | brief | 07:30 daily | `claude -p "/brief"` |
 | scan | every 2 h, 09:00–23:00 | `claude -p "/scan"` |
+| retro | Sunday 20:00 | `claude -p "/retro"` |
 | dispatcher | every 5 min | due wakeup-queue entries |
 | watchdog | 09:00 daily | plain-text health check |
 
@@ -169,6 +199,31 @@ summary + reference to the English report. Alerts: what happened, expected gold
 impact, stance change or not. Email (phase 4) is another `notify` backend over
 the same report files; dashboard (phase 4) is a static site generated from
 `reports/` + `state/`.
+
+## Self-learning
+
+The learning loop closes the gap between what Jamasp predicted and what
+actually happened, at two cadences:
+
+- **Daily micro-retro** (inside `/brief`): score matured predictions against
+  local price history, surface hits/misses in the brief, queue candidate
+  lessons in `lessons-inbox.md`. Cheap, no behavioral changes.
+- **Weekly deep `/retro`** (Sunday): calibration scorecard, playbook rewrite
+  from evidence, source-quality analysis, and gated proposals for code/skill/
+  config changes via a review branch.
+
+Division of authority — *the daily runs use the playbook; the weekly run earns
+it*:
+
+| Artifact | Who may change it |
+|---|---|
+| `stance.md`, `watchlist.yaml`, `lessons-inbox.md`, `predictions.jsonl` | any agent run |
+| `playbook.md` | `/retro` only |
+| skills, `CLAUDE.md`, `config/*` | `/retro` proposes on a branch; Saman merges |
+
+Rationale for gating: unbounded self-editing of prompts risks silent
+behavioral drift; git-branch review keeps the improvement loop while keeping a
+human on the throttle.
 
 ## Error handling & ops
 
@@ -201,8 +256,8 @@ the same report files; dashboard (phase 4) is a static site generated from
 | Phase | Scope | Exit criterion |
 |---|---|---|
 | 1 — MVP (Mac) | Repo scaffold; `jamasp` CLI (ingest, digest, inbox, extract, price, notify); starting `sources.yaml`; `/brief` skill; Telegram bot; manual daily runs | A week of daily briefs Saman finds genuinely useful |
-| 2 — Autonomy + VPS | Wakeup queue + dispatcher; `/scan`, `/deepdive`; calendar ingestion; watchlist; systemd timers; watchdog; deploy script | Jamasp self-schedules an event analysis correctly, unprompted |
-| 3 — Position awareness | `positions.yaml`; `jamasp position set` (CLI and/or Telegram); refill-timing advice in briefs/alerts | Useful "cover now / wait" advice on a real −10 kg scenario |
+| 2 — Autonomy + VPS | Wakeup queue + dispatcher; `/scan`, `/deepdive`; calendar ingestion; watchlist; systemd timers; watchdog; deploy script; predictions + daily micro-retro + weekly `/retro` with playbook | Jamasp self-schedules an event analysis correctly, unprompted; first weekly scorecard produced |
+| 3 — Position awareness | `positions.yaml`; `jamasp position set` (CLI and/or Telegram); refill-timing advice in briefs/alerts; source-quality learning; gated self-edit proposals | Useful "cover now / wait" advice on a real −10 kg scenario |
 | 4 — Surfaces & upgrades | Email digest backend; static dashboard; paid feeds as new sources | — |
 
 ## Out of scope (for now)
