@@ -1,0 +1,51 @@
+sources:
+  # --- news wires (rss) ---
+  - name: fxstreet
+    type: rss
+    url: https://www.fxstreet.com/rss/news
+    interval_minutes: 15
+    topic: markets
+  - name: investing_commodities
+    type: rss
+    url: https://www.investing.com/rss/news_11.rss
+    interval_minutes: 15
+    topic: gold
+  - name: marketwatch_top
+    type: rss
+    url: https://feeds.content.dowjones.io/public/rss/mw_topstories
+    interval_minutes: 15
+    topic: markets
+  - name: kitco
+    type: rss
+    url: https://www.kitco.com/rss/
+    interval_minutes: 15
+    topic: gold
+  - name: fed_press
+    type: rss
+    url: https://www.federalreserve.gov/feeds/press_all.xml
+    interval_minutes: 60
+    topic: fed
+  - name: treasury_press
+    type: rss
+    url: https://home.treasury.gov/rss/press.xml
+    interval_minutes: 60
+    topic: fiscal
+  # --- prices (price_api) ---
+  - name: gold_spot
+    type: price_api
+    url: "https://stooq.com/q/l/?s=xauusd&f=sd2t2ohlcv&h&e=csv"
+    interval_minutes: 15
+    topic: prices
+    parser: stooq_csv
+  - name: dollar_index
+    type: price_api
+    url: "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DTWEXBGS"
+    interval_minutes: 60
+    topic: prices
+    parser: fred_csv
+  - name: real_yield_10y
+    type: price_api
+    url: "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DFII10"
+    interval_minutes: 60
+    topic: prices
+    parser: fred_csv
