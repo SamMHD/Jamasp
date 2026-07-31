@@ -13,6 +13,7 @@ from jamasp import digest as digest_mod
 from jamasp import extract as extract_mod
 from jamasp import inbox as inbox_mod
 from jamasp import notify as notify_mod
+from jamasp import pricesummary as pricesummary_mod
 from jamasp.config import load_settings, load_sources
 from jamasp.ingest import prices as prices_mod
 from jamasp.ingest import rss as rss_mod
@@ -132,3 +133,12 @@ def sources_check(db_path, config_dir):
                     click.echo(f"OK   {source.name} ({symbol}={value} @ {ts})")
             except Exception as exc:
                 click.echo(f"FAIL {source.name}: {exc}")
+
+
+@main.command()
+@db_opt
+@cfg_opt
+def price(db_path, config_dir):
+    """Print latest snapshots with 24h/7d deltas."""
+    conn, _, _ = _common(db_path, config_dir)
+    click.echo(pricesummary_mod.render(conn))
