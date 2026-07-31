@@ -27,6 +27,14 @@ bite you if you skip them.
 3. **Secrets never live in the repo.** Telegram token/chat id go in
    `~/.config/jamasp/env` (chmod 600), referenced by the units via
    `EnvironmentFile=`.
+4. **Cloudflare WARP: PROXY MODE ONLY — never full tunnel.** Full-tunnel
+   WARP (`warp-cli mode warp`) hijacks the default route on connect; on a
+   remote-managed box the return path breaks and you lose SSH entirely
+   (this happened — recovery needed provider console access). Proxy mode
+   only opens a localhost SOCKS5 port and never touches routing. The
+   sequence in "7. egress proxy" below sets the mode **before** the first
+   connect and verifies it; keep that order. If `warp-cli settings` ever
+   shows a Mode other than `WarpProxy`, disconnect before anything else.
 
 ## Steps
 
@@ -100,6 +108,38 @@ uv run jamasp ingest             # 0 ledes until Claude is logged in — expecte
 uv run jamasp price
 systemctl start jamasp-ingest.service && systemctl show jamasp-ingest.service -p Result
 ```
+
+### 7. egress proxy (WARP proxy mode — for `jamasp extract`)
+
+Several publishers (CNBC, MarketWatch, Mining.com) 401/403 requests coming
+from datacenter IPs. `jamasp extract` falls back to the proxy named in
+`JAMASP_EXTRACT_PROXY`; provide it with Cloudflare WARP in **proxy mode
+only** (constraint 4 — full tunnel kills SSH on a remote box). As root:
+
+```bash
+curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg | gpg --yes --dearmor \
+  --output /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
+. /etc/os-release
+echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ ${VERSION_CODENAME} main" \
+  > /etc/apt/sources.list.d/cloudflare-client.list
+apt-get update -qq && apt-get install -y cloudflare-warp
+systemctl enable --now warp-svc && sleep 3
+
+warp-cli --accept-tos registration new
+warp-cli --accept-tos mode proxy          # BEFORE the first connect — always
+warp-cli --accept-tos proxy port 40000
+warp-cli --accept-tos settings | grep "Mode:"   # must say: WarpProxy on port 40000
+warp-cli --accept-tos connect
+ip route show default                     # MUST be unchanged (dev eth0);
+                                          # if not: warp-cli disconnect NOW
+curl --proxy socks5h://127.0.0.1:40000 https://ifconfig.me   # Cloudflare IP
+echo 'JAMASP_EXTRACT_PROXY=socks5://127.0.0.1:40000' >> /home/jamasp/.config/jamasp/env
+```
+
+Known limits: Investing.com still 403s (Cloudflare bot *challenge*, not IP
+reputation — no plain HTTP client passes it), and Google News wrapper URLs
+"succeed" but yield menu junk instead of the article; treat both as
+headline-only sources.
 
 ## Human handoff (two steps, then activate)
 
