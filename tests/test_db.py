@@ -41,6 +41,11 @@ def test_phase2_schema_migrates_existing_db(tmp_path):
     assert conn.execute("SELECT COUNT(*) FROM wakeups").fetchone()[0] == 0
 
 
+def test_busy_timeout_set(tmp_path):
+    conn = db.connect(tmp_path / "j.db")
+    assert conn.execute("PRAGMA busy_timeout").fetchone()[0] == 5000
+
+
 def test_meta_helpers(tmp_path):
     conn = db.connect(tmp_path / "j.db")
     assert db.get_meta(conn, "last_ingest_at") is None
