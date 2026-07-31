@@ -13,6 +13,27 @@ sources:
     url: https://feeds.content.dowjones.io/public/rss/mw_topstories
     interval_minutes: 15
     topic: markets
+  # cnbc_finance / cnbc_economy / mining_com: added 2026-07-31 as
+  # DEEP-READABLE sources. investing_commodities (Cloudflare 403) and
+  # gnews_gold (Google News consent-wall wrapper URLs) give headline+lede
+  # breadth but their article pages can't be fetched by `jamasp extract`;
+  # these three fetch AND extract cleanly (verified), so the brief has real
+  # article text to deep-read.
+  - name: cnbc_finance
+    type: rss
+    url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10000664"
+    interval_minutes: 15
+    topic: markets
+  - name: cnbc_economy
+    type: rss
+    url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=20910258"
+    interval_minutes: 30
+    topic: macro
+  - name: mining_com
+    type: rss
+    url: https://www.mining.com/feed/
+    interval_minutes: 30
+    topic: gold
   # kitco: removed 2026-07-31 — every rss path (/rss/, /news/*/rss,
   # /rss/KitcoNews.xml) returns 403 Forbidden; site is bot-protected
   # and no alternate feed exists.
