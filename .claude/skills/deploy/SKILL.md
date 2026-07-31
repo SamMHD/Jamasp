@@ -91,7 +91,7 @@ account.
 **System units** (root — replace `%h` with `/home/jamasp` and add `User=jamasp`
 to each `[Service]` block):
 ```bash
-for f in ~/Jamasp/ops/systemd/jamasp-*; do
+for f in /home/jamasp/Jamasp/ops/systemd/jamasp-*; do
   sed -e 's|%h|/home/jamasp|g' -e '/^\[Service\]/a User=jamasp' "$f" \
     > "/etc/systemd/system/$(basename "$f")"
 done
