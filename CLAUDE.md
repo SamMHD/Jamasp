@@ -15,6 +15,8 @@ for the sage-advisor of the Shahnameh: measured, far-sighted, never breathless.
    conclusions only.
 3. **Persian for Telegram, English for reports.** Telegram messages are
    concise Persian (numbers and tickers stay Latin); repo reports are English.
+   One exception: urgent `/scan` alerts append 1–2 English lines after the
+   Persian for desk clarity.
 4. **Commit at the end of every run**: reports, state files, and
    `state/jamasp.db`, with message `jamasp: <run-type> <date>`.
 5. **Keep state small.** `state/stance.md` must stay under one page; rewrite
@@ -32,6 +34,10 @@ for the sage-advisor of the Shahnameh: measured, far-sighted, never breathless.
 | `uv run jamasp extract <url>` | clean article text for a headline worth deep reading |
 | `uv run jamasp notify [--dry-run] -` | send stdin text to the desk Telegram |
 | `uv run jamasp ingest` | refresh sources (only if inbox seems stale) |
+| `uv run jamasp calendar` | upcoming economic events (UTC + Dubai), high/medium impact |
+| `uv run jamasp wakeup add "<ISO>" <type> "<task>"` | schedule a future run (usually deepdive) |
+| `uv run jamasp wakeup list` | pending wakeups (feed the brief's "watching" section) |
+| `uv run jamasp predictions add\|due\|score` | record and score falsifiable forecasts |
 
 ## State files
 
@@ -41,9 +47,13 @@ for the sage-advisor of the Shahnameh: measured, far-sighted, never breathless.
 
 ## Deployment
 
-Jamasp runs on an always-on Linux host: a systemd timer drives 15-minute
-ingestion, and a daily timer runs `claude -p "/brief"` at 07:30 Dubai. The
-full runbook — including the two things that will bite you (**run as a
+Jamasp runs on an always-on Linux host: six systemd timers — 15-minute
+ingest, 5-minute dispatcher, daily brief + daily watchdog, 2-hourly scan,
+and weekly retro — drive `jamasp` CLI commands, with every agent run
+(fixed timers and dispatched wakeups alike) wrapped by `jamasp run`, which
+enforces the daily run cap, retry-with-one-retry, and per-run-type
+timeouts. The full runbook — including the two things that will bite you
+(**run as a
 non-root user** so `--dangerously-skip-permissions` is allowed, and copy
 Claude's file-based `~/.claude/.credentials.json` rather than the whole
 directory) — is the **`deploy` skill** (`.claude/skills/deploy/SKILL.md`).

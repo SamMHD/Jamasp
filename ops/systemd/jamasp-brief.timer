@@ -1,0 +1,9 @@
+[Unit]
+Description=Run the Jamasp daily brief at 07:30 Dubai
+
+[Timer]
+OnCalendar=*-*-* 07:30:00 Asia/Dubai
+Persistent=true
+
+[Install]
+WantedBy=timers.target

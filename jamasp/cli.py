@@ -1,20 +1,28 @@
 """jamasp CLI — the agent's toolbox and the operator's ops tool."""
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
 import click
 import httpx
 
+from jamasp import calendarview as calendarview_mod
 from jamasp import cluster as cluster_mod
 from jamasp import db as db_mod
 from jamasp import digest as digest_mod
+from jamasp import dispatch as dispatch_mod
 from jamasp import extract as extract_mod
 from jamasp import inbox as inbox_mod
 from jamasp import notify as notify_mod
+from jamasp import predictions as predictions_mod
 from jamasp import pricesummary as pricesummary_mod
+from jamasp import runner as runner_mod
+from jamasp import wakeup as wakeup_mod
+from jamasp import watchdog as watchdog_mod
 from jamasp.config import load_settings, load_sources
+from jamasp.ingest import calendar as calendar_mod
 from jamasp.ingest import prices as prices_mod
 from jamasp.ingest import rss as rss_mod
 
@@ -43,7 +51,7 @@ def main():
 def ingest(no_digest, db_path, config_dir):
     """Fetch all sources, dedupe, cluster, and (optionally) write ledes."""
     conn, sources, settings = _common(db_path, config_dir)
-    new_items = prices_n = errors = 0
+    new_items = prices_n = events_n = errors = 0
     with httpx.Client(headers={"User-Agent": "jamasp/0.1"}) as client:
         for source in sources:
             try:
@@ -55,6 +63,10 @@ def ingest(no_digest, db_path, config_dir):
                     symbol, ts, value = prices_mod.fetch_price(source, client)
                     prices_mod.store_price(conn, symbol, ts, value)
                     prices_n += 1
+                elif source.type == "calendar":
+                    events_n += calendar_mod.store_events(
+                        conn, calendar_mod.fetch_source(source, client)
+                    )
             except Exception as exc:  # per-source isolation, by design
                 errors += 1
                 conn.execute(
@@ -68,9 +80,10 @@ def ingest(no_digest, db_path, config_dir):
         conn, ccfg["similarity_threshold"], ccfg["window_hours"]
     )
     ledes = 0 if no_digest else digest_mod.run_digest(conn, settings)
+    db_mod.set_meta(conn, "last_ingest_at", db_mod.utcnow())
     click.echo(
         f"ingest: {new_items} new items ({joined} clustered), "
-        f"{prices_n} price snapshots, {ledes} ledes, {errors} source errors"
+        f"{prices_n} price snapshots, {events_n} events, {ledes} ledes, {errors} source errors"
     )
 
 
@@ -131,8 +144,66 @@ def sources_check(db_path, config_dir):
                 elif source.type == "price_api":
                     symbol, ts, value = prices_mod.fetch_price(source, client)
                     click.echo(f"OK   {source.name} ({symbol}={value} @ {ts})")
+                elif source.type == "calendar":
+                    n = len(calendar_mod.fetch_source(source, client))
+                    click.echo(f"OK   {source.name} ({n} events)")
             except Exception as exc:
                 click.echo(f"FAIL {source.name}: {exc}")
+
+
+@main.group("wakeup")
+def wakeup_group():
+    """Wakeup queue: schedule future agent runs."""
+
+
+@wakeup_group.command("add")
+@click.argument("due_at")
+@click.argument("run_type")
+@click.argument("task")
+@db_opt
+@cfg_opt
+def wakeup_add(due_at, run_type, task, db_path, config_dir):
+    """Schedule RUN_TYPE at DUE_AT (ISO-8601 with timezone) carrying TASK text."""
+    conn, _, _ = _common(db_path, config_dir)
+    try:
+        wid = wakeup_mod.add(conn, due_at, run_type, task)
+    except ValueError as exc:
+        raise click.BadParameter(str(exc))
+    row = conn.execute("SELECT due_at FROM wakeups WHERE id = ?", (wid,)).fetchone()
+    click.echo(f"scheduled wakeup #{wid}: {run_type} at {row['due_at']}")
+
+
+@wakeup_group.command("list")
+@db_opt
+@cfg_opt
+def wakeup_list(db_path, config_dir):
+    """List pending wakeups, soonest first."""
+    conn, _, _ = _common(db_path, config_dir)
+    rows = wakeup_mod.list_open(conn)
+    if not rows:
+        click.echo("no pending wakeups")
+        return
+    for r in rows:
+        click.echo(f"#{r['id']}  {r['due_at']}  {r['run_type']}  attempts={r['attempts']}  {r['task']}")
+
+
+@main.command()
+@click.option("--dry-run", is_flag=True, help="show what would fire; fire nothing")
+@db_opt
+@cfg_opt
+def dispatch(dry_run, db_path, config_dir):
+    """Fire due wakeup-queue entries as headless agent runs."""
+    conn, _, settings = _common(db_path, config_dir)
+    if dry_run:
+        for w in wakeup_mod.due(conn):  # wakeup_mod imported in Task 2
+            click.echo(f"[dry-run] would fire #{w['id']} {w['run_type']}: {w['task']}")
+        return
+    results = dispatch_mod.run_due(conn, settings)
+    if not results:
+        click.echo("no due wakeups")
+        return
+    for wid, status in results:
+        click.echo(f"wakeup #{wid}: {status}")
 
 
 @main.command()
@@ -142,3 +213,114 @@ def price(db_path, config_dir):
     """Print latest snapshots with 24h/7d deltas."""
     conn, _, _ = _common(db_path, config_dir)
     click.echo(pricesummary_mod.render(conn))
+
+
+@main.command()
+@click.option("--reports-dir", default="reports", show_default=True)
+@db_opt
+@cfg_opt
+def watchdog(reports_dir, db_path, config_dir):
+    """Health check: ingestion fresh, yesterday's brief exists, queue draining."""
+    conn, _, settings = _common(db_path, config_dir)
+    violations = watchdog_mod.run(conn, settings, Path(reports_dir))
+    if not violations:
+        click.echo("OK")
+    else:
+        for v in violations:
+            click.echo(f"VIOLATION: {v}")
+
+
+@main.command()
+@click.option("--days", type=int, default=14, show_default=True)
+@click.option("--all-impacts", is_flag=True, help="include Low/Holiday impact rows")
+@db_opt
+@cfg_opt
+def calendar(days, all_impacts, db_path, config_dir):
+    """Print upcoming economic-calendar events (JSONL, UTC + Dubai times)."""
+    conn, _, _ = _common(db_path, config_dir)
+    click.echo(calendarview_mod.render(
+        conn, days=days, impact_min="all" if all_impacts else "default"
+    ))
+
+
+@main.command("run")
+@click.argument("run_type", type=click.Choice(["brief", "scan", "deepdive", "retro"]))
+@click.argument("task", required=False, default=None)
+@click.option("--dry-run", is_flag=True, help="print the command; don't execute or record")
+@db_opt
+@cfg_opt
+def run_cmd(run_type, task, dry_run, db_path, config_dir):
+    """Fire one wrapped agent run (cap, timeout, retry, failure notice)."""
+    conn, _, settings = _common(db_path, config_dir)
+    if dry_run:
+        prompt = f"/{run_type} {task}" if task else f"/{run_type}"
+        click.echo(f"[dry-run] would run: {' '.join(settings['runs']['claude_cmd'])} {prompt!r}")
+        return
+    status = runner_mod.run_agent(conn, settings, run_type, task=task)
+    click.echo(f"{run_type}: {status}")
+    if status in ("failed", "timeout"):
+        raise SystemExit(1)
+
+
+pred_path_opt = click.option(
+    "--path", "pred_path", default="state/predictions.jsonl", show_default=True
+)
+
+
+@main.group("predictions")
+def predictions_group():
+    """Structured forecast ledger (add, list, due, score)."""
+
+
+@predictions_group.command("add")
+@click.argument("claim")
+@click.option("--direction", type=click.Choice(["up", "down", "flat"]), required=True)
+@click.option("--horizon-days", type=int, required=True)
+@click.option("--confidence", type=float, required=True)
+@pred_path_opt
+@db_opt
+@cfg_opt
+def predictions_add(claim, direction, horizon_days, confidence, pred_path, db_path, config_dir):
+    """Record a falsifiable claim with direction, horizon, and confidence."""
+    try:
+        e = predictions_mod.add(Path(pred_path), claim, direction, horizon_days, confidence)
+    except ValueError as exc:
+        raise click.BadParameter(str(exc))
+    click.echo(f"recorded prediction {e['id']}: {claim}")
+
+
+@predictions_group.command("list")
+@pred_path_opt
+@db_opt
+@cfg_opt
+def predictions_list(pred_path, db_path, config_dir):
+    """Print every ledger entry as JSONL."""
+    for e in predictions_mod.load(Path(pred_path)):
+        click.echo(json.dumps(e, ensure_ascii=False))
+
+
+@predictions_group.command("due")
+@pred_path_opt
+@db_opt
+@cfg_opt
+def predictions_due(pred_path, db_path, config_dir):
+    """Matured, unscored predictions annotated with the actual price move."""
+    conn, _, settings = _common(db_path, config_dir)
+    symbol = settings.get("predictions", {}).get("price_symbol", "GC")
+    click.echo(predictions_mod.render_due(conn, Path(pred_path), symbol))
+
+
+@predictions_group.command("score")
+@click.argument("pred_id")
+@click.option("--outcome", type=click.Choice(["hit", "miss", "unclear"]), required=True)
+@click.option("--note", default=None)
+@pred_path_opt
+@db_opt
+@cfg_opt
+def predictions_score(pred_id, outcome, note, pred_path, db_path, config_dir):
+    """Mark a matured prediction hit/miss/unclear (with a why note)."""
+    try:
+        e = predictions_mod.score(Path(pred_path), pred_id, outcome, note=note)
+    except (KeyError, ValueError) as exc:
+        raise click.ClickException(str(exc))
+    click.echo(f"scored {e['id']} {outcome}: {e['claim']}")
