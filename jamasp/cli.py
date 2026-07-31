@@ -7,6 +7,7 @@ from pathlib import Path
 import click
 import httpx
 
+from jamasp import calendarview as calendarview_mod
 from jamasp import cluster as cluster_mod
 from jamasp import db as db_mod
 from jamasp import digest as digest_mod
@@ -16,6 +17,7 @@ from jamasp import notify as notify_mod
 from jamasp import pricesummary as pricesummary_mod
 from jamasp import wakeup as wakeup_mod
 from jamasp.config import load_settings, load_sources
+from jamasp.ingest import calendar as calendar_mod
 from jamasp.ingest import prices as prices_mod
 from jamasp.ingest import rss as rss_mod
 
@@ -44,7 +46,7 @@ def main():
 def ingest(no_digest, db_path, config_dir):
     """Fetch all sources, dedupe, cluster, and (optionally) write ledes."""
     conn, sources, settings = _common(db_path, config_dir)
-    new_items = prices_n = errors = 0
+    new_items = prices_n = events_n = errors = 0
     with httpx.Client(headers={"User-Agent": "jamasp/0.1"}) as client:
         for source in sources:
             try:
@@ -56,6 +58,10 @@ def ingest(no_digest, db_path, config_dir):
                     symbol, ts, value = prices_mod.fetch_price(source, client)
                     prices_mod.store_price(conn, symbol, ts, value)
                     prices_n += 1
+                elif source.type == "calendar":
+                    events_n += calendar_mod.store_events(
+                        conn, calendar_mod.fetch_source(source, client)
+                    )
             except Exception as exc:  # per-source isolation, by design
                 errors += 1
                 conn.execute(
@@ -69,9 +75,10 @@ def ingest(no_digest, db_path, config_dir):
         conn, ccfg["similarity_threshold"], ccfg["window_hours"]
     )
     ledes = 0 if no_digest else digest_mod.run_digest(conn, settings)
+    db_mod.set_meta(conn, "last_ingest_at", db_mod.utcnow())
     click.echo(
         f"ingest: {new_items} new items ({joined} clustered), "
-        f"{prices_n} price snapshots, {ledes} ledes, {errors} source errors"
+        f"{prices_n} price snapshots, {events_n} events, {ledes} ledes, {errors} source errors"
     )
 
 
@@ -132,6 +139,9 @@ def sources_check(db_path, config_dir):
                 elif source.type == "price_api":
                     symbol, ts, value = prices_mod.fetch_price(source, client)
                     click.echo(f"OK   {source.name} ({symbol}={value} @ {ts})")
+                elif source.type == "calendar":
+                    n = len(calendar_mod.fetch_source(source, client))
+                    click.echo(f"OK   {source.name} ({n} events)")
             except Exception as exc:
                 click.echo(f"FAIL {source.name}: {exc}")
 
@@ -179,3 +189,16 @@ def price(db_path, config_dir):
     """Print latest snapshots with 24h/7d deltas."""
     conn, _, _ = _common(db_path, config_dir)
     click.echo(pricesummary_mod.render(conn))
+
+
+@main.command()
+@click.option("--days", type=int, default=14, show_default=True)
+@click.option("--all-impacts", is_flag=True, help="include Low/Holiday impact rows")
+@db_opt
+@cfg_opt
+def calendar(days, all_impacts, db_path, config_dir):
+    """Print upcoming economic-calendar events (JSONL, UTC + Dubai times)."""
+    conn, _, _ = _common(db_path, config_dir)
+    click.echo(calendarview_mod.render(
+        conn, days=days, impact_min="all" if all_impacts else "default"
+    ))

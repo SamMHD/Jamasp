@@ -81,3 +81,14 @@ sources:
     interval_minutes: 60
     topic: prices
     parser: fred_csv
+  # --- calendars ---
+  # ff_calendar: ForexFactory weekly economic calendar mirror (faireconomy
+  # media CDN), free JSON, no key. Gives CPI/NFP/FOMC-class events with
+  # impact ratings. Refreshed 4x/day; whole-week payload, dedupe by
+  # (source, title, starts_at) hash.
+  - name: ff_calendar
+    type: calendar
+    url: "https://nfs.faireconomy.media/ff_calendar_thisweek.json"
+    interval_minutes: 360
+    topic: macro
+    parser: ff_json
