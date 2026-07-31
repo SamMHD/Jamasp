@@ -60,6 +60,81 @@ sources:
     assert [e["source"] for e in errs] == ["deadfeed"]
 
 
+def test_ingest_skips_source_fetched_within_interval(tmp_path):
+    cfg = _write_configs(
+        tmp_path,
+        """
+sources:
+  - name: deadfeed
+    type: rss
+    url: http://127.0.0.1:1/rss
+    interval_minutes: 60
+    topic: markets
+""",
+    )
+    dbp = tmp_path / "j.db"
+    conn = db.connect(dbp)
+    db.set_meta(conn, "source_last_fetch.deadfeed", db.utcnow())
+    conn.close()
+    runner = CliRunner()
+    result = runner.invoke(
+        main, ["ingest", "--no-digest", "--db", str(dbp), "--config-dir", str(cfg)]
+    )
+    assert result.exit_code == 0
+    conn = db.connect(dbp)
+    # within the 60-minute interval -> no fetch attempt, so no error either
+    assert conn.execute("SELECT COUNT(*) c FROM source_errors").fetchone()["c"] == 0
+
+    # age the marker past the interval -> the source is fetched (and fails)
+    db.set_meta(conn, "source_last_fetch.deadfeed", "2026-01-01T00:00:00Z")
+    conn.close()
+    result = runner.invoke(
+        main, ["ingest", "--no-digest", "--db", str(dbp), "--config-dir", str(cfg)]
+    )
+    assert result.exit_code == 0
+    conn = db.connect(dbp)
+    assert conn.execute("SELECT COUNT(*) c FROM source_errors").fetchone()["c"] == 1
+
+
+def test_ingest_records_last_fetch_only_on_success(tmp_path, monkeypatch):
+    cfg = _write_configs(
+        tmp_path,
+        """
+sources:
+  - name: goodfeed
+    type: rss
+    url: http://127.0.0.1:1/rss
+    interval_minutes: 60
+    topic: markets
+  - name: deadfeed
+    type: rss
+    url: http://127.0.0.1:1/rss
+    interval_minutes: 60
+    topic: markets
+""",
+    )
+    from jamasp import cli as cli_mod
+
+    real_fetch = cli_mod.rss_mod.fetch_source
+
+    def fake_fetch(source, client):
+        if source.name == "goodfeed":
+            return []
+        return real_fetch(source, client)
+
+    monkeypatch.setattr(cli_mod.rss_mod, "fetch_source", fake_fetch)
+    dbp = tmp_path / "j.db"
+    runner = CliRunner()
+    result = runner.invoke(
+        main, ["ingest", "--no-digest", "--db", str(dbp), "--config-dir", str(cfg)]
+    )
+    assert result.exit_code == 0
+    conn = db.connect(dbp)
+    assert db.get_meta(conn, "source_last_fetch.goodfeed") is not None
+    # a failed fetch must NOT set the marker, so the source retries next run
+    assert db.get_meta(conn, "source_last_fetch.deadfeed") is None
+
+
 def test_inbox_command_renders_and_marks(tmp_path):
     cfg = _write_configs(tmp_path, "sources: []\n")
     dbp = tmp_path / "j.db"

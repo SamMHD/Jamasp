@@ -1,7 +1,11 @@
 # Future sources — research doc
 
-Status: research only. Nothing here is wired into `config/sources.yaml` yet.
-Researched 2026-07-31.
+Researched 2026-07-31. **Updated same day after a per-source verification
+pass run FROM the Hetzner host** (every candidate tested through the
+production fetch path) plus three research sweeps on technical sources —
+see the addendum at the bottom. Everything marked ✅ HERE→"added" is now
+wired into `config/sources.yaml`; the tables below carry the corrected
+from-Hetzner verdicts.
 
 ## Infrastructure constraints (read before adding anything)
 
@@ -41,20 +45,20 @@ host) · ❌ confirmed blocked/broken.
 | Name | Feed/API | Cost | Value | Feasibility |
 |---|---|---|---|---|
 | Kitco | no working RSS — `/rss/`, `/news/*/rss`, `/rss/KitcoNews.xml` all previously 403; re-check today returned 404 | free (if it worked) | High — the trade-press benchmark for gold-specific commentary | ❌ Already removed from `sources.yaml` (2026-07-31). Same site-wide bot posture as Investing.com/FXStreet — assume unfixable |
-| World Gold Council (gold.org) | `https://www.gold.org/rss.xml` | free | High — official demand-trends data, central-bank buying commentary, ETF-flow analysis, written for exactly this audience | ✅ Verified: valid RSS 2.0, live items. Article-page extractability (Cloudflare or not) not yet tested — try `jamasp extract` on one item before committing |
-| LBMA gold price benchmark (AM/PM auction) | `https://prices.lbma.org.uk/json/gold_am.json` and `.../gold_pm.json` | free | High — this *is* the global benchmark spot price (vs. our current GC=F futures proxy) | ✅ Verified: 200, valid JSON, history back to 1968. Caveat: ICE Benchmark Administration (IBA) licenses real-time/historical redistribution of the LBMA benchmark for commercial use — fine for internal desk reference, worth a light legal check before publishing derived numbers externally |
+| World Gold Council (gold.org) | `https://www.gold.org/rss.xml` | free | High — official demand-trends data, central-bank buying commentary, ETF-flow analysis, written for exactly this audience | ✅ **Added.** Verified from Hetzner: valid RSS, works direct, and `jamasp extract` returns clean article prose (3.3k chars on test). Caveat: feed mixes in old archive items (a 2018 entry appeared) — dedupe absorbs them |
+| LBMA gold price benchmark (AM/PM auction) | `https://prices.lbma.org.uk/json/gold_am.json` and `.../gold_pm.json` | free | High — this *is* the global benchmark spot price (vs. our current GC=F futures proxy) | ✅ **Added** (as `XAU_AM`/`XAU_PM`). Verified from Hetzner: works direct, ~900KB full-history JSON each, latest auction present. Caveat: ICE Benchmark Administration (IBA) licenses real-time/historical redistribution of the LBMA benchmark for commercial use — fine for internal desk reference, worth a light legal check before publishing derived numbers externally |
 | LBMA news/press | no discoverable RSS (`/rss`, `/news-insights` → 404) | — | Medium | ❌ No feed found; would need scraping, not recommended |
-| BullionVault (gold-news blog) | `https://www.bullionvault.com/gold-news/rss` | free | Medium — independent retail-flow-adjacent commentary | ⚠️ Timed out from this sandbox on every attempt (curl and WebFetch); re-check from Hetzner |
+| BullionVault (gold-news blog) | `https://www.bullionvault.com/gold-news/rss` | free | Medium — independent retail-flow-adjacent commentary | ❌ Re-checked from Hetzner: site reachable but `/gold-news/rss` and `/gold-news/feed` both 404, and the landing page advertises no feed anywhere. No RSS exists |
 | Metals Focus | no free feed; research reports/subscriptions (Gold Focus, Precious Metals Investment Focus, Gold Mine Cost Service) | paid, price not published — contact for quote | High-quality supply/demand and mine-cost data, but built for scheduled reports not a live feed | Not RSS/API-shaped — a "buy the annual report and read it manually" source, not an ingest candidate |
 
 ## 2. Macro/central-bank primary sources (beyond Fed/Treasury)
 
 | Name | Feed/API | Cost | Value | Feasibility |
 |---|---|---|---|---|
-| ECB press releases | `https://www.ecb.europa.eu/rss/press.html` | free | High — euro-area rate decisions move DXY and thus gold | ✅ Verified: valid RSS 2.0, live items |
-| Bank of England | `https://www.bankofengland.co.uk/rss/news` (index at `/rss`) | free | Medium-high — GBP/gilt moves, less direct gold impact than Fed/ECB | ❌ 403 on both curl and WebFetch — bot-protected, same posture as blocked news sites. Not fixable via WARP |
-| IMF | `https://www.imf.org/en/news/rss`, `https://www.imf.org/en/rss-list/feed?category=WHATSNEW` | free | Medium — reserve-asset commentary, occasional gold-reserve mentions in Article IV reports | ❌ 403 on all paths tried — bot-protected |
-| BIS press releases | `https://www.bis.org/doclist/all_pressrels.rss` | free | Medium — central-bank-of-central-banks commentary, useful for systemic-risk framing | ✅ Verified valid RDF/RSS 1.0 via WebFetch (direct curl timed out from this sandbox — re-check from Hetzner, but the WebFetch result is a good sign it's not bot-blocked) |
+| ECB press releases | `https://www.ecb.europa.eu/rss/press.html` | free | High — euro-area rate decisions move DXY and thus gold | ✅ **Added.** Verified from Hetzner: works direct, 15 live entries |
+| Bank of England | `https://www.bankofengland.co.uk/rss/news` (index at `/rss`) | free | Medium-high — GBP/gilt moves, less direct gold impact than Fed/ECB | ✅ **Added.** The dev-sandbox 403 did NOT reproduce from Hetzner — works direct there, 50 entries incl. rate decisions. A reminder that bot-wall verdicts are vantage-point-specific |
+| IMF | `https://www.imf.org/en/news/rss`, `https://www.imf.org/en/rss-list/feed?category=WHATSNEW` | free | Medium — reserve-asset commentary, occasional gold-reserve mentions in Article IV reports | ❌ Confirmed from Hetzner: 403 direct AND via WARP — hard bot-wall from every vantage tried |
+| BIS press releases | `https://www.bis.org/doclist/all_pressrels.rss` | free | Medium — central-bank-of-central-banks commentary, useful for systemic-risk framing | ✅ **Added.** Verified from Hetzner: works direct (the sandbox curl timeout was environment-specific), 25 entries |
 | BoJ | not checked — no obvious English RSS found in this pass | free (if exists) | Medium — yen carry-trade unwinds are a live gold theme | Needs a follow-up search; skip for now |
 | PBoC / SAFE gold reserves | no RSS/API — monthly "Official Reserve Assets" release on the SAFE website, gold reported in USD only (needs conversion to oz/tonnes using month-end price) | free but not machine-readable | High — China's 20-month buying streak is one of the desk's active themes | Not feasible as an automated feed; the WGC's China commentary (see §1) and secondary reporting (Kitco/Reuters-style writeups, when reachable) are the practical proxy |
 | IMF IFS central-bank gold reserves by country | `gold.org/goldhub/data/gold-reserves-by-country` (WGC repackages IMF IFS data) | free, dashboard-only, no documented public API | High context, low ingest-value | Goldhub is a login-gated dashboard, not a feed — manual reference, not a source-config candidate |
@@ -63,10 +67,10 @@ host) · ❌ confirmed blocked/broken.
 
 | Name | Feed/API | Cost | Value | Feasibility |
 |---|---|---|---|---|
-| CFTC Commitments of Traders (Socrata API) | `https://publicreporting.cftc.gov/resource/jun7-fc8e.json?commodity_name=GOLD` (legacy report; disaggregated report is a different dataset id) | free, no key required | High — weekly speculative positioning is a core gold-desk signal | ✅ Verified: 200, valid JSON via WebFetch (direct curl timed out from sandbox — likely a Socrata rate-limit/network quirk, re-check from Hetzner). Updates Fridays, data through the prior Tuesday |
-| SPDR GLD daily holdings | `https://www.spdrgoldshares.com/assets/dynamic/GLD/GLD_US_archive_EN.csv` | free | High — GLD tonnage changes are a widely watched institutional-flow proxy | ✅ Verified: 200, CSV, daily NAV/holdings/premium-discount history |
-| iShares SLV holdings | `https://www.ishares.com/us/products/239855/ishares-silver-trust-fund/1467271812596.ajax?fileType=csv&fileName=SLV_holdings&dataType=fund` | free | Medium — silver is a secondary desk interest, correlated but distinct flow signal | ✅ Verified: 200, CSV |
-| COMEX warehouse stocks (CME Metals Stocks report) | `https://www.cmegroup.com/delivery_reports/Metals_Stocks.xls` | free | Medium-high — registered/eligible gold inventory levels matter around delivery months | ⚠️ Timed out from this sandbox; re-check from Hetzner. If blocked, CME also publishes the same data via a daily bulletin page that may be scrape-friendlier |
+| CFTC Commitments of Traders (Socrata API) | `https://publicreporting.cftc.gov/resource/jun7-fc8e.json?market_and_exchange_names=GOLD%20-%20COMMODITY%20EXCHANGE%20INC.&$order=report_date_as_yyyy_mm_dd%20DESC&$limit=1` | free, no key required | High — weekly speculative positioning is a core gold-desk signal | ✅ **Added** (as `GC_NET_SPEC` = non-commercial long − short). Verified from Hetzner: works direct. Gotcha found: `commodity_name=GOLD` alone matches MICRO GOLD first — pin the main contract via `market_and_exchange_names` (the URL here does) and the parser refuses other contracts as a second guard |
+| SPDR GLD daily holdings | `https://www.spdrgoldshares.com/assets/dynamic/GLD/GLD_US_archive_EN.csv` | free | High — GLD tonnage changes are a widely watched institutional-flow proxy | ❌ Endpoint moved since the morning check: from Hetzner it 302s to `api.spdrgoldshares.com/api/v1/barlist?underlying=gld` which serves a **PDF**, not CSV (same via proxy — not an IP block). Needs a replacement endpoint before it can be wired |
+| iShares SLV holdings | `https://www.ishares.com/us/products/239855/ishares-silver-trust-fund/1467271812596.ajax?fileType=csv&fileName=SLV_holdings&dataType=fund` | free | Medium — silver is a secondary desk interest, correlated but distinct flow signal | ❌ From Hetzner: 200 with `text/csv` header but an **HTML product page** as body, direct and via proxy — interstitial served regardless of IP. Dead as given |
+| COMEX warehouse stocks (CME Metals Stocks report) | `https://www.cmegroup.com/delivery_reports/Metals_Stocks.xls` | free | Medium-high — registered/eligible gold inventory levels matter around delivery months | ❌ From Hetzner: 403 with an explicit CME anti-scraping message, direct AND via WARP. Unfetchable via plain HTTP; a licensed feed is the only path |
 
 ## 4. Economic calendars
 
@@ -74,7 +78,7 @@ host) · ❌ confirmed blocked/broken.
 |---|---|---|---|
 | ForexFactory calendar | `ffcal_week_this.xml` and similar | free (if reachable) | ❌ 403 — confirmed scraping-hostile, matches its reputation |
 | FXStreet economic calendar | `/economic-calendar/rss` | free (if reachable) | ❌ 403 — same Cloudflare posture as the already-blocked FXStreet news site |
-| BLS (Bureau of Labor Statistics) release feed | `https://www.bls.gov/feed/bls_latest.rss` | free | ❌ 403 in this test — worth a re-check from Hetzner since BLS is a US government site less likely to be a hard bot-wall than a commercial one; could be a transient block |
+| BLS (Bureau of Labor Statistics) release feed | `https://www.bls.gov/feed/bls_latest.rss` | free | ✅ **Added.** From Hetzner: 403 direct but works through the WARP proxy fallback (`JAMASP_EXTRACT_PROXY` in `~/.config/jamasp/env` is load-bearing for this source). Low-volume "latest numbers" summary feed — sparse but exactly the CPI/NFP prints the desk times itself around |
 | BEA (Bureau of Economic Analysis) | no working RSS found at guessed path | free (if exists) | ❌ 404 on `bea.gov/rss.xml` — needs a better URL, not pursued further this pass |
 | FRED release-dates API | `https://api.stlouisfed.org/fred/releases?api_key=...&file_type=json` | free, requires a (free) API key | ✅ Endpoint is live (confirmed via a clear "bad key format" error rather than a network failure) — gives scheduled release dates for CPI, NFP, PCE, etc. Would need `jamasp` to register its own FRED key (already presumably has one for DTWEXBGS/DFII10) |
 | TradingEconomics calendar | see §6 | paid | API-only; calendar is bundled into the general TE subscription, not a separate free feed |
@@ -90,10 +94,10 @@ attention around NFP/CPI days.
 |---|---|---|---|---|
 | DMCC (owns DGCX) | no discoverable RSS — press releases live at `dmcc.ae/media-room/press-releases`, no feed link found | free (if it existed) | Medium — DMCC/DGCX product and trading-volume announcements | ❌ No feed; would require scraping the press-release listing page. Not recommended given the no-scraping posture |
 | DGCX (Dubai Gold & Commodities Exchange) | no discoverable RSS; news lives at `dgcx.ae/news/<year>` | free (if it existed) | Medium-high — direct visibility into the desk's own regional exchange (contract specs, trading-halt notices, volume records) | ❌ 403 on the domain root in this test, and no feed found via search. Best bet if this matters enough: ask DGCX's exchange-relations contact directly whether a machine feed exists — exchanges sometimes have one that isn't publicly linked |
-| Gulf News | `https://gulfnews.com/feed` (redirects to `/stories.rss`) | free | Medium — regional business/markets context, UAE-specific angle the international wires don't cover | ✅ Verified: valid RSS 2.0 via WebFetch |
-| Zawya (Refinitiv-owned MENA business news) | guessed paths (`/en/rss`, `/sitemaps/en/rss`, old `rssfeeds/regional.xml`) all 403/404, or timed out | free (if reachable) | High — MENA business-desk-grade coverage would be a strong regional complement | ⚠️ Inconclusive from this sandbox; worth a direct re-check from Hetzner before writing it off, since some paths returned 403 (bot-wall) rather than clean 404 (wrong URL) |
-| The National (UAE) | site confirms it publishes RSS feeds (per its own `/uae/rss-feeds-1.536712` help page) but exact section URLs weren't discoverable via search or guessing | free | Medium — UAE/Gulf business angle | ⚠️ Inconclusive; the site itself claims RSS exists (\"click the RSS icon top-right\"), so this is worth a manual look at the live page rather than further guessing, then re-verify from Hetzner |
-| Khaleej Times | `/rss/business` | free (nominally) | Medium | ❌ Returns HTTP 200 but the body is an HTML consent-wall page (Securiti.ai cookie script), not RSS/XML — a reminder that status code alone isn't sufficient proof of a working feed |
+| Gulf News | `https://gulfnews.com/feed` (redirects to `/stories.rss`) | free | Medium — regional business/markets context, UAE-specific angle the international wires don't cover | ✅ **Added.** Verified from Hetzner: works direct, 11 live entries |
+| Zawya (Refinitiv-owned MENA business news) | none | free (if reachable) | High — MENA business-desk-grade coverage would be a strong regional complement | ❌ Exhaustively re-checked from Hetzner: eight guessed paths 404, generic paths redirect to homepage HTML, and neither the homepage nor `/en/markets` carries any feed-autodiscovery tag. No feed exists |
+| The National (UAE) | `https://www.thenationalnews.com/arc/outboundfeeds/rss/category/business/?outputType=xml` | free | Medium — UAE/Gulf business angle | ✅ **Added** (business section, 31 entries). Cracked from Hetzner: it's an Arc Publishing site and the `?outputType=xml` suffix is mandatory (bare paths 404). Economy-only variant `.../category/business/economy/?outputType=xml` (11 entries) and all-news `.../rss/?outputType=xml` (100) also work |
+| Khaleej Times | `/rss/business` | free (nominally) | Medium | ❌ Confirmed from Hetzner too: HTTP 200 but a Securiti.ai consent-wall HTML page, identical from the datacenter IP. Definitively dead — a reminder that status code alone isn't sufficient proof of a working feed |
 
 ## 6. Paid wire/API tier for later
 
@@ -110,25 +114,75 @@ attention around NFP/CPI days.
 
 | Name | Feed/API | Cost | Value | Feasibility |
 |---|---|---|---|---|
-| Mining Weekly | `https://www.miningweekly.com/page/home/feed` | free | Medium — African/global mining-sector coverage, complements Mining.com | ✅ Verified: 200. (A guessed alternate path, `/page/rss-feed/feed:americas-home`, was 403 — use the working one) |
-| Northern Miner | `https://www.northernminer.com/feed/` | free | Medium — Canadian mining-sector trade press, junior-miner-heavy | ✅ Verified: 200 |
-| Junior Mining Network | `/rss.html` | free (if reachable) | Medium — junior-miner news flow, more speculative/volatile signal | ❌ 403 — bot-protected |
-| Mining Journal | `/rss` | free (if reachable) | Medium | ❌ 403 — bot-protected |
+| Mining Weekly | `https://www.miningweekly.com/page/home/feed` | free | Medium — African/global mining-sector coverage, complements Mining.com | ✅ **Added.** Verified from Hetzner: works direct, 8 entries |
+| Northern Miner | `https://www.northernminer.com/feed/` | free | Medium — Canadian mining-sector trade press, junior-miner-heavy | ✅ **Added.** Verified from Hetzner: works direct, 20 entries |
+| Junior Mining Network | `/rss.html` | free (if reachable) | Medium — junior-miner news flow, more speculative/volatile signal | ❌ Confirmed from Hetzner: 403 direct and via WARP — bot-protected |
+| Mining Journal | `/rss` | free (if reachable) | Medium | ❌ From Hetzner: `/rss` redirects to the homepage HTML — no real feed behind the path |
 | ETF/fund-flow trackers (etf.com, VettaFi, WGC's own Gold ETF flows page) | no free machine feed found this pass | mostly free to read, no API without a data-vendor contract | High conceptually (institutional flow is a top-tier signal) | Best free proxy remains the SPDR GLD CSV (§3) — a dedicated cross-fund tracker would need a paid data vendor (e.g. via TradingEconomics or a specialist ETF-flow API) |
 | X/Twitter signal (trader chatter, Fed-watcher accounts, geopolitical break-news) | X API v2 | Basic tier ($200/mo) closed to new signups as of Feb 2026; current model is pay-per-use: $0.015/post created, $0.005/post read (capped 2M reads/mo), or Enterprise for bulk | High signal speed for breaking macro/geopolitical news, but noisy and adversarial to filter | Feasible cost-wise at low volume (a narrow filtered stream of ~10-20 accounts would stay in the low tens of dollars/month), but this is a different ingestion shape than RSS — would need a dedicated poller, dedup logic, and real editorial judgment about which accounts are worth the noise. Treat as a v2 project, not a drop-in source |
 | Reuters (business RSS) | `arc/outboundfeeds/rss/category/business/` | free (if reachable) | High — but already established as DataDome-blocked, confirmed again this pass (404/blocked) | ❌ Not fixable client-side. Only real path in is a paid LSEG/Reuters license (§6) |
 
 ---
 
-## Recommended next additions
+## Implemented 2026-07-31
 
-1. **LBMA gold AM/PM auction JSON** (`prices.lbma.org.uk/json/gold_*.json`) — free, verified live, and it's the actual global benchmark gold price rather than a futures proxy (GC=F). Near-zero integration cost; add as a second `price_api` source alongside `gold_spot`.
-2. **World Gold Council RSS** (`gold.org/rss.xml`) — free, verified live, and it's the one source in this whole list written by and for the gold-market audience Jamasp serves. Only open question is article-page extractability; test one `jamasp extract` call before committing.
-3. **CFTC Commitments of Traders (Socrata JSON)** — free, no key, weekly speculative-positioning data with no equivalent already in `sources.yaml`. This fills a real gap: today's sources are all news/price, nothing on positioning.
-4. **SPDR GLD daily holdings CSV** — free, verified live, standard institutional-flow proxy that every gold desk already watches informally; costs nothing to formalize.
-5. **Gulf News RSS** (`gulfnews.com/feed`) — free, verified live, and the only regional/Dubai-adjacent source in this research that actually works out of the box; gives the desk a UAE-market lens the international wires don't carry.
+Wired into `config/sources.yaml` after per-source verification from the
+Hetzner host (see corrected verdicts in the tables above and the addendum
+below): **WGC, ECB, BoE, BIS, BLS, Mining Weekly, Northern Miner, Gulf
+News, The National (business)** as news RSS; **LBMA AM/PM** (`XAU_AM`/
+`XAU_PM`), **CFTC COT net spec** (`GC_NET_SPEC`), **SGE daily benchmark**
+(`SGE_AU_CNY_G`) as new price parsers; **^GVZ, ^TNX, JPY=X, BTC-USD,
+^GSPC, DX-Y.NYB** as config-only additions on the existing Yahoo parser;
+**Saxo, ActionForex, FXEmpire forecasts, Forexlive, gold-eagle** as the
+TA-commentary tier. The ingest loop now honors `interval_minutes` (skips
+sources fetched within their interval; failures don't advance the clock).
 
-Lower priority but worth a second pass from the Hetzner host specifically
-(where several checks were inconclusive due to this sandbox's network path,
-not confirmed blocks): BIS press RSS, CFTC Socrata direct reachability,
-CME COMEX warehouse stocks, Zawya, The National, and BullionVault.
+---
+
+## Addendum 2026-07-31 — technical-source research (three sweeps)
+
+Condensed from three research passes (quant/technical data, TA commentary
+RSS, physical-market microstructure). Everything recommended-and-verified
+is already implemented (see above); this records what remains and what's
+dead so nobody re-chases it.
+
+### Worth doing next (needs a small amount of work)
+
+| Candidate | What's needed | Value |
+|---|---|---|
+| Gold futures term structure (Yahoo `GC<M><YY>.CMX` per-month contracts, verified live) | a derived-series fetcher: two chart calls + spread arithmetic; contract symbols roll, so config must be generated, not static | contango/backwardation is a physical-stress signal a Dubai desk uniquely cares about; backwardation = squeeze |
+| GLD options put/call OI ratio (Yahoo `v7/finance/options/GLD`) | one-time cookie+crumb handshake parser (`fc.yahoo.com` → `getcrumb`) | only free machine-readable options-positioning proxy that isn't bot-walled |
+| VXSLV silver vol (CBOE CDN `cdn.cboe.com/api/global/us_indices/daily_prices/VXSLV_History.csv`) | CSV is OHLC-shaped — small parser or column-select; NB Yahoo's `^VXSLV` is stale/empty, use CBOE | tells whether a vol move is metals-wide or gold-specific |
+| FRED release-dates API | register a free FRED API key (none on the VM; checked) | release-calendar timing for CPI/NFP/PCE beyond the ForexFactory mirror |
+| Swiss customs gold trade (BAZG i14y API, verified: anonymous access, `TN8_VK_IMP` zip, HS 7108) | heavier monthly parser: unzip, filter tariff 7108, aggregate by destination country | the premier physical-flow signal — Swiss re-exports to India/China/UAE track where bullion physically goes |
+| IBJA India gold rate (`ibjarates.com/API/GoldRates/`, endpoint live, token-gated, 40 hits/day cap) | signup for access token; confirm free-tier pricing | India premium/discount — #2 physical demand center, no substitute |
+| US Mint bullion sales (`usmint.gov/data`, advertises CSV) | 403 from dev sandbox (Akamai, likely IP-reputation) — re-check from Hetzner via WARP before writing off | Western retail coin demand, classic sentiment tell |
+| Derived in-house series (no external source): implied lease rate (SOFR − GC curve forward), Dubai retail premium (LBMA × AED 3.6725 vs DGJG print), gold/silver ratio (GC=F ÷ SI=F), SGE premium (now computable — SGE and LBMA both ingested) | analysis-time computation or a tiny derived-series pass | each maps to an active desk theme |
+
+### Verified working but deliberately not added
+
+- **OANDA MarketPulse** (`marketpulse.com/feed/`) — live but carries a
+  single, stale item from both vantage points; not worth a slot.
+- **SilverSeek** (`silverseek.com/rss.xml`) — alive (10 items, carries
+  weekly COT writeups) but leans gold-bug; revisit if the desk wants a
+  silver-specialist voice.
+- **StockCharts articles** (`articles.stockcharts.com/feed`) — alive but
+  overwhelmingly US-equity-centric; gold appears rarely.
+- **Yahoo GC=F finer bars** — `interval=1m&range=8d` and `5m/60d` both
+  work on the existing endpoint if intraday technicals are ever needed.
+
+### Confirmed dead — do not re-chase
+
+- **DailyFX** (Akamai hard-block, the one high-quality TA casualty),
+  DailyForex (feed objects deleted from S3), TradingView (no first-party
+  RSS), GoldSeek (feed stranded in 2020), 321gold / SafeHaven / Sprott /
+  GoldMoney (no feeds), Incrementum (feed dead since 2018), IG /
+  Interactive Brokers (no public RSS).
+- **Stooq** — now behind a JS proof-of-work challenge (the reason
+  `gold_spot` moved to Yahoo in the first place); permanently off the list.
+- **Lease-rate feeds** — Monetary Metals and GoldBroker publish charts
+  only; Bloomberg/LSEG paid. In-house computation is the only free path.
+- **COMEX delivery notices** (PDF-only), **India/UAE import stats**
+  (PDF/dashboard), **Borsa Istanbul premium** (paid), **DGJG Dubai retail
+  rate** (no feed; derivable in-house).
+- **DXY vol index** — discontinued; no free replacement exists.

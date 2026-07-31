@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
 
 import click
@@ -38,6 +39,16 @@ def _common(db_path: str, config_dir: str):
 db_opt = click.option("--db", "db_path", default="state/jamasp.db", show_default=True)
 cfg_opt = click.option("--config-dir", default="config", show_default=True)
 
+# The ingest timer fires every 15 minutes; without slack a 15-minute source
+# would miss its own tick whenever the timer lands a second early.
+_REFETCH_SLACK_SECONDS = 60
+
+
+def _refetch_due(last: str, interval_minutes: int, now: str) -> bool:
+    fmt = "%Y-%m-%dT%H:%M:%SZ"
+    elapsed = (datetime.strptime(now, fmt) - datetime.strptime(last, fmt)).total_seconds()
+    return elapsed >= interval_minutes * 60 - _REFETCH_SLACK_SECONDS
+
 
 @click.group()
 def main():
@@ -51,9 +62,13 @@ def main():
 def ingest(no_digest, db_path, config_dir):
     """Fetch all sources, dedupe, cluster, and (optionally) write ledes."""
     conn, sources, settings = _common(db_path, config_dir)
-    new_items = prices_n = events_n = errors = 0
+    new_items = prices_n = events_n = errors = skipped = 0
     with httpx.Client(headers={"User-Agent": "jamasp/0.1"}) as client:
         for source in sources:
+            last = db_mod.get_meta(conn, f"source_last_fetch.{source.name}")
+            if last and not _refetch_due(last, source.interval_minutes, db_mod.utcnow()):
+                skipped += 1
+                continue
             try:
                 if source.type == "rss":
                     new_items += rss_mod.store_items(
@@ -67,6 +82,11 @@ def ingest(no_digest, db_path, config_dir):
                     events_n += calendar_mod.store_events(
                         conn, calendar_mod.fetch_source(source, client)
                     )
+                # only a successful fetch advances the interval clock; failures
+                # retry on the next timer tick
+                db_mod.set_meta(
+                    conn, f"source_last_fetch.{source.name}", db_mod.utcnow()
+                )
             except Exception as exc:  # per-source isolation, by design
                 errors += 1
                 conn.execute(
@@ -83,7 +103,8 @@ def ingest(no_digest, db_path, config_dir):
     db_mod.set_meta(conn, "last_ingest_at", db_mod.utcnow())
     click.echo(
         f"ingest: {new_items} new items ({joined} clustered), "
-        f"{prices_n} price snapshots, {events_n} events, {ledes} ledes, {errors} source errors"
+        f"{prices_n} price snapshots, {events_n} events, {ledes} ledes, "
+        f"{errors} source errors, {skipped} within interval"
     )
 
 
