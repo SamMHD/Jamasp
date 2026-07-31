@@ -223,6 +223,9 @@ sources:
     interval_minutes: 60
     topic: prices
     parser: yahoo_chart_json
+    # Yahoo's meta.symbol for this pair flip-flops between JPY and USDJPY
+    # across calls; pin it so the series doesn't split
+    symbol: USDJPY
   - name: btc_usd
     type: price_api
     url: "https://query1.finance.yahoo.com/v8/finance/chart/BTC-USD?range=1d&interval=1h"

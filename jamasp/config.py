@@ -15,6 +15,9 @@ class Source:
     interval_minutes: int
     topic: str
     parser: str | None = None
+    # overrides the parser-derived series symbol; needed where the payload's
+    # own symbol is unstable (Yahoo FX pairs)
+    symbol: str | None = None
 
 
 def load_sources(path: Path = Path("config/sources.yaml")) -> list[Source]:
@@ -27,6 +30,7 @@ def load_sources(path: Path = Path("config/sources.yaml")) -> list[Source]:
             interval_minutes=e["interval_minutes"],
             topic=e["topic"],
             parser=e.get("parser"),
+            symbol=e.get("symbol"),
         )
         for e in raw["sources"]
     ]
