@@ -1,0 +1,169 @@
+---
+name: deploy
+description: Deploy or redeploy Jamasp to a Linux host — install runtime, clone, set up systemd timers for ingest + daily brief, and hand off the human auth steps. Use when setting up Jamasp on a new server or repairing an existing deployment.
+---
+
+# Deploying Jamasp to a host
+
+Jamasp runs on an always-on Linux box: deterministic `jamasp` CLI on a
+timer for ingestion, and a scheduled headless Claude Code run for the daily
+brief. This skill is the full runbook, including the two gotchas that will
+bite you if you skip them.
+
+## Non-negotiable constraints (learned the hard way)
+
+1. **The brief must NOT run as root.** Claude Code refuses
+   `--dangerously-skip-permissions` under root/sudo ("cannot be used with
+   root/sudo privileges for security reasons"), and the autonomous brief
+   needs that flag to run bash/edit/git without prompts. **Always run the
+   agent as a dedicated non-root user** (e.g. `jamasp`). If the box only
+   gives you root, create the user (below).
+2. **Claude credentials are file-based and portable** — `~/.claude/.credentials.json`.
+   You can carry a login between users by copying that file, but **copy the
+   file, not the directory**: `claude`'s installer already created
+   `~/.claude/`, so `cp -a /root/.claude ~otheruser/.claude` nests it to
+   `~/.claude/.claude/`. Copy `.credentials.json` directly into the existing
+   `~/.claude/`.
+3. **Secrets never live in the repo.** Telegram token/chat id go in
+   `~/.config/jamasp/env` (chmod 600), referenced by the units via
+   `EnvironmentFile=`.
+4. **Cloudflare WARP: PROXY MODE ONLY — never full tunnel.** Full-tunnel
+   WARP (`warp-cli mode warp`) hijacks the default route on connect; on a
+   remote-managed box the return path breaks and you lose SSH entirely
+   (this happened — recovery needed provider console access). Proxy mode
+   only opens a localhost SOCKS5 port and never touches routing. The
+   sequence in "7. egress proxy" below sets the mode **before** the first
+   connect and verifies it; keep that order. If `warp-cli settings` ever
+   shows a Mode other than `WarpProxy`, disconnect before anything else.
+
+## Steps
+
+Assumes Ubuntu/systemd; the repo is PUBLIC so no GitHub auth is needed to
+clone.
+
+### 0. Access the host
+Everything below runs **on the target host**, reached over SSH. The current
+production deployment is reachable as `ssh jamasp` (an alias in the
+operator's `~/.ssh/config`; the concrete host/IP is kept out of this public
+repo — see private ops notes). Steps marked **(root)** need root; run the
+rest as the service user, e.g. `sudo -u jamasp -i` (or log in as `jamasp`).
+Over SSH, prefix a service-user command as:
+```bash
+ssh jamasp 'sudo -u jamasp -i bash -lc "cd ~/Jamasp && uv run jamasp price"'
+```
+
+### 1. (root only) create the service user
+```bash
+id jamasp || useradd -m -s /bin/bash jamasp
+```
+
+### 2. install runtime (as the service user)
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh          # -> ~/.local/bin/uv
+curl -fsSL https://claude.ai/install.sh | bash           # -> ~/.local/bin/claude
+```
+
+### 3. clone + sync + identity
+```bash
+git clone https://github.com/SamMHD/Jamasp.git ~/Jamasp
+cd ~/Jamasp && git checkout phase1-mvp        # use main once PR #1 is merged
+~/.local/bin/uv sync
+git config user.name Jamasp
+git config user.email jamasp@mahdanian.xyz    # for the per-run commits
+```
+
+### 4. secrets scaffold
+```bash
+mkdir -p ~/.config/jamasp
+printf 'JAMASP_TG_TOKEN=\nJAMASP_TG_CHAT=\n' > ~/.config/jamasp/env
+chmod 600 ~/.config/jamasp/env
+```
+
+### 5. systemd units
+Use **system** units (`/etc/systemd/system/`, `User=jamasp`) when you have
+root; use **user** units (`~/.config/systemd/user/`, plus
+`loginctl enable-linger jamasp` and `XDG_RUNTIME_DIR=/run/user/$(id -u)`)
+when you only have the unprivileged account.
+
+`jamasp-ingest.service` (Type=oneshot) → `ExecStart=%h/.local/bin/uv run jamasp ingest`
+paired with `jamasp-ingest.timer` → `OnCalendar=*:0/15`, `Persistent=true`,
+`RandomizedDelaySec=90`.
+
+`jamasp-brief.service` (Type=oneshot) →
+`ExecStart=%h/.local/bin/claude -p "/brief" --dangerously-skip-permissions`
+paired with `jamasp-brief.timer` → `OnCalendar=*-*-* 07:30:00 Asia/Dubai`
+(systemd ≥252 honors the timezone suffix; the box clock stays UTC).
+
+Both services set `Environment=PATH=<home>/.local/bin:/usr/local/bin:/usr/bin:/bin`,
+`Environment=HOME=<home>`, and `EnvironmentFile=-<home>/.config/jamasp/env`.
+
+Then: `daemon-reload`, `enable --now jamasp-ingest.timer`. Leave the brief
+timer **disabled** until the human steps below are done.
+
+### 6. verify the deterministic half now
+```bash
+cd ~/Jamasp
+uv run jamasp sources check      # every source should print OK
+uv run jamasp ingest             # 0 ledes until Claude is logged in — expected
+uv run jamasp price
+systemctl start jamasp-ingest.service && systemctl show jamasp-ingest.service -p Result
+```
+
+### 7. egress proxy (WARP proxy mode — for `jamasp extract`)
+
+Several publishers (CNBC, MarketWatch, Mining.com) 401/403 requests coming
+from datacenter IPs. `jamasp extract` falls back to the proxy named in
+`JAMASP_EXTRACT_PROXY`; provide it with Cloudflare WARP in **proxy mode
+only** (constraint 4 — full tunnel kills SSH on a remote box). As root:
+
+```bash
+curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg | gpg --yes --dearmor \
+  --output /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
+. /etc/os-release
+echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ ${VERSION_CODENAME} main" \
+  > /etc/apt/sources.list.d/cloudflare-client.list
+apt-get update -qq && apt-get install -y cloudflare-warp
+systemctl enable --now warp-svc && sleep 3
+
+warp-cli --accept-tos registration new
+warp-cli --accept-tos mode proxy          # BEFORE the first connect — always
+warp-cli --accept-tos proxy port 40000
+warp-cli --accept-tos settings | grep "Mode:"   # must say: WarpProxy on port 40000
+warp-cli --accept-tos connect
+ip route show default                     # MUST be unchanged (dev eth0);
+                                          # if not: warp-cli disconnect NOW
+curl --proxy socks5h://127.0.0.1:40000 https://ifconfig.me   # Cloudflare IP
+echo 'JAMASP_EXTRACT_PROXY=socks5://127.0.0.1:40000' >> /home/jamasp/.config/jamasp/env
+```
+
+Known limits: Investing.com still 403s (Cloudflare bot *challenge*, not IP
+reputation — no plain HTTP client passes it), and Google News wrapper URLs
+"succeed" but yield menu junk instead of the article; treat both as
+headline-only sources.
+
+## Human handoff (two steps, then activate)
+
+1. **Log Claude in** as the service user: `claude`, complete the login with
+   the dedicated Max account. This enables the Haiku digest (ingest ledes)
+   AND the brief. Verify: `claude -p "hi" --dangerously-skip-permissions`.
+2. **Telegram**: create a bot via @BotFather, get token + chat id, put them
+   in `~/.config/jamasp/env`. Verify:
+   `set -a && . ~/.config/jamasp/env && set +a && uv run jamasp notify "test"`.
+
+Then run one **supervised brief** (`claude`, type `/brief`) or
+`systemctl start jamasp-brief.service`; confirm a report appeared under
+`reports/`, a commit was made, and the Telegram summary arrived. When happy:
+```bash
+systemctl enable --now jamasp-brief.timer
+```
+
+## Sanity / ops
+```bash
+systemctl list-timers | grep jamasp
+journalctl -u jamasp-ingest.service -n 20
+journalctl -u jamasp-brief.service -n 40
+```
+A transient inbox `WARNING` about source `digest` just means Claude isn't
+logged in yet; it clears on the first successful digest. The box commits
+state locally each run but can't push to GitHub without a write credential —
+add a deploy key if you want the history mirrored.
