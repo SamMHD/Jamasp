@@ -81,3 +81,10 @@ def value_at_or_before(conn: sqlite3.Connection, symbol: str, ts: str) -> float 
         (symbol, ts),
     ).fetchone()
     return row["value"] if row else None
+
+
+def row_at_or_before(conn: sqlite3.Connection, symbol: str, ts: str) -> sqlite3.Row | None:
+    return conn.execute(
+        "SELECT ts, value FROM prices WHERE symbol = ? AND ts <= ? ORDER BY ts DESC LIMIT 1",
+        (symbol, ts),
+    ).fetchone()

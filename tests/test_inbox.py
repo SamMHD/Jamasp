@@ -1,11 +1,20 @@
 import json
+from datetime import datetime, timedelta, timezone
 
 from jamasp import cluster, db, inbox
 from jamasp.ingest import rss
 from jamasp.models import Item
 
 
-def _mk(source, headline, i, ts="2026-07-30T14:00:00Z"):
+def _ts(hours_ago: float = 0) -> str:
+    return (datetime.now(timezone.utc) - timedelta(hours=hours_ago)).strftime(
+        "%Y-%m-%dT%H:%M:%SZ"
+    )
+
+
+def _mk(source, headline, i, ts=None):
+    if ts is None:
+        ts = _ts(2)
     return Item(
         id=rss.item_id(source, f"https://e/{source}/{i}", headline),
         source=source,
@@ -19,7 +28,7 @@ def _mk(source, headline, i, ts="2026-07-30T14:00:00Z"):
 def _seed_clustered(conn):
     a = _mk("fxstreet", "Gold climbs as dollar softens ahead of Fed decision", 1)
     b = _mk("kitco", "Gold climbs ahead of Fed decision as dollar softens", 2)
-    c = _mk("marketwatch_top", "Oil slides on OPEC supply surprise", 3, ts="2026-07-30T15:00:00Z")
+    c = _mk("marketwatch_top", "Oil slides on OPEC supply surprise", 3, ts=_ts(1))
     rss.store_items(conn, [a, b, c])
     cluster.assign_clusters(conn)
     return a, b, c

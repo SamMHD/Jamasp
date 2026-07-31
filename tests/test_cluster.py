@@ -1,10 +1,20 @@
+from datetime import datetime, timedelta, timezone
+
 from jamasp import cluster, db
 from jamasp.config import Source
 from jamasp.ingest import rss
 from jamasp.models import Item
 
 
-def _mk(conn, source, headline, ts="2026-07-30T14:00:00Z"):
+def _ts(hours_ago: float = 0) -> str:
+    return (datetime.now(timezone.utc) - timedelta(hours=hours_ago)).strftime(
+        "%Y-%m-%dT%H:%M:%SZ"
+    )
+
+
+def _mk(conn, source, headline, ts=None):
+    if ts is None:
+        ts = _ts(2)
     it = Item(
         id=rss.item_id(source, f"https://{source}.example/{headline[:10]}", headline),
         source=source,
@@ -32,10 +42,10 @@ def test_near_duplicates_share_cluster(tmp_path):
 
 def test_old_items_outside_window_not_matched(tmp_path):
     conn = db.connect(tmp_path / "t.db")
-    _mk(conn, "fxstreet", "Gold climbs as dollar softens", ts="2026-07-01T00:00:00Z")
+    _mk(conn, "fxstreet", "Gold climbs as dollar softens", ts=_ts(24 * 30))
     conn.execute("UPDATE items SET cluster_id = id")
     conn.commit()
-    b = _mk(conn, "kitco", "Gold climbs as dollar softens", ts="2026-07-30T00:00:00Z")
+    b = _mk(conn, "kitco", "Gold climbs as dollar softens", ts=_ts(2))
     cluster.assign_clusters(conn, window_hours=48)
     row = conn.execute("SELECT cluster_id FROM items WHERE id = ?", (b.id,)).fetchone()
     assert row["cluster_id"] == b.id  # month-old story is not "the same story"
@@ -43,8 +53,8 @@ def test_old_items_outside_window_not_matched(tmp_path):
 
 def test_backlog_old_pending_item_not_a_match_target(tmp_path):
     conn = db.connect(tmp_path / "t.db")
-    old = _mk(conn, "fxstreet", "Gold climbs as dollar softens", ts="2026-07-01T00:00:00Z")
-    new = _mk(conn, "kitco", "Gold climbs as dollar softens", ts="2026-07-30T00:00:00Z")
+    old = _mk(conn, "fxstreet", "Gold climbs as dollar softens", ts=_ts(24 * 30))
+    new = _mk(conn, "kitco", "Gold climbs as dollar softens", ts=_ts(2))
     joined = cluster.assign_clusters(conn, window_hours=48)
     assert joined == 0  # old item outside window is not a match target
     rows = {r["id"]: r["cluster_id"] for r in conn.execute("SELECT id, cluster_id FROM items")}

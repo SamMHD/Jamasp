@@ -45,7 +45,10 @@ def render(conn: sqlite3.Connection, cap: int = 120) -> str:
     also = _also_map(conn)
     lines = [f"# jamasp inbox {utcnow()} — {len(reps)} unread"]
     for src in dead_sources(conn):
-        lines.append(f"# WARNING: source '{src}' failing for 24h+ — coverage gap")
+        lines.append(
+            f"# WARNING: source '{src}' had errors in the last 24h and produced"
+            " no new items — possible coverage gap"
+        )
     for r in reps[:cap]:
         obj = {
             "id": r["id"],
