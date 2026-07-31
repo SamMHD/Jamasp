@@ -12,9 +12,18 @@ watchlist:
     since: 2026-07-31
   - theme: middle-east-risk-premium
     why: >
-      premium deflating while the war continues — gold loses the haven bid but
-      keeps the inflationary drag on the Fed. Watch Hormuz traffic, Oman-Iran
-      talks, oil's response to escalation headlines.
+      re-escalating as of 31 Jul — Iran says it is stopping ships in Hormuz,
+      reversing the improving-traffic read. The haven bid stops draining while
+      the inflationary drag on the Fed stays. Watch how many ships and for how
+      long: Iran issued a similar warning 25 Jun without a durable stoppage.
+    since: 2026-07-31
+
+  - theme: energy-pce-passthrough
+    why: >
+      June core PCE 3.3% was flattered by energy -5.9% / gasoline -9.2%, which
+      the BEA attributes to a temporary Middle East easing that has since
+      reversed (crude +~20% on the month). July/August prints should be worse.
+      This is now the central event for the Fed path, ahead of the FOMC itself.
     since: 2026-07-31
   - theme: india-duty-grey-market
     why: >
@@ -24,6 +33,9 @@ watchlist:
     since: 2026-07-31
   - theme: metals-financialization
     why: >
-      Binance gold/silver options after $7bn+ daily metals perps; leveraged
-      marginal money weakens the real-yield-to-spot mapping and amplifies moves.
+      Binance gold/silver options after $7bn+ daily metals perps. Thesis was
+      that leveraged marginal money would amplify moves. First stress test
+      (31 Jul, record momentum crash + forced $45bn liquidation) says that money
+      is NOT yet in gold — it held while everything levered was sold.
+      Downgraded, not dropped; re-test if the unwind resumes.
     since: 2026-07-31
