@@ -47,9 +47,13 @@ for the sage-advisor of the Shahnameh: measured, far-sighted, never breathless.
 
 ## Deployment
 
-Jamasp runs on an always-on Linux host: a systemd timer drives 15-minute
-ingestion, and a daily timer runs `claude -p "/brief"` at 07:30 Dubai. The
-full runbook — including the two things that will bite you (**run as a
+Jamasp runs on an always-on Linux host: six systemd timers — 15-minute
+ingest, 5-minute dispatcher, daily brief + daily watchdog, 2-hourly scan,
+and weekly retro — drive `jamasp` CLI commands, with every agent run
+(fixed timers and dispatched wakeups alike) wrapped by `jamasp run`, which
+enforces the daily run cap, retry-with-one-retry, and per-run-type
+timeouts. The full runbook — including the two things that will bite you
+(**run as a
 non-root user** so `--dangerously-skip-permissions` is allowed, and copy
 Claude's file-based `~/.claude/.credentials.json` rather than the whole
 directory) — is the **`deploy` skill** (`.claude/skills/deploy/SKILL.md`).
