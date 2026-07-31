@@ -10,8 +10,22 @@ import trafilatura
 from jamasp.db import utcnow
 
 
+# Publishers (CNBC, Mining.com, MarketWatch, …) block non-browser User-Agents
+# with 401/403. Identify as a browser so article pages are retrievable.
+BROWSER_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/126.0 Safari/537.36"
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+}
+
+
 def _default_fetch(url: str) -> str:
-    resp = httpx.get(url, follow_redirects=True, timeout=30)
+    resp = httpx.get(
+        url, headers=BROWSER_HEADERS, follow_redirects=True, timeout=30
+    )
     resp.raise_for_status()
     return resp.text
 

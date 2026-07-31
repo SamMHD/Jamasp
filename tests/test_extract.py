@@ -42,3 +42,27 @@ def test_extract_empty_raises(tmp_path):
     conn = db.connect(tmp_path / "t.db")
     with pytest.raises(ValueError):
         extract.extract_url(conn, "https://e/x", fetch=lambda u: "<html></html>")
+
+
+def test_default_fetch_sends_browser_user_agent(monkeypatch):
+    # Many publishers (CNBC, Mining.com, MarketWatch) 401/403 a non-browser
+    # User-Agent, so the default fetch must identify as a browser.
+    captured = {}
+
+    class FakeResp:
+        text = "<html><body><article>ok</article></body></html>"
+
+        def raise_for_status(self):
+            pass
+
+    def fake_get(url, **kwargs):
+        captured["url"] = url
+        captured["kwargs"] = kwargs
+        return FakeResp()
+
+    monkeypatch.setattr(extract.httpx, "get", fake_get)
+    extract._default_fetch("https://example.com/a")
+
+    headers = captured["kwargs"]["headers"]
+    assert "Mozilla" in headers["User-Agent"]
+    assert captured["kwargs"]["follow_redirects"] is True
