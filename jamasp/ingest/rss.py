@@ -12,6 +12,7 @@ import httpx
 from jamasp.config import Source
 from jamasp.db import utcnow
 from jamasp.models import Item
+from jamasp.net import get_with_fallback
 
 
 def item_id(source_name: str, url: str, headline: str) -> str:
@@ -49,8 +50,7 @@ def parse_feed(source: Source, content: bytes) -> list[Item]:
 
 
 def fetch_source(source: Source, client: httpx.Client) -> list[Item]:
-    resp = client.get(source.url, follow_redirects=True, timeout=30)
-    resp.raise_for_status()
+    resp = get_with_fallback(source.url, client)
     return parse_feed(source, resp.content)
 
 
