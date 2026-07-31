@@ -14,6 +14,7 @@ from jamasp import extract as extract_mod
 from jamasp import inbox as inbox_mod
 from jamasp import notify as notify_mod
 from jamasp import pricesummary as pricesummary_mod
+from jamasp import wakeup as wakeup_mod
 from jamasp.config import load_settings, load_sources
 from jamasp.ingest import prices as prices_mod
 from jamasp.ingest import rss as rss_mod
@@ -133,6 +134,42 @@ def sources_check(db_path, config_dir):
                     click.echo(f"OK   {source.name} ({symbol}={value} @ {ts})")
             except Exception as exc:
                 click.echo(f"FAIL {source.name}: {exc}")
+
+
+@main.group("wakeup")
+def wakeup_group():
+    """Wakeup queue: schedule future agent runs."""
+
+
+@wakeup_group.command("add")
+@click.argument("due_at")
+@click.argument("run_type")
+@click.argument("task")
+@db_opt
+@cfg_opt
+def wakeup_add(due_at, run_type, task, db_path, config_dir):
+    """Schedule RUN_TYPE at DUE_AT (ISO-8601 with timezone) carrying TASK text."""
+    conn, _, _ = _common(db_path, config_dir)
+    try:
+        wid = wakeup_mod.add(conn, due_at, run_type, task)
+    except ValueError as exc:
+        raise click.BadParameter(str(exc))
+    row = conn.execute("SELECT due_at FROM wakeups WHERE id = ?", (wid,)).fetchone()
+    click.echo(f"scheduled wakeup #{wid}: {run_type} at {row['due_at']}")
+
+
+@wakeup_group.command("list")
+@db_opt
+@cfg_opt
+def wakeup_list(db_path, config_dir):
+    """List pending wakeups, soonest first."""
+    conn, _, _ = _common(db_path, config_dir)
+    rows = wakeup_mod.list_open(conn)
+    if not rows:
+        click.echo("no pending wakeups")
+        return
+    for r in rows:
+        click.echo(f"#{r['id']}  {r['due_at']}  {r['run_type']}  attempts={r['attempts']}  {r['task']}")
 
 
 @main.command()
