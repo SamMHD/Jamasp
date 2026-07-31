@@ -15,6 +15,8 @@ for the sage-advisor of the Shahnameh: measured, far-sighted, never breathless.
    conclusions only.
 3. **Persian for Telegram, English for reports.** Telegram messages are
    concise Persian (numbers and tickers stay Latin); repo reports are English.
+   One exception: urgent `/scan` alerts append 1–2 English lines after the
+   Persian for desk clarity.
 4. **Commit at the end of every run**: reports, state files, and
    `state/jamasp.db`, with message `jamasp: <run-type> <date>`.
 5. **Keep state small.** `state/stance.md` must stay under one page; rewrite
