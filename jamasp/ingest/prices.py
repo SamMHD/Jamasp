@@ -50,9 +50,63 @@ def parse_yahoo_chart_json(text: str) -> tuple[str, str, float]:
     raise ValueError(f"no non-null closes in yahoo chart json for {symbol}")
 
 
+def _parse_lbma_json(text: str, symbol: str, auction_utc: str) -> tuple[str, str, float]:
+    # LBMA serves the full auction history (records like
+    # {"d": "2026-07-30", "v": [usd, gbp, eur]}); today's record can exist
+    # with null prices before the auction settles, so walk back to the
+    # latest non-null USD value.
+    records = json.loads(text)
+    for rec in sorted(records, key=lambda r: r["d"], reverse=True):
+        v = rec.get("v") or []
+        if v and v[0]:
+            return symbol, f"{rec['d']}T{auction_utc}Z", float(v[0])
+    raise ValueError(f"no non-null USD price in LBMA json for {symbol}")
+
+
+def parse_lbma_am_json(text: str) -> tuple[str, str, float]:
+    return _parse_lbma_json(text, "XAU_AM", "10:30:00")
+
+
+def parse_lbma_pm_json(text: str) -> tuple[str, str, float]:
+    return _parse_lbma_json(text, "XAU_PM", "15:00:00")
+
+
+def parse_cftc_cot_json(text: str) -> tuple[str, str, float]:
+    records = json.loads(text)
+    if not records:
+        raise ValueError("empty CFTC COT response")
+    rec = records[0]
+    market = rec.get("market_and_exchange_names", "")
+    # A commodity_name=GOLD query also matches MICRO GOLD et al.; refuse
+    # anything but the main 100-oz COMEX contract rather than store wrong
+    # positioning numbers.
+    if not market.startswith("GOLD - COMMODITY EXCHANGE"):
+        raise ValueError(f"unexpected COT contract: {market!r}")
+    net = float(rec["noncomm_positions_long_all"]) - float(
+        rec["noncomm_positions_short_all"]
+    )
+    ts = f"{rec['report_date_as_yyyy_mm_dd'][:10]}T00:00:00Z"
+    return "GC_NET_SPEC", ts, net
+
+
+def parse_sge_json(text: str) -> tuple[str, str, float]:
+    # SGE daily benchmark (Au99.99, CNY/gram): {"zp": [[epoch_ms, price], …]}.
+    # Walk back to the latest non-null price.
+    points = json.loads(text)["zp"]
+    for ts_ms, price in sorted(points, key=lambda p: p[0], reverse=True):
+        if price is not None:
+            dt = datetime.fromtimestamp(ts_ms / 1000, tz=timezone.utc)
+            return "SGE_AU_CNY_G", dt.strftime("%Y-%m-%dT%H:%M:%SZ"), float(price)
+    raise ValueError("no non-null price in SGE benchmark json")
+
+
 PARSERS["stooq_csv"] = parse_stooq_csv
 PARSERS["fred_csv"] = parse_fred_csv
 PARSERS["yahoo_chart_json"] = parse_yahoo_chart_json
+PARSERS["lbma_am_json"] = parse_lbma_am_json
+PARSERS["lbma_pm_json"] = parse_lbma_pm_json
+PARSERS["cftc_cot_json"] = parse_cftc_cot_json
+PARSERS["sge_json"] = parse_sge_json
 
 
 def fetch_price(source: Source, client: httpx.Client) -> tuple[str, str, float]:

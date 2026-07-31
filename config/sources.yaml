@@ -44,11 +44,104 @@ sources:
     url: "https://news.google.com/rss/search?q=gold+OR+bullion+market&hl=en-US&gl=US&ceid=US:en"
     interval_minutes: 15
     topic: gold
+  # wgc / ecb_press / boe_news / bis_press / bls_latest / mining_weekly /
+  # northern_miner / gulf_news / national_business: added 2026-07-31 after
+  # per-source verification FROM the Hetzner host (docs/future-sources.md
+  # has the full research; every feed below returned valid RSS with live
+  # entries through the production fetch path). Notable: BoE works from the
+  # VM despite 403ing dev sandboxes; BLS needs the WARP proxy fallback
+  # (JAMASP_EXTRACT_PROXY, set in ~/.config/jamasp/env); WGC article pages
+  # extract cleanly but the feed carries some old archive items — dedupe
+  # handles them.
+  - name: wgc
+    type: rss
+    url: https://www.gold.org/rss.xml
+    interval_minutes: 60
+    topic: gold
+  - name: mining_weekly
+    type: rss
+    url: https://www.miningweekly.com/page/home/feed
+    interval_minutes: 30
+    topic: gold
+  - name: northern_miner
+    type: rss
+    url: https://www.northernminer.com/feed/
+    interval_minutes: 30
+    topic: gold
+  - name: gulf_news
+    type: rss
+    url: https://gulfnews.com/feed
+    interval_minutes: 30
+    topic: regional
+  - name: national_business
+    type: rss
+    # Arc Publishing feed — the ?outputType=xml suffix is required (bare
+    # path 404s). Economy-only variant: .../category/business/economy/
+    url: "https://www.thenationalnews.com/arc/outboundfeeds/rss/category/business/?outputType=xml"
+    interval_minutes: 30
+    topic: regional
+  # saxo_research / actionforex / fxempire_forecasts / forexlive /
+  # gold_eagle: added 2026-07-31 — technical-analysis/trader-commentary
+  # tier, all verified from the Hetzner host on the plain jamasp-UA path.
+  # Quality ranking from research: Saxo (best broker research) >
+  # ActionForex (aggregated bank-desk notes) > FXEmpire forecasts (only
+  # feed with explicit gold/silver TA levels) > Forexlive (fast, noisy) >
+  # gold-eagle (only living gold-specialist TA feed, but gold-bug noise —
+  # weigh accordingly). MarketPulse rejected: 1-item stale feed. DailyFX
+  # rejected: Akamai hard-block.
+  - name: saxo_research
+    type: rss
+    url: https://www.home.saxo/insights/content-hub/rss/all-articles
+    interval_minutes: 60
+    topic: analysis
+  - name: actionforex
+    type: rss
+    url: https://www.actionforex.com/feed/
+    interval_minutes: 30
+    topic: analysis
+  - name: fxempire_forecasts
+    type: rss
+    url: https://www.fxempire.com/api/v1/en/articles/rss/forecasts
+    interval_minutes: 30
+    topic: analysis
+  - name: forexlive
+    type: rss
+    # 301s to investinglive.com/feed (site rebranded); redirect followed
+    url: https://www.forexlive.com/feed
+    interval_minutes: 15
+    topic: analysis
+  - name: gold_eagle
+    type: rss
+    url: https://www.gold-eagle.com/rss.xml
+    interval_minutes: 60
+    topic: gold
   - name: fed_press
     type: rss
     url: https://www.federalreserve.gov/feeds/press_all.xml
     interval_minutes: 60
     topic: fed
+  - name: ecb_press
+    type: rss
+    url: https://www.ecb.europa.eu/rss/press.html
+    interval_minutes: 60
+    topic: macro
+  - name: boe_news
+    type: rss
+    url: https://www.bankofengland.co.uk/rss/news
+    interval_minutes: 60
+    topic: macro
+  - name: bis_press
+    type: rss
+    url: https://www.bis.org/doclist/all_pressrels.rss
+    interval_minutes: 60
+    topic: macro
+  - name: bls_latest
+    type: rss
+    # low-volume "latest numbers" summary feed; 403s direct from the VM,
+    # works via the WARP proxy fallback
+    url: https://www.bls.gov/feed/bls_latest.rss
+    interval_minutes: 60
+    topic: macro
   - name: treasury_press
     type: rss
     # 2026-07-31: /rss/press.xml (Task 2 URL) now 404s — Treasury retired
@@ -81,6 +174,83 @@ sources:
     interval_minutes: 60
     topic: prices
     parser: fred_csv
+  # lbma_gold_am/pm: added 2026-07-31 — the actual global benchmark price
+  # (vs. GC=F futures proxy). Full-history JSON (~900KB), hence the long
+  # interval; verified working direct from the Hetzner host.
+  - name: lbma_gold_am
+    type: price_api
+    url: "https://prices.lbma.org.uk/json/gold_am.json"
+    interval_minutes: 360
+    topic: prices
+    parser: lbma_am_json
+  - name: lbma_gold_pm
+    type: price_api
+    url: "https://prices.lbma.org.uk/json/gold_pm.json"
+    interval_minutes: 360
+    topic: prices
+    parser: lbma_pm_json
+  # cftc_gold_cot: added 2026-07-31 — weekly net non-commercial (speculative)
+  # positioning in the main 100-oz COMEX contract, released Fridays with
+  # data through Tuesday. The market_and_exchange_names filter pins the main
+  # contract server-side (commodity_name=GOLD alone matches MICRO GOLD
+  # first); the parser refuses anything else as a second guard.
+  - name: cftc_gold_cot
+    type: price_api
+    url: "https://publicreporting.cftc.gov/resource/jun7-fc8e.json?market_and_exchange_names=GOLD%20-%20COMMODITY%20EXCHANGE%20INC.&$order=report_date_as_yyyy_mm_dd%20DESC&$limit=1"
+    interval_minutes: 720
+    topic: prices
+    parser: cftc_cot_json
+  # gold_vol / yield_10y_nominal / usdjpy / btc_usd / spx / dxy_intraday:
+  # added 2026-07-31 — technical/cross-asset scalars through the same Yahoo
+  # chart API already serving gold_spot (GC=F), zero new code. ^GVZ is
+  # CBOE's gold-ETF implied vol ("gold VIX"); DX-Y.NYB is the intraday ICE
+  # dollar index complementing FRED's daily broad index (DTWEXBGS).
+  - name: gold_vol
+    type: price_api
+    url: "https://query1.finance.yahoo.com/v8/finance/chart/^GVZ?range=1d&interval=1h"
+    interval_minutes: 60
+    topic: prices
+    parser: yahoo_chart_json
+  - name: yield_10y_nominal
+    type: price_api
+    url: "https://query1.finance.yahoo.com/v8/finance/chart/^TNX?range=1d&interval=1h"
+    interval_minutes: 60
+    topic: prices
+    parser: yahoo_chart_json
+  - name: usdjpy
+    type: price_api
+    url: "https://query1.finance.yahoo.com/v8/finance/chart/JPY=X?range=1d&interval=1h"
+    interval_minutes: 60
+    topic: prices
+    parser: yahoo_chart_json
+  - name: btc_usd
+    type: price_api
+    url: "https://query1.finance.yahoo.com/v8/finance/chart/BTC-USD?range=1d&interval=1h"
+    interval_minutes: 60
+    topic: prices
+    parser: yahoo_chart_json
+  - name: spx
+    type: price_api
+    url: "https://query1.finance.yahoo.com/v8/finance/chart/^GSPC?range=1d&interval=1h"
+    interval_minutes: 60
+    topic: prices
+    parser: yahoo_chart_json
+  - name: dxy_intraday
+    type: price_api
+    url: "https://query1.finance.yahoo.com/v8/finance/chart/DX-Y.NYB?range=1d&interval=1h"
+    interval_minutes: 60
+    topic: prices
+    parser: yahoo_chart_json
+  # sge_benchmark: added 2026-07-31 — official Shanghai Gold Exchange daily
+  # benchmark (Au99.99, CNY/gram). The China physical-demand gauge: SGE
+  # premium vs London = CNY/g × 31.1035 / USDCNY − LBMA PM, computed at
+  # analysis time. Daily print, so the long interval.
+  - name: sge_benchmark
+    type: price_api
+    url: "https://en.sge.com.cn/graph/DayilyJzj"
+    interval_minutes: 360
+    topic: prices
+    parser: sge_json
   # --- calendars ---
   # ff_calendar: ForexFactory weekly economic calendar mirror (faireconomy
   # media CDN), free JSON, no key. Gives CPI/NFP/FOMC-class events with

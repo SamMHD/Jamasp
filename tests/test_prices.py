@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from jamasp import db
 from jamasp.ingest import prices
 
@@ -27,6 +29,45 @@ def test_parse_yahoo_chart_json_uses_latest_non_null_close():
     assert symbol == "GC"
     assert ts == "2026-07-30T22:51:51Z"
     assert value == 4167.7998046875
+
+
+def test_parse_lbma_am_json_takes_latest_non_null_usd():
+    symbol, ts, value = prices.parse_lbma_am_json((FIXTURES / "lbma_gold.json").read_text())
+    assert symbol == "XAU_AM"
+    assert ts == "2026-07-30T10:30:00Z"
+    assert value == 4061.5
+
+
+def test_parse_lbma_pm_json_takes_latest_non_null_usd():
+    symbol, ts, value = prices.parse_lbma_pm_json((FIXTURES / "lbma_gold.json").read_text())
+    assert symbol == "XAU_PM"
+    assert ts == "2026-07-30T15:00:00Z"
+    assert value == 4061.5
+
+
+def test_parse_cftc_cot_json_net_noncommercial():
+    symbol, ts, value = prices.parse_cftc_cot_json(
+        (FIXTURES / "cftc_cot_gold.json").read_text()
+    )
+    assert symbol == "GC_NET_SPEC"
+    assert ts == "2026-07-28T00:00:00Z"
+    assert value == 302145 - 68210
+
+
+def test_parse_cftc_cot_json_rejects_wrong_contract():
+    # commodity_name=GOLD also matches MICRO GOLD; the parser must refuse
+    # anything but the main COMEX contract rather than store wrong numbers.
+    with pytest.raises(ValueError):
+        prices.parse_cftc_cot_json((FIXTURES / "cftc_cot_micro.json").read_text())
+
+
+def test_parse_sge_json_takes_latest_non_null():
+    symbol, ts, value = prices.parse_sge_json(
+        (FIXTURES / "sge_benchmark.json").read_text()
+    )
+    assert symbol == "SGE_AU_CNY_G"
+    assert ts == "2026-07-30T00:00:00Z"
+    assert value == 878.99
 
 
 def test_store_and_query(tmp_path):
