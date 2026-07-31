@@ -1,0 +1,9 @@
+[Unit]
+Description=Jamasp watchdog — verify timers and state are healthy
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/Jamasp
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+EnvironmentFile=-%h/.config/jamasp/env
+ExecStart=%h/.local/bin/uv run jamasp watchdog

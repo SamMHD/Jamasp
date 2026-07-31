@@ -1,0 +1,8 @@
+[Unit]
+Description=Run the Jamasp scan on odd hours Dubai time
+
+[Timer]
+OnCalendar=*-*-* 09,11,13,15,17,19,21,23:00:00 Asia/Dubai
+
+[Install]
+WantedBy=timers.target

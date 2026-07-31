@@ -34,6 +34,10 @@ for the sage-advisor of the Shahnameh: measured, far-sighted, never breathless.
 | `uv run jamasp extract <url>` | clean article text for a headline worth deep reading |
 | `uv run jamasp notify [--dry-run] -` | send stdin text to the desk Telegram |
 | `uv run jamasp ingest` | refresh sources (only if inbox seems stale) |
+| `uv run jamasp calendar` | upcoming economic events (UTC + Dubai), high/medium impact |
+| `uv run jamasp wakeup add "<ISO>" <type> "<task>"` | schedule a future run (usually deepdive) |
+| `uv run jamasp wakeup list` | pending wakeups (feed the brief's "watching" section) |
+| `uv run jamasp predictions add\|due\|score` | record and score falsifiable forecasts |
 
 ## State files
 

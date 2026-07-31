@@ -80,25 +80,48 @@ chmod 600 ~/.config/jamasp/env
 ```
 
 ### 5. systemd units
-Use **system** units (`/etc/systemd/system/`, `User=jamasp`) when you have
-root; use **user** units (`~/.config/systemd/user/`, plus
-`loginctl enable-linger jamasp` and `XDG_RUNTIME_DIR=/run/user/$(id -u)`)
-when you only have the unprivileged account.
+All 12 unit files (6 services + 6 timers: ingest, brief, scan, dispatch,
+retro, watchdog) live in `ops/systemd/` in this repo — copy them onto the
+host rather than hand-writing units. Use **system** units
+(`/etc/systemd/system/`, `User=jamasp`) when you have root; use **user**
+units (`~/.config/systemd/user/`, plus `loginctl enable-linger jamasp` and
+`XDG_RUNTIME_DIR=/run/user/$(id -u)`) when you only have the unprivileged
+account.
 
-`jamasp-ingest.service` (Type=oneshot) → `ExecStart=%h/.local/bin/uv run jamasp ingest`
-paired with `jamasp-ingest.timer` → `OnCalendar=*:0/15`, `Persistent=true`,
-`RandomizedDelaySec=90`.
+**System units** (root — replace `%h` with `/home/jamasp` and add `User=jamasp`
+to each `[Service]` block):
+```bash
+for f in ~/Jamasp/ops/systemd/jamasp-*; do
+  sed -e 's|%h|/home/jamasp|g' -e '/^\[Service\]/a User=jamasp' "$f" \
+    > "/etc/systemd/system/$(basename "$f")"
+done
+systemctl daemon-reload
+```
 
-`jamasp-brief.service` (Type=oneshot) →
-`ExecStart=%h/.local/bin/claude -p "/brief" --dangerously-skip-permissions`
-paired with `jamasp-brief.timer` → `OnCalendar=*-*-* 07:30:00 Asia/Dubai`
-(systemd ≥252 honors the timezone suffix; the box clock stays UTC).
+**User units** (unprivileged account — keep `%h` as-is):
+```bash
+mkdir -p ~/.config/systemd/user
+cp ~/Jamasp/ops/systemd/jamasp-* ~/.config/systemd/user/
+loginctl enable-linger jamasp   # timers survive logout
+XDG_RUNTIME_DIR=/run/user/$(id -u) systemctl --user daemon-reload
+```
 
-Both services set `Environment=PATH=<home>/.local/bin:/usr/local/bin:/usr/bin:/bin`,
-`Environment=HOME=<home>`, and `EnvironmentFile=-<home>/.config/jamasp/env`.
+`jamasp-brief` replaces phase 1's direct `claude -p "/brief"` ExecStart —
+`jamasp run brief` now wraps it (cap/retry/Telegram). The brief/scan/retro/
+dispatch services rely on `claude` being on the `PATH=` set in each unit.
+Timer OnCalendar values (systemd ≥252 honors the `Asia/Dubai` suffix; the
+box clock stays UTC): ingest `*:0/15`, dispatch `*:0/5`, watchdog daily
+`09:00`, brief daily `07:30`, scan `09,11,13,15,17,19,21,23:00` (all Dubai
+time), retro `Sun 20:00` Dubai.
 
-Then: `daemon-reload`, `enable --now jamasp-ingest.timer`. Leave the brief
-timer **disabled** until the human steps below are done.
+Enable in two stages — the deterministic infra first, the agentic runs
+after the human handoff:
+```bash
+# (drop --user for system units)
+systemctl --user enable --now jamasp-ingest.timer jamasp-dispatch.timer jamasp-watchdog.timer
+# jamasp-brief.timer, jamasp-scan.timer, jamasp-retro.timer stay DISABLED
+# until the human steps below are done
+```
 
 ### 6. verify the deterministic half now
 ```bash
@@ -152,16 +175,24 @@ headline-only sources.
 
 Then run one **supervised brief** (`claude`, type `/brief`) or
 `systemctl start jamasp-brief.service`; confirm a report appeared under
-`reports/`, a commit was made, and the Telegram summary arrived. When happy:
+`reports/`, a commit was made, and the Telegram summary arrived. When happy,
+enable the remaining agentic timers (drop `--user` for system units):
 ```bash
-systemctl enable --now jamasp-brief.timer
+systemctl --user enable --now jamasp-brief.timer jamasp-scan.timer jamasp-retro.timer
 ```
+
+**Watchdog check**: after the first full day, confirm `uv run jamasp watchdog`
+prints OK — that means ingest/dispatch/brief/scan all ran on schedule.
 
 ## Sanity / ops
 ```bash
 systemctl list-timers | grep jamasp
 journalctl -u jamasp-ingest.service -n 20
+journalctl -u jamasp-dispatch.service -n 20
+journalctl -u jamasp-watchdog.service -n 20
 journalctl -u jamasp-brief.service -n 40
+journalctl -u jamasp-scan.service -n 40
+journalctl -u jamasp-retro.service -n 40
 ```
 A transient inbox `WARNING` about source `digest` just means Claude isn't
 logged in yet; it clears on the first successful digest. The box commits

@@ -1,0 +1,10 @@
+[Unit]
+Description=Run the Jamasp ingest every 15 minutes
+
+[Timer]
+OnCalendar=*:0/15
+Persistent=true
+RandomizedDelaySec=90
+
+[Install]
+WantedBy=timers.target

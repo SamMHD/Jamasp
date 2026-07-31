@@ -1,0 +1,9 @@
+[Unit]
+Description=Jamasp scan — intraday news/price check for urgent moves
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/Jamasp
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+EnvironmentFile=-%h/.config/jamasp/env
+ExecStart=%h/.local/bin/uv run jamasp run scan
