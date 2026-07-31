@@ -70,6 +70,24 @@ def test_parse_sge_json_takes_latest_non_null():
     assert value == 878.99
 
 
+def test_fetch_price_symbol_override(monkeypatch):
+    # Yahoo's meta.symbol is not stable for FX pairs (JPY=X came back as
+    # "JPY" and "USDJPY" in consecutive live calls); a configured symbol
+    # must win so one source can't split into two series.
+    from jamasp.config import Source
+
+    class FakeResp:
+        text = (FIXTURES / "yahoo_gc.json").read_text()
+
+    monkeypatch.setattr(prices, "get_with_fallback", lambda url, client: FakeResp())
+    src = Source(
+        name="x", type="price_api", url="https://x", interval_minutes=60,
+        topic="prices", parser="yahoo_chart_json", symbol="USDJPY",
+    )
+    symbol, _, _ = prices.fetch_price(src, client=None)
+    assert symbol == "USDJPY"
+
+
 def test_store_and_query(tmp_path):
     conn = db.connect(tmp_path / "t.db")
     prices.store_price(conn, "XAUUSD", "2026-07-29T00:00:00Z", 3390.0)

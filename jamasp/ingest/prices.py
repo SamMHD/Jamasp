@@ -111,7 +111,8 @@ PARSERS["sge_json"] = parse_sge_json
 
 def fetch_price(source: Source, client: httpx.Client) -> tuple[str, str, float]:
     resp = get_with_fallback(source.url, client)
-    return PARSERS[source.parser](resp.text)
+    symbol, ts, value = PARSERS[source.parser](resp.text)
+    return source.symbol or symbol, ts, value
 
 
 def store_price(conn: sqlite3.Connection, symbol: str, ts: str, value: float) -> None:
