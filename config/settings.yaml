@@ -12,3 +12,11 @@ telegram:
   chat_id_env: JAMASP_TG_CHAT
 predictions:
   price_symbol: GC
+runs:
+  claude_cmd: ["claude", "-p", "--dangerously-skip-permissions"]
+  max_agent_runs_per_day: 20
+  timeouts_seconds:
+    brief: 900
+    deepdive: 900
+    scan: 300
+    retro: 1200

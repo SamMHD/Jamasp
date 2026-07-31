@@ -17,6 +17,7 @@ from jamasp import inbox as inbox_mod
 from jamasp import notify as notify_mod
 from jamasp import predictions as predictions_mod
 from jamasp import pricesummary as pricesummary_mod
+from jamasp import runner as runner_mod
 from jamasp import wakeup as wakeup_mod
 from jamasp.config import load_settings, load_sources
 from jamasp.ingest import calendar as calendar_mod
@@ -204,6 +205,25 @@ def calendar(days, all_impacts, db_path, config_dir):
     click.echo(calendarview_mod.render(
         conn, days=days, impact_min="all" if all_impacts else "default"
     ))
+
+
+@main.command("run")
+@click.argument("run_type", type=click.Choice(["brief", "scan", "deepdive", "retro"]))
+@click.argument("task", required=False, default=None)
+@click.option("--dry-run", is_flag=True, help="print the command; don't execute or record")
+@db_opt
+@cfg_opt
+def run_cmd(run_type, task, dry_run, db_path, config_dir):
+    """Fire one wrapped agent run (cap, timeout, retry, failure notice)."""
+    conn, _, settings = _common(db_path, config_dir)
+    if dry_run:
+        prompt = f"/{run_type} {task}" if task else f"/{run_type}"
+        click.echo(f"[dry-run] would run: {' '.join(settings['runs']['claude_cmd'])} {prompt!r}")
+        return
+    status = runner_mod.run_agent(conn, settings, run_type, task=task)
+    click.echo(f"{run_type}: {status}")
+    if status in ("failed", "timeout"):
+        raise SystemExit(1)
 
 
 pred_path_opt = click.option(
