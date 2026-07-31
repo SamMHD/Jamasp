@@ -1,10 +1,8 @@
 sources:
   # --- news wires (rss) ---
-  - name: fxstreet
-    type: rss
-    url: https://www.fxstreet.com/rss/news
-    interval_minutes: 15
-    topic: markets
+  # fxstreet: removed 2026-07-31 — entire site is behind a Cloudflare
+  # bot-challenge (cf-mitigated: challenge on every path, including /),
+  # no plain HTTP client can retrieve it, and no alternate feed exists.
   - name: investing_commodities
     type: rss
     url: https://www.investing.com/rss/news_11.rss
@@ -15,11 +13,9 @@ sources:
     url: https://feeds.content.dowjones.io/public/rss/mw_topstories
     interval_minutes: 15
     topic: markets
-  - name: kitco
-    type: rss
-    url: https://www.kitco.com/rss/
-    interval_minutes: 15
-    topic: gold
+  # kitco: removed 2026-07-31 — every rss path (/rss/, /news/*/rss,
+  # /rss/KitcoNews.xml) returns 403 Forbidden; site is bot-protected
+  # and no alternate feed exists.
   - name: fed_press
     type: rss
     url: https://www.federalreserve.gov/feeds/press_all.xml
@@ -27,7 +23,11 @@ sources:
     topic: fed
   - name: treasury_press
     type: rss
-    url: https://home.treasury.gov/rss/press.xml
+    # 2026-07-31: /rss/press.xml (Task 2 URL) now 404s — Treasury retired
+    # the press-release-specific feed. /rss.xml is the sitewide feed and
+    # is the only working RSS endpoint left on home.treasury.gov; it mixes
+    # in non-press content (FAQs, program pages) alongside press releases.
+    url: https://home.treasury.gov/rss.xml
     interval_minutes: 60
     topic: fiscal
   # --- prices (price_api) ---
