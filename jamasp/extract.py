@@ -9,18 +9,7 @@ import httpx
 import trafilatura
 
 from jamasp.db import utcnow
-
-
-# Publishers (CNBC, Mining.com, MarketWatch, …) block non-browser User-Agents
-# with 401/403. Identify as a browser so article pages are retrievable.
-BROWSER_HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-        "(KHTML, like Gecko) Chrome/126.0 Safari/537.36"
-    ),
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    "Accept-Language": "en-US,en;q=0.9",
-}
+from jamasp.net import BROWSER_HEADERS, PROXY_ENV_VAR
 
 
 def _default_fetch(url: str) -> str:
@@ -29,13 +18,6 @@ def _default_fetch(url: str) -> str:
     )
     resp.raise_for_status()
     return resp.text
-
-
-# Even with a browser UA, several publishers (CNBC, MarketWatch, Investing)
-# reject requests from datacenter IPs outright. JAMASP_EXTRACT_PROXY names a
-# local egress proxy (WARP in proxy mode: socks5://127.0.0.1:40000) used as a
-# fallback ONLY inside this fetch — system routing is never touched.
-PROXY_ENV_VAR = "JAMASP_EXTRACT_PROXY"
 
 
 def _proxy_fetch(url: str) -> str:

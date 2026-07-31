@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 import httpx
 
 from jamasp.config import Source
+from jamasp.net import get_with_fallback
 
 PARSERS = {}
 
@@ -55,8 +56,7 @@ PARSERS["yahoo_chart_json"] = parse_yahoo_chart_json
 
 
 def fetch_price(source: Source, client: httpx.Client) -> tuple[str, str, float]:
-    resp = client.get(source.url, follow_redirects=True, timeout=30)
-    resp.raise_for_status()
+    resp = get_with_fallback(source.url, client)
     return PARSERS[source.parser](resp.text)
 
 
