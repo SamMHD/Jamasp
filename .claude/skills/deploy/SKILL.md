@@ -30,8 +30,19 @@ bite you if you skip them.
 
 ## Steps
 
-Run everything as the target service user (`jamasp`) unless noted. Assumes
-Ubuntu/systemd; the repo is PUBLIC so no GitHub auth is needed to clone.
+Assumes Ubuntu/systemd; the repo is PUBLIC so no GitHub auth is needed to
+clone.
+
+### 0. Access the host
+Everything below runs **on the target host**, reached over SSH. The current
+production deployment is reachable as `ssh jamasp` (an alias in the
+operator's `~/.ssh/config`; the concrete host/IP is kept out of this public
+repo — see private ops notes). Steps marked **(root)** need root; run the
+rest as the service user, e.g. `sudo -u jamasp -i` (or log in as `jamasp`).
+Over SSH, prefix a service-user command as:
+```bash
+ssh jamasp 'sudo -u jamasp -i bash -lc "cd ~/Jamasp && uv run jamasp price"'
+```
 
 ### 1. (root only) create the service user
 ```bash
