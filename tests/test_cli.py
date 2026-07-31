@@ -1,4 +1,5 @@
 import json
+import sys
 from pathlib import Path
 
 from click.testing import CliRunner
@@ -9,9 +10,10 @@ from jamasp.ingest import rss
 from jamasp.models import Item
 
 FIXTURES = Path(__file__).parent / "fixtures"
+FAKE_AGENT = str(Path(__file__).parent / "fake_agent.py")
 
 
-def _write_configs(tmp_path, sources_yaml):
+def _write_configs(tmp_path, sources_yaml, extra_settings_yaml=""):
     cfg = tmp_path / "config"
     cfg.mkdir()
     (cfg / "sources.yaml").write_text(sources_yaml)
@@ -20,8 +22,19 @@ def _write_configs(tmp_path, sources_yaml):
         "digest:\n  claude_cmd: [\"/nonexistent\"]\n  batch_max_items: 60\n"
         "cluster:\n  similarity_threshold: 80\n  window_hours: 48\n"
         "telegram:\n  bot_token_env: JAMASP_TG_TOKEN\n  chat_id_env: JAMASP_TG_CHAT\n"
+        + extra_settings_yaml
     )
     return cfg
+
+
+def _runs_yaml(mode):
+    """A `runs:` settings block whose claude_cmd is tests/fake_agent.py in MODE."""
+    return (
+        "runs:\n"
+        f"  claude_cmd: [{json.dumps(sys.executable)}, {json.dumps(FAKE_AGENT)}, {json.dumps(mode)}]\n"
+        "  max_agent_runs_per_day: 20\n"
+        "  timeouts_seconds:\n    brief: 900\n    deepdive: 900\n    scan: 300\n    retro: 1200\n"
+    )
 
 
 def test_ingest_survives_dead_source_and_reports(tmp_path, monkeypatch):
@@ -81,3 +94,48 @@ def test_notify_dry_run(tmp_path, monkeypatch):
     )
     assert out.exit_code == 0
     assert "[dry-run] would send 5 chars" in out.output
+
+
+def test_run_cmd_ok_exits_zero(tmp_path, monkeypatch):
+    monkeypatch.delenv("JAMASP_TG_TOKEN", raising=False)
+    monkeypatch.delenv("JAMASP_TG_CHAT", raising=False)
+    cfg = _write_configs(tmp_path, "sources: []\n", _runs_yaml("ok"))
+    dbp = tmp_path / "j.db"
+    runner = CliRunner()
+    out = runner.invoke(main, ["run", "scan", "--db", str(dbp), "--config-dir", str(cfg)])
+    assert out.exit_code == 0
+    assert "scan: ok" in out.output
+    conn = db.connect(dbp)
+    rows = conn.execute("SELECT status FROM agent_runs").fetchall()
+    assert [r["status"] for r in rows] == ["ok"]
+
+
+def test_run_cmd_persistent_failure_exits_nonzero(tmp_path, monkeypatch):
+    # no Telegram env vars set -> the failure notice is swallowed by _notify_safe,
+    # so the CLI exit code is unaffected by Telegram availability.
+    monkeypatch.delenv("JAMASP_TG_TOKEN", raising=False)
+    monkeypatch.delenv("JAMASP_TG_CHAT", raising=False)
+    cfg = _write_configs(tmp_path, "sources: []\n", _runs_yaml("fail"))
+    dbp = tmp_path / "j.db"
+    runner = CliRunner()
+    out = runner.invoke(main, ["run", "scan", "--db", str(dbp), "--config-dir", str(cfg)])
+    assert out.exit_code != 0
+    assert "scan: failed" in out.output
+    conn = db.connect(dbp)
+    rows = conn.execute("SELECT status FROM agent_runs").fetchall()
+    assert [r["status"] for r in rows] == ["failed"]
+
+
+def test_run_cmd_dry_run_executes_and_records_nothing(tmp_path, monkeypatch):
+    monkeypatch.delenv("JAMASP_TG_TOKEN", raising=False)
+    monkeypatch.delenv("JAMASP_TG_CHAT", raising=False)
+    cfg = _write_configs(tmp_path, "sources: []\n", _runs_yaml("ok"))
+    dbp = tmp_path / "j.db"
+    runner = CliRunner()
+    out = runner.invoke(main, ["run", "scan", "--dry-run", "--db", str(dbp), "--config-dir", str(cfg)])
+    assert out.exit_code == 0
+    assert "[dry-run] would run:" in out.output
+    assert "/scan" in out.output
+    conn = db.connect(dbp)
+    rows = conn.execute("SELECT status FROM agent_runs").fetchall()
+    assert rows == []

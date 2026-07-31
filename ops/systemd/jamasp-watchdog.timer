@@ -1,0 +1,9 @@
+[Unit]
+Description=Run the Jamasp watchdog daily at 09:00 Dubai
+
+[Timer]
+OnCalendar=*-*-* 09:00:00 Asia/Dubai
+Persistent=true
+
+[Install]
+WantedBy=timers.target
