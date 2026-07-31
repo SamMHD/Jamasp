@@ -1,0 +1,25 @@
+{
+  "chart": {
+    "result": [
+      {
+        "meta": {
+          "currency": "USD",
+          "symbol": "GC=F",
+          "exchangeName": "CMX",
+          "instrumentType": "FUTURE",
+          "regularMarketPrice": 4167.8,
+          "regularMarketTime": 1785455511
+        },
+        "timestamp": [1785448311, 1785451911, 1785455511],
+        "indicators": {
+          "quote": [
+            {
+              "close": [4162.7998046875, 4167.7998046875, null]
+            }
+          ]
+        }
+      }
+    ],
+    "error": null
+  }
+}

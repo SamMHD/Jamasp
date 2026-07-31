@@ -20,6 +20,15 @@ def test_parse_fred_csv_skips_missing():
     assert value == 1.95
 
 
+def test_parse_yahoo_chart_json_uses_latest_non_null_close():
+    symbol, ts, value = prices.parse_yahoo_chart_json(
+        (FIXTURES / "yahoo_gc.json").read_text()
+    )
+    assert symbol == "GC"
+    assert ts == "2026-07-30T22:51:51Z"
+    assert value == 4167.7998046875
+
+
 def test_store_and_query(tmp_path):
     conn = db.connect(tmp_path / "t.db")
     prices.store_price(conn, "XAUUSD", "2026-07-29T00:00:00Z", 3390.0)

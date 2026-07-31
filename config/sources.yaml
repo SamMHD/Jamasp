@@ -16,6 +16,13 @@ sources:
   # kitco: removed 2026-07-31 — every rss path (/rss/, /news/*/rss,
   # /rss/KitcoNews.xml) returns 403 Forbidden; site is bot-protected
   # and no alternate feed exists.
+  # gnews_gold: added 2026-07-31 to replace lost gold-topic coverage
+  # from fxstreet+kitco — Google News RSS search, no key required.
+  - name: gnews_gold
+    type: rss
+    url: "https://news.google.com/rss/search?q=gold+OR+bullion+market&hl=en-US&gl=US&ceid=US:en"
+    interval_minutes: 15
+    topic: gold
   - name: fed_press
     type: rss
     url: https://www.federalreserve.gov/feeds/press_all.xml
@@ -33,10 +40,14 @@ sources:
   # --- prices (price_api) ---
   - name: gold_spot
     type: price_api
-    url: "https://stooq.com/q/l/?s=xauusd&f=sd2t2ohlcv&h&e=csv"
+    # 2026-07-31: stooq's CSV/quote endpoints now sit behind a client-side
+    # JS proof-of-work challenge (see commit 5b3b150); switched to Yahoo
+    # Finance's no-key chart API for COMEX gold futures (GC=F), the
+    # standard free proxy for spot gold pricing.
+    url: "https://query1.finance.yahoo.com/v8/finance/chart/GC=F?range=1d&interval=1h"
     interval_minutes: 15
     topic: prices
-    parser: stooq_csv
+    parser: yahoo_chart_json
   - name: dollar_index
     type: price_api
     url: "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DTWEXBGS"

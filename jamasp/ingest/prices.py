@@ -1,9 +1,11 @@
-"""Price snapshot fetchers: Stooq CSV and FRED CSV."""
+"""Price snapshot fetchers: Stooq CSV, FRED CSV, Yahoo Finance chart JSON."""
 from __future__ import annotations
 
 import csv
 import io
+import json
 import sqlite3
+from datetime import datetime, timezone
 
 import httpx
 
@@ -31,8 +33,25 @@ def parse_fred_csv(text: str) -> tuple[str, str, float]:
     return series, f"{last[0]}T00:00:00Z", last[1]
 
 
+def parse_yahoo_chart_json(text: str) -> tuple[str, str, float]:
+    result = json.loads(text)["chart"]["result"][0]
+    symbol = result["meta"]["symbol"].upper()
+    for suffix in ("=X", "=F"):
+        if symbol.endswith(suffix):
+            symbol = symbol[: -len(suffix)]
+            break
+    timestamps = result["timestamp"]
+    closes = result["indicators"]["quote"][0]["close"]
+    for ts, close in zip(reversed(timestamps), reversed(closes)):
+        if close is not None:
+            dt = datetime.fromtimestamp(ts, tz=timezone.utc)
+            return symbol, dt.strftime("%Y-%m-%dT%H:%M:%SZ"), float(close)
+    raise ValueError(f"no non-null closes in yahoo chart json for {symbol}")
+
+
 PARSERS["stooq_csv"] = parse_stooq_csv
 PARSERS["fred_csv"] = parse_fred_csv
+PARSERS["yahoo_chart_json"] = parse_yahoo_chart_json
 
 
 def fetch_price(source: Source, client: httpx.Client) -> tuple[str, str, float]:
