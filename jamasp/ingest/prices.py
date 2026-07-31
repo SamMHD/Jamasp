@@ -100,6 +100,50 @@ def parse_sge_json(text: str) -> tuple[str, str, float]:
     raise ValueError("no non-null price in SGE benchmark json")
 
 
+# TradingView scanner fields -> series-name suffixes (daily timeframe;
+# pivots are TradingView's monthly Classic set). Recommend.All — the
+# aggregate buy/sell gauge — is deliberately absent: technicals annotate
+# the macro read, they must not originate calls.
+TV_FIELD_SUFFIXES = {
+    "RSI": "RSI14",
+    "SMA50": "SMA50",
+    "SMA200": "SMA200",
+    "ATR": "ATR14",
+    "Pivot.M.Classic.S1": "PIV_S1",
+    "Pivot.M.Classic.R1": "PIV_R1",
+}
+
+
+def parse_tradingview_scanner_json(text: str) -> list[tuple[str, float]]:
+    # Fields can be null when the market is closed mid-roll; skip those
+    # rather than store garbage.
+    data = json.loads(text)
+    out = [
+        (suffix, float(data[field]))
+        for field, suffix in TV_FIELD_SUFFIXES.items()
+        if data.get(field) is not None
+    ]
+    if not out:
+        raise ValueError("no technical fields in tradingview scanner json")
+    return out
+
+
+TECH_PARSERS = {"tradingview_scanner_json": parse_tradingview_scanner_json}
+
+
+def fetch_technicals(source: Source, client: httpx.Client) -> list[tuple[str, str, float]]:
+    """One technicals fetch -> several (symbol, ts, value) rows, e.g. GC_RSI14."""
+    if not source.symbol:
+        raise ValueError(f"technicals source {source.name} needs a symbol prefix")
+    resp = get_with_fallback(source.url, client)
+    # The scanner payload carries no timestamp; stamp with fetch time.
+    ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return [
+        (f"{source.symbol}_{suffix}", ts, value)
+        for suffix, value in TECH_PARSERS[source.parser](resp.text)
+    ]
+
+
 PARSERS["stooq_csv"] = parse_stooq_csv
 PARSERS["fred_csv"] = parse_fred_csv
 PARSERS["yahoo_chart_json"] = parse_yahoo_chart_json

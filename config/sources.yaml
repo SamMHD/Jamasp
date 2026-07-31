@@ -254,6 +254,20 @@ sources:
     interval_minutes: 360
     topic: prices
     parser: sge_json
+  # tv_gc_technicals: added 2026-08-01 — daily technical context for GC
+  # pulled precomputed from TradingView's keyless scanner API (RSI14,
+  # SMA50/200, ATR14, monthly Classic pivot S1/R1) instead of computing
+  # locally. Context annotation only: the aggregate buy/sell gauge
+  # (Recommend.All) is deliberately not stored — technicals annotate the
+  # macro read, they must not originate calls. `symbol: GC` prefixes the
+  # stored series (GC_RSI14, …).
+  - name: tv_gc_technicals
+    type: technicals_api
+    url: "https://scanner.tradingview.com/symbol?symbol=COMEX%3AGC1!&fields=RSI,SMA50,SMA200,ATR,Pivot.M.Classic.S1,Pivot.M.Classic.R1&no_404=true"
+    interval_minutes: 360
+    topic: prices
+    parser: tradingview_scanner_json
+    symbol: GC
   # --- calendars ---
   # ff_calendar: ForexFactory weekly economic calendar mirror (faireconomy
   # media CDN), free JSON, no key. Gives CPI/NFP/FOMC-class events with

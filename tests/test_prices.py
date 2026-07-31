@@ -88,6 +88,59 @@ def test_fetch_price_symbol_override(monkeypatch):
     assert symbol == "USDJPY"
 
 
+def test_parse_tradingview_scanner_json_maps_fields_and_drops_gauge():
+    pairs = dict(
+        prices.parse_tradingview_scanner_json(
+            (FIXTURES / "tv_scanner_gc.json").read_text()
+        )
+    )
+    assert set(pairs) == {"RSI14", "SMA50", "SMA200", "ATR14", "PIV_S1", "PIV_R1"}
+    assert pairs["RSI14"] == pytest.approx(49.0847, abs=1e-3)
+    assert pairs["PIV_R1"] == pytest.approx(4425.4, abs=1e-3)
+    # Recommend.All (buy/sell gauge) and close must never become series
+
+
+def test_parse_tradingview_scanner_json_skips_nulls():
+    pairs = prices.parse_tradingview_scanner_json('{"RSI": null, "ATR": 5.0}')
+    assert pairs == [("ATR14", 5.0)]
+    with pytest.raises(ValueError):
+        prices.parse_tradingview_scanner_json('{"RSI": null}')
+
+
+def test_fetch_technicals_prefixes_symbols_and_stamps_fetch_time(monkeypatch):
+    from jamasp.config import Source
+
+    class FakeResp:
+        text = (FIXTURES / "tv_scanner_gc.json").read_text()
+
+    monkeypatch.setattr(prices, "get_with_fallback", lambda url, client: FakeResp())
+    src = Source(
+        name="tv", type="technicals_api", url="https://x", interval_minutes=360,
+        topic="prices", parser="tradingview_scanner_json", symbol="GC",
+    )
+    rows = prices.fetch_technicals(src, client=None)
+    assert {s for s, _, _ in rows} == {
+        "GC_RSI14", "GC_SMA50", "GC_SMA200", "GC_ATR14", "GC_PIV_S1", "GC_PIV_R1"
+    }
+    # one shared fetch-time stamp in the canonical format
+    stamps = {ts for _, ts, _ in rows}
+    assert len(stamps) == 1
+    from datetime import datetime
+
+    datetime.strptime(stamps.pop(), "%Y-%m-%dT%H:%M:%SZ")
+
+
+def test_fetch_technicals_requires_symbol_prefix(monkeypatch):
+    from jamasp.config import Source
+
+    src = Source(
+        name="tv", type="technicals_api", url="https://x", interval_minutes=360,
+        topic="prices", parser="tradingview_scanner_json",
+    )
+    with pytest.raises(ValueError):
+        prices.fetch_technicals(src, client=None)
+
+
 def test_store_and_query(tmp_path):
     conn = db.connect(tmp_path / "t.db")
     prices.store_price(conn, "XAUUSD", "2026-07-29T00:00:00Z", 3390.0)
