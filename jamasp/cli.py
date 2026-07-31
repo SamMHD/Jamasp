@@ -12,6 +12,7 @@ from jamasp import calendarview as calendarview_mod
 from jamasp import cluster as cluster_mod
 from jamasp import db as db_mod
 from jamasp import digest as digest_mod
+from jamasp import dispatch as dispatch_mod
 from jamasp import extract as extract_mod
 from jamasp import inbox as inbox_mod
 from jamasp import notify as notify_mod
@@ -183,6 +184,25 @@ def wakeup_list(db_path, config_dir):
         return
     for r in rows:
         click.echo(f"#{r['id']}  {r['due_at']}  {r['run_type']}  attempts={r['attempts']}  {r['task']}")
+
+
+@main.command()
+@click.option("--dry-run", is_flag=True, help="show what would fire; fire nothing")
+@db_opt
+@cfg_opt
+def dispatch(dry_run, db_path, config_dir):
+    """Fire due wakeup-queue entries as headless agent runs."""
+    conn, _, settings = _common(db_path, config_dir)
+    if dry_run:
+        for w in wakeup_mod.due(conn):  # wakeup_mod imported in Task 2
+            click.echo(f"[dry-run] would fire #{w['id']} {w['run_type']}: {w['task']}")
+        return
+    results = dispatch_mod.run_due(conn, settings)
+    if not results:
+        click.echo("no due wakeups")
+        return
+    for wid, status in results:
+        click.echo(f"wakeup #{wid}: {status}")
 
 
 @main.command()
