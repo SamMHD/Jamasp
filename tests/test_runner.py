@@ -1,4 +1,6 @@
+import os
 import sys
+import time
 from pathlib import Path
 
 from jamasp import db, runner
@@ -67,6 +69,32 @@ def test_cap_defers_and_warns(tmp_path, monkeypatch):
     assert statuses == ["ok", "deferred"]
     # deferred rows don't consume the cap themselves
     assert runner.runs_today(conn) == 1
+
+
+def test_timeout_kills_grandchild_process_group(tmp_path, monkeypatch):
+    # The fake agent spawns its own long-sleeping child and records its pid.
+    # A correct timeout kills the whole process group, so the grandchild
+    # must be gone almost immediately after run_agent returns — not lingering
+    # for the 30s it would otherwise sleep.
+    monkeypatch.setattr(runner, "_notify_safe", lambda s, t: None)
+    conn = db.connect(tmp_path / "j.db")
+    marker = tmp_path / "child_pid"
+    status = runner.run_agent(
+        conn, settings_with(["spawn_orphan", str(marker)], scan_timeout=1), "scan"
+    )
+    assert status == "timeout"
+    child_pid = int(marker.read_text().strip())
+    # Give the OS a brief moment to reap; the process must not still be alive.
+    deadline = time.monotonic() + 2
+    alive = True
+    while time.monotonic() < deadline:
+        try:
+            os.kill(child_pid, 0)
+        except ProcessLookupError:
+            alive = False
+            break
+        time.sleep(0.05)
+    assert not alive, "grandchild process survived the timeout kill"
 
 
 def test_notify_safe_swallows(monkeypatch):

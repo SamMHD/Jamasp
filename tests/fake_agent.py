@@ -5,6 +5,7 @@ For `flaky`, a state file (argv[2]) makes the first call fail, later calls succe
 The prompt is always the last argument.
 """
 import pathlib
+import subprocess
 import sys
 import time
 
@@ -24,4 +25,12 @@ if mode == "flaky":
     sys.exit(1)
 if mode == "sleep":
     time.sleep(5)
+    sys.exit(0)
+if mode == "spawn_orphan":
+    # Spawns a long-sleeping grandchild, records its pid, then sleeps itself —
+    # used to prove a timeout kills the whole process group, not just us.
+    marker = pathlib.Path(sys.argv[2])
+    child = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(30)"])
+    marker.write_text(str(child.pid))
+    time.sleep(30)
     sys.exit(0)

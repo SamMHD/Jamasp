@@ -5,6 +5,8 @@ run_agent(), so cap accounting and failure notices live in exactly one place.
 """
 from __future__ import annotations
 
+import os
+import signal
 import sqlite3
 import subprocess
 from datetime import datetime, timedelta, timezone
@@ -45,13 +47,33 @@ def _record(conn, run_type, task, started_at, exit_code, status) -> None:
 
 
 def _execute_once(cmd: list[str], timeout: int) -> tuple[int | None, str]:
-    """Run once; return (exit_code, status) where status is ok|failed|timeout."""
+    """Run once; return (exit_code, status) where status is ok|failed|timeout.
+
+    Uses Popen + a new process group so a timeout can be enforced by killing
+    the whole group (SIGKILL) rather than subprocess.run's timeout path,
+    which only kills the direct child and then blocks in communicate()
+    until grandchildren (claude's own tool subprocesses) close the pipes
+    they inherited — i.e. it can hang forever. Output was always discarded,
+    so we route both streams to DEVNULL instead of capturing.
+    """
     try:
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
-    except subprocess.TimeoutExpired:
-        return None, "timeout"
+        proc = subprocess.Popen(
+            cmd,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
     except OSError:
         return None, "failed"
+    try:
+        proc.wait(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        try:
+            os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        proc.wait()
+        return None, "timeout"
     return proc.returncode, "ok" if proc.returncode == 0 else "failed"
 
 
@@ -61,6 +83,7 @@ def run_agent(
     run_type: str,
     task: str | None = None,
     dry_run: bool = False,
+    notify_on_failure: bool = True,
 ) -> str:
     cfg = settings["runs"]
     prompt = f"/{run_type} {task}" if task else f"/{run_type}"
@@ -82,7 +105,7 @@ def run_agent(
     if status != "ok":  # one retry, immediately
         exit_code, status = _execute_once(cmd, timeout)
     _record(conn, run_type, task, started_at, exit_code, status)
-    if status != "ok":
+    if status != "ok" and notify_on_failure:
         _notify_safe(
             settings,
             f"Jamasp FAILURE: {run_type} run {status} after retry"
