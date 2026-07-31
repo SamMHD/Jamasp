@@ -20,6 +20,7 @@ from jamasp import predictions as predictions_mod
 from jamasp import pricesummary as pricesummary_mod
 from jamasp import runner as runner_mod
 from jamasp import wakeup as wakeup_mod
+from jamasp import watchdog as watchdog_mod
 from jamasp.config import load_settings, load_sources
 from jamasp.ingest import calendar as calendar_mod
 from jamasp.ingest import prices as prices_mod
@@ -212,6 +213,21 @@ def price(db_path, config_dir):
     """Print latest snapshots with 24h/7d deltas."""
     conn, _, _ = _common(db_path, config_dir)
     click.echo(pricesummary_mod.render(conn))
+
+
+@main.command()
+@click.option("--reports-dir", default="reports", show_default=True)
+@db_opt
+@cfg_opt
+def watchdog(reports_dir, db_path, config_dir):
+    """Health check: ingestion fresh, yesterday's brief exists, queue draining."""
+    conn, _, settings = _common(db_path, config_dir)
+    violations = watchdog_mod.run(conn, settings, Path(reports_dir))
+    if not violations:
+        click.echo("OK")
+    else:
+        for v in violations:
+            click.echo(f"VIOLATION: {v}")
 
 
 @main.command()
