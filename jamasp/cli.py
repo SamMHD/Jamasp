@@ -1,6 +1,7 @@
 """jamasp CLI — the agent's toolbox and the operator's ops tool."""
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -14,6 +15,7 @@ from jamasp import digest as digest_mod
 from jamasp import extract as extract_mod
 from jamasp import inbox as inbox_mod
 from jamasp import notify as notify_mod
+from jamasp import predictions as predictions_mod
 from jamasp import pricesummary as pricesummary_mod
 from jamasp import wakeup as wakeup_mod
 from jamasp.config import load_settings, load_sources
@@ -202,3 +204,67 @@ def calendar(days, all_impacts, db_path, config_dir):
     click.echo(calendarview_mod.render(
         conn, days=days, impact_min="all" if all_impacts else "default"
     ))
+
+
+pred_path_opt = click.option(
+    "--path", "pred_path", default="state/predictions.jsonl", show_default=True
+)
+
+
+@main.group("predictions")
+def predictions_group():
+    """Structured forecast ledger (add, list, due, score)."""
+
+
+@predictions_group.command("add")
+@click.argument("claim")
+@click.option("--direction", type=click.Choice(["up", "down", "flat"]), required=True)
+@click.option("--horizon-days", type=int, required=True)
+@click.option("--confidence", type=float, required=True)
+@pred_path_opt
+@db_opt
+@cfg_opt
+def predictions_add(claim, direction, horizon_days, confidence, pred_path, db_path, config_dir):
+    """Record a falsifiable claim with direction, horizon, and confidence."""
+    try:
+        e = predictions_mod.add(Path(pred_path), claim, direction, horizon_days, confidence)
+    except ValueError as exc:
+        raise click.BadParameter(str(exc))
+    click.echo(f"recorded prediction {e['id']}: {claim}")
+
+
+@predictions_group.command("list")
+@pred_path_opt
+@db_opt
+@cfg_opt
+def predictions_list(pred_path, db_path, config_dir):
+    """Print every ledger entry as JSONL."""
+    for e in predictions_mod.load(Path(pred_path)):
+        click.echo(json.dumps(e, ensure_ascii=False))
+
+
+@predictions_group.command("due")
+@pred_path_opt
+@db_opt
+@cfg_opt
+def predictions_due(pred_path, db_path, config_dir):
+    """Matured, unscored predictions annotated with the actual price move."""
+    conn, _, settings = _common(db_path, config_dir)
+    symbol = settings.get("predictions", {}).get("price_symbol", "GC")
+    click.echo(predictions_mod.render_due(conn, Path(pred_path), symbol))
+
+
+@predictions_group.command("score")
+@click.argument("pred_id")
+@click.option("--outcome", type=click.Choice(["hit", "miss", "unclear"]), required=True)
+@click.option("--note", default=None)
+@pred_path_opt
+@db_opt
+@cfg_opt
+def predictions_score(pred_id, outcome, note, pred_path, db_path, config_dir):
+    """Mark a matured prediction hit/miss/unclear (with a why note)."""
+    try:
+        e = predictions_mod.score(Path(pred_path), pred_id, outcome, note=note)
+    except (KeyError, ValueError) as exc:
+        raise click.ClickException(str(exc))
+    click.echo(f"scored {e['id']} {outcome}: {e['claim']}")

@@ -10,3 +10,5 @@ cluster:
 telegram:
   bot_token_env: JAMASP_TG_TOKEN
   chat_id_env: JAMASP_TG_CHAT
+predictions:
+  price_symbol: GC
