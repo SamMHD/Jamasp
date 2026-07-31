@@ -72,3 +72,14 @@ def test_cap_defers_and_warns(tmp_path, monkeypatch):
 def test_notify_safe_swallows(monkeypatch):
     # no telegram env vars set -> notify.notify raises; _notify_safe must not
     runner._notify_safe({"telegram": {"bot_token_env": "X_NOPE", "chat_id_env": "Y_NOPE"}}, "t")
+
+
+def test_dry_run_executes_and_records_nothing(tmp_path, monkeypatch):
+    calls = []
+    monkeypatch.setattr(runner.subprocess, "run", lambda *a, **k: calls.append((a, k)))
+    conn = db.connect(tmp_path / "j.db")
+    status = runner.run_agent(conn, settings_with(["ok"]), "scan", dry_run=True)
+    assert status == "ok"
+    assert calls == []  # no subprocess was launched
+    rows = conn.execute("SELECT * FROM agent_runs").fetchall()
+    assert rows == []
