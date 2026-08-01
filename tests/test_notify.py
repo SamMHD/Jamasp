@@ -33,3 +33,14 @@ def test_notify_missing_env_raises(monkeypatch):
     monkeypatch.delenv("JAMASP_TG_TOKEN", raising=False)
     with pytest.raises(RuntimeError, match="JAMASP_TG_TOKEN"):
         notify.notify("hello", SETTINGS)
+
+
+def test_log_sent_records_row(tmp_path):
+    from jamasp import db as db_mod
+    from jamasp import notify as notify_mod
+
+    conn = db_mod.connect(tmp_path / "t.db")
+    notify_mod.log_sent(conn, "سلام desk", ok=True)
+    notify_mod.log_sent(conn, "failed one", ok=False)
+    rows = conn.execute("SELECT text, ok FROM notify_log ORDER BY id").fetchall()
+    assert [(r["text"], r["ok"]) for r in rows] == [("سلام desk", 1), ("failed one", 0)]

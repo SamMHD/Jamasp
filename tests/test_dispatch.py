@@ -30,7 +30,7 @@ def test_failure_retries_next_tick_then_fails(tmp_path, monkeypatch):
     sent = []
     monkeypatch.setattr(dispatch.runner, "run_agent",
                         lambda c, s, rt, task=None, dry_run=False, notify_on_failure=True: "failed")
-    monkeypatch.setattr(dispatch.runner, "_notify_safe", lambda s, t: sent.append(t))
+    monkeypatch.setattr(dispatch.runner, "_notify_safe", lambda c, s, t: sent.append(t))
     # tick 1: attempt 1 -> stays pending
     assert dispatch.run_due(conn, SETTINGS, now="2026-08-01T07:00:00Z") == [(wid, "failed")]
     row = conn.execute("SELECT * FROM wakeups WHERE id=?", (wid,)).fetchone()
@@ -57,7 +57,7 @@ def test_dispatch_suppresses_runner_own_failure_notice(tmp_path, monkeypatch):
         lambda c, s, rt, task=None, dry_run=False, notify_on_failure=True:
             kwargs_seen.append(notify_on_failure) or "failed",
     )
-    monkeypatch.setattr(dispatch.runner, "_notify_safe", lambda s, t: None)
+    monkeypatch.setattr(dispatch.runner, "_notify_safe", lambda c, s, t: None)
     dispatch.run_due(conn, SETTINGS, now="2026-08-01T07:00:00Z")
     assert kwargs_seen == [False]
 
@@ -96,7 +96,7 @@ def test_cap_reached_precheck_skips_without_touching_wakeups(tmp_path, monkeypat
     wid = wakeup.add(conn, "2000-01-01T00:00:00Z", "deepdive", "t")
     called = []
     monkeypatch.setattr(dispatch.runner, "run_agent", lambda *a, **k: called.append(1) or "ok")
-    monkeypatch.setattr(dispatch.runner, "_notify_safe", lambda s, t: None)
+    monkeypatch.setattr(dispatch.runner, "_notify_safe", lambda c, s, t: None)
     results = dispatch.run_due(conn, _settings(cap=1))
     assert results == []
     assert called == []  # run_agent never invoked
@@ -111,7 +111,7 @@ def test_cap_warning_throttled_across_ticks_then_rewarns_next_day(tmp_path, monk
     _seed_agent_run(conn, day2)
     settings = _settings(cap=1)
     sent, called = [], []
-    monkeypatch.setattr(dispatch.runner, "_notify_safe", lambda s, t: sent.append(t))
+    monkeypatch.setattr(dispatch.runner, "_notify_safe", lambda c, s, t: sent.append(t))
     monkeypatch.setattr(dispatch.runner, "run_agent", lambda *a, **k: called.append(1) or "ok")
 
     monkeypatch.setattr(dispatch.runner, "utcnow", lambda: day1)

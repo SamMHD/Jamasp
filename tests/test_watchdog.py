@@ -51,6 +51,6 @@ def test_run_sends_single_telegram_on_violation(tmp_path, monkeypatch):
     conn, reports = healthy(tmp_path)
     db.set_meta(conn, "last_ingest_at", "2026-08-01T04:00:00Z")
     sent = []
-    monkeypatch.setattr(watchdog.runner, "_notify_safe", lambda s, t: sent.append(t))
+    monkeypatch.setattr(watchdog.runner, "_notify_safe", lambda c, s, t: sent.append(t))
     v = watchdog.run(conn, {}, reports, now=NOW)
     assert v and len(sent) == 1 and "Jamasp watchdog" in sent[0]

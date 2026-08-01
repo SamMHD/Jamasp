@@ -143,10 +143,18 @@ def extract(url, db_path, config_dir):
 @cfg_opt
 def notify(text, dry_run, db_path, config_dir):
     """Send TEXT (or '-' for stdin) to the Telegram chat."""
-    _, _, settings = _common(db_path, config_dir)
+    conn, _, settings = _common(db_path, config_dir)
     if text == "-":
         text = sys.stdin.read()
-    click.echo(notify_mod.notify(text, settings, dry_run=dry_run))
+    try:
+        msg = notify_mod.notify(text, settings, dry_run=dry_run)
+    except Exception:
+        if not dry_run:
+            notify_mod.log_sent(conn, text, ok=False)
+        raise
+    if not dry_run:
+        notify_mod.log_sent(conn, text, ok=True)
+    click.echo(msg)
 
 
 @main.group()
@@ -213,6 +221,25 @@ def wakeup_list(db_path, config_dir):
         return
     for r in rows:
         click.echo(f"#{r['id']}  {r['due_at']}  {r['run_type']}  attempts={r['attempts']}  {r['task']}")
+
+
+@wakeup_group.command("cancel")
+@click.argument("wakeup_id", type=int)
+@db_opt
+@cfg_opt
+def wakeup_cancel(wakeup_id, db_path, config_dir):
+    """Cancel a wakeup that has not yet fired.
+
+    Only affects wakeups still in 'pending' status. Cannot stop a run
+    already in progress — once the dispatcher picks a wakeup up, cancelling
+    it here has no effect on that run.
+    """
+    conn, _, _ = _common(db_path, config_dir)
+    try:
+        wakeup_mod.cancel(conn, wakeup_id)
+    except ValueError as exc:
+        raise click.ClickException(str(exc))
+    click.echo(f"cancelled wakeup #{wakeup_id}")
 
 
 @main.command()

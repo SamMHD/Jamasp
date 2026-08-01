@@ -17,11 +17,16 @@ from jamasp.db import utcnow
 DUBAI = timezone(timedelta(hours=4))
 
 
-def _notify_safe(settings: dict, text: str) -> None:
+def _notify_safe(conn: sqlite3.Connection, settings: dict, text: str) -> None:
     try:
         notify_mod.notify(text, settings)
+        ok = True
     except Exception:
-        pass  # infra never dies on a Telegram hiccup
+        ok = False  # infra never dies on a Telegram hiccup
+    try:
+        notify_mod.log_sent(conn, text, ok)
+    except Exception:
+        pass
 
 
 def runs_today(conn: sqlite3.Connection, now: str | None = None) -> int:
@@ -95,6 +100,7 @@ def run_agent(
     if runs_today(conn) >= cap:
         _record(conn, run_type, task, started_at, None, "deferred")
         _notify_safe(
+            conn,
             settings,
             f"Jamasp: daily run cap ({cap}) reached — deferred {run_type} run."
             + (f" Task: {task}" if task else ""),
@@ -107,6 +113,7 @@ def run_agent(
     _record(conn, run_type, task, started_at, exit_code, status)
     if status != "ok" and notify_on_failure:
         _notify_safe(
+            conn,
             settings,
             f"Jamasp FAILURE: {run_type} run {status} after retry"
             + (f" (task: {task})" if task else "")

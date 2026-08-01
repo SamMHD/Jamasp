@@ -60,3 +60,25 @@ def mark(conn: sqlite3.Connection, wakeup_id: int, status: str) -> None:
         (status, utcnow(), wakeup_id),
     )
     conn.commit()
+
+
+def cancel(conn: sqlite3.Connection, wakeup_id: int) -> None:
+    # Single atomic UPDATE, not read-then-write: a read-then-write gap here
+    # is exactly the race that lets an operator's cancel silently land on a
+    # wakeup the dispatcher has already picked up (see dispatch.py's
+    # record_attempt/mark, which never touch status until the run finishes).
+    # If the guarded UPDATE affects no row, we read afterwards purely to
+    # produce a more specific error message — that read has no bearing on
+    # correctness.
+    cur = conn.execute(
+        "UPDATE wakeups SET status = 'cancelled' WHERE id = ? AND status = 'pending'",
+        (wakeup_id,),
+    )
+    conn.commit()
+    if cur.rowcount == 0:
+        row = conn.execute(
+            "SELECT status FROM wakeups WHERE id = ?", (wakeup_id,)
+        ).fetchone()
+        if row is None:
+            raise ValueError(f"no wakeup #{wakeup_id}")
+        raise ValueError(f"wakeup #{wakeup_id} is {row['status']}, not pending")
