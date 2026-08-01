@@ -1,0 +1,4 @@
+{"id":"aaaa0001","date":"2026-08-01","claim":"GC above 3350 within 5 days","direction":"up","horizon_days":5,"confidence":0.6,"created_at":"2026-08-01T05:00:00Z","outcome":null,"scored_at":null,"note":null}
+{"id":"aaaa0002","date":"2026-07-20","claim":"GC flat through July","direction":"flat","horizon_days":5,"confidence":0.5,"created_at":"2026-07-20T05:00:00Z","outcome":null,"scored_at":null,"note":null}
+{"id":"aaaa0003","date":"2026-07-10","claim":"DXY down on CPI","direction":"down","horizon_days":3,"confidence":0.7,"created_at":"2026-07-10T05:00:00Z","outcome":"hit","scored_at":"2026-07-14T05:00:00Z","note":"clean"}
+{"id":"aaaa0004","date":"2026-07-05","claim":"GC up on FOMC","direction":"up","horizon_days":2,"confidence":0.8,"created_at":"2026-07-05T05:00:00Z","outcome":"miss","scored_at":"2026-07-08T05:00:00Z","note":"wrong"}
