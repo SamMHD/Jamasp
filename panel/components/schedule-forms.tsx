@@ -86,6 +86,7 @@ export function CancelButton({ id }: { id: number }) {
   const { pending, act } = useAct();
   return (
     <Button size="sm" variant="ghost" disabled={pending}
+      title="Only works before the wakeup fires — cannot stop a run already in progress"
       onClick={() => act(() => cancelWakeup(id))}>cancel</Button>
   );
 }

@@ -80,3 +80,30 @@ def test_cancel_missing_or_fired_raises(tmp_path):
     wakeup.mark(conn, wid, "done")
     with pytest.raises(ValueError):
         wakeup.cancel(conn, wid)
+
+
+def test_cancel_is_atomic_against_a_run_in_progress(tmp_path):
+    """Guard against the exact race FIX 1 closes: a wakeup that has been
+    picked up by the dispatcher (attempts bumped, status still 'pending'
+    for the run's whole duration) and then moved out of 'pending' by the
+    time cancel's guarded UPDATE runs must not be cancellable, and the
+    UPDATE itself must be the single point of truth — not a prior read."""
+    from jamasp import db as db_mod, wakeup
+
+    conn = db_mod.connect(tmp_path / "t.db")
+    wid = wakeup.add(conn, "2030-01-01T00:00:00Z", "scan", "t")
+
+    # Simulate the dispatcher: attempts bumped mid-run, status untouched.
+    wakeup.record_attempt(conn, wid)
+    row = conn.execute("SELECT status FROM wakeups WHERE id = ?", (wid,)).fetchone()
+    assert row["status"] == "pending"  # still looks cancellable to a naive read
+
+    # Simulate the run finishing (dispatch.py's wakeup.mark) just before the
+    # cancel's UPDATE would fire — the row has moved on by the time the
+    # atomic guard evaluates it.
+    wakeup.mark(conn, wid, "done")
+
+    with pytest.raises(ValueError, match="done"):
+        wakeup.cancel(conn, wid)
+    row = conn.execute("SELECT status FROM wakeups WHERE id = ?", (wid,)).fetchone()
+    assert row["status"] == "done"  # cancel must not have clobbered it

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { PageHeader } from "@/components/page-header";
 import { StatCard } from "@/components/stat-card";
-import { Badge } from "@/components/ui/badge";
+import { RunBadge } from "@/components/run-badge";
 import * as db from "@/lib/db";
 import * as files from "@/lib/files";
 import { deriveSourceHealth, deriveWarnings } from "@/lib/health";
@@ -31,8 +31,9 @@ export default function Overview() {
   const wakeups = db.getWakeups("pending").slice(0, 3);
   const events = db.getEvents(14, now).slice(0, 3);
   const lastAlert = db.getNotifyLog(1)[0];
+  const lastRuns = db.lastRunPerType();
   const lastByType = ["brief", "scan", "deepdive", "retro"].map(t =>
-    [t, recentRuns.find(r => r.run_type === t)] as const);
+    [t, lastRuns.find(r => r.run_type === t)] as const);
 
   return (
     <div>
@@ -72,7 +73,7 @@ export default function Overview() {
             {lastByType.map(([t, r]) => (
               <li key={t} className="flex justify-between">
                 <span>{t}</span>
-                {r ? <span><Badge variant={r.status === "ok" ? "secondary" : "destructive"}>{r.status}</Badge>
+                {r ? <span><RunBadge status={r.status} />
                   <span className="ml-2 text-muted-foreground">{fmtAge(r.started_at, now)}</span></span>
                   : <span className="text-muted-foreground">never</span>}
               </li>

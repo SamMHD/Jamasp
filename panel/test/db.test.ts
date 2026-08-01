@@ -40,4 +40,23 @@ describe("db layer", () => {
     expect(db.getPriceSeries("GC", "2026-07-30T00:00:00Z").map(p => p.value))
       .toEqual([3310.5, 3325.0]);
   });
+  it("lastRunPerType finds the newest run for a type even outside a small window", () => {
+    // Fixture has one 'retro' run dated 2026-07-20, well older than the
+    // three 2026-08-01 runs of other types. A limit of 3 (via getAgentRuns)
+    // only reaches back to those three same-day runs, so a naive
+    // `.find()` over that window never sees the retro row at all.
+    const windowed = db.getAgentRuns(3);
+    expect(windowed.find(r => r.run_type === "retro")).toBeUndefined();
+
+    const perType = db.lastRunPerType();
+    const retro = perType.find(r => r.run_type === "retro");
+    expect(retro?.started_at).toBe("2026-07-20T05:00:00Z");
+    // Still one row per type for the types that *are* in the recent window.
+    expect(perType.find(r => r.run_type === "brief")?.started_at)
+      .toBe("2026-08-01T05:00:00Z");
+    expect(perType.find(r => r.run_type === "scan")?.started_at)
+      .toBe("2026-08-01T07:00:00Z");
+    expect(perType.map(r => r.run_type).sort())
+      .toEqual(["brief", "deepdive", "retro", "scan"]);
+  });
 });

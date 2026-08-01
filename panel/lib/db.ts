@@ -86,6 +86,25 @@ export function getAgentRuns(limit: number): AgentRunRow[] {
     "SELECT * FROM agent_runs ORDER BY started_at DESC LIMIT ?").all(limit) as AgentRunRow[]);
 }
 
+/**
+ * Most recent run per `run_type`, regardless of how far back it falls —
+ * unlike `getAgentRuns(N)`, which is a fixed-size window that can silently
+ * drop infrequent run types (retro runs weekly; at ~13 runs/day, 50 rows
+ * is under four days, so a plain `.find()` over that window would wrongly
+ * report retro as "never run" for roughly half of every week).
+ */
+export function lastRunPerType(): AgentRunRow[] {
+  return q(db => db.prepare(
+    `SELECT a.* FROM agent_runs a
+     WHERE a.id = (
+       SELECT b.id FROM agent_runs b
+       WHERE b.run_type = a.run_type
+       ORDER BY b.started_at DESC, b.id DESC
+       LIMIT 1
+     )`
+  ).all() as AgentRunRow[]);
+}
+
 export function runsTodayDubai(now: Date = new Date()): number {
   const dubaiDay = new Date(now.getTime() + 4 * 3600_000).toISOString().slice(0, 10);
   return q(db => (db.prepare("SELECT started_at FROM agent_runs WHERE status != 'deferred'")

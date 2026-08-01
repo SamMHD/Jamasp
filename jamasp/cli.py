@@ -221,7 +221,12 @@ def wakeup_list(db_path, config_dir):
 @db_opt
 @cfg_opt
 def wakeup_cancel(wakeup_id, db_path, config_dir):
-    """Cancel a pending wakeup by id."""
+    """Cancel a wakeup that has not yet fired.
+
+    Only affects wakeups still in 'pending' status. Cannot stop a run
+    already in progress — once the dispatcher picks a wakeup up, cancelling
+    it here has no effect on that run.
+    """
     conn, _, _ = _common(db_path, config_dir)
     try:
         wakeup_mod.cancel(conn, wakeup_id)

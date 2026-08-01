@@ -83,6 +83,7 @@ INSERT INTO events VALUES
  ('e1','ff_calendar','US Nonfarm Payrolls','US','High','2026-08-07T12:30:00Z','2026-08-01T00:00:00Z'),
  ('e2','ff_calendar','FOMC Minutes','US','Medium','2026-08-19T18:00:00Z','2026-08-01T00:00:00Z');
 INSERT INTO agent_runs (run_type,task,started_at,finished_at,exit_code,status) VALUES
+ ('retro',NULL,'2026-07-20T05:00:00Z','2026-07-20T05:20:00Z',0,'ok'),
  ('brief',NULL,'2026-08-01T05:00:00Z','2026-08-01T05:09:00Z',0,'ok'),
  ('scan',NULL,'2026-08-01T07:00:00Z','2026-08-01T07:02:00Z',1,'failed'),
  ('deepdive',NULL,'2026-08-01T06:00:00Z',NULL,NULL,'deferred');

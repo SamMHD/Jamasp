@@ -207,13 +207,26 @@ oneshot timer units).
 
 1. Install Node >= 20 (NodeSource apt repo or the distro package).
 2. Build: `cd ~/Jamasp/panel && npm ci && npm run build`.
-3. Install/enable the unit the same way as the timers (the
+3. Apply the DB schema before first boot: `cd ~/Jamasp && uv run jamasp wakeup list`.
+   This is required, not redundant — `notify_log` (and other panel-read
+   tables) are created by the shared `_common` DB-open helper the first time
+   *any* `jamasp` CLI command runs; on a host that predates the panel, no
+   such command has run yet, so without this step `/` and `/alerts` serve
+   errors until the next scheduled ingest tick happens to create the table.
+   `wakeup list` is read-only, so it's safe to run against a live DB.
+4. Install/enable the unit the same way as the timers (the
    `ops/systemd/jamasp-*` glob already includes it), then:
-   `systemctl --user enable --now jamasp-panel.service` (or the system
-   variant with `User=jamasp`).
-4. Verify: `curl -s http://127.0.0.1:3300/ | grep -q Overview && echo OK`.
-5. Access from a workstation: `ssh -L 3300:127.0.0.1:3300 jamasp@<host>`
+   `systemctl --user enable --now jamasp-panel.service` for user units, or
+   for the system variant (`User=jamasp`), drop `--user`:
+   `systemctl enable --now jamasp-panel.service`.
+5. Verify: `curl -s http://127.0.0.1:3300/ | grep -q "Last ingest" && echo OK`.
+   Grepping for "Overview" is not a real check — that's the sidebar nav
+   link, present even when the page body has failed; "Last ingest" only
+   appears once the Overview's stat cards actually render.
+6. Access from a workstation: `ssh -L 3300:127.0.0.1:3300 jamasp@<host>`
    or `tailscale serve 3300`. The panel has NO auth of its own — never
    bind it to a public interface.
-6. Rebuild after every `git pull` that touches `panel/`:
-   `npm ci && npm run build && systemctl --user restart jamasp-panel`.
+7. Rebuild after every `git pull` that touches `panel/`:
+   `npm ci && npm run build && systemctl --user restart jamasp-panel`
+   for user units, or (drop `--user` for system units)
+   `systemctl restart jamasp-panel` for the system variant.
