@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# generated test fixture db (fixture.sql is the source of truth)
+/test/fixtures/root/
