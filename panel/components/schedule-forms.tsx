@@ -12,11 +12,13 @@ import { RUN_TYPES } from "@/lib/validate";
 function useAct() {
   const router = useRouter();
   const [pending, start] = useTransition();
-  const act = (fn: () => Promise<ActionResult>) => start(async () => {
-    const r = await fn();
-    if (r.ok) toast.success(r.message); else toast.error(r.message);
-    router.refresh();
-  });
+  const act = (fn: () => Promise<ActionResult>, onDone?: (r: ActionResult) => void) =>
+    start(async () => {
+      const r = await fn();
+      if (r.ok) toast.success(r.message); else toast.error(r.message);
+      router.refresh();
+      onDone?.(r);
+    });
   return { pending, act };
 }
 
@@ -32,7 +34,8 @@ export function RunNowButtons({ capped }: { capped: boolean }) {
           Run {t} now
         </Button>
       ))}
-      <Input className="w-64" placeholder="optional task text (deepdive needs one)"
+      <Input className="w-64"
+        placeholder="optional task text — blank defaults to a generic note, for any run type"
         value={task} onChange={e => setTask(e.target.value)} />
       {capped && <span className="text-xs text-amber-400">cap reached — runs disabled</span>}
     </div>
@@ -64,13 +67,14 @@ export function AddWakeupDialog() {
             </select>
           </div>
           <div>
-            <Label htmlFor="task">Task</Label>
+            <Label htmlFor="task">Task (required)</Label>
             <Input id="task" value={task} onChange={e => setTask(e.target.value)}
               placeholder="e.g. read the Fed statement and assess gold impact" />
           </div>
           <Button disabled={pending || !due} onClick={() => {
-            act(() => addWakeup(new Date(due).toISOString(), type, task));
-            setOpen(false);
+            act(() => addWakeup(new Date(due).toISOString(), type, task), r => {
+              if (r.ok) setOpen(false);
+            });
           }}>Schedule</Button>
         </div>
       </DialogContent>

@@ -15,6 +15,20 @@ function runDuration(started: string, finished: string | null): string {
   return `${Math.round((new Date(finished).getTime() - new Date(started).getTime()) / 1000)}s`;
 }
 
+/**
+ * `ok` is a plain success; `deferred` means the daily cap was already reached
+ * so the run was skipped — benign, not a failure, and deliberately excluded
+ * from the cap count by `runsTodayDubai`. Only real failures (`failed`,
+ * `timeout`, ...) get the destructive treatment.
+ */
+function runBadge(status: string): { variant: "secondary" | "destructive" | "outline"; className?: string } {
+  if (status === "ok") return { variant: "secondary" };
+  if (status === "deferred") {
+    return { variant: "outline", className: "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400" };
+  }
+  return { variant: "destructive" };
+}
+
 export default function SchedulePage() {
   const now = new Date();
   const pending = db.getWakeups("pending");
@@ -60,19 +74,24 @@ export default function SchedulePage() {
           <TableHead>Duration</TableHead><TableHead>Exit</TableHead><TableHead>Task</TableHead></TableRow>
         </TableHeader>
         <TableBody>
-          {runs.map(r => (
-            <TableRow key={r.id}>
-              <TableCell>{fmtUtc(r.started_at)}</TableCell><TableCell>{r.run_type}</TableCell>
-              <TableCell><Badge variant={r.status === "ok" ? "secondary" : "destructive"}>{r.status}</Badge></TableCell>
-              <TableCell>{runDuration(r.started_at, r.finished_at)}</TableCell>
-              <TableCell>{r.exit_code ?? "—"}</TableCell>
-              <TableCell className="max-w-md truncate">{r.task ?? ""}</TableCell>
-            </TableRow>
-          ))}
+          {runs.length === 0 && <TableRow><TableCell colSpan={6} className="text-muted-foreground">none</TableCell></TableRow>}
+          {runs.map(r => {
+            const badge = runBadge(r.status);
+            return (
+              <TableRow key={r.id}>
+                <TableCell>{fmtUtc(r.started_at)}</TableCell><TableCell>{r.run_type}</TableCell>
+                <TableCell><Badge variant={badge.variant} className={badge.className}>{r.status}</Badge></TableCell>
+                <TableCell>{runDuration(r.started_at, r.finished_at)}</TableCell>
+                <TableCell>{r.exit_code ?? "—"}</TableCell>
+                <TableCell className="max-w-md truncate">{r.task ?? ""}</TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
       <h2 className="mb-2 mt-8 font-medium">Wakeup history</h2>
       <ul className="space-y-1 text-sm text-muted-foreground">
+        {history.length === 0 && <li>none</li>}
         {history.map(w => (
           <li key={w.id}>#{w.id} {w.run_type} · {w.status} · due {fmtUtc(w.due_at)} · {w.task}</li>
         ))}
