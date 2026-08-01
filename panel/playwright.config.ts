@@ -1,15 +1,18 @@
+import { existsSync } from "node:fs";
 import { defineConfig } from "@playwright/test";
+
+// The provisioned browser at /opt/pw-browsers doesn't match the revision
+// this @playwright/test version expects — launch it via its known path
+// where it exists; elsewhere fall back to the default lookup.
+const provisioned = "/opt/pw-browsers/chromium";
 
 export default defineConfig({
   testDir: "./e2e",
   use: {
     baseURL: "http://127.0.0.1:3311",
-    launchOptions: {
-      // The provisioned browser at /opt/pw-browsers doesn't match the
-      // revision this @playwright/test version expects. Launching it
-      // download-free via its known path instead of the default lookup.
-      executablePath: "/opt/pw-browsers/chromium",
-    },
+    launchOptions: existsSync(provisioned)
+      ? { executablePath: provisioned }
+      : {},
   },
   webServer: {
     command: "npm run fixture && npm run dev -- -p 3311",
