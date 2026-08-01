@@ -54,8 +54,8 @@ export default function AlertsPage() {
         <TabsContent value="warnings">
           <ul className="mt-4 space-y-2">
             {warnings.length === 0 && <li className="text-sm text-emerald-400">all clear</li>}
-            {warnings.map(w => (
-              <li key={`${w.severity}-${w.text}`} className={w.severity === "red"
+            {warnings.map((w, i) => (
+              <li key={`${i}-${w.severity}`} className={w.severity === "red"
                 ? "rounded border border-destructive bg-destructive/10 px-3 py-2 text-sm text-destructive"
                 : "rounded border border-amber-900 bg-amber-950/50 px-3 py-2 text-sm text-amber-300"}>
                 {w.text}
