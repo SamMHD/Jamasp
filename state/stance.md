@@ -1,73 +1,79 @@
-# Stance — 2026-07-31 (updated, evening)
+# Stance — 2026-08-01 (Saturday, post-close)
 
-**Neutral, range-bound, modest downward tilt.** Gold $4,105.7 (GC=F); range
-$4,000–$4,180 expected to hold. Tilt walked back from this afternoon's steeper
-version — see "revisions today".
+**Neutral on the range, bimodal on the weekend.** GC=F 4098.6, LBMA PM fix
+4026.6. Range $4,000–$4,180 still expected to hold *absent strikes on Iran*.
+Direction for Monday is event-dependent, not merely uncertain.
 
 ## The central tension
 
-Gold holds above $4,000 with the 10y real yield at **2.41%**. Rate math is
-bearish; something else is paying the difference. Both sides of that gap got
-stronger today; neither resolved.
+Gold holds $4,000+ with the 10y real yield at 2.41% and nominal 10y at 4.745%.
+Rate math is bearish and is currently winning. The offsetting bid did not show
+up on Friday even when handed a reason.
 
 **Bearish side**
-- **Q2 GDP 1.5% is a low-quality miss.** Federal spending and inventories took
-  it down; **final sales to private domestic purchasers +3.9%**, spending +2.1%.
-  Private demand is strong. The dissenters therefore have **no growth alibi
-  against them** — this is the firmest bearish argument on the book.
-  **Conviction: high.**
-- FOMC held 3.50–3.75% on a 9–3 vote, all three dissents hawkish (Hammack,
-  Kashkari, Logan), and all three went public within 48 hours. Underpriced.
-- Real yields restrictive at 2.41%; Treasury yields rose sharply on the GDP/PCE
-  release.
-- China's July PMI contracted — disinflationary impulse, headwind to Chinese
-  retail demand. Mildly bearish, low conviction.
+- **Logan wanted a HIKE, not a hold** ("would have preferred a quarter-point
+  rate increase"; "monetary policy is not restraining the economy"). Kashkari
+  and Hammack same day; Barkin calls the next decision a "close call."
+  My underpriced-dissent call **paid out Friday** — 10y 4.745%, gold −1.5%.
+  Do not double-count it; the edge is now thinner. **Conviction: high, realized.**
+- Q2 GDP's low quality still stands: final sales to private domestic purchasers
+  +3.9%. The dissenters have no growth alibi against them.
+- UMich final July 55.2 vs 54.0 est, 1y inflation expectations eased. But it is
+  a July survey — same borrowed-from-the-ceasefire flattery as June core PCE.
+- Wall Street trisected on gold, Main Street bulls in the minority (KITCO).
 
 **Bullish side**
-- **Chair Warsh's inflation-fighting credibility is doubted.** Debasement
-  channel. Still the load-bearing support under the price.
-- **Gold absorbed the largest momentum crash on record without being sold.**
-  MS Momentum Index −17.4% in four days (worst ever); Situational Awareness
-  forcibly liquidated from ~$45bn; gold rose through it. Forced deleveraging
-  normally drags gold down as collateral. It didn't. **The marginal holder of
-  gold is not the leveraged crowd.** New evidence, medium conviction.
-- **June inflation was borrowed from a ceasefire that has reversed.** Energy
-  −5.9%, gasoline −9.2% in June, explicitly attributed to the temporary Middle
-  East easing. Crude +~20% on the month and Iran is now stopping ships in
-  Hormuz. **June core PCE 3.3% is the best print the Fed will see for a while.**
-- Central-bank demand is a **floor, not a bid** — arrests drawdowns, does not
-  drive rallies.
-- Physical/provenance premium rising (India duty → grey market; LBMA sourcing
-  challenge; Saudi outperforming) — structurally good for a documented Dubai
-  desk.
+- **US/Israel strikes on Iranian energy infrastructure possibly this weekend**
+  (WSJ, CBS, Axios converge; targets = refineries and power plants; Israel
+  joining for the first time since February). Iran threatens Israeli
+  installations **and US energy assets across the Middle East.** Unpriced.
+- Warsh's inflation-fighting credibility still doubted — debasement channel
+  remains the load-bearing support under $4,000.
+- June inflation was borrowed from a ceasefire that has reversed; crude +~20%
+  on the month. July/August prints should be worse.
+- **Positioning is not stretched** — CFTC net spec 174,131 (28 Jul), slightly
+  lower. Caps liquidation downside, leaves room for a geopolitical bid to run.
+- Central-bank demand is a floor, not a bid.
+- New non-CB structural buyers: Tether +14t in Q2.
+- Physical/provenance premium rising — structurally good for a documented Dubai
+  desk. Counter-move logged: India's NSE launched Electronic Gold Receipts.
+
+## The tell (two days running)
+
+Thursday gold absorbed the largest momentum crash on record without being sold.
+Friday it absorbed a credible imminent-strike report without being bought — six
+hours of 4095–4110 chop through the WSJ/CBS headlines. **The marginal
+price-setter is the rates desk, not the geopolitics desk.** Bearish near-term;
+it is also exactly what makes the weekend asymmetric, since nothing has to be
+unwound if the strikes don't come.
 
 ## Conviction
 
-Medium-low on direction; medium-high on the range holding. High on the hawkish
-dissent being underpriced *and* on the energy-passthrough risk to the next two
-inflation prints.
+Medium-high the range holds absent strikes. Deliberately low on Monday
+direction. High that the war risk is not in Friday's close.
 
 ## What flips me
 
-- **Constructive:** DFII10 through 2.5% with gold still bid. Or July/August core
-  PCE reaccelerating on energy with no Fed response — now materially more likely.
-- **Bearish:** **$4,000 lost on hawkish repricing alone.** (The old
-  "on de-escalation" qualifier is void — there is no de-escalation left to test.)
+- **Bearish:** $4,000 lost on payrolls (7 Aug) or more hike talk, with no war
+  bid → the debasement premium is thinner than assumed and the floor is fiction.
+- **Bullish:** strikes land *and* gold holds the gain 48h later. A spike that
+  retraces is noise; a held gap means the marginal holder changed.
 
-## Revisions logged today
+## Corrections logged today
 
-1. Morning read falling oil as the Middle East premium deflating. Wrong: it was
-   deflating in gold, not energy.
-2. Afternoon steepened the tilt on "de-escalating in the lanes, inflating in the
-   barrel." Iran stopping ships removed the first half; tilt walked back to
-   modest. The second half stands.
-3. **Both earlier runs listed Q2 GDP / core PCE as *upcoming*. They printed
-   30 July.** Cause: headline-only sourcing let the data read as commentary.
-   Do not classify a CNBC macro item without extracting it.
+1. **Yesterday's "Iran is now stopping ships in Hormuz" was backwards.** CENTCOM
+   31 Jul: **the US** has blockaded Iranian ports since 14 July — 30 vessels
+   rerouted, 2 disabled, 2 boarded, ~30 humanitarian passed. Iran *claims*
+   Hormuz is closed; CENTCOM calls that false. Strait functionally open, but
+   harassed (tanker hit 11nm NE of Limah, Oman). Trims the bullish carry.
+2. **The war started 28 February** — Friday was day 152. Prior runs treated the
+   escalation as new. Cause: same headline-only sourcing failure as 31 Jul.
 
 ## Sourcing health
 
-**Improved.** `extract` now returns clean text from CNBC — first non-.gov
-primary sourcing. Still blocked: Investing.com 403, MarketWatch 401, Google News
-consent wall; `mining.com` now 403s on ingest. `digest` erroring; DTWEXBGS 7d
-stale, DFII10 2d stale; price deltas n/a.
+`gulfnews.com` and `investinglive.com` extract cleanly and carried today's two
+load-bearing items. Blocked: Investing.com 403, MarketWatch 401, Google News
+consent wall, mining.com 403. Erroring with no new items in 24h: `digest`,
+`dollar_index`, `real_yield_10y`. DFII10 2d stale, DTWEXBGS 7d stale.
+**`jamasp calendar` returns 0 events for the next 14 days** while the market
+trades around payrolls — the event feed is broken, not empty.

@@ -1,10 +1,27 @@
 # Agent-curated event notes: things Jamasp decided to care about, with why.
 # The raw feed lives in the events table (`jamasp calendar`); this file is
 # judgment — which events matter for gold and what to do when they hit.
-events: []
-# example entry:
-# - date: 2026-08-12
-#   time_dubai: "16:30"
-#   title: US CPI (Jul)
-#   why: dominant real-yield driver; stance §rates hinges on it
-#   action: wakeup scheduled for 16:45 same day (deepdive: compare print to consensus)
+#
+# NOTE 2026-08-01: `jamasp calendar` returns 0 events for the next 14 days while
+# the market is openly trading around US payrolls. The event feed is broken, not
+# empty. Entries below are hand-built until it is repaired.
+events:
+  - date: 2026-08-02
+    time_dubai: "n/a (weekend, markets closed)"
+    title: Iran strike window (US/Israel, energy infrastructure)
+    why: >
+      WSJ/CBS/Axios converge on Trump having ordered preparations to strike
+      Iranian refineries and power plants as soon as this weekend, Israel
+      joining for the first time since February. Iran threatens Israeli
+      installations and US energy assets across the Gulf in reply. Entirely
+      unpriced in Friday's close; no market open to price it.
+    action: wakeup scheduled 2026-08-03 04:00 Dubai (Asia open gap check)
+
+  - date: 2026-08-07
+    time_dubai: "16:30"
+    title: US Non-Farm Payrolls (Jul)
+    why: >
+      Next real rates catalyst and the one the market has explicitly named
+      (KITCO: "market looks to July payrolls for direction"). Stance hinges on
+      whether $4,000 survives further hawkish repricing without a war bid.
+    action: wakeup scheduled 2026-08-07 16:45 Dubai (deepdive on the print)

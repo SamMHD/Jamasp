@@ -1,41 +1,68 @@
 watchlist:
   - theme: fed-rate-path
-    why: dominant driver of real yields and hence gold
+    why: >
+      dominant driver of real yields and hence gold. Logan wants a HIKE
+      (explicit, 31 Jul); Kashkari/Hammack dissent same direction; Barkin calls
+      the next decision a "close call." Payrolls 7 Aug is the next test.
     since: 2026-07-31
+
   - theme: central-bank-gold-buying
     why: structural demand floor; watch monthly reserve reports
     since: 2026-07-31
+
   - theme: warsh-credibility
     why: >
       debasement channel; best explanation for gold holding $4,000+ against a
       2.41% real yield. Jackson Hole late August is the set piece.
     since: 2026-07-31
+
   - theme: middle-east-risk-premium
     why: >
-      re-escalating as of 31 Jul — Iran says it is stopping ships in Hormuz,
-      reversing the improving-traffic read. The haven bid stops draining while
-      the inflationary drag on the Fed stays. Watch how many ships and for how
-      long: Iran issued a similar warning 25 Jun without a durable stoppage.
+      CORRECTED 1 Aug. The war began 28 Feb (day 152 on 31 Jul). It is the US
+      blockading Iranian ports since 14 July, not Iran closing Hormuz — CENTCOM
+      31 Jul: 30 vessels rerouted, 2 disabled, 2 boarded. Iran claims the strait
+      is closed; CENTCOM calls that false. Live catalyst: WSJ/CBS/Axios all
+      report Trump has ordered preparations to strike Iranian refineries and
+      power plants, possibly the weekend of 1-2 Aug, with Israel joining for the
+      first time since February. Iran threatens US energy assets across the Gulf
+      in reply. Watch: whether strikes land, and whether any gold gain HOLDS 48h.
     since: 2026-07-31
 
   - theme: energy-pce-passthrough
     why: >
       June core PCE 3.3% was flattered by energy -5.9% / gasoline -9.2%, which
       the BEA attributes to a temporary Middle East easing that has since
-      reversed (crude +~20% on the month). July/August prints should be worse.
-      This is now the central event for the Fed path, ahead of the FOMC itself.
+      reversed (crude +~20% on the month). July UMich 1y inflation expectations
+      eased, but that survey predates the crude move — same flattery. July/August
+      prints should be worse. Central event for the Fed path.
     since: 2026-07-31
-  - theme: india-duty-grey-market
+
+  - theme: india-gold-formalisation
     why: >
-      duty hike diverting flow to grey market (6-8% smuggling margins); pulls
-      physical through Dubai and prices documented, traceable supply at a
-      premium. Directly desk-relevant.
+      RENAMED from india-duty-grey-market, 1 Aug. Duty hike diverts flow to the
+      grey market (6-8% smuggling margins) and pulls physical through Dubai at a
+      provenance premium. First counter-move logged: NSE launched Electronic
+      Gold Receipts (31 Jul) to formalise the domestic market. Ambiguous for the
+      desk — less smuggled volume, but a larger documented market, and
+      documentation is Dubai's edge. Watch EGR volumes.
     since: 2026-07-31
+
   - theme: metals-financialization
     why: >
       Binance gold/silver options after $7bn+ daily metals perps. Thesis was
       that leveraged marginal money would amplify moves. First stress test
       (31 Jul, record momentum crash + forced $45bn liquidation) says that money
-      is NOT yet in gold — it held while everything levered was sold.
-      Downgraded, not dropped; re-test if the unwind resumes.
+      is NOT yet in gold. Constructive counterweight added 1 Aug: Tether bought
+      14t in Q2 — a price-insensitive, non-CB, non-ETF holder. Downgraded on
+      leverage, upgraded on structural bid.
     since: 2026-07-31
+
+  - theme: gold-basis-lbma-comex
+    why: >
+      31 Jul printed ~$75 between the LBMA PM fix (4026.6) and GC=F at the same
+      clock minute (4101.9), against ~$32 of fair carry at 4.7% and ~2m to
+      expiry. UNVERIFIED — one overlapping datapoint, no baseline history in the
+      DB. A persistent wide basis is a London/COMEX physical dislocation and is
+      directly actionable for this desk; a collapse on Monday means it was a
+      data artifact. Track the spread daily until it resolves.
+    since: 2026-08-01
