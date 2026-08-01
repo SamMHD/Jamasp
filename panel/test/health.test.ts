@@ -206,6 +206,27 @@ describe("deriveWarnings", () => {
       text: "deepdive run deferred at 2026-08-01T09:00:00Z" }]);
   });
 
+  it("flags a timeout run as red, distinct from deferred (amber) and ok (silent)", () => {
+    const w = deriveWarnings({
+      lastIngestAt: "2026-08-01T11:50:00Z",
+      runs: [
+        { id: 1, run_type: "deepdive", task: "t", started_at: "2026-08-01T09:00:00Z",
+          finished_at: "2026-08-01T09:05:00Z", exit_code: 124, status: "timeout" },
+        { id: 2, run_type: "scan", task: null, started_at: "2026-08-01T08:00:00Z",
+          finished_at: null, exit_code: null, status: "deferred" },
+        { id: 3, run_type: "brief", task: null, started_at: "2026-08-01T05:00:00Z",
+          finished_at: "2026-08-01T05:09:00Z", exit_code: 0, status: "ok" },
+      ],
+      sourceHealth: [], runsToday: 0, cap: 20,
+    }, NOW);
+    // Exactly one warning per non-ok run: timeout -> red, deferred -> amber, ok -> nothing.
+    expect(w).toEqual([
+      { severity: "red", text: "deepdive run timeout at 2026-08-01T09:00:00Z (exit=124)" },
+      { severity: "amber", text: "scan run deferred at 2026-08-01T08:00:00Z" },
+    ]);
+    expect(w.some(x => x.severity === "red" && x.text.includes("timeout"))).toBe(true);
+  });
+
   it("cap boundary: below cap is silent, at cap warns", () => {
     const under = deriveWarnings({
       lastIngestAt: "2026-08-01T11:50:00Z",
