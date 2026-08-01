@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { cls } from "@/lib/format";
 
-const TONES = { ok: "text-emerald-400", warn: "text-amber-400", bad: "text-red-400" };
+const TONES = { ok: "text-emerald-400", warn: "text-amber-400", bad: "text-destructive" };
 
 export function StatCard({ label, value, sub, tone }: {
   label: string; value: string; sub?: string; tone?: keyof typeof TONES;
