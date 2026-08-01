@@ -32,6 +32,10 @@ describe("db layer", () => {
     expect(db.getEvents(30, new Date("2026-08-01T00:00:00Z")).length).toBe(2);
     expect(db.getNotifyLog(10)[0].ok).toBe(0); // newest first
   });
+  it("orders unfiltered wakeups by due_at descending (history view)", () => {
+    // id 1 due 2026-08-02, id 2 due 2026-07-31 -> DESC gives [1, 2].
+    expect(db.getWakeups().map(w => w.id)).toEqual([1, 2]);
+  });
   it("returns an ascending price series from a cutoff", () => {
     expect(db.getPriceSeries("GC", "2026-07-30T00:00:00Z").map(p => p.value))
       .toEqual([3310.5, 3325.0]);

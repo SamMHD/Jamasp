@@ -84,7 +84,8 @@ INSERT INTO events VALUES
  ('e2','ff_calendar','FOMC Minutes','US','Medium','2026-08-19T18:00:00Z','2026-08-01T00:00:00Z');
 INSERT INTO agent_runs (run_type,task,started_at,finished_at,exit_code,status) VALUES
  ('brief',NULL,'2026-08-01T05:00:00Z','2026-08-01T05:09:00Z',0,'ok'),
- ('scan',NULL,'2026-08-01T07:00:00Z','2026-08-01T07:02:00Z',1,'failed');
+ ('scan',NULL,'2026-08-01T07:00:00Z','2026-08-01T07:02:00Z',1,'failed'),
+ ('deepdive',NULL,'2026-08-01T06:00:00Z',NULL,NULL,'deferred');
 INSERT INTO meta VALUES ('last_ingest_at','2026-08-01T08:05:00Z'),
  ('source_last_fetch.cnbc_finance','2026-08-01T08:05:00Z');
 INSERT INTO notify_log (ts,text,ok) VALUES

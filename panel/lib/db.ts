@@ -47,17 +47,18 @@ export function getUnreadCount(): number {
   ).get() as { c: number }).c);
 }
 
-export function getItems(opts: { limit?: number; source?: string; topic?: string;
-  unreadOnly?: boolean } = {}): ItemRow[] {
+export function getItems(opts?: { limit?: number; source?: string; topic?: string;
+  unreadOnly?: boolean }): ItemRow[] {
+  const o = opts ?? {};
   const cond: string[] = [];
   const args: unknown[] = [];
-  if (opts.source) { cond.push("source = ?"); args.push(opts.source); }
-  if (opts.topic) { cond.push("topic = ?"); args.push(opts.topic); }
-  if (opts.unreadOnly) cond.push("read_at IS NULL");
+  if (o.source) { cond.push("source = ?"); args.push(o.source); }
+  if (o.topic) { cond.push("topic = ?"); args.push(o.topic); }
+  if (o.unreadOnly) cond.push("read_at IS NULL");
   const where = cond.length ? `WHERE ${cond.join(" AND ")}` : "";
   return q(db => db.prepare(
     `SELECT * FROM items ${where} ORDER BY published_at DESC LIMIT ?`
-  ).all(...args, opts.limit ?? 200) as ItemRow[]);
+  ).all(...args, o.limit ?? 200) as ItemRow[]);
 }
 
 export function getItemFilters(): { sources: string[]; topics: string[] } {
@@ -69,6 +70,11 @@ export function getItemFilters(): { sources: string[]; topics: string[] } {
   }));
 }
 
+/**
+ * Ordering depends on whether `status` is passed:
+ *  - filtered by status: ascending by due_at (soonest-due first — for "what's next").
+ *  - unfiltered: descending by due_at (newest first — for the wakeup history view).
+ */
 export function getWakeups(status?: string): WakeupRow[] {
   return q(db => (status
     ? db.prepare("SELECT * FROM wakeups WHERE status = ? ORDER BY due_at").all(status)

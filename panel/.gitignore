@@ -41,4 +41,4 @@ yarn-error.log*
 next-env.d.ts
 
 # generated test fixture db (fixture.sql is the source of truth)
-/test/fixtures/root/
+/test/fixtures/root/state/jamasp.db
