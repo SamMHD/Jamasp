@@ -18,6 +18,17 @@ describe("db layer", () => {
     expect(db.getItems({ source: "cnbc_finance" }).map(r => r.id)).toEqual(["i1", "i3"]);
     expect(db.getItems({ unreadOnly: true }).map(r => r.id)).toEqual(["i1", "i2"]);
   });
+  it("searches headline and lede case-insensitively", () => {
+    expect(db.getItems({ search: "dollar" }).map(r => r.id)).toEqual(["i1", "i3"]);
+    expect(db.getItems({ search: "held NEAR" }).map(r => r.id)).toEqual(["i1"]); // lede match
+    expect(db.getItems({ search: "%" })).toEqual([]); // LIKE wildcards are literal
+    expect(db.getItems({ search: "_old" })).toEqual([]);
+  });
+  it("paginates with limit and offset", () => {
+    expect(db.getItems({ limit: 2 }).map(r => r.id)).toEqual(["i1", "i2"]);
+    expect(db.getItems({ limit: 2, offset: 2 }).map(r => r.id)).toEqual(["i3"]);
+    expect(db.getItems({ offset: 3 })).toEqual([]);
+  });
   it("computes price snapshots with deltas", () => {
     const gc = db.getPriceSnapshots(new Date("2026-08-01T09:00:00Z")).find(s => s.symbol === "GC")!;
     expect(gc.value).toBe(3325.0);
