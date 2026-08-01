@@ -41,7 +41,7 @@ def test_retry_recovers_flaky(tmp_path):
 
 def test_persistent_failure_notifies(tmp_path, monkeypatch):
     sent = []
-    monkeypatch.setattr(runner, "_notify_safe", lambda s, t: sent.append(t))
+    monkeypatch.setattr(runner, "_notify_safe", lambda c, s, t: sent.append(t))
     conn = db.connect(tmp_path / "j.db")
     status = runner.run_agent(conn, settings_with(["fail"]), "scan")
     assert status == "failed"
@@ -51,7 +51,7 @@ def test_persistent_failure_notifies(tmp_path, monkeypatch):
 
 
 def test_timeout_status(tmp_path, monkeypatch):
-    monkeypatch.setattr(runner, "_notify_safe", lambda s, t: None)
+    monkeypatch.setattr(runner, "_notify_safe", lambda c, s, t: None)
     conn = db.connect(tmp_path / "j.db")
     status = runner.run_agent(conn, settings_with(["sleep"], scan_timeout=1), "scan")
     assert status == "timeout"
@@ -59,7 +59,7 @@ def test_timeout_status(tmp_path, monkeypatch):
 
 def test_cap_defers_and_warns(tmp_path, monkeypatch):
     sent = []
-    monkeypatch.setattr(runner, "_notify_safe", lambda s, t: sent.append(t))
+    monkeypatch.setattr(runner, "_notify_safe", lambda c, s, t: sent.append(t))
     conn = db.connect(tmp_path / "j.db")
     s = settings_with(["ok"], cap=1)
     assert runner.run_agent(conn, s, "scan") == "ok"
@@ -76,7 +76,7 @@ def test_timeout_kills_grandchild_process_group(tmp_path, monkeypatch):
     # A correct timeout kills the whole process group, so the grandchild
     # must be gone almost immediately after run_agent returns — not lingering
     # for the 30s it would otherwise sleep.
-    monkeypatch.setattr(runner, "_notify_safe", lambda s, t: None)
+    monkeypatch.setattr(runner, "_notify_safe", lambda c, s, t: None)
     conn = db.connect(tmp_path / "j.db")
     marker = tmp_path / "child_pid"
     status = runner.run_agent(
@@ -97,9 +97,10 @@ def test_timeout_kills_grandchild_process_group(tmp_path, monkeypatch):
     assert not alive, "grandchild process survived the timeout kill"
 
 
-def test_notify_safe_swallows(monkeypatch):
+def test_notify_safe_swallows(tmp_path, monkeypatch):
     # no telegram env vars set -> notify.notify raises; _notify_safe must not
-    runner._notify_safe({"telegram": {"bot_token_env": "X_NOPE", "chat_id_env": "Y_NOPE"}}, "t")
+    conn = db.connect(tmp_path / "j.db")
+    runner._notify_safe(conn, {"telegram": {"bot_token_env": "X_NOPE", "chat_id_env": "Y_NOPE"}}, "t")
 
 
 def test_dry_run_executes_and_records_nothing(tmp_path, monkeypatch):

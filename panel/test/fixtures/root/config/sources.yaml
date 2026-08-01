@@ -1,0 +1,11 @@
+sources:
+  - name: cnbc_finance
+    type: rss
+    url: https://example.com/rss1
+    interval_minutes: 15
+    topic: markets
+  - name: investing_commodities
+    type: rss
+    url: https://example.com/rss2
+    interval_minutes: 15
+    topic: gold

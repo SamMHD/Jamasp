@@ -1,0 +1,15 @@
+[Unit]
+Description=Jamasp panel — web control panel on 127.0.0.1:3300
+After=network.target
+
+[Service]
+WorkingDirectory=%h/Jamasp/panel
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+Environment=JAMASP_ROOT=%h/Jamasp
+EnvironmentFile=-%h/.config/jamasp/env
+ExecStart=/usr/bin/env npx next start -H 127.0.0.1 -p 3300
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

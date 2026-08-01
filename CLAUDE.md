@@ -69,3 +69,8 @@ before touching anything non-trivial, and land specs and plans in
 `docs/superpowers/`. They trigger on development work, not on analysis runs —
 a brief or scan should never invoke them. Provenance and update instructions:
 `docs/superpowers/VENDORED.md`.
+
+The web control panel lives in `panel/` (Next.js; see
+`docs/superpowers/specs/2026-08-01-jamasp-panel-design.md`). It reads
+`state/jamasp.db` read-only and performs every write through the `jamasp`
+CLI — keep it that way.

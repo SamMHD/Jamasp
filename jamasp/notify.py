@@ -2,9 +2,12 @@
 from __future__ import annotations
 
 import os
+import sqlite3
 from typing import Callable
 
 import httpx
+
+from jamasp.db import utcnow
 
 Poster = Callable[[str, dict], dict]
 
@@ -35,3 +38,12 @@ def notify(
         return f"[dry-run] would send {len(text)} chars to chat {chat_id}"
     send_telegram(text, token, chat_id, post=post)
     return f"sent {len(text)} chars to chat {chat_id}"
+
+
+def log_sent(conn: sqlite3.Connection, text: str, ok: bool) -> None:
+    """Record a Telegram message attempt so the panel's Alerts page can show it."""
+    conn.execute(
+        "INSERT INTO notify_log (ts, text, ok) VALUES (?, ?, ?)",
+        (utcnow(), text, 1 if ok else 0),
+    )
+    conn.commit()

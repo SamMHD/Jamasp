@@ -171,6 +171,41 @@ def test_notify_dry_run(tmp_path, monkeypatch):
     assert "[dry-run] would send 5 chars" in out.output
 
 
+def test_notify_cli_logs_sent_message(tmp_path, monkeypatch):
+    """`jamasp notify` records the message in notify_log on success."""
+    from click.testing import CliRunner
+    from jamasp import cli, db as db_mod, notify as notify_mod
+
+    monkeypatch.setenv("JAMASP_TG_TOKEN", "tok")
+    monkeypatch.setenv("JAMASP_TG_CHAT", "chat")
+    monkeypatch.setattr(
+        notify_mod, "send_telegram", lambda text, token, chat_id, post=None: None
+    )
+    db_path = tmp_path / "t.db"
+    result = CliRunner().invoke(
+        cli.main, ["notify", "hello desk", "--db", str(db_path), "--config-dir", "config"]
+    )
+    assert result.exit_code == 0, result.output
+    conn = db_mod.connect(db_path)
+    rows = conn.execute("SELECT text, ok FROM notify_log").fetchall()
+    assert [(r["text"], r["ok"]) for r in rows] == [("hello desk", 1)]
+
+
+def test_notify_cli_dry_run_does_not_log(tmp_path):
+    from click.testing import CliRunner
+    from jamasp import cli, db as db_mod
+
+    db_path = tmp_path / "t.db"
+    result = CliRunner().invoke(
+        cli.main,
+        ["notify", "x", "--dry-run", "--db", str(db_path), "--config-dir", "config"],
+    )
+    # dry-run may still fail on missing env vars in some environments; the
+    # invariant is simply: no notify_log rows are written.
+    conn = db_mod.connect(db_path)
+    assert conn.execute("SELECT COUNT(*) FROM notify_log").fetchone()[0] == 0
+
+
 def test_run_cmd_ok_exits_zero(tmp_path, monkeypatch):
     monkeypatch.delenv("JAMASP_TG_TOKEN", raising=False)
     monkeypatch.delenv("JAMASP_TG_CHAT", raising=False)
@@ -214,3 +249,20 @@ def test_run_cmd_dry_run_executes_and_records_nothing(tmp_path, monkeypatch):
     conn = db.connect(dbp)
     rows = conn.execute("SELECT status FROM agent_runs").fetchall()
     assert rows == []
+
+
+def test_wakeup_cancel_cli(tmp_path):
+    from click.testing import CliRunner
+    from jamasp import cli
+
+    db = str(tmp_path / "t.db")
+    r = CliRunner()
+    add = r.invoke(cli.main, ["wakeup", "add", "2030-01-01T00:00:00Z", "scan", "t",
+                              "--db", db, "--config-dir", "config"])
+    assert add.exit_code == 0, add.output
+    wid = add.output.split("#")[1].split(":")[0]
+    cancel = r.invoke(cli.main, ["wakeup", "cancel", wid, "--db", db, "--config-dir", "config"])
+    assert cancel.exit_code == 0, cancel.output
+    assert f"cancelled wakeup #{wid}" in cancel.output
+    bad = r.invoke(cli.main, ["wakeup", "cancel", "999", "--db", db, "--config-dir", "config"])
+    assert bad.exit_code != 0
