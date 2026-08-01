@@ -39,7 +39,16 @@ export function readWatchlist(): WatchlistEntry[] {
 export function readPredictions(): Prediction[] {
   const raw = readText(path.join(STATE_DIR, "predictions.jsonl"));
   if (!raw) return [];
-  return raw.split("\n").filter(l => l.trim()).map(l => JSON.parse(l) as Prediction);
+  const out: Prediction[] = [];
+  for (const l of raw.split("\n")) {
+    if (!l.trim()) continue;
+    try {
+      out.push(JSON.parse(l) as Prediction);
+    } catch {
+      // skip malformed/truncated lines (e.g. an interrupted append)
+    }
+  }
+  return out;
 }
 
 export function predictionStats(preds: Prediction[], now: Date = new Date()): PredictionStats {
@@ -68,7 +77,9 @@ export function loadSources(): SourceConfig[] {
 
 export function loadSettings(): Record<string, unknown> {
   const raw = readText(path.join(CONFIG_DIR, "settings.yaml"));
-  return raw ? (YAML.parse(raw) as Record<string, unknown>) : {};
+  if (!raw) return {};
+  const parsed = YAML.parse(raw);
+  return (parsed ?? {}) as Record<string, unknown>;
 }
 
 export function maxRunsPerDay(): number {
