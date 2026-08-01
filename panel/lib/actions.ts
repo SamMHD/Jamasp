@@ -3,6 +3,7 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { revalidatePath } from "next/cache";
 import { JAMASP_ROOT } from "./paths";
+import { buildWakeupAddArgs, buildWakeupCancelArgs } from "./cliArgs";
 import { validateWakeup } from "./validate";
 
 const pexec = promisify(execFile);
@@ -23,7 +24,7 @@ async function jamasp(args: string[]): Promise<ActionResult> {
 
 export async function markInboxRead(): Promise<ActionResult> {
   const r = await jamasp(["inbox", "--mark-read"]);
-  revalidatePath("/inbox");
+  if (r.ok) revalidatePath("/inbox");
   return r;
 }
 
@@ -31,15 +32,15 @@ export async function addWakeup(dueAt: string, runType: string, task: string):
   Promise<ActionResult> {
   const v = validateWakeup(dueAt, runType, task);
   if (!v.ok) return { ok: false, message: v.error };
-  const r = await jamasp(["wakeup", "add", v.dueAtUtc, runType, task]);
-  revalidatePath("/schedule");
+  const r = await jamasp(buildWakeupAddArgs(v.dueAtUtc, runType, task));
+  if (r.ok) revalidatePath("/schedule");
   return r;
 }
 
 export async function cancelWakeup(id: number): Promise<ActionResult> {
   if (!Number.isInteger(id) || id < 1) return { ok: false, message: `bad wakeup id: ${id}` };
-  const r = await jamasp(["wakeup", "cancel", String(id)]);
-  revalidatePath("/schedule");
+  const r = await jamasp(buildWakeupCancelArgs(id));
+  if (r.ok) revalidatePath("/schedule");
   return r;
 }
 
