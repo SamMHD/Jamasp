@@ -8,7 +8,14 @@ import type { ItemRow } from "@/lib/db";
 import { markInboxRead } from "@/lib/actions";
 import { fmtAge } from "@/lib/format";
 
-const fetcher = (url: string) => fetch(url).then(r => r.json());
+const fetcher = async (url: string) => {
+  const r = await fetch(url);
+  if (!r.ok) {
+    const body = await r.text().catch(() => "");
+    throw new Error(`GET ${url} failed: ${r.status} ${r.statusText}${body ? ` — ${body}` : ""}`);
+  }
+  return r.json();
+};
 
 export function InboxTable({ sources, topics }: { sources: string[]; topics: string[] }) {
   const [source, setSource] = useState("");
@@ -18,7 +25,7 @@ export function InboxTable({ sources, topics }: { sources: string[]; topics: str
   const qs = new URLSearchParams({
     ...(source && { source }), ...(topic && { topic }), ...(unread && { unread: "1" }),
   }).toString();
-  const { data, mutate } = useSWR<{ items: ItemRow[] }>(`/api/inbox?${qs}`, fetcher,
+  const { data, error, mutate } = useSWR<{ items: ItemRow[] }>(`/api/inbox?${qs}`, fetcher,
     { refreshInterval: 30_000 });
 
   const items = data?.items ?? [];
@@ -49,7 +56,7 @@ export function InboxTable({ sources, topics }: { sources: string[]; topics: str
         <Button size="sm" variant="outline" disabled={pending}
           onClick={() => startTransition(async () => {
             const r = await markInboxRead();
-            r.ok ? toast.success(r.message) : toast.error(r.message);
+            if (r.ok) toast.success(r.message); else toast.error(r.message);
             mutate();
           })}>
           Mark delta read
@@ -76,8 +83,15 @@ export function InboxTable({ sources, topics }: { sources: string[]; topics: str
             </li>
           );
         })}
-        {items.length === 0 && <li className="text-sm text-muted-foreground">nothing here</li>}
+        {!error && items.length === 0 && (
+          <li className="text-sm text-muted-foreground">nothing here</li>
+        )}
       </ul>
+      {error && (
+        <div className="mt-3 rounded border border-destructive p-3 text-sm text-destructive">
+          Could not load the inbox: {error.message}
+        </div>
+      )}
     </div>
   );
 }
