@@ -216,6 +216,20 @@ def wakeup_list(db_path, config_dir):
         click.echo(f"#{r['id']}  {r['due_at']}  {r['run_type']}  attempts={r['attempts']}  {r['task']}")
 
 
+@wakeup_group.command("cancel")
+@click.argument("wakeup_id", type=int)
+@db_opt
+@cfg_opt
+def wakeup_cancel(wakeup_id, db_path, config_dir):
+    """Cancel a pending wakeup by id."""
+    conn, _, _ = _common(db_path, config_dir)
+    try:
+        wakeup_mod.cancel(conn, wakeup_id)
+    except ValueError as exc:
+        raise click.ClickException(str(exc))
+    click.echo(f"cancelled wakeup #{wakeup_id}")
+
+
 @main.command()
 @click.option("--dry-run", is_flag=True, help="show what would fire; fire nothing")
 @db_opt

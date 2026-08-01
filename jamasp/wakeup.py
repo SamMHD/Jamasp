@@ -60,3 +60,17 @@ def mark(conn: sqlite3.Connection, wakeup_id: int, status: str) -> None:
         (status, utcnow(), wakeup_id),
     )
     conn.commit()
+
+
+def cancel(conn: sqlite3.Connection, wakeup_id: int) -> None:
+    row = conn.execute(
+        "SELECT status FROM wakeups WHERE id = ?", (wakeup_id,)
+    ).fetchone()
+    if row is None:
+        raise ValueError(f"no wakeup #{wakeup_id}")
+    if row["status"] != "pending":
+        raise ValueError(f"wakeup #{wakeup_id} is {row['status']}, not pending")
+    conn.execute(
+        "UPDATE wakeups SET status = 'cancelled' WHERE id = ?", (wakeup_id,)
+    )
+    conn.commit()

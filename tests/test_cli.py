@@ -249,3 +249,20 @@ def test_run_cmd_dry_run_executes_and_records_nothing(tmp_path, monkeypatch):
     conn = db.connect(dbp)
     rows = conn.execute("SELECT status FROM agent_runs").fetchall()
     assert rows == []
+
+
+def test_wakeup_cancel_cli(tmp_path):
+    from click.testing import CliRunner
+    from jamasp import cli
+
+    db = str(tmp_path / "t.db")
+    r = CliRunner()
+    add = r.invoke(cli.main, ["wakeup", "add", "2030-01-01T00:00:00Z", "scan", "t",
+                              "--db", db, "--config-dir", "config"])
+    assert add.exit_code == 0, add.output
+    wid = add.output.split("#")[1].split(":")[0]
+    cancel = r.invoke(cli.main, ["wakeup", "cancel", wid, "--db", db, "--config-dir", "config"])
+    assert cancel.exit_code == 0, cancel.output
+    assert f"cancelled wakeup #{wid}" in cancel.output
+    bad = r.invoke(cli.main, ["wakeup", "cancel", "999", "--db", db, "--config-dir", "config"])
+    assert bad.exit_code != 0
