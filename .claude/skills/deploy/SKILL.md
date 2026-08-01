@@ -198,3 +198,22 @@ A transient inbox `WARNING` about source `digest` just means Claude isn't
 logged in yet; it clears on the first successful digest. The box commits
 state locally each run but can't push to GitHub without a write credential —
 add a deploy key if you want the history mirrored.
+
+## Panel (optional web control panel)
+
+The panel is a Next.js app in `panel/`, served on `127.0.0.1:3300` by
+`jamasp-panel.service` (a long-running service — enable it, unlike the
+oneshot timer units).
+
+1. Install Node >= 20 (NodeSource apt repo or the distro package).
+2. Build: `cd ~/Jamasp/panel && npm ci && npm run build`.
+3. Install/enable the unit the same way as the timers (the
+   `ops/systemd/jamasp-*` glob already includes it), then:
+   `systemctl --user enable --now jamasp-panel.service` (or the system
+   variant with `User=jamasp`).
+4. Verify: `curl -s http://127.0.0.1:3300/ | grep -q Overview && echo OK`.
+5. Access from a workstation: `ssh -L 3300:127.0.0.1:3300 jamasp@<host>`
+   or `tailscale serve 3300`. The panel has NO auth of its own — never
+   bind it to a public interface.
+6. Rebuild after every `git pull` that touches `panel/`:
+   `npm ci && npm run build && systemctl --user restart jamasp-panel`.
