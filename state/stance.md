@@ -1,4 +1,4 @@
-# Stance — 2026-08-01 (Saturday, post-close)
+# Stance — 2026-08-01 (Saturday, updated 05:00Z scan)
 
 **Neutral on the range, bimodal on the weekend.** GC=F 4098.6, LBMA PM fix
 4026.6. Range $4,000–$4,180 still expected to hold *absent strikes on Iran*.
@@ -21,6 +21,8 @@ up on Friday even when handed a reason.
 - UMich final July 55.2 vs 54.0 est, 1y inflation expectations eased. But it is
   a July survey — same borrowed-from-the-ceasefire flattery as June core PCE.
 - Wall Street trisected on gold, Main Street bulls in the minority (KITCO).
+- Gaza: Hamas accepted the disarmament framework; Israel has not endorsed it.
+  Minor bearish at the margin, and a separate theatre from the Iran channel.
 
 **Bullish side**
 - **US/Israel strikes on Iranian energy infrastructure possibly this weekend**
@@ -33,6 +35,15 @@ up on Friday even when handed a reason.
   on the month. July/August prints should be worse.
 - **Positioning is not stretched** — CFTC net spec 174,131 (28 Jul), slightly
   lower. Caps liquidation downside, leaves room for a geopolitical bid to run.
+- **Hormuz transits −77% Thursday: 22 vessels → 5 (Kpler).** De jure open, de
+  facto near-shut by owner choice. Bab al-Mandeb normal, so this is Iran-specific
+  risk pricing, not general regional avoidance. Feeds crude → the July/August
+  inflation-print channel above. **New 1 Aug; not in Friday's close.**
+- **Airline cancellations cluster on Kuwait and Bahrain** — the two largest US
+  base hosts (Arifjan/Ali Al Salem; NSA Bahrain/Fifth Fleet). Qatar Airways
+  suspended Bahrain/Kuwait/Erbil through 7 Aug. Reads as airspace clearing around
+  probable Iranian retaliation targets, i.e. a leading indicator on the strike
+  timing the WSJ/CBS reporting describes. Dubai routes unaffected; flydubai normal.
 - Central-bank demand is a floor, not a bid.
 - New non-CB structural buyers: Tether +14t in Q2.
 - Physical/provenance premium rising — structurally good for a documented Dubai
@@ -64,8 +75,10 @@ direction. High that the war risk is not in Friday's close.
 1. **Yesterday's "Iran is now stopping ships in Hormuz" was backwards.** CENTCOM
    31 Jul: **the US** has blockaded Iranian ports since 14 July — 30 vessels
    rerouted, 2 disabled, 2 boarded, ~30 humanitarian passed. Iran *claims*
-   Hormuz is closed; CENTCOM calls that false. Strait functionally open, but
-   harassed (tanker hit 11nm NE of Limah, Oman). Trims the bullish carry.
+   Hormuz is closed; CENTCOM calls that false. Tanker hit 11nm NE of Limah, Oman.
+   **Amended 05:00Z:** "functionally open" was wrong — legally open, but transits
+   fell 77% Thursday. The correct framing is *shipowners have closed it, not
+   Iran*. That restores most of the bullish carry I trimmed on 31 Jul.
 2. **The war started 28 February** — Friday was day 152. Prior runs treated the
    escalation as new. Cause: same headline-only sourcing failure as 31 Jul.
 
