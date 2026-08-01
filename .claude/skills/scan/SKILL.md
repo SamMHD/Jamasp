@@ -15,6 +15,11 @@ Cheap run. Target: a few thousand tokens, sub-minute. The default outcome is
 
 ## 2. Decide
 
+Freshness first: if the price snapshot or inbox is stale (old timestamps,
+market closed, ingest clearly not running), don't analyze bad inputs — treat
+it as a no-alert run; mention staleness only if it persists across scans
+(that's watchdog territory).
+
 Urgency test — does anything in the delta meet at least one of:
 - surprise data print or central-bank action that contradicts the stance;
 - geopolitical shock with a plausible gold transmission channel;
@@ -26,6 +31,9 @@ stance edit.**
 
 ## 3. If YES — alert
 
+- In the final hours before a high-impact calendar event, pre-positioning
+  moves are expected — no fresh directional calls on them; if alerting at
+  all, frame it as event-pending.
 - Compose a terse bilingual alert: 2–4 lines Persian (numbers/tickers Latin)
   then 1–2 lines English: what happened, expected gold impact, whether the
   stance changes. Send via `uv run jamasp notify -`.

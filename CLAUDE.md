@@ -58,3 +58,14 @@ non-root user** so `--dangerously-skip-permissions` is allowed, and copy
 Claude's file-based `~/.claude/.credentials.json` rather than the whole
 directory) — is the **`deploy` skill** (`.claude/skills/deploy/SKILL.md`).
 Invoke it when standing up a new host or repairing one.
+
+## Working on Jamasp itself
+
+The [Superpowers](https://github.com/obra/superpowers) skill set is vendored
+into `.claude/skills/` — brainstorming, writing-plans,
+subagent-driven-development, test-driven-development, systematic-debugging and
+the rest. Use them when changing Jamasp's code: brainstorm and write a plan
+before touching anything non-trivial, and land specs and plans in
+`docs/superpowers/`. They trigger on development work, not on analysis runs —
+a brief or scan should never invoke them. Provenance and update instructions:
+`docs/superpowers/VENDORED.md`.

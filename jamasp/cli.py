@@ -78,6 +78,10 @@ def ingest(no_digest, db_path, config_dir):
                     symbol, ts, value = prices_mod.fetch_price(source, client)
                     prices_mod.store_price(conn, symbol, ts, value)
                     prices_n += 1
+                elif source.type == "technicals_api":
+                    for symbol, ts, value in prices_mod.fetch_technicals(source, client):
+                        prices_mod.store_price(conn, symbol, ts, value)
+                    prices_n += 1
                 elif source.type == "calendar":
                     events_n += calendar_mod.store_events(
                         conn, calendar_mod.fetch_source(source, client)
@@ -165,6 +169,9 @@ def sources_check(db_path, config_dir):
                 elif source.type == "price_api":
                     symbol, ts, value = prices_mod.fetch_price(source, client)
                     click.echo(f"OK   {source.name} ({symbol}={value} @ {ts})")
+                elif source.type == "technicals_api":
+                    rows = prices_mod.fetch_technicals(source, client)
+                    click.echo(f"OK   {source.name} ({len(rows)} technicals @ {rows[0][1]})")
                 elif source.type == "calendar":
                     n = len(calendar_mod.fetch_source(source, client))
                     click.echo(f"OK   {source.name} ({n} events)")

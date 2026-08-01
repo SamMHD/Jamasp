@@ -10,7 +10,7 @@ import yaml
 @dataclass(frozen=True)
 class Source:
     name: str
-    type: str  # rss | price_api  (calendar arrives in phase 2)
+    type: str  # rss | price_api | technicals_api | calendar
     url: str
     interval_minutes: int
     topic: str
