@@ -13,7 +13,7 @@ telegram:
 predictions:
   price_symbol: GC
 runs:
-  claude_cmd: ["claude", "-p", "--dangerously-skip-permissions"]
+  claude_cmd: ["claude", "-p", "--dangerously-skip-permissions", "--model", "fable", "--effort", "xhigh"]
   max_agent_runs_per_day: 20
   timeouts_seconds:
     brief: 900
