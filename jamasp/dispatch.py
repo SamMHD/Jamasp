@@ -28,6 +28,7 @@ def _warn_cap_once(conn: sqlite3.Connection, settings: dict, cap: int) -> None:
         return
     db.set_meta(conn, CAP_WARNED_META_KEY, today)
     runner._notify_safe(
+        conn,
         settings,
         f"Jamasp: daily run cap ({cap}) reached — dispatcher holding all wakeups"
         " until tomorrow.",
@@ -69,6 +70,7 @@ def run_due(
         elif attempts >= MAX_ATTEMPTS:
             wakeup.mark(conn, w["id"], "failed")
             runner._notify_safe(
+                conn,
                 settings,
                 f"Jamasp FAILURE: wakeup #{w['id']} ({w['run_type']}: {w['task']})"
                 f" gave up after {attempts} attempts.",

@@ -69,6 +69,12 @@ CREATE TABLE IF NOT EXISTS meta (
     key   TEXT PRIMARY KEY,
     value TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS notify_log (
+    id   INTEGER PRIMARY KEY AUTOINCREMENT,
+    ts   TEXT NOT NULL,
+    text TEXT NOT NULL,
+    ok   INTEGER NOT NULL
+);
 """
 
 

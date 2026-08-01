@@ -50,6 +50,6 @@ def run(
     violations = check(conn, reports_dir, now=now)
     if violations:
         runner._notify_safe(
-            settings, "Jamasp watchdog:\n" + "\n".join(f"- {v}" for v in violations)
+            conn, settings, "Jamasp watchdog:\n" + "\n".join(f"- {v}" for v in violations)
         )
     return violations
