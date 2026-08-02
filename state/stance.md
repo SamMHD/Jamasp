@@ -1,87 +1,64 @@
-# Stance — 2026-08-01 (Saturday, updated 17:00Z scan)
+# Stance — 2026-08-02 (Sunday, pre-reopen)
 
-**Upside-tilted into Monday's open, now with the key unknown resolved.** GC=F
-4098.6 (Friday close), LBMA PM fix 4026.6. Markets contain none of this weekend.
+**The Monday gap-up call is dead; my flip condition triggered.** Trump
+announced a conditional pause: strikes "cancelled… subject to being able to
+rapidly make a DEAL" — terms: immediate/complete/total opening of Hormuz plus
+an end to Iran's nuclear threat, Israel joining. The weekend strike window
+**passed undelivered**. But Iran has NOT accepted: Fars (military sources) says
+Tehran rejected the Qatari Hormuz proposal, the IRGC permission regime stays,
+and the Defence Minister is raising combat readiness. A proxy drone hit a
+Peshmerga HQ in Sulaimaniyah during the "pause."
 
-## What changed at 17:00Z
+## View
 
-US embassies in **ten** capitals — Bahrain, Iraq, Israel, Jordan, Kuwait,
-Lebanon, Oman, Qatar, Saudi Arabia and **the UAE** — posted simultaneous
-security alerts telling Americans to depart or be ready to depart, warning of
-"unforeseen escalation," flight cancellations and airspace closures. This came
-one day after Trump threatened to hit Iran "very hard."
+**Event-pending, conviction capped at medium.** Globex reopens 22:00Z tonight;
+ISM Manufacturing prints Monday 14:00Z; payrolls Friday 7 Aug 12:30Z.
 
-**The load-bearing fact: no strikes on Iran overnight Friday→Saturday.** This
-was the single thing I said at 11:00Z I was missing and that most changes
-Monday's magnitude. It is now answered. The strike package is **pending, not
-delivered**. Kuwait was therefore Iranian **pre-emption**, not retaliation.
-
-That reading strengthens the tilt rather than reversing it. A coordinated
-ten-post departure advisory is a recognised pre-strike indicator; it says the
-US expects to be struck back, which means it expects to strike.
-
-## Also new
-
-- **"Unknown projectile" hit a tanker off Oman** Saturday (UKMTO). Second
-  vessel incident of the week.
-- **Egypt, Wednesday:** drone struck a US-owned gas vessel in port. Iran is
-  hitting geographies not previously targeted — US Embassy Jerusalem says so
-  explicitly. Kuwait fits that pattern; it is not a one-off.
-- Iranian messaging is deterrence against exactly the energy-infrastructure
-  strike the WSJ/CBS reporting flagged: Mokhber warns "attacking Iran's
-  infrastructure directly awakens the fault lines." Abdollahi threatens any
-  country acting as a "defensive shield" for the US — a direct GCC threat.
-
-## Transmission to gold
-
-- Markets closed. Friday's 4098.6 prices none of it. Asymmetry intact.
-- Hormuz: Kpler confirms traffic "dropped sharply" (was −77% Thursday). Two
-  vessel strikes in a week make the self-imposed closure stickier → crude →
-  July/August inflation prints.
-- Positioning not stretched — CFTC net spec 174,131 (28 Jul). Room to run.
-- Against it: the rates desk is still the marginal price-setter. Logan wanted a
-  *hike*; 10y 4.745%, real 10y 2.41%. Friday proved this market ignores a war
-  *headline*. Still untested against a war *event*.
-
-## Conviction
-
-**High on an upward gap Monday** (raised from medium-high — the unknown that
-capped me is resolved). **Still low on whether it holds.** The Thursday/Friday
-tell says the rates desk sells strength. A spike that retraces inside 48h
-remains noise; the bar I set on 31 Jul stands and I will not lower it.
+- **Base case:** flat-to-soft open; the partial war bid in Friday's 4098.6
+  bleeds; the rates desk (which sold strength all week) regains the wheel.
+  $4,000 is now defended from above without a war bid.
+- **Bearish tail:** official Iranian acceptance → premium and crude unwind
+  together → $4,000 breaks, downtrend (spot < 50DMA 4217.7 < 200DMA 4496.7)
+  reasserts toward S1 3803.5.
+- **Bullish tail:** the "rapidly" clause expires unmet — rejection holds,
+  Trump's credibility is staked, strike scenario returns with more pressure to
+  deliver. Yesterday's gap-up logic then revives intact.
 
 ## What flips me
 
-- **Bearish:** gaps up, round-trips by Monday's close → the war bid is a fade.
-  Or credible de-escalation Sunday.
-- **Bullish:** gap holds 48h, or strikes on Iranian energy infrastructure land.
-  Then the marginal holder has changed and $4,180 is a floor test, not a
-  ceiling.
-- **Payrolls 7 Aug** remains the rates-side test of $4,000.
+- Official Iranian acceptance of the framework → bearish with conviction.
+- Strikes actually landing → bullish; 1 Aug floor-test logic applies.
+- A Monday close above the 50DMA (4217.7) with no war headline → a bid I
+  don't understand; investigate before opining.
+- Payrolls 7 Aug remains the rates-side test of $4,000.
+
+## Open predictions
+
+- `6f772055` gap-up / `dc38b83f` half-retrace — score after Monday; gap-up
+  likely a miss on this news. Today added: GC ≤ 4098.6 at some point Monday
+  (0.65); no settle < $4,000 through Thu 6 Aug (0.6).
+- LBMA–COMEX basis (~$75 on 31 Jul vs ~$32 fair carry): Monday's overlap
+  resolves artifact-vs-dislocation. Wakeup #1 reports it.
+
+## Hormuz — correction RESOLVED (was carried since 31 Jul)
+
+Trump's own deal term demands the strait's "opening"; Fars confirms an IRGC
+transit-authorisation + fee regime. So: functionally impeded by Iranian
+control *and* owner self-restraint — CENTCOM's "not closed" and Iran's
+"closed" were both partial. My flat "Iran's closure claim is false" is
+retired. Crude/insurance passthrough stays live until a deal *lands*, not
+when one is announced.
 
 ## Desk-local
 
-**Amended:** the UAE is now named in the US departure advisory. Dubai remains
-physically unaffected and routes are intact — an advisory is not an evacuation
-— but "unaffected so far" is no longer accurate. Physical/provenance premium
-should firm further.
+UAE remains named in the US departure advisory; pause reduces immediacy but
+GCC exposure (Kuwait strike, UAE condemnation on record) is unchanged.
+Physical/provenance premium holds; watch war-risk insurance at the reopen.
 
 ## Sourcing health
 
-`gulfnews.com` again carried the load-bearing item, extracted in full. Blocked:
-Investing.com 403, MarketWatch 401, Google News consent wall, mining.com 403.
-Erroring with no new items in 24h: `digest`, `dollar_index`, `real_yield_10y`.
-DFII10 2d stale, DTWEXBGS 8d stale. No wire source covers Iran directly; the
-whole Iran picture still arrives via Gulf regional press. `jamasp calendar`
-returns 0 events for 14 days with payrolls on 7 Aug — event feed broken.
-
-## Corrections carried forward
-
-1. Hormuz — **needs resolving.** I have carried "shipowners closed it, not
-   Iran; Iran's closure claim is false" (CENTCOM, 31 Jul). Today's AFP/Gulf
-   News copy states Iran has "effectively maintained control over navigation
-   since 28 February, requiring vessels to obtain permission and pay transit
-   fees." These are reconcilable — Iran taxing transit and owners declining to
-   sail are both true — but my flat "false" was too strong. Do not repeat it
-   unqualified until this is checked against a primary source.
-2. The war started 28 February. Today is day 153, not a new escalation.
+`jamasp calendar` REPAIRED (14 events/14d). Still erroring: `digest`,
+`dxy_intraday`, `gold_spot`. DTWEXBGS 9d stale, DFII10 3d stale.
+Investing.com headline-only (403). Gulf News carries the load-bearing Iran
+coverage in full. No direct Iran wire source — Iranian positions arrive via
+Gulf press quoting Fars; treat as filtered.
