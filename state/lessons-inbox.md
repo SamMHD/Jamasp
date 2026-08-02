@@ -27,3 +27,15 @@ by the weekly /retro. One bullet per lesson: date, observation, suggested rule.
   reports, no buying). **Suggested rule:** treat repeated non-response as
   evidence about *who the marginal price-setter is*, and check whether that
   makes an unpriced catalyst more asymmetric rather than less relevant.
+
+- **2026-08-02 — the maritime leg of the war was invisible to our feed.**
+  A pre-reopen deepdive found via gcaptain.com (extracts cleanly; carries
+  licensed Bloomberg + Reuters copy) that the 28 Jul Iranian missile attack
+  on a US base in Jordan and the 29 Jul drone strike on a US-owned FSRU at
+  Damietta (Mediterranean front) never entered our feed — both moved Brent
+  >8% intraday. The same source resolved the Hormuz who-restricts question
+  in one pass with primary material (CENTCOM escort counts, the IRGC's own
+  "unauthorized route" admission, Treasury designations) that four days of
+  Gulf-press reading couldn't. **Suggested rule:** add a maritime trade-press
+  source (gcaptain) to ingest config; for any chokepoint/shipping claim,
+  check the shipping trade press before concluding from general news.
