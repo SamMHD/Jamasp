@@ -5,15 +5,17 @@
 # NOTE 2026-08-02: the `jamasp calendar` feed is REPAIRED (14 events/14d,
 # was 0). Hand-built entries below are judgment layered on the feed again.
 events:
-  - date: 2026-08-02
-    time_dubai: "resolved (strike window passed undelivered)"
-    title: US-Iran deal-confirmation watch (replaces 1-2 Aug strike window)
+  - date: 2026-08-03
+    time_dubai: "~22:00-02:00 (Mon afternoon US time; unscheduled)"
+    title: US-Iran denuclearisation talks convene — the checkable marker
     why: >
-      Trump paused strikes conditional on "rapidly" closing a deal (Hormuz
-      opening + nuclear); Fars says Iran rejected the Hormuz term. No
-      scheduled time — resolution arrives as a headline. Acceptance = bearish
-      premium unwind; rejection held = strike scenario returns.
-    action: covered by 2-hourly scan + tonight's reopen wakeups (#3, #5, #1)
+      Trump claimed (21:53Z 2 Aug, pre-reopen) the Hormuz deal is "done" and
+      direct talks start Monday afternoon. The deal claim is unverifiable
+      (no Iranian confirmation, no terms); talks convening IS verifiable.
+      Convened with substance = bearish-tail evidence; no talks / Iranian
+      denial = the claim deflates and the reopen's crude −6% whips back.
+    action: wakeup added 2026-08-03 20:00Z (Tue 00:00 Dubai deepdive);
+      2-hourly scans cover an earlier Iranian denial
 
   - date: 2026-08-03
     time_dubai: "18:00"
