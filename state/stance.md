@@ -1,9 +1,10 @@
-# Stance — 2026-08-02 (Sunday 14:50 Dubai, pre-reopen; deepdive×2-refined)
+# Stance — 2026-08-02 (Sunday 23:05 Dubai, pre-reopen; scan-updated)
 
-**No strikes landed through Sunday afternoon; no GCC-soil attack after
+**No strikes landed through Sunday; no GCC-soil attack after
 Boubyan (Kuwait, Sat); both capitals narrate a pause whose *terms* Iran
-rejects** (Omani strait plan spurned 29 Jul, Qatari proposal 1–2 Aug; IRGC
-regime stays; Mehr's front page accepts the *cessation* framing). This is
+rejects** (Omani strait plan spurned 29 Jul — but see route-talks reversal
+below; Qatari proposal 1–2 Aug; IRGC regime stays; Mehr's front page
+accepts the *cessation* framing). This is
 the war's **third de-escalation attempt**: June's interim deal unraveled in
 early July (Al Rekayyat hit 7 Jul → 13-day US campaign), and the 24 Jul
 halt broke in 4 days (Iran missiles on Jordan base 28 Jul → US-Saudi
@@ -17,7 +18,12 @@ transit *with force* — IRGC claims striking three tankers on an
 projectile/explosion near the US escort corridor); the regime is
 institutionalized (Treasury-designated PGSA fees + HormuzSafe + own
 insurer PGMIC). The US restricts too: Navy blockade of Iranian ports since
-14 Jul, >20 warships, escorts. Owner reluctance is the volume channel,
+14 Jul, >20 warships, escorts. **NEW 2 Aug 19Z (Gulf News):**
+Araghchi/Baqaei say Iran–Oman talks on a *new route* ("neither northern
+nor southern") are in "final stages" — but Baqaei explicitly decouples it
+from reopening ("nothing to do with whether the Strait is reopened"),
+blaming the US blockade. Route deal = marginal volume recovery, NOT
+premium unwind; Muscat silent. Owner reluctance is the volume channel,
 downstream of IRGC enforcement. Flows ≈ half pre-war (CENTCOM ~5.6 mb/d
 escorted since May; Wright: 13 mb/d out of Gulf, half strait/half bypass;
 pre-war ~20) and recovering at the margin (Sohar STS 2→7 pairs; Qatar LNG
@@ -56,7 +62,8 @@ two institutionalized regimes only unwind on a signed deal.
   `4b5a5df9` no new GCC attack pre-Mon-22Z (0.8, on track); GC ≤ 4098.6
   intraday Mon (0.65); no settle < $4,000 through Thu (0.6). NEW:
   `ae22c017` pause-break kinetic event by Fri 20:00Z (0.55); `b8d67af8`
-  IRGC transit regime still in force Fri (0.8). LBMA–COMEX basis: wakeup #1.
+  IRGC transit regime still in force Fri (0.8); `7fcb559d` Iran–Oman route
+  deal announced by Fri 20:00Z (0.5). LBMA–COMEX basis: wakeup #1.
 
 ## Desk-local
 
