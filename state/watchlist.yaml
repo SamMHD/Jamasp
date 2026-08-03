@@ -30,10 +30,17 @@ watchlist:
       (three tankers struck 29 Jul; PGSA/HormuzSafe/PGMIC,
       Treasury-designated) and US Navy blockade of Iranian ports + escorts
       (~5.6 mb/d, ~half pre-war, recovering at margin). Premium only fully
-      unwinds on a SIGNED text, not a claim. Watch: talks actually convening
-      Monday (wakeup Tue 00:00 Dubai); official Iranian response
-      (confirmation = bearish unwind; second "new lie" = sharp reversal of
-      the reopen move); Arbaeen Tue–Wed escalation focal.
+      unwinds on a SIGNED text, not a claim. UPDATED 3 Aug 04:00: IRGC fired
+      an anti-ship cruise missile toward a US-escorted tanker on the southern
+      route at 22:16Z — 23 min AFTER "deal done" — with a UKMTO attack
+      incident off Oman (single-source forexlive, corroboration prediction
+      4cb05e3d); Pezeshkian overnight reasserted the June Islamabad MoU
+      ("force the enemy to remain committed to what it has signed"), i.e.
+      Tehran negotiates the June document, not Trump's; Gulf News base rate:
+      five prior halt announcements, all broken within days or hours. Watch:
+      talks actually convening Monday (wakeup Tue 00:00 Dubai); official
+      Iranian response (confirmation = bearish unwind; second "new lie" =
+      sharp reversal of the reopen move); Arbaeen Tue–Wed escalation focal.
     since: 2026-07-31
 
   - theme: energy-pce-passthrough
@@ -70,10 +77,14 @@ watchlist:
 
   - theme: gold-basis-lbma-comex
     why: >
-      31 Jul printed ~$75 between the LBMA PM fix (4026.6) and GC=F at the same
-      clock minute (4101.9), against ~$32 of fair carry at 4.7% and ~2m to
-      expiry. UNVERIFIED — one overlapping datapoint, no baseline history in the
-      DB. A persistent wide basis is a London/COMEX physical dislocation and is
-      directly actionable for this desk; a collapse on Monday means it was a
-      data artifact. Track the spread daily until it resolves.
+      RESOLVED IN PRINCIPLE 3 Aug (wakeup #1): the 31 Jul ~$75 (PM fix 4026.6
+      vs GC 4101.5, -4 min) was the ONLY overlapping pair in the DB, and the
+      "~$32 fair carry" benchmark assumed the October contract. GC=F rolled to
+      Dec-26 around 31 Jul first-notice; fair carry to the December delivery
+      window at ~4.7% is $63-78, so $74.9 sits INSIDE fair value — carry
+      mis-specification, not a London/COMEX dislocation. Confirm-and-close:
+      3 Aug PM fix pair should print $50-90 (prediction 12360fdd, 0.65); score
+      cb2a8977 on the letter 4 Aug with a wrong-operationalization note (a
+      PERSISTENT $60-80 is the no-dislocation outcome). NB: DB fix timestamps
+      are London-clock labeled Z (BST true UTC = 09:30/14:00).
     since: 2026-08-01
