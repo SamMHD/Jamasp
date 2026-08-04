@@ -30,6 +30,26 @@ events:
       First US data with the war bid pulled — the rates desk back at the
       wheel. Prices-paid is the next read on the energy-PCE passthrough theme.
     action: wakeup scheduled 2026-08-03 18:45 Dubai (deepdive on the print)
+    outcome: >
+      RESOLVED 3 Aug — prices-paid 71.1 (from 73.0), first easing of the
+      passthrough; deepdive in reports/2026/08. Prediction 951d8286 records
+      Aug < 71.1 (0.7, ~1 Sep).
+
+  - date: 2026-08-04
+    time_dubai: "through Wed 03:00 (US Tuesday)"
+    title: Trump deadline — Hormuz must open "completely" by Tuesday
+    why: >
+      Set 3 Aug 22:24Z alongside "last chance before decapitation" and
+      talks-"underway" claims (Tehran denies). Rezaei pre-rejected it on
+      record ("not reopened on Washington's terms"; strike any warship
+      forcing an unauthorised route), and both transit regimes are in
+      force — the deadline cannot be met by market mechanics, so what
+      matters is Trump's reaction to the lapse: climbdown/extension
+      (drift) vs the called-off strike going back on (bullish tail).
+    action: >
+      wakeup added 2026-08-04 20:30Z (deepdive: deadline-lapse assessment,
+      also scores 90ee5bdd due 20:00Z); 2-hourly scans cover the interim;
+      prediction recorded (deadline lapses unmet, 0.7, Wed 03:00Z).
 
   - date: 2026-08-07
     time_dubai: "16:30"

@@ -18,29 +18,29 @@ watchlist:
 
   - theme: middle-east-risk-premium
     why: >
-      REWRITTEN 3 Aug 07:45 (history in reports/2026/08/2026-08-03-brief.md).
-      Trump claimed the Hormuz deal "done" 7 min pre-reopen (21:53Z 2 Aug);
-      23 min later the IRGC fired at a southern-route tanker — now
-      UKMTO-LOGGED (04:37 Dubai): explosion ~20nm NE of Khasab, crew/vessel
-      safe. IRNA photo of a tanker aft-aflame (unverified, 30 min later)
-      contradicts "safe" — misattribution risk both ways (Caroline Bezengi
-      leaking crude nearby). Market bought the claim (Brent <$84, −5%) and
-      kept buying it after the explosion; gold refused the refund (GC 4122.6,
-      no print below Fri 4098.6). Three documents in play: Trump's new deal
-      (talks Monday, downgraded to INTERMEDIATED via Saudi/UAE/Qatar,
-      Hegseth "locked and loaded" alongside); Tehran's June Islamabad MoU
-      (Pezeshkian: SNSC unanimous, "force the enemy to remain committed to
-      what it has signed"); and the REAL motion — Iran–Oman route deal,
-      Araghchi "final stages," Baqaei: a new compromise route, explicitly
-      NOT full reopening. Both Hormuz regimes in force and tightening:
-      IRGC transit authorisation (Treasury-designated PGSA/HormuzSafe/PGMIC)
-      + US blockade (38 vessels redirected, Lincoln in Arabian Sea); flows
-      ~half pre-war. Base rate: five prior halt announcements, all broken
-      within days-hours. Premium fully unwinds only on a SIGNED text; Oman
-      deal = PARTIAL deflation (managed transit ≠ reopening). Watch: talks
-      format/mandate tonight (wakeup #13); official Iranian language;
-      IRNA photo verification (hit = bullish fuel); Arbaeen Tue–Wed
-      (wakeup #10).
+      REWRITTEN 4 Aug (history in reports/2026/08/2026-08-03-brief.md and
+      2026-08-04-brief.md). The kinetic floor is now a PATTERN: Aug 1 Limah
+      (tanker engine room disabled), Aug 2 Khasab near-miss (UKMTO-
+      corroborated, crew safe — IRNA aflame photo unverified/likely
+      misattributed), Aug 3 22:00Z cargo vessel STRUCK 20nm NE Khasab —
+      UKMTO Warning 104-26, classified an ATTACK, unattributed. Arbaeen
+      focal window Tue–Wed. Rezaei (adviser to Supreme Leader Mojtaba
+      Khamenei): US warships forcing an "unauthorised route" will be
+      struck; "Hormuz will not be reopened on Washington's terms" — the
+      escort-convoy miscalculation is the sharpest edge. Trump set a
+      TUESDAY deadline for complete reopening ("last chance before
+      decapitation"; talks "underway" — Tehran denies). Both regimes in
+      force and tightening: IRGC transit authorisation + US blockade (44
+      vessels redirected per CENTCOM, tankers disabled, Lincoln on
+      station); flows ~half pre-war; IMO: ~6,000 seafarers stranded. Real
+      motion remains the Iran–Oman compromise route (Araghchi "final
+      stages") — Tehran-authorized, so Rezaei's threat does NOT cover it;
+      corridor signed + spun as reopening is still the bearish tail, but
+      narrowed. Base rate: five prior halt announcements, all broken.
+      Premium fully unwinds only on a SIGNED text. Watch: deadline lapse
+      (deepdive 20:30Z), official Iranian language, further UKMTO
+      advisories, Arbaeen (wakeup #10), Mojtaba–Pezeshkian power struggle
+      over Hormuz policy.
     since: 2026-07-31
 
   - theme: energy-pce-passthrough
@@ -52,7 +52,10 @@ watchlist:
       prints should be worse. Central event for the Fed path. AMENDED 2 Aug:
       two new drags — OPEC+ set for a September quota increase, and the US-Iran
       pause (if it holds) softens crude. Passthrough stays live only until a
-      Hormuz deal LANDS; ISM prices-paid 3 Aug is the next read.
+      Hormuz deal LANDS. ISM prices-paid printed 71.1 on 3 Aug (from 73.0 —
+      first easing; prediction 951d8286: Aug < 71.1). Next reads: July CPI/PCE,
+      then Aug ISM ~1 Sep. Crude's new lower base (~$80 WTI) accelerates the
+      rollover while it holds.
     since: 2026-07-31
 
   - theme: india-gold-formalisation
@@ -74,17 +77,8 @@ watchlist:
       14t in Q2 — a price-insensitive, non-CB, non-ETF holder. Downgraded on
       leverage, upgraded on structural bid.
     since: 2026-07-31
-
-  - theme: gold-basis-lbma-comex
-    why: >
-      RESOLVED IN PRINCIPLE 3 Aug (wakeup #1): the 31 Jul ~$75 (PM fix 4026.6
-      vs GC 4101.5, -4 min) was the ONLY overlapping pair in the DB, and the
-      "~$32 fair carry" benchmark assumed the October contract. GC=F rolled to
-      Dec-26 around 31 Jul first-notice; fair carry to the December delivery
-      window at ~4.7% is $63-78, so $74.9 sits INSIDE fair value — carry
-      mis-specification, not a London/COMEX dislocation. Confirm-and-close:
-      3 Aug PM fix pair should print $50-90 (prediction 12360fdd, 0.65); score
-      cb2a8977 on the letter 4 Aug with a wrong-operationalization note (a
-      PERSISTENT $60-80 is the no-dislocation outcome). NB: DB fix timestamps
-      are London-clock labeled Z (BST true UTC = 09:30/14:00).
-    since: 2026-08-01
+# REMOVED 4 Aug: gold-basis-lbma-comex — resolved. 3 Aug PM fix pair printed
+# $56 (fix 4028.15 vs GC 4084.3, ±5 min), inside the $50-90 Dec-26 fair-carry
+# band; 31 Jul $75 was contract-roll carry, not a London dislocation
+# (prediction 12360fdd hit). NB kept for future basis work: DB fix timestamps
+# are London-clock labeled Z (BST true UTC = 09:30/14:00).
