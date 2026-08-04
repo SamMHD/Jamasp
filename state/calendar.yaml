@@ -71,3 +71,13 @@ events:
       window, ahead of Friday payrolls.
     action: wakeup #10 (Tue 06:00Z deepdive) checks whether rhetoric turns
       operational; scan runs cover the interim.
+    outcome: >
+      CHECKED 4 Aug 10:15 Dubai (deepdive) — rhetoric staying symbolic:
+      Mehr coverage devotional (red flags, 2M pilgrims via Mehran), no
+      operational date-keyed language on Mehr/Gulf News/Al Jazeera. But
+      the blockade-track escalated into the window regardless: Khasab
+      projectile identified as a MISSILE (engine room disabled), Rezaei
+      ruled out any second corridor, unconfirmed Kuwait/F-35B claims in
+      Iranian channels, Araghchi in Iraq. Weights → 55/10/35; prediction
+      01018427 (Arbaeen stays symbolic, 0.75, Wed 23:59Z). Window close
+      folds into the 20:30Z deadline-lapse deepdive (wakeup #14).
