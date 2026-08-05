@@ -50,6 +50,27 @@ events:
       wakeup added 2026-08-04 20:30Z (deepdive: deadline-lapse assessment,
       also scores 90ee5bdd due 20:00Z); 2-hourly scans cover the interim;
       prediction recorded (deadline lapses unmet, 0.7, Wed 03:00Z).
+    outcome: >
+      RESOLVED 5 Aug — lapsed unmet at 03:00Z (50db7544 HIT); no strike,
+      diplomacy instead: US-Iran-Oman interim managed-corridor deal near,
+      Wednesday announcement targeted, Iranian leadership approved terms
+      Tuesday. Follow-through: Trump-speech entry below + wakeups #17/#16.
+
+  - date: 2026-08-05
+    time_dubai: "2026-08-06 00:30 (20:30Z Wed)"
+    title: Trump speaks — on interim-deal announcement-target day
+    why: >
+      Scheduled speech (calendar feed, medium impact) landing inside the
+      announcement window Axios says targets Wednesday. The obvious venue
+      for announcing the Hormuz interim deal. What matters is shape and
+      Iranian co-confirmation (fb90abae), not the headline: a managed
+      corridor spun as "reopening" is an oil event; gold reacts only via
+      rates. No announcement in the speech → watch for climbdown vs
+      strike-threat revival on the lapsed deadline.
+    action: >
+      wakeup #17 added 2026-08-05 21:45Z (deepdive: parse remarks, feed
+      fb90abae/394dfea7); wakeup #16 (Thu 00:15Z) closes the window and
+      scores; 2-hourly scans cover the gap.
 
   - date: 2026-08-07
     time_dubai: "16:30"
