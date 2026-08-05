@@ -16,13 +16,15 @@ Red Sea still hot (dhow sunk 4 Aug, HRA widened, Saudi VLCCs via
 Africa). Jebel Ali "attack" rumor: one forexlive aside, zero
 corroboration — noise unless Gulf News/The National confirm.
 
-**Tape:** sign question settled — **announcement risk lands on oil; gold
-trades it through rates.** Oil −5% (~$76 WTI) on deal hopes while GC
-rose a third day to 4186 (+1.7%), breaking the old 4160 cap with no war
-headline (`f7d39052` MISS on its own falsifier; lesson filed). ^TNX
-4.631, DXY 99.8, S&P record. No war premium in gold to unwind;
-battleground 50DMA 4194.3 / R1 4227.3, floor 4084. Basis closed:
-~$28 on 4 Aug fixes (`cb2a8977` HIT).
+**Tape (updated 15:00Z scan):** announcement risk lands on oil; gold
+trades it through rates — and the rates leg is running. GC 4291
+intraday (+3.65%/24h, +2.5% from the brief), **R1 4227.3 broken
+intraday with no war headline** on weak ADP + ISM services 54.1
+(employment contracting, prices accelerating); Fed-hike bets fading.
+^TNX 4.633, DXY 99.7, GVZ 25.3 (+8.4%), oil ~$75.8. Desk alerted
+15:00Z, event-pending framing — **tonight's settle vs 4227.3 decides
+`394dfea7` and the upward revisit** (`1ee59e17`). Floor 4084; basis
+~$28 (`cb2a8977` HIT).
 
 ## View
 
