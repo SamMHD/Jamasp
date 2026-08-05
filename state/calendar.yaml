@@ -71,6 +71,35 @@ events:
       wakeup #17 added 2026-08-05 21:45Z (deepdive: parse remarks, feed
       fb90abae/394dfea7); wakeup #16 (Thu 00:15Z) closes the window and
       scores; 2-hourly scans cover the gap.
+    outcome: >
+      RESOLVED 5 Aug 21:47Z (wakeup #17) — no announcement, no speech
+      headline on any working source 77 min after the slot. Target slid
+      to Friday (CNN Gulf official 50:50; N12 tonight-tail). Iran FM
+      confirmed Iran-Oman understanding + joint announcement "final
+      stages" but denied peace talks — framework confirmed, deal not
+      announced; fb90abae MISS-track, #16 scores. FT shape: mines
+      cleared by Iranian vessels BEFORE reopening, no fees; blockade
+      lifted + oil waiver in holding deal. Meanwhile GC broke R1 4227.3
+      on rates, not war (394dfea7 MISS-track). Follow-through: Friday
+      entry below, predictions df9a603b/f6c97f45.
+
+  - date: 2026-08-07
+    time_dubai: "through Sat 03:59 (Fri 23:59Z)"
+    title: Hormuz announcement deadline chatter — Friday window closes
+    why: >
+      The Wed announcement target lapsed empty; CNN's Gulf official puts
+      a deal by Friday at 50:50, traders per the forexlive oil recap now
+      watch Friday as the deadline. Recap judgment: the deal is NOT
+      pre-priced in oil — confirmation triggers the sharper downside
+      move. For gold it's an oil event unless a rates back-up joins.
+      Collides with payrolls (16:30 Dubai) — disentangle drivers before
+      re-weighting. Predictions riding on it: df9a603b (announcement by
+      Fri, 0.6), 7fcb559d (Iran-Oman route, 0.5), 96448cc2 (no joint
+      text, 0.85), b8d67af8 (IRGC regime in force, 0.8).
+    action: >
+      2-hourly scans cover the window; wakeup #2 (Fri 12:45Z) handles
+      payrolls and can flag announcement collision; scoring falls to the
+      Fri-close scans / Sat runs as each prediction matures.
 
   - date: 2026-08-07
     time_dubai: "16:30"
