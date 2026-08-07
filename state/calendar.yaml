@@ -109,6 +109,27 @@ events:
       it. Strong print strengthens the Logan/Kashkari/Hammack hike case; weak
       print is the dissenters' first growth alibi.
     action: wakeup scheduled 2026-08-07 16:45 Dubai (deepdive on the print)
+    outcome: >
+      RESOLVED 7 Aug 16:45 Dubai (deepdive) — the alibi branch: −23K vs
+      +80K exp, −103K revisions, AHE +0.1% m/m; 57%-priced Sept hike
+      gutted. GC +2.2% to 4420, 200DMA 4496.5 next. Weights → 65/10/25,
+      predictions ec71ce01/e29d9c5c/3e704df1. Hawks' comeback shot is
+      CPI 12 Aug (entry below, wakeup set).
+
+  - date: 2026-08-12
+    time_dubai: "16:30 (12:30Z — verify time as feed populates)"
+    title: US CPI (Jul) — the hawks' comeback shot
+    why: >
+      With payrolls negative and wages at +0.1% m/m, the September hike
+      case (Logan/Kashkari/Hammack) can only be re-armed by inflation:
+      a hot core CPI plus a "government-distorted jobs report" argument.
+      Decision tree — hot CPI + payrolls dismissed = hike case revives
+      (event-bearish weight back up); hot CPI + soft jobs accepted =
+      stagflation mix, gold-supportive both channels; soft CPI = no-hike
+      view (ec71ce01, 0.8) hardens and the 200DMA path (3e704df1) clears.
+      Also first test of energy-PCE passthrough easing (951d8286 thread).
+    action: wakeup added 2026-08-12 12:45Z (deepdive on the print vs
+      consensus, core m/m the decisive line; check hike-odds repricing)
 
   - date: 2026-08-04
     time_dubai: "all day (through 5 Aug)"
