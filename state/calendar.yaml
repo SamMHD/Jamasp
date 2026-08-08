@@ -100,6 +100,13 @@ events:
       2-hourly scans cover the window; wakeup #2 (Fri 12:45Z) handles
       payrolls and can flag announcement collision; scoring falls to the
       Fri-close scans / Sat runs as each prediction matures.
+    outcome: >
+      RESOLVED 8 Aug (04:20 deepdive) — window closed EMPTY; only
+      "progress" per a US official. Friday cohort scored 6/3/2, Brier
+      0.20: df9a603b MISS, 7fcb559d MISS, 96448cc2 HIT, b8d67af8 HIT.
+      Watch slid to the weekend/SNSC: 3d8416e4 (Sun ⇒ zero-fee) and
+      985e77d0 (no co-confirmed text by Mon 23:59Z) are the live hooks;
+      scans cover, no new wakeup needed.
 
   - date: 2026-08-07
     time_dubai: "16:30"
