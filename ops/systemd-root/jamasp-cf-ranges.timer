@@ -1,8 +1,8 @@
 [Unit]
-Description=Weekly refresh of Cloudflare source ranges
+Description=Daily refresh of Cloudflare source ranges
 
 [Timer]
-OnCalendar=Mon 04:17
+OnCalendar=*-*-* 04:17:00
 Persistent=true
 RandomizedDelaySec=30m
 
