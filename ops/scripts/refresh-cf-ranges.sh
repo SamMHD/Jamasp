@@ -10,7 +10,8 @@ set -euo pipefail
 
 V4_URL="https://www.cloudflare.com/ips-v4"
 V6_URL="https://www.cloudflare.com/ips-v6"
-MIN_CIDRS=5
+MIN_V4=10
+MIN_V6=5
 NFT_TABLE="inet jamasp_edge"
 NGINX_SNIPPET="/etc/nginx/conf.d/cloudflare-real-ip.conf"
 
@@ -26,7 +27,7 @@ grep -Ex '[0-9a-fA-F:]+/[0-9]+' "$tmp/v6" > "$tmp/v6.clean" || true
 
 v4n="$(wc -l < "$tmp/v4.clean")"
 v6n="$(wc -l < "$tmp/v6.clean")"
-if [ "$v4n" -lt "$MIN_CIDRS" ] || [ "$v6n" -lt "$MIN_CIDRS" ]; then
+if [ "$v4n" -lt "$MIN_V4" ] || [ "$v6n" -lt "$MIN_V6" ]; then
     echo "refresh-cf-ranges: implausible list (v4=$v4n v6=$v6n) — keeping existing ranges" >&2
     exit 1
 fi
