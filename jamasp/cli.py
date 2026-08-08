@@ -15,6 +15,7 @@ from jamasp import db as db_mod
 from jamasp import digest as digest_mod
 from jamasp import dispatch as dispatch_mod
 from jamasp import extract as extract_mod
+from jamasp import flash as flash_mod
 from jamasp import inbox as inbox_mod
 from jamasp import notify as notify_mod
 from jamasp import predictions as predictions_mod
@@ -57,9 +58,10 @@ def main():
 
 @main.command()
 @click.option("--no-digest", is_flag=True, help="skip the haiku lede pass")
+@click.option("--no-flash", is_flag=True, help="skip the telegram news flash pass")
 @db_opt
 @cfg_opt
-def ingest(no_digest, db_path, config_dir):
+def ingest(no_digest, no_flash, db_path, config_dir):
     """Fetch all sources, dedupe, cluster, and (optionally) write ledes."""
     conn, sources, settings = _common(db_path, config_dir)
     new_items = prices_n = events_n = errors = skipped = 0
@@ -104,12 +106,23 @@ def ingest(no_digest, db_path, config_dir):
         conn, ccfg["similarity_threshold"], ccfg["window_hours"]
     )
     ledes = 0 if no_digest else digest_mod.run_digest(conn, settings)
+    # Sources are fetched and committed by here, so the heartbeat is already
+    # true — the watchdog must not wait out the flash pass to see it.
     db_mod.set_meta(conn, "last_ingest_at", db_mod.utcnow())
+    flashes = {}
+    if not no_flash:
+        flashes = flash_mod.run_flash(conn, settings, sources)
     click.echo(
         f"ingest: {new_items} new items ({joined} clustered), "
         f"{prices_n} price snapshots, {events_n} events, {ledes} ledes, "
         f"{errors} source errors, {skipped} within interval"
     )
+    if flashes:
+        click.echo(
+            f"flash: {flashes['posted']} posted, {flashes['dup']} updated, "
+            f"{flashes['not_gold']} not gold, {flashes['burst']} over cap, "
+            f"{flashes['stale']} stale, {flashes['errors']} errors"
+        )
 
 
 @main.command()
@@ -134,6 +147,23 @@ def extract(url, db_path, config_dir):
     """Print readability-extracted article text (cached, truncated)."""
     conn, _, settings = _common(db_path, config_dir)
     click.echo(extract_mod.extract_url(conn, url, settings["extract_max_chars"]))
+
+
+@main.command()
+@click.option("--dry-run", is_flag=True, help="render messages; send and store nothing")
+@db_opt
+@cfg_opt
+def flash(dry_run, db_path, config_dir):
+    """Publish new gold items to the Telegram news channel (one pass)."""
+    conn, sources, settings = _common(db_path, config_dir)
+    stats = flash_mod.run_flash(
+        conn, settings, sources, emit=click.echo, dry_run=dry_run
+    )
+    click.echo(
+        f"flash: {stats['posted']} posted, {stats['dup']} updated, "
+        f"{stats['not_gold']} not gold, {stats['burst']} over cap, "
+        f"{stats['stale']} stale, {stats['errors']} errors"
+    )
 
 
 @main.command()
