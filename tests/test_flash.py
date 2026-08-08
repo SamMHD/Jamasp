@@ -1,3 +1,4 @@
+import sqlite3
 from datetime import datetime, timedelta, timezone
 
 from jamasp import db, flash
@@ -473,6 +474,91 @@ def test_run_flash_dry_run_emits_without_sending(tmp_path, monkeypatch):
     assert len(seen) == 1 and "منابع: Reuters" in seen[0]
     assert conn.execute("SELECT COUNT(*) c FROM flashes").fetchone()["c"] == 0
     assert conn.execute("SELECT COUNT(*) c FROM flash_items").fetchone()["c"] == 0
+
+
+def test_run_flash_survives_a_raising_record(tmp_path, monkeypatch):
+    # flash must never raise into the ingest run, whichever step breaks.
+    no_extract(monkeypatch)
+    conn = db.connect(tmp_path / "t.db")
+    (one,) = seed(conn, [("reuters", "Widget maker earnings", 1)])
+
+    def boom(*a, **k):
+        raise sqlite3.OperationalError("database is locked")
+
+    monkeypatch.setattr(flash, "record", boom)
+    stats = flash.run_flash(
+        conn, SETTINGS, SOURCES, post=FakePoster(),
+        run_model=model({one: {"gold": False, "dup_of": None}}),
+    )
+    assert stats["errors"] == 1
+    assert conn.execute(
+        "SELECT COUNT(*) c FROM source_errors WHERE source = 'flash'"
+    ).fetchone()["c"] == 1
+
+
+def test_run_flash_survives_a_raising_candidates(tmp_path, monkeypatch):
+    no_extract(monkeypatch)
+    conn = db.connect(tmp_path / "t.db")
+    seed(conn, [("reuters", "Gold hits record", 1)])
+
+    def boom(*a, **k):
+        raise sqlite3.OperationalError("database is locked")
+
+    monkeypatch.setattr(flash, "candidates", boom)
+    poster = FakePoster()
+    stats = flash.run_flash(conn, SETTINGS, SOURCES, post=poster,
+                            run_model=model({}))
+    assert stats["errors"] == 1 and poster.calls == []
+    assert conn.execute(
+        "SELECT COUNT(*) c FROM source_errors WHERE source = 'flash'"
+    ).fetchone()["c"] == 1
+
+
+class HalfWrittenConn:
+    """Real connection that dies on the publish's flash_items insert."""
+
+    def __init__(self, conn):
+        self._conn = conn
+
+    def __getattr__(self, name):
+        return getattr(self._conn, name)
+
+    def __enter__(self):
+        return self._conn.__enter__()
+
+    def __exit__(self, *exc):
+        return self._conn.__exit__(*exc)
+
+    def execute(self, sql, params=()):
+        if "flash_items" in sql and len(params) > 2 and params[2] == "posted":
+            raise sqlite3.OperationalError("disk I/O error")
+        return self._conn.execute(sql, params)
+
+
+def test_publish_write_is_atomic(tmp_path, monkeypatch):
+    # A death between the flashes insert and the flash_items row would leave the
+    # item a candidate again: a second Telegram message next tick, then an
+    # IntegrityError on flashes.id aborting ingest every 15 minutes.
+    no_extract(monkeypatch)
+    real = db.connect(tmp_path / "t.db")
+    (one,) = seed(real, [("reuters", "Gold hits record", 1)])
+    poster = FakePoster()
+    stats = flash.run_flash(
+        HalfWrittenConn(real), SETTINGS, SOURCES, post=poster,
+        run_model=model({one: {"gold": True, "dup_of": None}}),
+    )
+    assert (stats["posted"], stats["errors"]) == (0, 1)
+    assert [c[0] for c in poster.calls] == ["send"]  # the message did go out
+    orphans = real.execute(
+        "SELECT COUNT(*) c FROM flashes f"
+        " LEFT JOIN flash_items i ON i.flash_id = f.id WHERE i.item_id IS NULL"
+    ).fetchone()["c"]
+    assert orphans == 0
+    # neither half survived, so the next tick simply retries the item
+    assert real.execute("SELECT COUNT(*) c FROM flashes").fetchone()["c"] == 0
+    assert real.execute(
+        "SELECT COUNT(*) c FROM flash_items WHERE item_id = ?", (one,)
+    ).fetchone()["c"] == 0
 
 
 LONG_HTML = (

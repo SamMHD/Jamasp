@@ -48,14 +48,19 @@ def log_error(conn: sqlite3.Connection, exc: object) -> None:
 
 
 def record(
-    conn: sqlite3.Connection, item_id: str, flash_id: str | None, state: str
+    conn: sqlite3.Connection,
+    item_id: str,
+    flash_id: str | None,
+    state: str,
+    commit: bool = True,
 ) -> None:
     conn.execute(
         "INSERT OR REPLACE INTO flash_items (item_id, flash_id, state, ts)"
         " VALUES (?, ?, ?, ?)",
         (item_id, flash_id, state, utcnow()),
     )
-    conn.commit()
+    if commit:
+        conn.commit()
 
 
 def candidates(
@@ -154,17 +159,17 @@ def _publish(
     )
     try:
         fields = flashtext.parse_write_response(run_model(cfg["write_cmd"], prompt))
+        text = flashtext.render_message(
+            fields["title_fa"],
+            fields["summary_fa"],
+            fields["impact_fa"],
+            item["url"],
+            item["published_at"],
+            [label],
+        )
     except Exception as exc:
         log_error(conn, exc)
         return None
-    text = flashtext.render_message(
-        fields["title_fa"],
-        fields["summary_fa"],
-        fields["impact_fa"],
-        item["url"],
-        item["published_at"],
-        [label],
-    )
     if dry_run:
         if emit:
             emit(text)
@@ -176,15 +181,23 @@ def _publish(
         log_error(conn, exc)
         return None
     now = utcnow()
-    conn.execute(
-        "INSERT INTO flashes (id, created_at, updated_at, title_en, title_fa,"
-        " summary_fa, impact_fa, url, message_id, status)"
-        " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'sent')",
-        (item["id"], now, now, item["headline"], fields["title_fa"],
-         fields["summary_fa"], fields["impact_fa"], item["url"], message_id),
-    )
-    conn.commit()
-    record(conn, item["id"], item["id"], "posted")
+    try:
+        # One transaction. A flashes row without its flash_items row would make
+        # the item a candidate again next tick: a second Telegram message, then
+        # a PRIMARY KEY collision on flashes.id — every tick until it ages out.
+        with conn:
+            conn.execute(
+                "INSERT INTO flashes (id, created_at, updated_at, title_en,"
+                " title_fa, summary_fa, impact_fa, url, message_id, status)"
+                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'sent')",
+                (item["id"], now, now, item["headline"], fields["title_fa"],
+                 fields["summary_fa"], fields["impact_fa"], item["url"],
+                 message_id),
+            )
+            record(conn, item["id"], item["id"], "posted", commit=False)
+    except Exception as exc:
+        log_error(conn, exc)
+        return None
     return item["id"]
 
 
@@ -197,7 +210,11 @@ def _apply_dup(conn, item, row, display, chat, post, emit, dry_run) -> bool:
         if not dry_run:
             record(conn, item["id"], row["id"], "dup")
         return True
-    text = _render_flash(conn, row, display, extra=label)
+    try:
+        text = _render_flash(conn, row, display, extra=label)
+    except Exception as exc:
+        log_error(conn, exc)
+        return False
     if dry_run:
         if emit:
             emit(text)
@@ -235,6 +252,23 @@ def run_flash(
 ) -> dict[str, int]:
     """One flash pass. Never raises; every failure is counted and logged."""
     stats = {"posted": 0, "dup": 0, "not_gold": 0, "stale": 0, "burst": 0, "errors": 0}
+    try:
+        return _run_pass(conn, settings, sources, post, run_model, emit, dry_run,
+                         stats)
+    except Exception as exc:
+        # Last line of defence: ingest finishes whatever happens in here. The
+        # per-step handlers below cover the expected failures; this covers a
+        # locked database, a malformed row, anything unforeseen.
+        stats["errors"] += 1
+        try:
+            log_error(conn, exc)
+        except Exception:
+            pass
+        return stats
+
+
+def _run_pass(conn, settings, sources, post, run_model, emit, dry_run, stats):
+    """The pass itself. Mutates and returns stats; run_flash owns the guard."""
     cfg = settings.get("flash") or {}
     if not cfg.get("enabled"):
         return stats
