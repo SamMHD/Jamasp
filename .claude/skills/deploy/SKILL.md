@@ -303,6 +303,18 @@ Two changes close this:
   clears the floor but still silently drops real ranges) it loads that
   cache into the live nftables sets before still exiting non-zero, so the
   failure stays visible in `systemctl status` / `journalctl`.
+
+  **Known deadlock in the relative check.** If Cloudflare ever *legitimately*
+  shrinks its published list (still above the absolute floors, but below
+  what is currently loaded), the relative check rejects every fetch from
+  then on — permanently. The current count is read from the live set, which
+  only the daily `jamasp-cf-ranges.service` touches, and that never reloads
+  the table. It fails toward safety (stale ranges, not empty ones) but it
+  fails **silently**, and with no `OnFailure=` wired up nothing will say so.
+  Recovery is `systemctl restart jamasp-edge` — which reloads the table,
+  resetting the current count to zero so the next fetch is accepted. If a
+  refresh failure ever persists across days, check this before anything
+  else.
 - `nginx.service.d/requires-jamasp-edge.conf` (table above) stops nginx
   from starting fail-open if `jamasp-edge.service` itself fails outright
   (e.g. a syntax error in the `.nft` file — the cache can't help there
@@ -492,13 +504,18 @@ give it a few minutes of normal internet background noise before treating
 zero as a symptom.
 
 **M3:** `jamasp-edge.service`'s `ExecStop` runs `nft delete table inet
-jamasp_edge` — so `systemctl stop jamasp-edge` (or a `stop` as part of some
-other operation) silently removes the *entire* lockdown, sets and rules
-both, while nginx keeps right on serving on 80/443 with no filtering at
-all. There's no separate "pause and keep the rules" verb; treat
-`stop`/`restart` on this unit as "the origin is briefly wide open" and
-follow it promptly with `systemctl start jamasp-edge` (which the
-`nginx.service.d` drop-in above will now also require before nginx itself
+jamasp_edge` — so `systemctl stop jamasp-edge` removes the *entire*
+lockdown, sets and rules both. There is no "pause and keep the rules" verb.
+
+Because nginx now carries `Requires=jamasp-edge.service`, systemd stops
+nginx too when this unit is explicitly stopped, so the outcome is an
+outage rather than an unfiltered origin. That is the safer failure, but do
+not rely on it as a security control — it holds for an explicit `stop`, and
+reasoning about every systemd path that could drop the table while nginx
+survives is not worth betting the perimeter on. Treat `stop`/`restart` here
+as "the lockdown is gone until I put it back", and follow promptly with
+`systemctl start jamasp-edge nginx` (the `nginx.service.d` drop-in above
+also requires it before nginx itself
 can (re)start).
 
 ### Rollback
