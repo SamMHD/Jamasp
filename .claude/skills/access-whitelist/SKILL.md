@@ -28,7 +28,12 @@ Auth domain:  mahdanian-saman-81.cloudflareaccess.com
 IdP:          one-time PIN (email)
 ```
 
-Current allow-list: `mahdanian.saman@gmail.com`.
+Allow-list as of 2026-08-09: `saman@mahdanian.xyz` and
+`mahdanian.saman@gmail.com`.
+
+**Do not trust that line — confirm with the read in step 1.** It is a snapshot
+of mutable state living in a file that is not updated when the state changes.
+The API is the only authority on who currently has access.
 
 ## Non-negotiables
 
