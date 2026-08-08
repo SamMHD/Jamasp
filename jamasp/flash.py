@@ -143,10 +143,17 @@ def _render_flash(
     )
 
 
+UNREADABLE = object()  # the write model refused: source text was not an article
+
+
 def _publish(
     conn, item, cfg, display, chat, post, run_model, emit, dry_run, extract_max
 ):
-    """Post one new story. Returns its flash id, or None on failure."""
+    """Post one new story.
+
+    Returns its flash id, None on a retryable failure, or UNREADABLE when the
+    write model declined the source text.
+    """
     label = display.get(item["source"], item["source"])
     try:
         body = extract_mod.extract_url(conn, item["url"], extract_max)
@@ -167,6 +174,12 @@ def _publish(
             item["published_at"],
             [label],
         )
+    except flashtext.SourceUnusable:
+        # Not a failure and not worth retrying: the link will still be a consent
+        # wall next tick. Record it so it stops being a candidate.
+        if not dry_run:
+            record(conn, item["id"], None, "unreadable")
+        return UNREADABLE
     except Exception as exc:
         log_error(conn, exc)
         return None
@@ -251,7 +264,8 @@ def run_flash(
     dry_run: bool = False,
 ) -> dict[str, int]:
     """One flash pass. Never raises; every failure is counted and logged."""
-    stats = {"posted": 0, "dup": 0, "not_gold": 0, "stale": 0, "burst": 0, "errors": 0}
+    stats = {"posted": 0, "dup": 0, "not_gold": 0, "unreadable": 0, "stale": 0,
+             "burst": 0, "errors": 0}
     try:
         return _run_pass(conn, settings, sources, post, run_model, emit, dry_run,
                          stats)
@@ -332,6 +346,10 @@ def _run_pass(conn, settings, sources, post, run_model, emit, dry_run, stats):
             conn, item, cfg, display, chat, post, run_model, emit, dry_run,
             extract_max,
         )
+        if flash_id is UNREADABLE:
+            # no message, so it never cost a slot in the per-tick budget
+            stats["unreadable"] += 1
+            continue
         if flash_id is None:
             stats["errors"] += 1
             continue

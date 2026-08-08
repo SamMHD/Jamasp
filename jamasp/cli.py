@@ -118,11 +118,7 @@ def ingest(no_digest, no_flash, db_path, config_dir):
         f"{errors} source errors, {skipped} within interval"
     )
     if flashes:
-        click.echo(
-            f"flash: {flashes['posted']} posted, {flashes['dup']} updated, "
-            f"{flashes['not_gold']} not gold, {flashes['burst']} over cap, "
-            f"{flashes['stale']} stale, {flashes['errors']} errors"
-        )
+        click.echo(_flash_line(flashes))
 
 
 @main.command()
@@ -149,6 +145,16 @@ def extract(url, db_path, config_dir):
     click.echo(extract_mod.extract_url(conn, url, settings["extract_max_chars"]))
 
 
+def _flash_line(stats: dict) -> str:
+    """One-line flash summary, shared by `ingest` and `flash`."""
+    return (
+        f"flash: {stats['posted']} posted, {stats['dup']} updated, "
+        f"{stats['not_gold']} not gold, {stats['unreadable']} unreadable, "
+        f"{stats['burst']} over cap, {stats['stale']} stale, "
+        f"{stats['errors']} errors"
+    )
+
+
 @main.command()
 @click.option("--dry-run", is_flag=True, help="render messages; send and store nothing")
 @db_opt
@@ -159,11 +165,7 @@ def flash(dry_run, db_path, config_dir):
     stats = flash_mod.run_flash(
         conn, settings, sources, emit=click.echo, dry_run=dry_run
     )
-    click.echo(
-        f"flash: {stats['posted']} posted, {stats['dup']} updated, "
-        f"{stats['not_gold']} not gold, {stats['burst']} over cap, "
-        f"{stats['stale']} stale, {stats['errors']} errors"
-    )
+    click.echo(_flash_line(stats))
 
 
 @main.command()
