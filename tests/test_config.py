@@ -43,3 +43,18 @@ def test_repo_configs_load():
     settings = load_settings()
     assert settings["inbox_cap"] == 120
     assert settings["timezone"] == "Asia/Dubai"
+
+
+def test_display_names_uses_display_then_falls_back():
+    from jamasp.config import display_names
+
+    sources = [
+        Source(name="cnbc_finance", type="rss", url="u", interval_minutes=15,
+               topic="markets", display="CNBC"),
+        Source(name="mining_com", type="rss", url="u", interval_minutes=15,
+               topic="gold"),
+    ]
+    assert display_names(sources) == {
+        "cnbc_finance": "CNBC",
+        "mining_com": "Mining Com",
+    }
