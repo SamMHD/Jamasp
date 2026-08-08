@@ -75,9 +75,17 @@ git config user.email jamasp@mahdanian.xyz    # for the per-run commits
 ### 4. secrets scaffold
 ```bash
 mkdir -p ~/.config/jamasp
-printf 'JAMASP_TG_TOKEN=\nJAMASP_TG_CHAT=\n' > ~/.config/jamasp/env
+printf 'JAMASP_TG_TOKEN=\nJAMASP_TG_CHAT=\nJAMASP_TG_NEWS_CHAT=\n' > ~/.config/jamasp/env
 chmod 600 ~/.config/jamasp/env
 ```
+
+`JAMASP_TG_NEWS_CHAT` is the channel that receives per-story gold news
+flashes. Create a second Telegram channel, add the same bot to it as an
+administrator with "Post Messages" and "Edit Messages of Others" both
+enabled — the flash pipeline edits its own messages when a second source
+picks up a story — and put its chat id here. If the variable is missing, the
+flash pass disables itself and logs to `source_errors`; ingestion, briefs, and
+scans are unaffected.
 
 ### 5. systemd units
 All 12 unit files (6 services + 6 timers: ingest, brief, scan, dispatch,
