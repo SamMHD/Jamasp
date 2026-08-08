@@ -319,6 +319,41 @@ sources:
     assert calls == []
 
 
+def test_ingest_heartbeat_lands_before_the_flash_pass(tmp_path, monkeypatch):
+    # watchdog.check reads last_ingest_at with a 60-minute staleness bound.
+    # The fetch is done and committed before flash starts, so the heartbeat
+    # must not be gated on however long flash takes.
+    from jamasp import db as db_mod, flash as flash_mod
+
+    cfg = _write_configs(
+        tmp_path,
+        """
+sources:
+  - name: deadfeed
+    type: rss
+    url: http://127.0.0.1:1/rss
+    interval_minutes: 15
+    topic: gold
+""",
+    )
+    seen = {}
+
+    def fake_run_flash(conn, settings, sources, **kwargs):
+        seen["heartbeat"] = db_mod.get_meta(conn, "last_ingest_at")
+        return {}
+
+    monkeypatch.setattr(flash_mod, "run_flash", fake_run_flash)
+    result = CliRunner().invoke(
+        main,
+        [
+            "ingest", "--no-digest",
+            "--db", str(tmp_path / "j.db"), "--config-dir", str(cfg),
+        ],
+    )
+    assert result.exit_code == 0
+    assert seen["heartbeat"] is not None
+
+
 def test_ingest_runs_flash_by_default(tmp_path, monkeypatch):
     from jamasp import flash as flash_mod
 

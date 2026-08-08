@@ -106,10 +106,12 @@ def ingest(no_digest, no_flash, db_path, config_dir):
         conn, ccfg["similarity_threshold"], ccfg["window_hours"]
     )
     ledes = 0 if no_digest else digest_mod.run_digest(conn, settings)
+    # Sources are fetched and committed by here, so the heartbeat is already
+    # true — the watchdog must not wait out the flash pass to see it.
+    db_mod.set_meta(conn, "last_ingest_at", db_mod.utcnow())
     flashes = {}
     if not no_flash:
         flashes = flash_mod.run_flash(conn, settings, sources)
-    db_mod.set_meta(conn, "last_ingest_at", db_mod.utcnow())
     click.echo(
         f"ingest: {new_items} new items ({joined} clustered), "
         f"{prices_n} price snapshots, {events_n} events, {ledes} ledes, "
