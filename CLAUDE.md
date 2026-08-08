@@ -61,14 +61,17 @@ Invoke it when standing up a new host or repairing one.
 
 ## Working on Jamasp itself
 
-The [Superpowers](https://github.com/obra/superpowers) skill set is vendored
-into `.claude/skills/` — brainstorming, writing-plans,
-subagent-driven-development, test-driven-development, systematic-debugging and
-the rest. Use them when changing Jamasp's code: brainstorm and write a plan
-before touching anything non-trivial, and land specs and plans in
-`docs/superpowers/`. They trigger on development work, not on analysis runs —
-a brief or scan should never invoke them. Provenance and update instructions:
-`docs/superpowers/VENDORED.md`.
+Use the [Superpowers](https://github.com/obra/superpowers) skills —
+brainstorming, writing-plans, subagent-driven-development,
+test-driven-development, systematic-debugging and the rest — when changing
+Jamasp's code: brainstorm and write a plan before touching anything
+non-trivial, and land specs and plans in `docs/superpowers/`. They come from
+the installed plugin rather than being vendored into this repo, so they stay
+current on their own. They trigger on development work, not on analysis runs —
+a brief or scan should never invoke them.
+
+`.claude/skills/` holds only Jamasp's own skills: `brief`, `scan`,
+`deepdive`, `retro`, `deploy`.
 
 The web control panel lives in `panel/` (Next.js; see
 `docs/superpowers/specs/2026-08-01-jamasp-panel-design.md`). It reads
