@@ -23,7 +23,7 @@ table inet jamasp_edge {
         type filter hook input priority filter; policy accept;
 
         tcp dport { 80, 443 } iif lo accept
-        tcp dport { 80, 443 } meta nfproto ipv4 ip  saddr != @cf_v4 drop
-        tcp dport { 80, 443 } meta nfproto ipv6 ip6 saddr != @cf_v6 drop
+        tcp dport { 80, 443 } meta nfproto ipv4 ip  saddr != @cf_v4 counter drop
+        tcp dport { 80, 443 } meta nfproto ipv6 ip6 saddr != @cf_v6 counter drop
     }
 }
