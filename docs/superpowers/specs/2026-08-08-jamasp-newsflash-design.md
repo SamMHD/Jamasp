@@ -210,6 +210,14 @@ Guidance carried in the prompt:
   unrelated to gold, crypto-only stories, and general corporate news do not.
 - `dup_of` means the **same underlying event**, not the same topic. "Gold hits
   record" and "Gold pulls back from record" are two stories.
+- `dup_of` may name a POSTED flash id **or the id of an earlier-listed NEW
+  item**. Without the second form, two outlets carrying the same story inside a
+  single tick would both look new and produce two messages. When several NEW
+  items cover one story, all but the first point at that first item's id; the
+  first is published and the rest fold into it. A `dup_of` naming a candidate
+  that was never published — it was `not_gold`, its write call failed, or it
+  lost to the burst cap — falls through to "new story", which is the safe
+  direction.
 - When uncertain whether something is a repeat, treat it as new. A duplicate
   message is a smaller failure than a suppressed story.
 
@@ -259,8 +267,9 @@ mechanical, whereas write produces the Persian analytical prose the desk reads.
 ## CLI
 
 - `uv run jamasp flash` — run one flash pass standalone.
-- `uv run jamasp flash --dry-run` — render and print messages; send nothing,
-  write nothing.
+- `uv run jamasp flash --dry-run` — render and print messages. Makes no
+  Telegram calls and records no flash state. It does run both model calls, since
+  seeing the Persian output is the point, and may populate `extract_cache`.
 - `uv run jamasp ingest --no-flash` — skip the flash stage, mirroring
   `--no-digest`.
 
