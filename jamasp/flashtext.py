@@ -60,7 +60,13 @@ PARAGRAPH_MAX_CHARS = 400
 WRITE_HEADER = """You are a market analyst at a physical gold trading company in Dubai,
 writing a wire flash in Persian for the trading desk.
 
-Return ONLY a JSON object with exactly these keys:
+If the source text below is not a usable news article — a cookie or consent
+page, a paywall notice, an error page, a redirect stub, or boilerplate with no
+reportable content — return ONLY {{"usable": false}} and nothing else. Never
+write a flash describing the failure; a missing flash is far better than one
+about a cookie banner.
+
+Otherwise return ONLY a JSON object with exactly these keys:
   "title_fa"   - Persian headline, at most 10 words, no trailing punctuation.
   "summary_fa" - ONE Persian paragraph, 3-5 sentences and AT MOST {budget}
                  characters, stating only facts present in the source text
@@ -172,8 +178,19 @@ def build_write_prompt(
     )
 
 
+class SourceUnusable(ValueError):
+    """The write model declined: the source text is not a reportable article.
+
+    Extraction cannot detect this on its own — a consent wall or paywall notice
+    returns perfectly good text, just not the article. Only the model reading it
+    can tell, so it is given a way to say so.
+    """
+
+
 def parse_write_response(text: str) -> dict[str, str]:
     parsed = _json_object(text)
+    if parsed.get("usable") is False:
+        raise SourceUnusable("write model declined: source text is not an article")
     fields = {}
     for key in ("title_fa", "summary_fa", "impact_fa"):
         value = parsed.get(key)

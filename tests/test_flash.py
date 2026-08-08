@@ -407,6 +407,54 @@ def test_run_flash_edit_failure_leaves_item_unprocessed(tmp_path, monkeypatch):
     ).fetchone()["status"] == "sent"
 
 
+def test_run_flash_records_unreadable_and_posts_nothing(tmp_path, monkeypatch):
+    """A consent wall extracts fine, so only the write model can refuse it."""
+    no_extract(monkeypatch)
+    conn = db.connect(tmp_path / "t.db")
+    (one,) = seed(conn, [("reuters", "Gold hits record", 1)])
+
+    def run(cmd, prompt):
+        if cmd == ["fake-decide"]:
+            return json.dumps({one: {"gold": True, "dup_of": None}})
+        return json.dumps({"usable": False})
+
+    poster = FakePoster()
+    stats = flash.run_flash(conn, SETTINGS, SOURCES, post=poster, run_model=run)
+    assert stats["unreadable"] == 1
+    assert (stats["posted"], stats["errors"]) == (0, 0)
+    assert poster.calls == []
+    assert conn.execute("SELECT COUNT(*) c FROM flashes").fetchone()["c"] == 0
+    # recorded, so it is not retried every tick for the next six hours
+    assert conn.execute(
+        "SELECT state FROM flash_items WHERE item_id = ?", (one,)
+    ).fetchone()["state"] == "unreadable"
+
+
+def test_run_flash_unreadable_does_not_consume_the_post_budget(tmp_path, monkeypatch):
+    no_extract(monkeypatch)
+    conn = db.connect(tmp_path / "t.db")
+    junk, good = seed(
+        conn, [("reuters", "Junk redirect", 1), ("cnbc", "Gold hits record", 2)]
+    )
+
+    def run(cmd, prompt):
+        if cmd == ["fake-decide"]:
+            return json.dumps({
+                junk: {"gold": True, "dup_of": None},
+                good: {"gold": True, "dup_of": None},
+            })
+        if "Junk redirect" in prompt:
+            return json.dumps({"usable": False})
+        return json.dumps({"title_fa": "عنوان", "summary_fa": "خلاصه",
+                           "impact_fa": "اثر"})
+
+    settings = {**SETTINGS, "flash": {**SETTINGS["flash"], "max_posts_per_tick": 1}}
+    poster = FakePoster()
+    stats = flash.run_flash(conn, settings, SOURCES, post=poster, run_model=run)
+    assert (stats["unreadable"], stats["posted"], stats["burst"]) == (1, 1, 0)
+    assert [c[0] for c in poster.calls] == ["send"]
+
+
 def test_run_flash_disabled_without_news_chat(tmp_path, monkeypatch):
     no_extract(monkeypatch)
     monkeypatch.delenv("JAMASP_TG_NEWS_CHAT", raising=False)
@@ -453,7 +501,7 @@ def test_run_flash_disabled_by_settings(tmp_path, monkeypatch):
     poster = FakePoster()
     stats = flash.run_flash(conn, settings, SOURCES, post=poster,
                             run_model=model({}))
-    assert stats == {"posted": 0, "dup": 0, "not_gold": 0, "stale": 0,
+    assert stats == {"posted": 0, "dup": 0, "not_gold": 0, "unreadable": 0, "stale": 0,
                      "burst": 0, "errors": 0}
     assert poster.calls == []
 

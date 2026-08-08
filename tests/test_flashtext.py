@@ -115,6 +115,26 @@ def test_build_write_prompt_flattens_control_characters_in_headline():
     assert prompt.count("SOURCE: Reuters") == 1
 
 
+def test_parse_write_response_raises_unusable_when_model_declines():
+    """A consent wall extracts 'successfully'; only the model can spot the junk."""
+    with pytest.raises(flashtext.SourceUnusable):
+        flashtext.parse_write_response('{"usable": false}')
+
+
+def test_parse_write_response_accepts_explicit_usable_true():
+    text = '{"usable": true, "title_fa": "t", "summary_fa": "s", "impact_fa": "i"}'
+    assert flashtext.parse_write_response(text) == {
+        "title_fa": "t", "summary_fa": "s", "impact_fa": "i"
+    }
+
+
+def test_build_write_prompt_offers_the_refusal():
+    prompt = flashtext.build_write_prompt(
+        "Gold hits record", "Reuters", "2026-08-08T10:32:00Z", "body"
+    )
+    assert '"usable": false' in prompt
+
+
 def test_build_write_prompt_states_a_character_budget():
     """The 3-5 sentence guidance alone did not hold; a number is followable."""
     prompt = flashtext.build_write_prompt(

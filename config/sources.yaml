@@ -42,14 +42,12 @@ sources:
   # kitco: removed 2026-07-31 — every rss path (/rss/, /news/*/rss,
   # /rss/KitcoNews.xml) returns 403 Forbidden; site is bot-protected
   # and no alternate feed exists.
-  # gnews_gold: added 2026-07-31 to replace lost gold-topic coverage
-  # from fxstreet+kitco — Google News RSS search, no key required.
-  - name: gnews_gold
-    type: rss
-    url: "https://news.google.com/rss/search?q=gold+OR+bullion+market&hl=en-US&gl=US&ceid=US:en"
-    interval_minutes: 15
-    topic: gold
-    display: Google News
+  # gnews_gold: removed 2026-08-08. Added 2026-07-31 to replace lost
+  # fxstreet+kitco coverage, but its entries link to news.google.com redirect
+  # stubs rather than to the publisher. `jamasp extract` follows one and gets
+  # Google's cookie-consent page — text that extracts cleanly and says nothing —
+  # which poisons any article read, not just the news flash. Headlines alone
+  # were not worth that. Restore only with a link resolver in front of it.
   # wgc / ecb_press / boe_news / bis_press / bls_latest / mining_weekly /
   # northern_miner / gulf_news / national_business: added 2026-07-31 after
   # per-source verification FROM the Hetzner host (docs/future-sources.md
