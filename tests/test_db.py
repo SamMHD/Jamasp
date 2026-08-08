@@ -52,3 +52,26 @@ def test_meta_helpers(tmp_path):
     db.set_meta(conn, "last_ingest_at", "2026-07-31T05:00:00Z")
     db.set_meta(conn, "last_ingest_at", "2026-07-31T05:15:00Z")  # upsert
     assert db.get_meta(conn, "last_ingest_at") == "2026-07-31T05:15:00Z"
+
+
+def test_connect_creates_flash_tables(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    names = {
+        r["name"]
+        for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
+    }
+    assert {"flashes", "flash_items"} <= names
+
+
+def test_flashes_requires_message_id(tmp_path):
+    import sqlite3
+
+    import pytest
+
+    conn = db.connect(tmp_path / "t.db")
+    with pytest.raises(sqlite3.IntegrityError):
+        conn.execute(
+            "INSERT INTO flashes (id, created_at, updated_at, title_en, title_fa,"
+            " summary_fa, impact_fa, url, message_id, status)"
+            " VALUES ('a','t','t','en','fa','s','i','https://e/1', NULL, 'sent')"
+        )

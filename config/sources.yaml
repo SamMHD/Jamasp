@@ -8,11 +8,13 @@ sources:
     url: https://www.investing.com/rss/news_11.rss
     interval_minutes: 15
     topic: gold
+    display: Investing.com
   - name: marketwatch_top
     type: rss
     url: https://feeds.content.dowjones.io/public/rss/mw_topstories
     interval_minutes: 15
     topic: markets
+    display: MarketWatch
   # cnbc_finance / cnbc_economy / mining_com: added 2026-07-31 as
   # DEEP-READABLE sources. investing_commodities (Cloudflare 403) and
   # gnews_gold (Google News consent-wall wrapper URLs) give headline+lede
@@ -24,16 +26,19 @@ sources:
     url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10000664"
     interval_minutes: 15
     topic: markets
+    display: CNBC
   - name: cnbc_economy
     type: rss
     url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=20910258"
     interval_minutes: 30
     topic: macro
+    display: CNBC
   - name: mining_com
     type: rss
     url: https://www.mining.com/feed/
     interval_minutes: 30
     topic: gold
+    display: Mining.com
   # kitco: removed 2026-07-31 — every rss path (/rss/, /news/*/rss,
   # /rss/KitcoNews.xml) returns 403 Forbidden; site is bot-protected
   # and no alternate feed exists.
@@ -44,6 +49,7 @@ sources:
     url: "https://news.google.com/rss/search?q=gold+OR+bullion+market&hl=en-US&gl=US&ceid=US:en"
     interval_minutes: 15
     topic: gold
+    display: Google News
   # wgc / ecb_press / boe_news / bis_press / bls_latest / mining_weekly /
   # northern_miner / gulf_news / national_business: added 2026-07-31 after
   # per-source verification FROM the Hetzner host (docs/future-sources.md
@@ -58,21 +64,25 @@ sources:
     url: https://www.gold.org/rss.xml
     interval_minutes: 60
     topic: gold
+    display: World Gold Council
   - name: mining_weekly
     type: rss
     url: https://www.miningweekly.com/page/home/feed
     interval_minutes: 30
     topic: gold
+    display: Mining Weekly
   - name: northern_miner
     type: rss
     url: https://www.northernminer.com/feed/
     interval_minutes: 30
     topic: gold
+    display: Northern Miner
   - name: gulf_news
     type: rss
     url: https://gulfnews.com/feed
     interval_minutes: 30
     topic: regional
+    display: Gulf News
   - name: national_business
     type: rss
     # Arc Publishing feed — the ?outputType=xml suffix is required (bare
@@ -80,6 +90,7 @@ sources:
     url: "https://www.thenationalnews.com/arc/outboundfeeds/rss/category/business/?outputType=xml"
     interval_minutes: 30
     topic: regional
+    display: The National
   # saxo_research / actionforex / fxempire_forecasts / forexlive /
   # gold_eagle: added 2026-07-31 — technical-analysis/trader-commentary
   # tier, all verified from the Hetzner host on the plain jamasp-UA path.
@@ -94,47 +105,56 @@ sources:
     url: https://www.home.saxo/insights/content-hub/rss/all-articles
     interval_minutes: 60
     topic: analysis
+    display: Saxo
   - name: actionforex
     type: rss
     url: https://www.actionforex.com/feed/
     interval_minutes: 30
     topic: analysis
+    display: ActionForex
   - name: fxempire_forecasts
     type: rss
     url: https://www.fxempire.com/api/v1/en/articles/rss/forecasts
     interval_minutes: 30
     topic: analysis
+    display: FXEmpire
   - name: forexlive
     type: rss
     # 301s to investinglive.com/feed (site rebranded); redirect followed
     url: https://www.forexlive.com/feed
     interval_minutes: 15
     topic: analysis
+    display: ForexLive
   - name: gold_eagle
     type: rss
     url: https://www.gold-eagle.com/rss.xml
     interval_minutes: 60
     topic: gold
+    display: Gold-Eagle
   - name: fed_press
     type: rss
     url: https://www.federalreserve.gov/feeds/press_all.xml
     interval_minutes: 60
     topic: fed
+    display: Federal Reserve
   - name: ecb_press
     type: rss
     url: https://www.ecb.europa.eu/rss/press.html
     interval_minutes: 60
     topic: macro
+    display: ECB
   - name: boe_news
     type: rss
     url: https://www.bankofengland.co.uk/rss/news
     interval_minutes: 60
     topic: macro
+    display: Bank of England
   - name: bis_press
     type: rss
     url: https://www.bis.org/doclist/all_pressrels.rss
     interval_minutes: 60
     topic: macro
+    display: BIS
   - name: bls_latest
     type: rss
     # low-volume "latest numbers" summary feed; 403s direct from the VM,

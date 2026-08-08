@@ -75,9 +75,17 @@ git config user.email jamasp@mahdanian.xyz    # for the per-run commits
 ### 4. secrets scaffold
 ```bash
 mkdir -p ~/.config/jamasp
-printf 'JAMASP_TG_TOKEN=\nJAMASP_TG_CHAT=\n' > ~/.config/jamasp/env
+printf 'JAMASP_TG_TOKEN=\nJAMASP_TG_CHAT=\nJAMASP_TG_NEWS_CHAT=\n' > ~/.config/jamasp/env
 chmod 600 ~/.config/jamasp/env
 ```
+
+`JAMASP_TG_NEWS_CHAT` is the channel that receives per-story gold news
+flashes. Create a second Telegram channel, add the same bot to it as an
+administrator with "Post Messages" and "Edit Messages of Others" both
+enabled — the flash pipeline edits its own messages when a second source
+picks up a story — and put its chat id here. If the variable is missing, the
+flash pass disables itself and logs to `source_errors`; ingestion, briefs, and
+scans are unaffected.
 
 ### 5. systemd units
 All 12 unit files (6 services + 6 timers: ingest, brief, scan, dispatch,
@@ -169,9 +177,9 @@ headline-only sources.
 1. **Log Claude in** as the service user: `claude`, complete the login with
    the dedicated Max account. This enables the Haiku digest (ingest ledes)
    AND the brief. Verify: `claude -p "hi" --dangerously-skip-permissions`.
-2. **Telegram**: create a bot via @BotFather, get token + chat id, put them
-   in `~/.config/jamasp/env`. Verify:
-   `set -a && . ~/.config/jamasp/env && set +a && uv run jamasp notify "test"`.
+2. **Telegram**: create a bot via @BotFather; you will need two channels.
+   - **Desk channel** (briefs, scan alerts, failure notices): get its chat id and put the bot token + this chat id as `JAMASP_TG_TOKEN` and `JAMASP_TG_CHAT` in `~/.config/jamasp/env`. Verify: `set -a && . ~/.config/jamasp/env && set +a && uv run jamasp notify "test"`.
+   - **News channel** (per-story gold news flashes): create a second channel, add the same bot as an administrator with **both** "Post Messages" and "Edit Messages of Others" enabled (the flash pipeline edits its own earlier message when a second outlet picks up the same story), get its chat id, and put it as `JAMASP_TG_NEWS_CHAT` in the same env file. If you leave this blank, the flash pass disables itself silently — ingestion, briefs, and scans are unaffected, and `uv run jamasp watchdog` will still print OK. The check that catches it is `uv run jamasp flash --dry-run`: its summary line ends with an error count, and a missing news chat shows up there as `1 errors`.
 
 Then run one **supervised brief** (`claude`, type `/brief`) or
 `systemctl start jamasp-brief.service`; confirm a report appeared under
