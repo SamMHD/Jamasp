@@ -1,0 +1,15 @@
+[Unit]
+Description=Jamasp origin lockdown — restrict 80/443 to Cloudflare ranges
+After=network-online.target
+Wants=network-online.target
+Before=nginx.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/nft -f /etc/nftables.d/jamasp-edge.nft
+ExecStart=/usr/local/sbin/refresh-cf-ranges.sh
+ExecStop=/usr/sbin/nft delete table inet jamasp_edge
+
+[Install]
+WantedBy=multi-user.target

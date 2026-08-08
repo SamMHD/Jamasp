@@ -1,0 +1,8 @@
+[Unit]
+Description=Refresh Cloudflare source ranges for the Jamasp origin lockdown
+After=network-online.target jamasp-edge.service
+Requires=jamasp-edge.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/refresh-cf-ranges.sh
