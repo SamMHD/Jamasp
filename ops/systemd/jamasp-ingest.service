@@ -3,6 +3,10 @@ Description=Jamasp ingest — refresh news/price sources
 
 [Service]
 Type=oneshot
+# oneshot units have no start timeout by default. Worst case per tick is the
+# decide call plus max_posts_per_tick fetch+write rounds — a wedged model
+# subprocess or hung socket must not hold the 15-minute timer down forever.
+TimeoutStartSec=600
 WorkingDirectory=%h/Jamasp
 Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
 EnvironmentFile=-%h/.config/jamasp/env
