@@ -224,9 +224,219 @@ oneshot timer units).
    link, present even when the page body has failed; "Last ingest" only
    appears once the Overview's stat cards actually render.
 6. Access from a workstation: `ssh -L 3300:127.0.0.1:3300 jamasp@<host>`
-   or `tailscale serve 3300`. The panel has NO auth of its own — never
-   bind it to a public interface.
+   or `tailscale serve 3300`. The panel is still bound to localhost with
+   no auth of its own — public access is provided by the nginx + Access +
+   nftables stack in "Public access" below, and the SSH tunnel remains
+   the fallback.
 7. Rebuild after every `git pull` that touches `panel/`:
    `npm ci && npm run build && systemctl --user restart jamasp-panel`
    for user units, or (drop `--user` for system units)
    `systemctl restart jamasp-panel` for the system variant.
+
+## Public access (jamasp.mahdanian.xyz)
+
+The panel is also reachable publicly, behind three independent layers, none
+of which restructure `panel/` — it's still the same `next start` on
+`127.0.0.1:3300`:
+
+1. **nftables lockdown** — ports 80/443 on the origin (`167.235.150.246`)
+   accept traffic only from Cloudflare's published IP ranges. Without this,
+   Access is decoration: anyone who finds the origin IP skips the edge
+   entirely and hits nginx directly.
+2. **nginx** — terminates TLS (Let's Encrypt, DNS-01) and challenges with
+   HTTP basic auth before reverse-proxying to `127.0.0.1:3300`.
+3. **Cloudflare Access** — a one-time-PIN gate on the hostname at the edge,
+   in front of both of the above.
+
+### File inventory
+
+| File | Installed to | Purpose |
+|---|---|---|
+| `ops/nftables/jamasp-edge.nft` | `/etc/nftables.d/jamasp-edge.nft` | table `inet jamasp_edge`, sets `cf_v4`/`cf_v6` |
+| `ops/scripts/refresh-cf-ranges.sh` | `/usr/local/sbin/refresh-cf-ranges.sh` (0755) | fetch CF ranges → nft sets + nginx real-IP snippet; fails closed |
+| `ops/systemd-root/jamasp-edge.service` | `/etc/systemd/system/` | load the table at boot, `Before=nginx.service` |
+| `ops/systemd-root/jamasp-cf-ranges.service` + `.timer` | `/etc/systemd/system/` | weekly refresh (`OnCalendar=Mon 04:17`, `RandomizedDelaySec=30m`) |
+| `ops/nginx/jamasp-panel.conf` | `/etc/nginx/sites-available/`, symlinked into `sites-enabled/` | public vhost + catch-all `444` default servers |
+| `panel/next.config.ts` | built into the panel | `experimental.serverActions.allowedOrigins: ["jamasp.mahdanian.xyz"]` — without this, pages render fine but every Server Action POST silently fails Origin checking |
+
+### Trap: `ops/systemd-root/` is NOT `ops/systemd/`
+
+Deliberately a separate directory. Step 5's install loop above globs
+`ops/systemd/jamasp-*` and injects `User=jamasp` into every unit it copies.
+`jamasp-edge.service`, `jamasp-cf-ranges.service`, and
+`jamasp-cf-ranges.timer` need root (they own `/etc/nftables.d/` and the
+`nft` binary) and must **never** go through that loop. Install them
+directly instead:
+
+```bash
+for u in jamasp-edge.service jamasp-cf-ranges.service jamasp-cf-ranges.timer; do
+  ssh jamasp "cat > /etc/systemd/system/$u" < "ops/systemd-root/$u"
+done
+ssh jamasp 'systemctl daemon-reload && systemctl enable --now jamasp-edge.service jamasp-cf-ranges.timer'
+```
+
+### Prerequisite: Cloudflare API token
+
+DNS-01 issuance needs a token scoped **Zone:DNS:Edit + Zone:Zone:Read** on
+`mahdanian.xyz` (Cloudflare cannot mint tokens via the API/MCP — create it
+by hand in the dashboard). Install it on the host, never in the repo:
+
+```bash
+ssh jamasp 'install -m 0600 -o root -g root /dev/null /etc/letsencrypt/cloudflare.ini && cat > /etc/letsencrypt/cloudflare.ini' <<'EOF'
+dns_cloudflare_api_token = PASTE_TOKEN_HERE
+EOF
+```
+
+Same rule for the basic-auth file generated below — `/etc/nginx/jamasp.htpasswd`
+and `/etc/letsencrypt/cloudflare.ini` never enter this repo.
+
+### Reinstall on a rebuilt host, in order
+
+1. **nftables lockdown first**, before anything listens on 80/443 (see the
+   `ops/systemd-root/` trap above for the install commands). Confirm the
+   sets are populated before moving on:
+   `ssh jamasp 'nft list set inet jamasp_edge cf_v4 | grep -c /'` — a count
+   of 0 means the lockdown would drop Cloudflare itself; stop and fix the
+   fetch before continuing.
+2. **nginx + certbot**:
+   ```bash
+   ssh jamasp 'apt-get update -qq && apt-get install -y nginx certbot python3-certbot-dns-cloudflare apache2-utils'
+   ```
+   Issue the certificate **inside the IPv4-only sandbox** (see the certbot
+   trap below — do not run this bare):
+   ```bash
+   ssh jamasp 'systemd-run --wait --pipe --collect \
+     -p RestrictAddressFamilies="AF_INET AF_UNIX AF_NETLINK" \
+     certbot certonly --dns-cloudflare \
+       --dns-cloudflare-credentials /etc/letsencrypt/cloudflare.ini \
+       --dns-cloudflare-propagation-seconds 20 \
+       -d jamasp.mahdanian.xyz --non-interactive --agree-tos \
+       -m saman@mahdanian.xyz --deploy-hook "systemctl reload nginx"'
+   ```
+   Then install `ops/nginx/jamasp-panel.conf` to
+   `/etc/nginx/sites-available/`, symlink into `sites-enabled/`, remove the
+   distro `default`, generate basic-auth credentials
+   (`htpasswd -bcB /etc/nginx/jamasp.htpasswd desk "$(openssl rand -base64 18)"`,
+   then `chmod 0640` + `chgrp www-data`), `nginx -t`, then
+   `systemctl enable --now nginx`.
+3. **Panel** — `panel/next.config.ts` already carries
+   `serverActions.allowedOrigins`; build and enable it as in the Panel
+   section above.
+4. **Cloudflare Access before DNS** (ordering trap below) — create the
+   self-hosted app + allow policy on `jamasp.mahdanian.xyz`.
+5. **DNS last** — proxied A record `jamasp` → `167.235.150.246`.
+
+### Trap: certbot's IPv4-only workaround
+
+The Cloudflare API token is IP-allowlisted to the host's IPv4 address only;
+the host is dual-stack and certbot's HTTP client defaults to IPv6, so the
+Cloudflare zone lookup fails with error 9109 ("Cannot use the access token
+from location: ..."). Fix: a systemd drop-in scoped to `certbot.service`
+only — deliberately not a host-wide `/etc/gai.conf` change — at
+`/etc/systemd/system/certbot.service.d/ipv4-only.conf`:
+
+```ini
+[Service]
+RestrictAddressFamilies=AF_INET AF_UNIX AF_NETLINK
+```
+
+This is a **workaround, not a fix** — remove the drop-in once the host's
+IPv6 address is added to the token's Client IP Address Filtering allowlist
+on Cloudflare's side.
+
+**Verification trap**: a bare `certbot renew --dry-run` run in an
+interactive shell is not reliable proof it will renew unattended — the
+shell is unsandboxed, so it can reach the Cloudflare API over a different
+network path than `certbot.timer` → `certbot.service` (with the drop-in
+above) actually uses, and can report success even when the real
+timer-driven renewal would fail. Verify inside the identical sandbox
+instead:
+
+```bash
+ssh jamasp 'systemd-run --wait --pipe --collect -p RestrictAddressFamilies="AF_INET AF_UNIX AF_NETLINK" certbot renew --dry-run'
+```
+
+Only a dry run executed this way is evidence the automated path works.
+
+### Trap: configure Access before creating the DNS record
+
+Create the DNS record **last**, after nginx, certbot, and Access are all
+already live. Creating DNS first — with only basic auth in front — would
+leave the hostname publicly reachable through basic auth alone until Access
+is added, a real exposure window during a rebuild. Access applications are
+matched by hostname and don't require the DNS record to exist, so ordering
+Access before DNS closes that window entirely (verified: creating the
+Access app for `jamasp.mahdanian.xyz` succeeded with no DNS record present
+and no warning).
+
+### Debugging: nftables drop counters
+
+Both drop rules in `jamasp-edge.nft` carry `counter` — this is the entry
+point for checking the lockdown is actually working, not just installed:
+
+```bash
+ssh jamasp 'nft list table inet jamasp_edge'
+```
+
+Non-zero, growing counters on the `cf_v4`/`cf_v6` drop rules confirm real
+non-Cloudflare traffic is being dropped (background internet scan noise
+keeps them incrementing under normal operation). Counters stuck at zero are
+themselves worth investigating — either nothing is probing 80/443, or the
+rules aren't matching what you think they are.
+
+### Rollback
+
+```bash
+ssh jamasp 'systemctl stop nginx'
+ssh -f -N -L 3300:127.0.0.1:3300 jamasp
+curl -s http://127.0.0.1:3300/ | grep -c "Last ingest"   # panel still reachable via the tunnel
+ssh jamasp 'systemctl start nginx && systemctl is-active nginx'
+```
+
+The nftables lockdown and Cloudflare Access are independent of nginx —
+stopping nginx only removes the origin's HTTP(S) listener. The SSH tunnel
+bypasses all three layers by design: loopback traffic is exempted by
+`iif lo accept` in the nftables table.
+
+### Outstanding: per-hostname strict TLS not applied
+
+The plan called for a Cloudflare Configuration Rule scoping `ssl: strict`
+to `jamasp.mahdanian.xyz` alone, leaving the zone-wide setting at `full`.
+**Not created** — the deployment's API token lacks the `rulesets`
+permission (`GET .../rulesets/phases/http_config_settings/entrypoint` →
+403, code 10000, "Authentication error"). This is a **token permissions
+gap, not a Free-plan limitation** — the API never said Configuration Rules
+are unavailable on this plan. The zone-wide SSL setting was deliberately
+left untouched (no PUT was attempted) and is presumed still `full`, though
+the read-back to reconfirm that also 403s under the same token. Needs
+either a broader token (Zone Settings + Rulesets edit) or the Cloudflare
+MCP reconnected, then:
+
+```js
+async () => cloudflare.request({
+  method: "PUT",
+  path: "/zones/4f4fa848a174bf69d638b66d4e6fa29b/rulesets/phases/http_config_settings/entrypoint",
+  body: {
+    name: "default", kind: "zone", phase: "http_config_settings",
+    rules: [{
+      action: "set_config",
+      action_parameters: { ssl: "strict" },
+      expression: '(http.host eq "jamasp.mahdanian.xyz")',
+      description: "Full (strict) TLS for the Jamasp panel only",
+      enabled: true,
+    }],
+  },
+})
+```
+
+### Reference values
+
+- Hostname `jamasp.mahdanian.xyz`, origin `167.235.150.246`, zone
+  `mahdanian.xyz` (zone id `4f4fa848a174bf69d638b66d4e6fa29b`, account id
+  `85799051dc45ac9a2add4892d13f4e58`).
+- Access app `d9e0dc1d-797c-4f73-8915-caa3214a6d3a`, auth domain
+  `mahdanian-saman-81.cloudflareaccess.com`, one-time-PIN, allow policy for
+  `saman@mahdanian.xyz` and `mahdanian.saman@gmail.com`.
+- Basic auth user `desk` — the password lives in the operator's password
+  manager and `/etc/nginx/jamasp.htpasswd` (bcrypt) only, never in this
+  repo.
