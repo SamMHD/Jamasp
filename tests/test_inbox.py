@@ -77,3 +77,18 @@ def test_dead_sources(tmp_path):
     assert inbox.dead_sources(conn) == ["treasury_press"]
     out = inbox.render(conn)
     assert "treasury_press" in out and "WARNING" in out
+
+
+def test_dead_sources_ignores_pipeline_pseudo_sources(tmp_path):
+    # flash and digest log to source_errors but never write items, so the
+    # dead-feed rule would report them as a permanent coverage gap. A missing
+    # JAMASP_TG_NEWS_CHAT alone is 96 flash errors a day.
+    conn = db.connect(tmp_path / "t.db")
+    now = db.utcnow()
+    for src in ("flash", "digest", "treasury_press"):
+        conn.execute("INSERT INTO source_errors VALUES (?, ?, 'boom')", (src, now))
+    conn.commit()
+    assert inbox.dead_sources(conn) == ["treasury_press"]
+    out = inbox.render(conn)
+    assert "'flash'" not in out and "'digest'" not in out
+    assert "'treasury_press'" in out

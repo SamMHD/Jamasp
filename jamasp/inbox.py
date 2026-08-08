@@ -8,21 +8,32 @@ from datetime import datetime, timedelta, timezone
 
 from jamasp.db import utcnow
 
+# Pipeline stages log their own failures to source_errors under a pseudo-source
+# name. They never produce items, so the dead-feed rule would flag them forever
+# — telling the agent a news source is dead when no such source exists.
+PIPELINE_SOURCES = ("flash", "digest")
+
 
 def dead_sources(conn: sqlite3.Connection, hours: int = 24) -> list[str]:
     since = (datetime.now(timezone.utc) - timedelta(hours=hours)).strftime(
         "%Y-%m-%dT%H:%M:%SZ"
     )
+    params = {"since": since}
+    names = []
+    for i, name in enumerate(PIPELINE_SOURCES):
+        params[f"pipeline{i}"] = name
+        names.append(f":pipeline{i}")
     rows = conn.execute(
-        """
+        f"""
         SELECT DISTINCT e.source FROM source_errors e
         WHERE e.ts >= :since
+          AND e.source NOT IN ({", ".join(names)})
           AND NOT EXISTS (
             SELECT 1 FROM items i WHERE i.source = e.source AND i.fetched_at >= :since
           )
         ORDER BY e.source
         """,
-        {"since": since},
+        params,
     ).fetchall()
     return [r["source"] for r in rows]
 
