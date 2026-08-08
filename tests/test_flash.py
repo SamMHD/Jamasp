@@ -422,6 +422,28 @@ def test_run_flash_disabled_without_news_chat(tmp_path, monkeypatch):
     ).fetchone()["c"] == 1
 
 
+def test_run_flash_missing_config_key_is_not_fatal(tmp_path, monkeypatch):
+    no_extract(monkeypatch)
+    conn = db.connect(tmp_path / "t.db")
+    (one,) = seed(conn, [("reuters", "Gold hits record", 1)])
+    broken = {**SETTINGS["flash"]}
+    del broken["max_posts_per_tick"]
+    settings = {**SETTINGS, "flash": broken}
+    poster = FakePoster()
+    stats = flash.run_flash(
+        conn, settings, SOURCES, post=poster,
+        run_model=model({one: {"gold": True, "dup_of": None}}),
+    )
+    assert stats["errors"] == 1 and poster.calls == []
+    row = conn.execute(
+        "SELECT error FROM source_errors WHERE source = 'flash'"
+    ).fetchone()
+    assert "max_posts_per_tick" in row["error"]
+    assert conn.execute(
+        "SELECT COUNT(*) c FROM flash_items WHERE item_id = ?", (one,)
+    ).fetchone()["c"] == 0
+
+
 def test_run_flash_disabled_by_settings(tmp_path, monkeypatch):
     no_extract(monkeypatch)
     conn = db.connect(tmp_path / "t.db")

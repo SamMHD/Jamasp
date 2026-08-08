@@ -18,6 +18,15 @@ from jamasp.db import utcnow
 
 MODEL_TIMEOUT_SECONDS = 120
 
+REQUIRED_CFG_KEYS = (
+    "max_age_hours",
+    "classify_batch_max",
+    "max_posts_per_tick",
+    "extract_chars",
+    "decide_cmd",
+    "write_cmd",
+)
+
 
 def _since(hours: int) -> str:
     dt = datetime.now(timezone.utc) - timedelta(hours=hours)
@@ -219,6 +228,11 @@ def run_flash(
     cfg = settings.get("flash") or {}
     if not cfg.get("enabled"):
         return stats
+    missing = [key for key in REQUIRED_CFG_KEYS if key not in cfg]
+    if missing:
+        log_error(conn, f"flash config missing keys: {', '.join(missing)}")
+        stats["errors"] += 1
+        return stats
     run_model = run_model or _run_model
     try:
         chat = notify_mod.resolve_chat(settings, "news")
@@ -246,8 +260,6 @@ def run_flash(
         return stats
 
     display = config_mod.display_names(sources)
-    # item id -> flash id, for stories first published during this very tick
-    fresh: dict[str, str] = {}
     budget = cfg["max_posts_per_tick"]
     for item in pending:
         verdict = verdicts.get(item["id"])
@@ -259,7 +271,6 @@ def run_flash(
             stats["not_gold"] += 1
             continue
         target_id = verdict["dup_of"]
-        target_id = fresh.get(target_id, target_id)
         row = known.get(target_id) if target_id else None
         if row is not None:
             if _apply_dup(conn, item, row, display, chat, post, emit, dry_run):
@@ -281,7 +292,11 @@ def run_flash(
         budget -= 1
         stats["posted"] += 1
         if not dry_run:
-            # later items in this same tick can now be folded into it
+            # Re-read known flashes so a later candidate naming this item's id
+            # as dup_of resolves against the flash it just produced. A
+            # candidate that names an id that was never published — not_gold,
+            # failed to write, or lost to the burst cap — simply misses this
+            # lookup and is treated as a new story, which is the safe
+            # direction.
             known = {row["id"]: row for row in posted_flashes(conn)}
-            fresh[item["id"]] = flash_id
     return stats
