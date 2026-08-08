@@ -115,6 +115,36 @@ def test_build_write_prompt_flattens_control_characters_in_headline():
     assert prompt.count("SOURCE: Reuters") == 1
 
 
+def test_build_write_prompt_states_a_character_budget():
+    """The 3-5 sentence guidance alone did not hold; a number is followable."""
+    prompt = flashtext.build_write_prompt(
+        "Gold hits record", "Reuters", "2026-08-08T10:32:00Z", "body"
+    )
+    assert str(flashtext.PARAGRAPH_MAX_CHARS) in prompt
+
+
+def test_latin_digits_converts_persian_and_arabic_numerals():
+    # Persian-Indic (U+06Fx) and Arabic-Indic (U+066x) both appear in model output
+    assert flashtext.latin_digits("۱۳۰ تا ۱۴۰") == "130 تا 140"
+    assert flashtext.latin_digits("٣٬٤٢٠٫٥") == "3,420.5"
+    assert flashtext.latin_digits("CPI 3,420") == "CPI 3,420"
+
+
+def test_render_message_forces_latin_digits():
+    """CLAUDE.md rule 3: numbers stay Latin. Observed live output disobeyed it."""
+    text = flashtext.render_message(
+        title_fa="طلا به ۳٬۴۲۰ دلار رسید",
+        summary_fa="روزانه ۱۳۰ تا ۱۴۰ کشتی عبور می‌کرد.",
+        impact_fa="اصلاح تا محدوده ۳٬۳۵۰ محتمل است.",
+        url="https://e/1",
+        published_at="2026-08-08T10:32:00Z",
+        source_labels=["Reuters"],
+    )
+    assert "3,420" in text and "130 تا 140" in text and "3,350" in text
+    for persian_digit in "۰۱۲۳۴۵۶۷۸۹":
+        assert persian_digit not in text
+
+
 def test_parse_write_response_returns_three_fields():
     text = '{"title_fa": "t", "summary_fa": "s", "impact_fa": "i"}'
     assert flashtext.parse_write_response(text) == {
