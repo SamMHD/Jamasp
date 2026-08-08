@@ -260,7 +260,7 @@ def test_flash_command_reports_stats(tmp_path, monkeypatch):
 
     def fake_run_flash(conn, settings, sources, **kwargs):
         called["dry_run"] = kwargs.get("dry_run")
-        return {"posted": 2, "dup": 1, "not_gold": 3, "stale": 4,
+        return {"posted": 2, "dup": 1, "not_gold": 3, "unreadable": 0, "stale": 4,
                 "burst": 0, "errors": 0}
 
     monkeypatch.setattr(flash_mod, "run_flash", fake_run_flash)
@@ -281,7 +281,7 @@ def test_flash_dry_run_passes_flag(tmp_path, monkeypatch):
 
     def fake_run_flash(conn, settings, sources, **kwargs):
         called["dry_run"] = kwargs.get("dry_run")
-        return {"posted": 0, "dup": 0, "not_gold": 0, "stale": 0,
+        return {"posted": 0, "dup": 0, "not_gold": 0, "unreadable": 0, "stale": 0,
                 "burst": 0, "errors": 0}
 
     monkeypatch.setattr(flash_mod, "run_flash", fake_run_flash)
@@ -369,7 +369,8 @@ sources:
 """,
     )
     calls = []
-    stats = {"posted": 1, "dup": 2, "not_gold": 3, "stale": 4, "burst": 0, "errors": 0}
+    stats = {"posted": 1, "dup": 2, "not_gold": 3, "unreadable": 0, "stale": 4,
+             "burst": 0, "errors": 0}
     monkeypatch.setattr(
         flash_mod, "run_flash", lambda *a, **k: calls.append(1) or stats
     )
