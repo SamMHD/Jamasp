@@ -44,8 +44,17 @@ clone.
 ### 0. Access the host
 Everything below runs **on the target host**, reached over SSH. The current
 production deployment is reachable as `ssh jamasp` (an alias in the
-operator's `~/.ssh/config`; the concrete host/IP is kept out of this public
-repo — see private ops notes). Steps marked **(root)** need root; run the
+operator's `~/.ssh/config`). **Correction:** earlier drafts of this doc
+claimed the concrete host/IP was "kept out of this public repo" — that is
+no longer true and should not be relied on. This repo is public, and since
+the "Public access" section below was written it has carried the origin
+IP, hostname, zone/account IDs, the Access app UUID, and the basic-auth
+username in plain text (see "Reference values" at the end of that
+section). The mitigation for that exposure is origin-side authentication —
+nftables + nginx basic auth today, moving toward Cloudflare Access JWT
+validation at the origin per
+`docs/superpowers/specs/2026-08-09-access-jwt-origin-auth-design.md` — not
+secrecy of the address. Steps marked **(root)** need root; run the
 rest as the service user, e.g. `sudo -u jamasp -i` (or log in as `jamasp`).
 Over SSH, prefix a service-user command as:
 ```bash
@@ -242,7 +251,20 @@ of which restructure `panel/` — it's still the same `next start` on
 1. **nftables lockdown** — ports 80/443 on the origin (`167.235.150.246`)
    accept traffic only from Cloudflare's published IP ranges. Without this,
    Access is decoration: anyone who finds the origin IP skips the edge
-   entirely and hits nginx directly.
+   entirely and hits nginx directly. **The converse is not true, though:**
+   having the lockdown in place does *not* make Access unbypassable.
+   Cloudflare's IP ranges are shared by every Cloudflare customer, so a
+   request can still arrive at the origin from an allow-listed Cloudflare IP
+   via *another* tenant's zone, with an Origin Rule overriding Host/SNI to
+   `jamasp.mahdanian.xyz` (a documented technique — Certitude, Nov 2023).
+   That request passes the firewall and matches our vhost without ever
+   touching our zone's Access configuration. Basic auth (item 2 below) is
+   what actually stops that path — see
+   `docs/superpowers/specs/2026-08-09-access-jwt-origin-auth-design.md` for
+   the proper origin-side fix and
+   `docs/superpowers/specs/2026-08-08-panel-public-access-design.md`'s
+   Architecture section for the full breakdown of what each layer does and
+   doesn't guarantee.
 2. **nginx** — terminates TLS (Let's Encrypt, DNS-01) and challenges with
    HTTP basic auth before reverse-proxying to `127.0.0.1:3300`.
 3. **Cloudflare Access** — a one-time-PIN gate on the hostname at the edge,
@@ -253,11 +275,39 @@ of which restructure `panel/` — it's still the same `next start` on
 | File | Installed to | Purpose |
 |---|---|---|
 | `ops/nftables/jamasp-edge.nft` | `/etc/nftables.d/jamasp-edge.nft` | table `inet jamasp_edge`, sets `cf_v4`/`cf_v6` |
-| `ops/scripts/refresh-cf-ranges.sh` | `/usr/local/sbin/refresh-cf-ranges.sh` (0755) | fetch CF ranges → nft sets + nginx real-IP snippet; fails closed |
+| `ops/scripts/refresh-cf-ranges.sh` | `/usr/local/sbin/refresh-cf-ranges.sh` (0755) | fetch CF ranges → nft sets + nginx real-IP snippet; fails closed, including onto an on-disk cache at boot (see C1 hardening below) |
 | `ops/systemd-root/jamasp-edge.service` | `/etc/systemd/system/` | load the table at boot, `Before=nginx.service` |
-| `ops/systemd-root/jamasp-cf-ranges.service` + `.timer` | `/etc/systemd/system/` | weekly refresh (`OnCalendar=Mon 04:17`, `RandomizedDelaySec=30m`) |
+| `ops/systemd-root/jamasp-cf-ranges.service` + `.timer` | `/etc/systemd/system/` | daily refresh (`OnCalendar=*-*-* 04:17:00`, `RandomizedDelaySec=30m`) — shortened from weekly post-launch |
+| `ops/systemd-root/nginx.service.d/requires-jamasp-edge.conf` | `/etc/systemd/system/nginx.service.d/` | `Requires=`/`After=jamasp-edge.service` — without it, nginx starts (fail-open) even when the lockdown failed to load, since `Before=` alone is ordering, not a dependency |
 | `ops/nginx/jamasp-panel.conf` | `/etc/nginx/sites-available/`, symlinked into `sites-enabled/` | public vhost + catch-all `444` default servers |
 | `panel/next.config.ts` | built into the panel | `experimental.serverActions.allowedOrigins: ["jamasp.mahdanian.xyz"]` — without this, pages render fine but every Server Action POST silently fails Origin checking |
+
+### Hardening (post-launch branch review, C1/M2)
+
+`jamasp-edge.nft` recreates its sets **empty** on every load (a
+`table`/`delete table` pair, used to make reloads idempotent), and
+`jamasp-edge.service` runs that reload immediately before
+`refresh-cf-ranges.sh` on every boot. That means the original "fails closed
+onto the previous ranges" claim was false specifically at boot — there was
+no previous live ruleset to fall back to, so one transient fetch failure at
+boot (Cloudflare blip, DNS not warm, the 20s `curl` timeout) could leave
+`cf_v4`/`cf_v6` empty, which drops **all** inbound 80/443 — including
+Cloudflare's — until the timer's next fire.
+
+Two changes close this:
+
+- `refresh-cf-ranges.sh` now caches the accepted lists to
+  `/var/lib/jamasp/cf-ranges.v4` and `.v6` on every success, and on any
+  failure (fetch error, an absolute-floor violation, or a **relative**
+  violation — fewer CIDRs than are currently loaded, catching a fetch that
+  clears the floor but still silently drops real ranges) it loads that
+  cache into the live nftables sets before still exiting non-zero, so the
+  failure stays visible in `systemctl status` / `journalctl`.
+- `nginx.service.d/requires-jamasp-edge.conf` (table above) stops nginx
+  from starting fail-open if `jamasp-edge.service` itself fails outright
+  (e.g. a syntax error in the `.nft` file — the cache can't help there
+  since the table never loads). **Recovery:** fix the problem, then
+  `systemctl start jamasp-edge nginx`.
 
 ### Trap: `ops/systemd-root/` is NOT `ops/systemd/`
 
@@ -266,9 +316,15 @@ Deliberately a separate directory. Step 5's install loop above globs
 `jamasp-edge.service`, `jamasp-cf-ranges.service`, and
 `jamasp-cf-ranges.timer` need root (they own `/etc/nftables.d/` and the
 `nft` binary) and must **never** go through that loop. Install them
-directly instead:
+directly instead — along with the two non-unit files those units depend on
+(`jamasp-edge.service`'s `ExecStart` fails on a missing file otherwise, and
+this is easy to drop since it's not itself a unit):
 
 ```bash
+ssh jamasp 'install -d /etc/nftables.d'
+ssh jamasp 'cat > /etc/nftables.d/jamasp-edge.nft' < ops/nftables/jamasp-edge.nft
+ssh jamasp 'cat > /usr/local/sbin/refresh-cf-ranges.sh && chmod 0755 /usr/local/sbin/refresh-cf-ranges.sh' < ops/scripts/refresh-cf-ranges.sh
+
 for u in jamasp-edge.service jamasp-cf-ranges.service jamasp-cf-ranges.timer; do
   ssh jamasp "cat > /etc/systemd/system/$u" < "ops/systemd-root/$u"
 done
@@ -282,25 +338,43 @@ DNS-01 issuance needs a token scoped **Zone:DNS:Edit + Zone:Zone:Read** on
 by hand in the dashboard). Install it on the host, never in the repo:
 
 ```bash
-ssh jamasp 'install -m 0600 -o root -g root /dev/null /etc/letsencrypt/cloudflare.ini && cat > /etc/letsencrypt/cloudflare.ini' <<'EOF'
+ssh jamasp 'install -D -m 0600 -o root -g root /dev/null /etc/letsencrypt/cloudflare.ini && cat > /etc/letsencrypt/cloudflare.ini' <<'EOF'
 dns_cloudflare_api_token = PASTE_TOKEN_HERE
 EOF
 ```
+(`-D` creates `/etc/letsencrypt/` if it doesn't exist yet — on a rebuilt
+host it won't, since certbot isn't installed until step 2 of the reinstall
+sequence below, and plain `install` without `-D` does not create parent
+directories.)
 
 Same rule for the basic-auth file generated below — `/etc/nginx/jamasp.htpasswd`
 and `/etc/letsencrypt/cloudflare.ini` never enter this repo.
 
 ### Reinstall on a rebuilt host, in order
 
-1. **nftables lockdown first**, before anything listens on 80/443 (see the
-   `ops/systemd-root/` trap above for the install commands). Confirm the
-   sets are populated before moving on:
+1. **nftables lockdown first**, before anything listens on 80/443 — run
+   *all* the commands in the `ops/systemd-root/` trap above: the
+   `/etc/nftables.d/` directory, the `.nft` file, the refresh script, and
+   the three root units, in that order. Confirm the sets are populated
+   before moving on:
    `ssh jamasp 'nft list set inet jamasp_edge cf_v4 | grep -c /'` — a count
    of 0 means the lockdown would drop Cloudflare itself; stop and fix the
    fetch before continuing.
 2. **nginx + certbot**:
    ```bash
    ssh jamasp 'apt-get update -qq && apt-get install -y nginx certbot python3-certbot-dns-cloudflare apache2-utils'
+   ```
+   Install the certbot IPv4-only drop-in now, as **commands**, not just as
+   illustrative content in the trap below — without the `daemon-reload` the
+   drop-in is inert and the first unattended renewal fails with Cloudflare
+   error 9109 (see the certbot trap below for why it's needed):
+   ```bash
+   ssh jamasp 'mkdir -p /etc/systemd/system/certbot.service.d'
+   ssh jamasp 'cat > /etc/systemd/system/certbot.service.d/ipv4-only.conf' <<'EOF'
+   [Service]
+   RestrictAddressFamilies=AF_INET AF_UNIX AF_NETLINK
+   EOF
+   ssh jamasp 'systemctl daemon-reload'
    ```
    Issue the certificate **inside the IPv4-only sandbox** (see the certbot
    trap below — do not run this bare):
@@ -315,10 +389,35 @@ and `/etc/letsencrypt/cloudflare.ini` never enter this repo.
    ```
    Then install `ops/nginx/jamasp-panel.conf` to
    `/etc/nginx/sites-available/`, symlink into `sites-enabled/`, remove the
-   distro `default`, generate basic-auth credentials
-   (`htpasswd -bcB /etc/nginx/jamasp.htpasswd desk "$(openssl rand -base64 18)"`,
-   then `chmod 0640` + `chgrp www-data`), `nginx -t`, then
-   `systemctl enable --now nginx`.
+   distro `default`. Generate basic-auth credentials — **capture the
+   password into a variable and echo it**; the hash is bcrypt and the
+   plaintext is not recoverable from it, so this is the only chance to save
+   it (a bare `$(...)` substitution with nothing capturing the output, as an
+   earlier draft of this doc had, discards it and locks the operator out):
+   ```bash
+   ssh jamasp 'PW=$(openssl rand -base64 18); htpasswd -bcB /etc/nginx/jamasp.htpasswd desk "$PW" >/dev/null 2>&1; chmod 0640 /etc/nginx/jamasp.htpasswd; chgrp www-data /etc/nginx/jamasp.htpasswd; echo "PANEL PASSWORD (save now, not recoverable): $PW"'
+   ```
+   Save that password immediately (password manager). Then `nginx -t`.
+
+   Install the nginx dependency drop-in (M2 — without it, `Before=` on the
+   jamasp-edge side is pure ordering, and nginx starts fail-open even when
+   the lockdown failed to load):
+   ```bash
+   ssh jamasp 'mkdir -p /etc/systemd/system/nginx.service.d'
+   ssh jamasp 'cat > /etc/systemd/system/nginx.service.d/requires-jamasp-edge.conf' < ops/systemd-root/nginx.service.d/requires-jamasp-edge.conf
+   ssh jamasp 'systemctl daemon-reload'
+   ```
+   `systemctl enable --now nginx`, then **re-run the range refresh**:
+   ```bash
+   ssh jamasp '/usr/local/sbin/refresh-cf-ranges.sh && test -s /etc/nginx/conf.d/cloudflare-real-ip.conf && echo OK'
+   ```
+   This step is easy to skip because it looks redundant with step 1, but
+   it isn't: `refresh-cf-ranges.sh` only writes
+   `/etc/nginx/conf.d/cloudflare-real-ip.conf` when nginx is already
+   installed (`command -v nginx`), and step 1 ran the script before nginx
+   existed. Skip this and a rebuilt host silently has no real-IP
+   restoration — access logs show Cloudflare edge IPs instead of real
+   clients, with no error to notice.
 3. **Panel** — `panel/next.config.ts` already carries
    `serverActions.allowedOrigins`; build and enable it as in the Panel
    section above.
@@ -380,9 +479,27 @@ ssh jamasp 'nft list table inet jamasp_edge'
 
 Non-zero, growing counters on the `cf_v4`/`cf_v6` drop rules confirm real
 non-Cloudflare traffic is being dropped (background internet scan noise
-keeps them incrementing under normal operation). Counters stuck at zero are
-themselves worth investigating — either nothing is probing 80/443, or the
-rules aren't matching what you think they are.
+keeps them incrementing under normal operation). Counters that stay at zero
+for a while under normal operation are worth investigating — either nothing
+is probing 80/443, or the rules aren't matching what you think they are.
+
+**M4:** counters reset to zero on every table reload, including every boot
+— `jamasp-edge.nft` starts with a `table`/`delete table` pair (for
+idempotent reloads), which discards them along with the sets they're
+attached to. So "counters at zero" immediately after a reboot or a manual
+`nft -f` reload is normal and not, by itself, evidence anything is wrong;
+give it a few minutes of normal internet background noise before treating
+zero as a symptom.
+
+**M3:** `jamasp-edge.service`'s `ExecStop` runs `nft delete table inet
+jamasp_edge` — so `systemctl stop jamasp-edge` (or a `stop` as part of some
+other operation) silently removes the *entire* lockdown, sets and rules
+both, while nginx keeps right on serving on 80/443 with no filtering at
+all. There's no separate "pause and keep the rules" verb; treat
+`stop`/`restart` on this unit as "the origin is briefly wide open" and
+follow it promptly with `systemctl start jamasp-edge` (which the
+`nginx.service.d` drop-in above will now also require before nginx itself
+can (re)start).
 
 ### Rollback
 
@@ -398,36 +515,55 @@ stopping nginx only removes the origin's HTTP(S) listener. The SSH tunnel
 bypasses all three layers by design: loopback traffic is exempted by
 `iif lo accept` in the nftables table.
 
-### Outstanding: per-hostname strict TLS not applied
+### Resolved: per-hostname strict TLS (I5)
 
-The plan called for a Cloudflare Configuration Rule scoping `ssl: strict`
-to `jamasp.mahdanian.xyz` alone, leaving the zone-wide setting at `full`.
-**Not created** — the deployment's API token lacks the `rulesets`
-permission (`GET .../rulesets/phases/http_config_settings/entrypoint` →
-403, code 10000, "Authentication error"). This is a **token permissions
-gap, not a Free-plan limitation** — the API never said Configuration Rules
-are unavailable on this plan. The zone-wide SSL setting was deliberately
-left untouched (no PUT was attempted) and is presumed still `full`, though
-the read-back to reconfirm that also 403s under the same token. Needs
-either a broader token (Zone Settings + Rulesets edit) or the Cloudflare
-MCP reconnected, then:
+**Update — this is now resolved**, superseding the "not created" status
+this section previously recorded. A Cloudflare Configuration Rule on the
+`http_config_settings` ruleset phase was created: ruleset
+`12e2ffdb18684db7ad23462af27480b8`, rule `b7126bdae59c4f33be8a0624e98d26fb`,
+`action_parameters.ssl: "strict"`, scoped to `http.host eq
+"jamasp.mahdanian.xyz"`. The zone-wide setting was re-confirmed still
+`full` (`modified_on: null`), so `dashagh.mahdanian.xyz` and anything else
+on the zone is untouched.
 
-```js
-async () => cloudflare.request({
-  method: "PUT",
-  path: "/zones/4f4fa848a174bf69d638b66d4e6fa29b/rulesets/phases/http_config_settings/entrypoint",
-  body: {
-    name: "default", kind: "zone", phase: "http_config_settings",
-    rules: [{
-      action: "set_config",
-      action_parameters: { ssl: "strict" },
-      expression: '(http.host eq "jamasp.mahdanian.xyz")',
-      description: "Full (strict) TLS for the Jamasp panel only",
-      enabled: true,
-    }],
-  },
-})
-```
+Why this matters, not just that it's done: under `full`, Cloudflare
+encrypts edge→origin but does **not validate the origin certificate** — an
+expired, self-signed, or wrong-hostname cert on the origin would go
+unnoticed, since Cloudflare accepts it regardless. `strict` (scoped to this
+hostname only) makes Cloudflare actually check the origin cert against
+`jamasp.mahdanian.xyz`, so a cert problem surfaces as a Cloudflare-side
+error instead of silently degrading to unauthenticated TLS.
+
+### Known gap: no failure alerting (I5)
+
+Neither the range-refresh units (`jamasp-cf-ranges.service`/`.timer`) nor
+the packaged `certbot.service` have an `OnFailure=` unit configured. A
+failure in either (with no cache to fall back to for the former, or a
+renewal miss for the latter) is currently only visible by *going looking*
+— `systemctl status`, `journalctl`, or noticing the panel is down. Jamasp
+already has a working Telegram notifier (`uv run jamasp notify`); that's
+the natural hook for an `OnFailure=` unit that posts a one-line alert. This
+is a **documented follow-up, not built as part of this change** — scope
+here was the cache fallback and the nginx dependency, not new alerting
+infrastructure.
+
+### Known host drift (M8)
+
+As of this writing, two on-host checkouts are not simply "at main":
+
+- `/home/jamasp/Jamasp` is on branch `live`, and has a hand-installed
+  `next.config.ts` that is **byte-identical** to the one committed to this
+  branch but which git still reports as modified (likely a line-ending or
+  mtime artifact from how it was placed on the host rather than checked
+  out). A post-merge `git pull` there will refuse with "local changes would
+  be overwritten" until that's reconciled — `git diff` will show no
+  content difference, which is the tell that this is the drift, not a real
+  divergence.
+- `/root/Jamasp` is a stale second checkout, left over from before the
+  service user was set up, carrying the **old** (pre-panel-public-access)
+  `next.config.ts`. It is not what's running the panel and should not be
+  assumed current for anything — treat `/home/jamasp/Jamasp` as the only
+  live checkout.
 
 ### Reference values
 
