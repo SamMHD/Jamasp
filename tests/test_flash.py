@@ -475,6 +475,49 @@ def test_run_flash_dry_run_emits_without_sending(tmp_path, monkeypatch):
     assert conn.execute("SELECT COUNT(*) c FROM flash_items").fetchone()["c"] == 0
 
 
+LONG_HTML = (
+    "<html><body><article><p>"
+    + "Gold rallied after the CPI print surprised to the downside. " * 60
+    + "</p></article></body></html>"
+)
+
+
+def test_run_flash_caches_full_length_extract(tmp_path, monkeypatch):
+    # extract_cache is keyed on url with no size column, and the daily brief
+    # deep-reads exactly the articles flash touches. So flash must extract at
+    # the full extract_max_chars budget and truncate only for its own prompt —
+    # otherwise every later `jamasp extract` is capped at flash's extract_chars.
+    from jamasp import extract as extract_mod
+
+    monkeypatch.setattr(extract_mod, "_default_fetch", lambda url: LONG_HTML)
+    conn = db.connect(tmp_path / "t.db")
+    (one,) = seed(conn, [("reuters", "Gold hits record", 1)])
+    settings = {
+        **SETTINGS,
+        "extract_max_chars": 16000,
+        "flash": {**SETTINGS["flash"], "extract_chars": 500},
+    }
+    prompts = []
+
+    def run(cmd, prompt):
+        prompts.append(prompt)
+        if cmd == ["fake-decide"]:
+            return json.dumps({one: {"gold": True, "dup_of": None}})
+        return json.dumps({"title_fa": "عنوان", "summary_fa": "خلاصه",
+                           "impact_fa": "اثر"})
+
+    stats = flash.run_flash(conn, settings, SOURCES, post=FakePoster(), run_model=run)
+    assert stats["posted"] == 1
+    cached = conn.execute(
+        "SELECT text FROM extract_cache WHERE url = ?", ("https://e/0",)
+    ).fetchone()["text"]
+    assert len(cached) > 500 and "[truncated]" not in cached
+    # the write prompt still carries only extract_chars of that body
+    write_prompt = prompts[1]
+    assert cached[:500] in write_prompt
+    assert cached[:501] not in write_prompt
+
+
 def test_run_flash_dry_run_does_not_retire_stale(tmp_path, monkeypatch):
     no_extract(monkeypatch)
     conn = db.connect(tmp_path / "t.db")

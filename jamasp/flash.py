@@ -18,6 +18,12 @@ from jamasp.db import utcnow
 
 MODEL_TIMEOUT_SECONDS = 120
 
+# Fallback ceiling for article extraction when settings omit extract_max_chars.
+# Flash must always extract at the full budget — extract_cache is keyed on url
+# alone with no size column, so a short extraction here would permanently cap
+# what `jamasp extract` can later hand the agent for the same article.
+DEFAULT_EXTRACT_MAX_CHARS = 16000
+
 REQUIRED_CFG_KEYS = (
     "max_age_hours",
     "classify_batch_max",
@@ -132,13 +138,17 @@ def _render_flash(
     )
 
 
-def _publish(conn, item, cfg, display, chat, post, run_model, emit, dry_run):
+def _publish(
+    conn, item, cfg, display, chat, post, run_model, emit, dry_run, extract_max
+):
     """Post one new story. Returns its flash id, or None on failure."""
     label = display.get(item["source"], item["source"])
     try:
-        body = extract_mod.extract_url(conn, item["url"], cfg["extract_chars"])
+        body = extract_mod.extract_url(conn, item["url"], extract_max)
     except Exception:
         body = ""  # not a failure: the write prompt falls back to headline + lede
+    # the cache keeps the full text; only the prompt is cut down to size
+    body = body[: cfg["extract_chars"]]
     prompt = flashtext.build_write_prompt(
         item["headline"], label, item["published_at"], body, item["lede"]
     )
@@ -260,6 +270,7 @@ def run_flash(
         return stats
 
     display = config_mod.display_names(sources)
+    extract_max = settings.get("extract_max_chars", DEFAULT_EXTRACT_MAX_CHARS)
     budget = cfg["max_posts_per_tick"]
     for item in pending:
         verdict = verdicts.get(item["id"])
@@ -284,7 +295,8 @@ def run_flash(
             stats["burst"] += 1
             continue
         flash_id = _publish(
-            conn, item, cfg, display, chat, post, run_model, emit, dry_run
+            conn, item, cfg, display, chat, post, run_model, emit, dry_run,
+            extract_max,
         )
         if flash_id is None:
             stats["errors"] += 1
