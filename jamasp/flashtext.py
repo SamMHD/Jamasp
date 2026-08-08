@@ -52,26 +52,34 @@ SOURCE_CAUTION = (
     " to trade."
 )
 
+# Per-paragraph ceiling for the write model. The original "3-5 sentences"
+# guidance did not hold in live output — paragraphs ran to 800+ characters — and
+# a concrete number is far easier for a model to obey than a sentence count.
+PARAGRAPH_MAX_CHARS = 400
+
 WRITE_HEADER = """You are a market analyst at a physical gold trading company in Dubai,
 writing a wire flash in Persian for the trading desk.
 
 Return ONLY a JSON object with exactly these keys:
   "title_fa"   - Persian headline, at most 10 words, no trailing punctuation.
-  "summary_fa" - ONE Persian paragraph, 3-5 sentences, stating only facts
-                 present in the source text below.
-  "impact_fa"  - ONE Persian paragraph naming the transmission channel to the
-                 gold market and the conditions that would confirm or
-                 invalidate it.
+  "summary_fa" - ONE Persian paragraph, 3-5 sentences and AT MOST {budget}
+                 characters, stating only facts present in the source text
+                 below. Pick the facts a gold desk needs; leave the rest out.
+  "impact_fa"  - ONE Persian paragraph, AT MOST {budget} characters, naming
+                 the transmission channel to the gold market and the
+                 conditions that would confirm or invalidate it.
 
 Rules:
 - Numbers, tickers, currencies and instrument names stay in Latin script:
   write 3,420 and CPI, never Persian-Indic digits.
 - Never state a number, date, or name that does not appear in the source text.
 - Do not begin impact_fa with "اثر احتمالی" — that label is added afterwards.
+- The character limits are hard. The desk reads these on a phone: a flash that
+  runs long is worse than one that leaves detail out.
 - No trading instructions. Describe mechanisms and conditions; never tell the
   desk to buy or sell.
 
-"""
+""".format(budget=PARAGRAPH_MAX_CHARS)
 
 
 def _json_object(text: str) -> dict[str, Any]:
@@ -93,6 +101,20 @@ _CONTROL_CHARS = {c: " " for c in list(range(0x20)) + [0x7F]}
 def _one_line(value: object) -> str:
     """Flatten untrusted feed text so one item can occupy only one line."""
     return str(value or "").translate(_CONTROL_CHARS).strip()
+
+
+# The write prompt asks for Latin numerals (CLAUDE.md rule 3), but live output
+# obeyed it only sometimes — one flash wrote ۱۳۰ while the next wrote 130. The
+# rule stays in the prompt; this makes it true regardless of what came back.
+_DIGIT_CHARS = str.maketrans(
+    "۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩٫٬",
+    "01234567890123456789.,",
+)
+
+
+def latin_digits(text: str) -> str:
+    """Rewrite Persian-Indic and Arabic-Indic numerals as Latin ones."""
+    return text.translate(_DIGIT_CHARS)
 
 
 def build_decide_prompt(
@@ -174,18 +196,20 @@ def render_message(
     published_at: str,
     source_labels: Sequence[str],
 ) -> str:
-    text = "\n".join(
-        [
-            f"🟡 {title_fa}",
-            "",
-            summary_fa,
-            "",
-            f"اثر احتمالی: {impact_fa}",
-            "",
-            f"منابع: {' • '.join(source_labels)}",
-            url,
-            f"⏱ {_dubai_hhmm(published_at)} دبی",
-        ]
+    text = latin_digits(
+        "\n".join(
+            [
+                f"🟡 {title_fa}",
+                "",
+                summary_fa,
+                "",
+                f"اثر احتمالی: {impact_fa}",
+                "",
+                f"منابع: {' • '.join(source_labels)}",
+                url,
+                f"⏱ {_dubai_hhmm(published_at)} دبی",
+            ]
+        )
     )
     if len(text) > MAX_CHARS:
         text = text[: MAX_CHARS - 1] + "…"
