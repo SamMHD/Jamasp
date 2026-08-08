@@ -21,3 +21,11 @@ runs:
     deepdive: 900
     scan: 300
     retro: 1200
+flash:
+  enabled: true
+  max_age_hours: 6
+  max_posts_per_tick: 10
+  classify_batch_max: 30
+  extract_chars: 4000
+  decide_cmd: ["claude", "-p", "--model", "sonnet"]
+  write_cmd: ["claude", "-p", "--model", "sonnet"]
