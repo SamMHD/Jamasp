@@ -45,6 +45,19 @@ def test_repo_configs_load():
     assert settings["timezone"] == "Asia/Dubai"
 
 
+def test_repo_settings_carry_the_whole_flash_block():
+    # A dropped or renamed key here passes every other test while silently
+    # disabling flash in production: one source_errors row per ingest tick.
+    from jamasp.flash import REQUIRED_CFG_KEYS
+
+    settings = load_settings()
+    cfg = settings["flash"]
+    missing = [key for key in REQUIRED_CFG_KEYS if key not in cfg]
+    assert missing == []
+    assert cfg["enabled"] is True
+    assert settings["telegram"]["news_chat_id_env"]
+
+
 def test_display_names_uses_display_then_falls_back():
     from jamasp.config import display_names
 
