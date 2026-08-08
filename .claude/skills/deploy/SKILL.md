@@ -177,9 +177,9 @@ headline-only sources.
 1. **Log Claude in** as the service user: `claude`, complete the login with
    the dedicated Max account. This enables the Haiku digest (ingest ledes)
    AND the brief. Verify: `claude -p "hi" --dangerously-skip-permissions`.
-2. **Telegram**: create a bot via @BotFather, get token + chat id, put them
-   in `~/.config/jamasp/env`. Verify:
-   `set -a && . ~/.config/jamasp/env && set +a && uv run jamasp notify "test"`.
+2. **Telegram**: create a bot via @BotFather; you will need two channels.
+   - **Desk channel** (briefs, scan alerts, failure notices): get its chat id and put the bot token + this chat id as `JAMASP_TG_TOKEN` and `JAMASP_TG_CHAT` in `~/.config/jamasp/env`. Verify: `set -a && . ~/.config/jamasp/env && set +a && uv run jamasp notify "test"`.
+   - **News channel** (per-story gold news flashes): create a second channel, add the same bot as an administrator with **both** "Post Messages" and "Edit Messages of Others" enabled (the flash pipeline edits its own earlier message when a second outlet picks up the same story), get its chat id, and put it as `JAMASP_TG_NEWS_CHAT` in the same env file. If you leave this blank, the flash pass disables itself silently — ingestion, briefs, and scans are unaffected, but `uv run jamasp watchdog` will report a `source_errors` row for `source='flash'`, which is the cue to check whether the channel setup is complete.
 
 Then run one **supervised brief** (`claude`, type `/brief`) or
 `systemctl start jamasp-brief.service`; confirm a report appeared under
