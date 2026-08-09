@@ -1,5 +1,6 @@
 [Unit]
 Description=Jamasp ingest — refresh news/price sources
+OnFailure=jamasp-alert@%n.service
 
 [Service]
 Type=oneshot

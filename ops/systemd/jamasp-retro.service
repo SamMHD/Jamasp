@@ -1,5 +1,6 @@
 [Unit]
 Description=Jamasp retro — weekly review of predictions and stance
+OnFailure=jamasp-alert@%n.service
 
 [Service]
 Type=oneshot

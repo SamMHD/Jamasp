@@ -2,6 +2,7 @@
 Description=Jamasp panel — Cloudflare Access JWT sidecar on 127.0.0.1:3301
 After=network-online.target
 Wants=network-online.target
+OnFailure=jamasp-alert@%n.service
 
 [Service]
 WorkingDirectory=%h/Jamasp

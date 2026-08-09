@@ -1,0 +1,23 @@
+[Unit]
+Description=Telegram alert for failed unit %i
+# Deliberately no OnFailure= of its own: an alerter that alerts about its own
+# failure loops. If this unit fails, that is visible in its journal only.
+
+[Service]
+Type=oneshot
+User=jamasp
+WorkingDirectory=%h/Jamasp
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+Environment=JAMASP_ROOT=%h/Jamasp
+EnvironmentFile=%h/.config/jamasp/env
+ExecStart=/usr/bin/env uv run jamasp alert %i
+TimeoutStartSec=90
+
+# Load-bearing. `journalctl -u <some other unit>` returns an EMPTY STRING
+# rather than a permission error for a user outside this group, so without it
+# every alert ships a blank log section that reads as "the unit failed
+# quietly" instead of "we cannot see its logs".
+SupplementaryGroups=systemd-journal
+
+# %i is the literal instance string. NOT %I — that unescapes `-` to `/`, which
+# mangles every unit name here (jamasp-authd.service -> jamasp/authd.service).
