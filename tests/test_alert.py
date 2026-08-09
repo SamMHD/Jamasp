@@ -191,3 +191,58 @@ def test_corrupt_timestamp_does_not_suppress(tmp_path):
     conn = _conn(tmp_path)
     db_mod.set_meta(conn, "alert_last.jamasp-authd.service", "not-a-timestamp")
     assert should_send(conn, "jamasp-authd.service", now="2026-08-09T10:00:00Z")
+
+
+# --- the alerter's own failure must not be silent -----------------------
+
+from click.testing import CliRunner
+
+from jamasp.cli import main
+
+
+def _cfg(tmp_path):
+    cfg = tmp_path / "config"
+    cfg.mkdir()
+    (cfg / "settings.yaml").write_text(
+        "telegram:\n"
+        "  bot_token_env: JAMASP_TG_TOKEN\n"
+        "  chat_id_env: JAMASP_TG_CHAT\n"
+    )
+    (cfg / "sources.yaml").write_text("sources: []\n")
+    return cfg
+
+
+def test_alert_exits_nonzero_when_the_send_fails(tmp_path, monkeypatch):
+    """If delivery fails the unit must land in `failed`, not report success.
+
+    jamasp-alert@.service deliberately has no OnFailure= of its own (that
+    would loop), so a silent exit 0 is the difference between 'shows up in
+    systemctl --failed' and 'nobody ever finds out alerting is broken'.
+    """
+    monkeypatch.delenv("JAMASP_TG_TOKEN", raising=False)
+    cfg = _cfg(tmp_path)
+
+    result = CliRunner().invoke(
+        main,
+        ["alert", "some.service", "--db", str(tmp_path / "t.db"), "--config-dir", str(cfg)],
+    )
+
+    assert result.exit_code != 0
+    assert "FAILED" in result.output or "FAILED" in str(result.exception or "")
+
+
+def test_alert_exits_zero_on_a_successful_send(tmp_path, monkeypatch):
+    monkeypatch.setenv("JAMASP_TG_TOKEN", "t")
+    monkeypatch.setenv("JAMASP_TG_CHAT", "c")
+    monkeypatch.setattr(
+        "jamasp.notify._default_post",
+        lambda url, data: {"ok": True, "result": {"message_id": 1}},
+    )
+    cfg = _cfg(tmp_path)
+
+    result = CliRunner().invoke(
+        main,
+        ["alert", "some.service", "--db", str(tmp_path / "t.db"), "--config-dir", str(cfg)],
+    )
+
+    assert result.exit_code == 0, result.output

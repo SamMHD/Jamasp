@@ -480,7 +480,24 @@ def alert_cmd(unit, dry_run, db_path, config_dir):
     if not alert_mod.should_send(conn, unit):
         click.echo(f"suppressed: {unit} already alerted within the window")
         return
-    # _notify_safe swallows Telegram hiccups and best-effort logs to the DB:
-    # this runs because something already failed, so it must not fail too.
-    runner_mod._notify_safe(conn, settings, text)
+
+    # Deliberately not runner._notify_safe here. That swallows the failure so
+    # a run can survive a Telegram hiccup — right for a brief, wrong for the
+    # alerter, whose entire job is delivery. jamasp-alert@.service carries no
+    # OnFailure= of its own (that would loop), so exiting non-zero is what
+    # puts a broken alerter into `systemctl --failed` instead of leaving
+    # nobody to notice that alerting itself stopped working.
+    ok = True
+    try:
+        notify_mod.notify(text, settings)
+    except Exception as exc:
+        ok = False
+        click.echo(f"alert send FAILED for {unit}: {exc}", err=True)
+    try:
+        notify_mod.log_sent(conn, text, ok)
+    except Exception:
+        pass
+
+    if not ok:
+        raise SystemExit(1)
     click.echo(f"alerted for {unit}")
