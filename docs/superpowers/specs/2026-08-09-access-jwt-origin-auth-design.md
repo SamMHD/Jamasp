@@ -1,7 +1,7 @@
 # Access JWT Origin Authentication — Design Spec
 
 **Date:** 2026-08-09
-**Status:** Decided — all three open decisions ruled 2026-08-09, see the end
+**Status:** Implemented 2026-08-09 — see "What was observed" at the end
 **Extends:** `2026-08-08-panel-public-access-design.md` (the basic-auth layer)
 **Plan:** `docs/superpowers/plans/2026-08-09-access-jwt-origin-auth.md`
 
@@ -317,3 +317,52 @@ panel down rather than letting an attacker in.
 3. **Rotate the basic auth password** as part of this work. It has been
    through a chat transcript, and this design leaves it load-bearing: it is
    the layer holding the Cloudflare tenant-spoofing line described above.
+
+## What was observed (2026-08-09)
+
+Measured against the live host, not inferred from the config.
+
+| Check | Result |
+|---|---|
+| Sidecar denies with no header / junk token / unknown `kid` | 403 in all three cases |
+| Sidecar bind | `127.0.0.1:3301` only — not reachable off-host |
+| JWKS fetched from the real team endpoint | 2 keys, matching the live endpoint's count |
+| Restart during normal operation | loads 2 keys from the backstop file, no network needed |
+| Origin with no credentials at all | **401**, never 200 |
+| `/api/*` (the SWR polling path) with no credentials | **401** — the gate is not just on navigations |
+| **`jamasp-authd` stopped** | **401** with `WWW-Authenticate: Basic realm="Jamasp"` — the `error_page` mapping works |
+| **`jamasp-authd` SIGSTOP-hung** | **401 in 2.04s**, matching `proxy_read_timeout 2s`; clean recovery on SIGCONT |
+| Basic auth rotation | old password → 401, new → 200, file ownership preserved (`root:www-data 640`) |
+| SSH tunnel to `127.0.0.1:3300` | 200 — the escape hatch still bypasses nginx entirely |
+| Public URL | still 302 to the Access auth domain |
+
+Every rejection in `AccessVerifier` was also proven at the unit level against
+PyJWT 2.13.0 — wrong signing key, wrong `aud`, wrong `iss`, expired, missing
+`exp`, unknown `kid`, `alg: none`, and RS256→HS256 confusion using the public
+key as the HMAC secret. 202 tests pass in the merged tree.
+
+### Two things worth recording for next time
+
+**The hung-sidecar case is the one the design nearly missed.** A refused
+connection produces 502 quickly; a *hung* process leaves the TCP connection
+established, so `proxy_connect_timeout` never fires and only
+`proxy_read_timeout` saves you. Without it the failure is not an error page
+but a 60-second stall on every request, which reads as "the panel is slow"
+rather than "auth is broken".
+
+**A malformed test token can prove nothing and look like it proved
+something.** `eyJ...fQ.e30.x` is rejected before the key lookup, because `x`
+is not valid base64 — no JWKS fetch, no log line, and a 403 that would look
+identical if the whole validator were broken. Exercising the fetch path needs
+a structurally valid RS256 token with an unknown `kid`.
+
+### Still open
+
+- The end-to-end browser path (Access PIN → panel with **no** password
+  prompt) is the one claim not machine-verifiable from here. It needs a
+  private window, since a saved basic auth credential would make the absence
+  of a prompt meaningless.
+- No `OnFailure=` alerting on `jamasp-authd`, the CF-ranges refresh units, or
+  `certbot.service`. A crash-looping sidecar is currently silent — it
+  degrades to a password prompt rather than an outage, which is the correct
+  behaviour but also the kind that goes unnoticed for weeks.
