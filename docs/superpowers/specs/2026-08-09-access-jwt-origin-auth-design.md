@@ -356,13 +356,23 @@ is not valid base64 — no JWKS fetch, no log line, and a 403 that would look
 identical if the whole validator were broken. Exercising the fetch path needs
 a structurally valid RS256 token with an unknown `kid`.
 
+### Closed out
+
+- **Browser path confirmed by the operator (2026-08-09):** Access PIN → panel,
+  with no basic auth prompt. That absence was the whole point of the work.
+- **`OnFailure=` alerting landed the same day** across all eleven units
+  (`jamasp-*` plus a `certbot.service` drop-in). See `jamasp/alert.py` and
+  `ops/systemd/jamasp-alert@.service`. Verified by injecting real failures
+  through the full systemd chain, not by reading config.
+
 ### Still open
 
-- The end-to-end browser path (Access PIN → panel with **no** password
-  prompt) is the one claim not machine-verifiable from here. It needs a
-  private window, since a saved basic auth credential would make the absence
-  of a prompt meaningless.
-- No `OnFailure=` alerting on `jamasp-authd`, the CF-ranges refresh units, or
-  `certbot.service`. A crash-looping sidecar is currently silent — it
-  degrades to a password prompt rather than an outage, which is the correct
-  behaviour but also the kind that goes unnoticed for weeks.
+- Nothing blocking. The natural next tightening — `satisfy any` → `satisfy
+  all`, or dropping basic auth entirely — is deliberately deferred until the
+  JWT path has run long enough to trust. It is a one-line change and
+  reversible, so there is no reason to make that call now.
+- `jamasp-alert@.service` carries no `OnFailure=` of its own, because an
+  alerter that alerts about its own failure loops. It exits non-zero on a
+  failed send instead, so a broken alerter surfaces in `systemctl --failed`
+  — but nothing actively pages about it. That is the one remaining blind
+  spot, and it is a deliberate one.

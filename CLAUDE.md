@@ -60,6 +60,12 @@ Claude's file-based `~/.claude/.credentials.json` rather than the whole
 directory) — is the **`deploy` skill** (`.claude/skills/deploy/SKILL.md`).
 Invoke it when standing up a new host or repairing one.
 
+Alongside the timers the host runs two always-on services: `jamasp-panel`
+(the web control panel) and `jamasp-authd` (the Cloudflare Access JWT
+sidecar that fronts it). Every unit carries
+`OnFailure=jamasp-alert@%n.service`, so a failure reaches the desk chat
+rather than sitting silently in the journal.
+
 Between agent runs, the ingest timer also publishes each gold-touching item to
 a **separate Telegram news channel** (`JAMASP_TG_NEWS_CHAT`) as a Persian
 summary plus impact read, deduped against the last 24 hours and edited in place
