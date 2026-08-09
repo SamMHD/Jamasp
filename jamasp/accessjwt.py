@@ -133,3 +133,60 @@ class JwksCache:
             tmp.replace(self._backstop)  # atomic; never a half-written file
         except Exception as exc:
             log.warning("could not write JWKS backstop %s: %s", self._backstop, exc)
+
+
+ACCESS_HEADER = "Cf-Access-Jwt-Assertion"
+
+# Pinned, never read from the token. A verifier that honours the token's own
+# `alg` can be defeated by re-signing with HS256 using the RSA public key —
+# which is not secret, it is published in the JWKS.
+ALGORITHMS = ["RS256"]
+
+
+class AccessVerifier:
+    """Verifies a Cloudflare Access JWT against this application."""
+
+    def __init__(self, jwks: JwksCache, audience: str, issuer: str) -> None:
+        if not audience or not issuer:
+            # Belt and braces: the CLI already refuses to start without
+            # these. An empty audience would disable the check that pins a
+            # token to THIS app, accepting any Access token from any team.
+            raise ValueError("AccessVerifier requires a non-empty audience and issuer")
+        self._jwks = jwks
+        self._audience = audience
+        self._issuer = issuer
+
+    def verify(self, token: str) -> str | None:
+        """The authenticated email, or None if the token is not acceptable."""
+        if not token:
+            return None
+
+        try:
+            kid = jwt.get_unverified_header(token).get("kid")
+        except Exception:
+            return None
+        if not kid:
+            return None
+
+        key = self._jwks.signing_key(kid)
+        if key is None:
+            log.info("no signing key for kid=%s", kid)
+            return None
+
+        try:
+            claims = jwt.decode(
+                token,
+                key=key.key,
+                algorithms=ALGORITHMS,
+                audience=self._audience,
+                issuer=self._issuer,
+                options={"require": ["exp", "iat", "aud", "iss"]},
+            )
+        except jwt.InvalidTokenError as exc:
+            log.info("token rejected: %s", exc)
+            return None
+        except Exception as exc:  # nothing gets through on an unexpected error
+            log.warning("token verification raised: %s", exc)
+            return None
+
+        return claims.get("email", "")
