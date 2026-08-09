@@ -60,9 +60,27 @@ browser
   → 127.0.0.1:3300             (next start, unchanged)
 ```
 
-Each layer fails closed independently: bypassing Access requires reaching the
-origin directly, which nftables refuses; reaching nginx without credentials
-yields 401; nginx never forwards an unauthenticated request upstream.
+Each layer covers a distinct threat, not a strictly nested one — **the
+layers are not fully independent, and nftables does not make Access
+unbypassable.** Cloudflare's published IP ranges are shared infrastructure:
+anyone with a free Cloudflare account can point their own zone at
+`167.235.150.246` and use an Origin Rule to override the Host/SNI sent to
+the origin to `jamasp.mahdanian.xyz` (a documented technique — Certitude,
+Nov 2023). That request arrives from an allow-listed Cloudflare IP, so
+nftables passes it; it presents the right Host, so it matches the panel
+vhost instead of the `444` catch-all; and Cloudflare Access is never
+consulted, because Access is enforced on *our* zone's edge configuration,
+not at the origin, and this request never touched our zone. What actually
+stops that path is nginx's basic auth (bcrypt, 144-bit random password) —
+which is precisely why it is being kept rather than dropped once Access
+was added. See
+`docs/superpowers/specs/2026-08-09-access-jwt-origin-auth-design.md` for
+the proper fix (origin-side Access JWT validation). Given all that, what
+each layer *does* reliably do: nftables blocks direct-IP scans and
+background internet noise (traffic that never went through Cloudflare at
+all); Access gates human sign-in and provides identity/audit for requests
+arriving via our hostname on our zone; nginx refuses to forward any
+request — via either path — that lacks valid basic-auth credentials.
 
 ### 1. DNS and edge configuration
 
@@ -146,12 +164,27 @@ table inet jamasp_edge {
 ```
 
 - Sets are populated from `https://www.cloudflare.com/ips-v4` and `ips-v6` by
-  `ops/scripts/refresh-cf-ranges.sh`, run by a weekly systemd timer
-  (`jamasp-cf-ranges.timer`), both checked into the repo.
-- **Failure guard:** if either fetch fails or returns fewer than 5 CIDRs, the
-  script exits non-zero *without touching the live ruleset*. An empty set
-  would drop Cloudflare itself and take the panel down — the stale list is
-  always the safer state.
+  `ops/scripts/refresh-cf-ranges.sh`, run by a **daily** systemd timer
+  (`jamasp-cf-ranges.timer`), both checked into the repo. (Originally
+  weekly; shortened post-launch — see the hardening note below.)
+- **Failure guard:** if either fetch fails or returns an implausible list
+  (below `MIN_V4`/`MIN_V6`, or fewer CIDRs than are currently loaded), the
+  script does not apply the fetched data and still exits non-zero. An empty
+  set would drop Cloudflare itself and take the panel down — the stale list
+  is always the safer state.
+- **Hardened post-launch (branch review finding C1):** `jamasp-edge.nft`
+  recreates its sets *empty* on every load (the `table`/`delete table` pair
+  used for idempotent reloads), and `jamasp-edge.service` runs that reload
+  immediately before this script on every boot. So "exits non-zero without
+  touching the live ruleset" was true in steady state but **false at
+  boot** — there was no previous ruleset to fall back to, and one transient
+  fetch failure at boot could leave the sets empty (dropping all inbound
+  80/443, including Cloudflare's) until the next timer fire. The script now
+  also caches the last-accepted lists to `/var/lib/jamasp/cf-ranges.v4` and
+  `.v6` on every success, and loads that cache into the live sets on any
+  failure — including at boot — before still exiting non-zero. The timer
+  moved from weekly to daily in the same change, to shrink worst-case
+  staleness if a cache load is ever needed for real.
 - Loopback is explicitly allowed so on-origin verification with `curl` works.
 
 ### 6. Panel change (the one real trap)
@@ -174,7 +207,7 @@ requires firing a real server action end-to-end, not merely loading pages.
 - `ops/nginx/jamasp-panel.conf` — the vhost and catch-all.
 - `ops/nftables/jamasp-edge.nft` — the table skeleton.
 - `ops/scripts/refresh-cf-ranges.sh` — range refresh with the failure guard.
-- `ops/systemd/jamasp-cf-ranges.{service,timer}` — weekly refresh.
+- `ops/systemd-root/jamasp-cf-ranges.{service,timer}` — daily refresh.
 - `panel/next.config.ts` — `serverActions.allowedOrigins`.
 - `.claude/skills/deploy/SKILL.md` — new "Public access" section making the
   whole thing reproducible on a rebuilt host, and correcting the existing
@@ -198,11 +231,11 @@ Secrets that never enter the repo: `/etc/nginx/jamasp.htpasswd`,
 | Failure | Behaviour |
 |---|---|
 | Cert renewal fails | Existing cert serves until expiry; `certbot.timer` retries twice daily. Detected by `certbot renew --dry-run` in acceptance, not by expiry. |
-| CF range refresh fails | Script aborts, previous ranges stay live. Panel unaffected. |
-| Ranges go stale between refreshes | Cloudflare announces changes well in advance; weekly cadence is ample. Worst case is a partial outage, fixed by a manual refresh run. |
+| CF range refresh fails | Script aborts non-zero; live ranges are preserved — from the already-loaded set, or from the on-disk cache if the set was empty (e.g. at boot). Panel unaffected once a cache exists (see C1 hardening, above); a first-ever run with no cache and a failed fetch is the one case that can leave the sets empty. |
+| Ranges go stale between refreshes | Cloudflare announces changes well in advance; daily cadence is ample. Worst case is a partial outage, fixed by a manual refresh run. |
 | nginx down | Panel unreachable publicly; SSH tunnel to 3300 unaffected. |
 | Access misconfigured/open | Basic auth still blocks. |
-| Basic auth credential leaked | Access still blocks, and the origin refuses non-Cloudflare sources. |
+| Basic auth credential leaked | **This path gets in.** Neither Access nor nftables reliably stops it: an attacker can reach the origin via another Cloudflare tenant's zone with Host/SNI overridden to `jamasp.mahdanian.xyz` (see Architecture, above), which nftables cannot distinguish from legitimate traffic and which never touches our zone's Access policy. Basic auth is the layer actually carrying this risk today; see `2026-08-09-access-jwt-origin-auth-design.md` for the planned origin-side JWT check. |
 | Panel service down | nginx returns 502; no data at risk. |
 
 ## Acceptance criteria
@@ -217,7 +250,10 @@ on the strength of "it should work".
    `mahdanian-saman-81.cloudflareaccess.com` (Access is live).
 4. From a workstation: `curl -sI --connect-timeout 10 --resolve
    jamasp.mahdanian.xyz:443:167.235.150.246 https://jamasp.mahdanian.xyz/` →
-   connection times out (origin lockdown is real, Access is not bypassable).
+   connection times out (confirms the origin lockdown blocks direct-IP
+   access from a non-Cloudflare source; it does not by itself prove Access
+   can't be bypassed via another Cloudflare tenant's zone — see
+   Architecture, above).
 5. `certbot renew --dry-run` → success.
 6. Browser: PIN → basic auth → Overview renders the text "Last ingest".
 7. Browser: schedule a wakeup, then cancel it → both succeed (Server Actions

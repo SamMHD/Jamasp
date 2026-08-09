@@ -1,0 +1,31 @@
+[Unit]
+Description=Jamasp panel — Cloudflare Access JWT sidecar on 127.0.0.1:3301
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+WorkingDirectory=%h/Jamasp
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+Environment=JAMASP_ROOT=%h/Jamasp
+# No `-` prefix, unlike the analyst units: a missing env file must stop the
+# daemon starting, not start it unconfigured. Starting unconfigured is the
+# failure mode this whole design exists to avoid.
+EnvironmentFile=%h/.config/jamasp/env
+ExecStart=/usr/bin/env uv run jamasp authd
+Restart=always
+RestartSec=2
+
+# Hardening. `full` rather than `strict`: strict makes the whole filesystem
+# read-only including /home, and `uv run` writes to the project venv and to
+# ~/.cache/uv. `full` covers /usr, /boot and /etc, which is the part worth
+# protecting here.
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=full
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+MemoryMax=256M
+
+[Install]
+WantedBy=default.target
