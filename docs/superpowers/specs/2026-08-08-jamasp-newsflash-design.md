@@ -332,6 +332,52 @@ Integration:
   file setup and the step of adding the bot to the second channel.
 - No new systemd unit. Flash rides the existing ingest timer.
 
+## Follow-ups left after implementation
+
+Carried out of the whole-branch review and its fix wave. None blocked the merge;
+all were judged real.
+
+- **Nothing detects a dead flash.** `watchdog` checks ingest staleness, the
+  previous day's brief, and stuck wakeups — never `source_errors`. A missing
+  `JAMASP_TG_NEWS_CHAT` logs 96 errors a day and leaves every other output
+  healthy, so the only signals are the ingest stdout line and the panel. A
+  watchdog rule on `source_errors WHERE source = 'flash'` would close this. The
+  false "dead source" warning that used to surface it in the agent inbox was
+  removed deliberately — it named a news source that does not exist.
+- **The article fence is escapable by the article.** `build_write_prompt`
+  interpolates the extracted body between delimiters without scrubbing them, so
+  a body containing the closing delimiter puts its remainder outside the fence,
+  in instruction position. One line fixes it (`body.replace(ARTICLE_CLOSE, " ")`).
+- **`_one_line` misses Unicode line separators.** It maps C0 and `0x7F` to
+  space but not `U+0085`, `U+2028`, `U+2029`, so a headline carrying one still
+  splits the tab-delimited decide prompt across two lines. Reachable through
+  `gnews_gold`, which syndicates arbitrary publishers' titles. Impact is a
+  mis-dedupe, not a channel post.
+- **`TimeoutStartSec=600` is below the computed worst case.** A saturated tick
+  is `120 + 10 × (30 + 30 + 120) = 1920s`. The bound is still right in
+  direction — it sits under the 900s timer period, and a mid-tick kill is safe
+  now that publishes are atomic and the heartbeat precedes flash — but it will
+  SIGTERM a genuinely busy tick.
+- **The truncation signal was lost.** `extract_url` used to append
+  `\n[truncated]` at its cut; flash now slices the full text itself, so the
+  write model no longer knows the article was cut.
+- **`extract_cache` is still structurally unsafe.** It is keyed on URL with no
+  size column or TTL, and returns the cached row before consulting `max_chars`.
+  Flash no longer poisons it — it extracts at the full budget and truncates only
+  for the prompt — but any future caller passing a smaller budget recreates the
+  bug. Truncating on read, or keying by size, is the structural fix.
+- **No output-side check on model text.** The fence and the prompt's
+  no-trading-instructions rule are the only guards on what reaches the channel.
+- **`--dry-run` still requires `JAMASP_TG_NEWS_CHAT`.** `run_flash` resolves the
+  chat before checking `dry_run`, though the dry-run path never uses it. Kept
+  deliberately: the deploy runbook documents `flash --dry-run` as the way to
+  detect a missing news chat.
+- Smaller items: `render_message` truncation slices the assembled message, so a
+  runaway summary drops the sources line, link, and timestamp rather than
+  trimming prose; the six-field stats line is duplicated between `ingest` and
+  `flash` in `cli.py`; `stats["dup"]` counts items that produced no edit; and
+  CLAUDE.md omits both the Persian title and `ingest --no-flash`.
+
 ## Open risks
 
 - **Volume.** 30–45 messages/day is a real firehose. If the channel proves

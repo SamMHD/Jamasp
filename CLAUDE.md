@@ -34,6 +34,7 @@ for the sage-advisor of the Shahnameh: measured, far-sighted, never breathless.
 | `uv run jamasp extract <url>` | clean article text for a headline worth deep reading |
 | `uv run jamasp notify [--dry-run] -` | send stdin text to the desk Telegram |
 | `uv run jamasp ingest` | refresh sources (only if inbox seems stale) |
+| `uv run jamasp flash [--dry-run]` | publish new gold items to the Telegram news channel (runs automatically inside `ingest`) |
 | `uv run jamasp calendar` | upcoming economic events (UTC + Dubai), high/medium impact |
 | `uv run jamasp wakeup add "<ISO>" <type> "<task>"` | schedule a future run (usually deepdive) |
 | `uv run jamasp wakeup list` | pending wakeups (feed the brief's "watching" section) |
@@ -58,6 +59,14 @@ non-root user** so `--dangerously-skip-permissions` is allowed, and copy
 Claude's file-based `~/.claude/.credentials.json` rather than the whole
 directory) — is the **`deploy` skill** (`.claude/skills/deploy/SKILL.md`).
 Invoke it when standing up a new host or repairing one.
+
+Between agent runs, the ingest timer also publishes each gold-touching item to
+a **separate Telegram news channel** (`JAMASP_TG_NEWS_CHAT`) as a Persian
+summary plus impact read, deduped against the last 24 hours and edited in place
+when a second source carries the same story. This is a deterministic pipeline
+stage, not an agent run: it consumes no agent-run budget and needs no
+supervision. The desk chat stays reserved for briefs, scan alerts, and failure
+notices.
 
 ## Working on Jamasp itself
 

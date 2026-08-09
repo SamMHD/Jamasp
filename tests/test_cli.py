@@ -251,6 +251,141 @@ def test_run_cmd_dry_run_executes_and_records_nothing(tmp_path, monkeypatch):
     assert rows == []
 
 
+def test_flash_command_reports_stats(tmp_path, monkeypatch):
+    from click.testing import CliRunner
+
+    from jamasp import cli, flash as flash_mod
+
+    called = {}
+
+    def fake_run_flash(conn, settings, sources, **kwargs):
+        called["dry_run"] = kwargs.get("dry_run")
+        return {"posted": 2, "dup": 1, "not_gold": 3, "unreadable": 0, "stale": 4,
+                "burst": 0, "errors": 0}
+
+    monkeypatch.setattr(flash_mod, "run_flash", fake_run_flash)
+    result = CliRunner().invoke(
+        cli.main, ["flash", "--db", str(tmp_path / "t.db")]
+    )
+    assert result.exit_code == 0
+    assert "2 posted" in result.output and "1 updated" in result.output
+    assert called["dry_run"] is False
+
+
+def test_flash_dry_run_passes_flag(tmp_path, monkeypatch):
+    from click.testing import CliRunner
+
+    from jamasp import cli, flash as flash_mod
+
+    called = {}
+
+    def fake_run_flash(conn, settings, sources, **kwargs):
+        called["dry_run"] = kwargs.get("dry_run")
+        return {"posted": 0, "dup": 0, "not_gold": 0, "unreadable": 0, "stale": 0,
+                "burst": 0, "errors": 0}
+
+    monkeypatch.setattr(flash_mod, "run_flash", fake_run_flash)
+    result = CliRunner().invoke(
+        cli.main, ["flash", "--dry-run", "--db", str(tmp_path / "t.db")]
+    )
+    assert result.exit_code == 0
+    assert called["dry_run"] is True
+
+
+def test_ingest_no_flash_skips_the_pass(tmp_path, monkeypatch):
+    from jamasp import flash as flash_mod
+
+    cfg = _write_configs(
+        tmp_path,
+        """
+sources:
+  - name: deadfeed
+    type: rss
+    url: http://127.0.0.1:1/rss
+    interval_minutes: 15
+    topic: gold
+""",
+    )
+    calls = []
+    monkeypatch.setattr(flash_mod, "run_flash", lambda *a, **k: calls.append(1) or {})
+    result = CliRunner().invoke(
+        main,
+        [
+            "ingest", "--no-digest", "--no-flash",
+            "--db", str(tmp_path / "j.db"), "--config-dir", str(cfg),
+        ],
+    )
+    assert result.exit_code == 0
+    assert calls == []
+
+
+def test_ingest_heartbeat_lands_before_the_flash_pass(tmp_path, monkeypatch):
+    # watchdog.check reads last_ingest_at with a 60-minute staleness bound.
+    # The fetch is done and committed before flash starts, so the heartbeat
+    # must not be gated on however long flash takes.
+    from jamasp import db as db_mod, flash as flash_mod
+
+    cfg = _write_configs(
+        tmp_path,
+        """
+sources:
+  - name: deadfeed
+    type: rss
+    url: http://127.0.0.1:1/rss
+    interval_minutes: 15
+    topic: gold
+""",
+    )
+    seen = {}
+
+    def fake_run_flash(conn, settings, sources, **kwargs):
+        seen["heartbeat"] = db_mod.get_meta(conn, "last_ingest_at")
+        return {}
+
+    monkeypatch.setattr(flash_mod, "run_flash", fake_run_flash)
+    result = CliRunner().invoke(
+        main,
+        [
+            "ingest", "--no-digest",
+            "--db", str(tmp_path / "j.db"), "--config-dir", str(cfg),
+        ],
+    )
+    assert result.exit_code == 0
+    assert seen["heartbeat"] is not None
+
+
+def test_ingest_runs_flash_by_default(tmp_path, monkeypatch):
+    from jamasp import flash as flash_mod
+
+    cfg = _write_configs(
+        tmp_path,
+        """
+sources:
+  - name: deadfeed
+    type: rss
+    url: http://127.0.0.1:1/rss
+    interval_minutes: 15
+    topic: gold
+""",
+    )
+    calls = []
+    stats = {"posted": 1, "dup": 2, "not_gold": 3, "unreadable": 0, "stale": 4,
+             "burst": 0, "errors": 0}
+    monkeypatch.setattr(
+        flash_mod, "run_flash", lambda *a, **k: calls.append(1) or stats
+    )
+    result = CliRunner().invoke(
+        main,
+        [
+            "ingest", "--no-digest",
+            "--db", str(tmp_path / "j.db"), "--config-dir", str(cfg),
+        ],
+    )
+    assert result.exit_code == 0
+    assert calls == [1]
+    assert "flash: 1 posted, 2 updated" in result.output
+
+
 def test_wakeup_cancel_cli(tmp_path):
     from click.testing import CliRunner
     from jamasp import cli

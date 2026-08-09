@@ -18,6 +18,8 @@ class Source:
     # overrides the parser-derived series symbol; needed where the payload's
     # own symbol is unstable (Yahoo FX pairs)
     symbol: str | None = None
+    # human-readable label for Telegram flash "منابع:" lines
+    display: str | None = None
 
 
 def load_sources(path: Path = Path("config/sources.yaml")) -> list[Source]:
@@ -31,6 +33,7 @@ def load_sources(path: Path = Path("config/sources.yaml")) -> list[Source]:
             topic=e["topic"],
             parser=e.get("parser"),
             symbol=e.get("symbol"),
+            display=e.get("display"),
         )
         for e in raw["sources"]
     ]
@@ -38,3 +41,10 @@ def load_sources(path: Path = Path("config/sources.yaml")) -> list[Source]:
 
 def load_settings(path: Path = Path("config/settings.yaml")) -> dict:
     return yaml.safe_load(path.read_text())
+
+
+def display_names(sources: list[Source]) -> dict[str, str]:
+    """Map source name to the label shown to humans."""
+    return {
+        s.name: s.display or s.name.replace("_", " ").title() for s in sources
+    }

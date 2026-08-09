@@ -47,18 +47,23 @@ export function getUnreadCount(): number {
   ).get() as { c: number }).c);
 }
 
-export function getItems(opts?: { limit?: number; source?: string; topic?: string;
-  unreadOnly?: boolean }): ItemRow[] {
+export function getItems(opts?: { limit?: number; offset?: number; source?: string;
+  topic?: string; unreadOnly?: boolean; search?: string }): ItemRow[] {
   const o = opts ?? {};
   const cond: string[] = [];
   const args: unknown[] = [];
   if (o.source) { cond.push("source = ?"); args.push(o.source); }
   if (o.topic) { cond.push("topic = ?"); args.push(o.topic); }
   if (o.unreadOnly) cond.push("read_at IS NULL");
+  if (o.search) {
+    const like = `%${o.search.replace(/[\\%_]/g, m => `\\${m}`)}%`;
+    cond.push("(headline LIKE ? ESCAPE '\\' OR lede LIKE ? ESCAPE '\\')");
+    args.push(like, like);
+  }
   const where = cond.length ? `WHERE ${cond.join(" AND ")}` : "";
   return q(db => db.prepare(
-    `SELECT * FROM items ${where} ORDER BY published_at DESC LIMIT ?`
-  ).all(...args, o.limit ?? 200) as ItemRow[]);
+    `SELECT * FROM items ${where} ORDER BY published_at DESC LIMIT ? OFFSET ?`
+  ).all(...args, o.limit ?? 200, o.offset ?? 0) as ItemRow[]);
 }
 
 export function getItemFilters(): { sources: string[]; topics: string[] } {

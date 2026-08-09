@@ -1611,20 +1611,72 @@ def test_flash_dry_run_passes_flag(tmp_path, monkeypatch):
 
 
 def test_ingest_no_flash_skips_the_pass(tmp_path, monkeypatch):
-    from click.testing import CliRunner
+    from jamasp import flash as flash_mod
 
-    from jamasp import cli, flash as flash_mod
-
+    cfg = _write_configs(
+        tmp_path,
+        """
+sources:
+  - name: deadfeed
+    type: rss
+    url: http://127.0.0.1:1/rss
+    interval_minutes: 15
+    topic: gold
+""",
+    )
     calls = []
-    monkeypatch.setattr(
-        flash_mod, "run_flash", lambda *a, **k: calls.append(1) or {}
+    monkeypatch.setattr(flash_mod, "run_flash", lambda *a, **k: calls.append(1) or {})
+    result = CliRunner().invoke(
+        main,
+        [
+            "ingest", "--no-digest", "--no-flash",
+            "--db", str(tmp_path / "j.db"), "--config-dir", str(cfg),
+        ],
     )
-    CliRunner().invoke(
-        cli.main,
-        ["ingest", "--no-digest", "--no-flash", "--db", str(tmp_path / "t.db")],
-    )
+    assert result.exit_code == 0
     assert calls == []
+
+
+def test_ingest_runs_flash_by_default(tmp_path, monkeypatch):
+    from jamasp import flash as flash_mod
+
+    cfg = _write_configs(
+        tmp_path,
+        """
+sources:
+  - name: deadfeed
+    type: rss
+    url: http://127.0.0.1:1/rss
+    interval_minutes: 15
+    topic: gold
+""",
+    )
+    calls = []
+    stats = {"posted": 1, "dup": 2, "not_gold": 3, "stale": 4, "burst": 0, "errors": 0}
+    monkeypatch.setattr(
+        flash_mod, "run_flash", lambda *a, **k: calls.append(1) or stats
+    )
+    result = CliRunner().invoke(
+        main,
+        [
+            "ingest", "--no-digest",
+            "--db", str(tmp_path / "j.db"), "--config-dir", str(cfg),
+        ],
+    )
+    assert result.exit_code == 0
+    assert calls == [1]
+    assert "flash: 1 posted, 2 updated" in result.output
 ```
+
+Both ingest tests use the `_write_configs(tmp_path, sources_yaml)` helper already at
+the top of `tests/test_cli.py`, together with an unreachable URL. Invoking `ingest`
+without `--config-dir` would fall through to the repo's real `config/sources.yaml`
+and fetch every live feed during the test run — every existing ingest test in that
+file avoids this the same way. The second test is the one that matters: it pins the
+actual integration point, that ingest runs the pass and reports its stats.
+
+The other two tests in this step monkeypatch `run_flash` before any pipeline work
+happens, so their use of the default config directory does no network work.
 
 - [ ] **Step 2: Run tests to verify they fail**
 

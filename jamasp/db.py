@@ -75,6 +75,26 @@ CREATE TABLE IF NOT EXISTS notify_log (
     text TEXT NOT NULL,
     ok   INTEGER NOT NULL
 );
+CREATE TABLE IF NOT EXISTS flashes (
+    id          TEXT PRIMARY KEY,
+    created_at  TEXT NOT NULL,
+    updated_at  TEXT NOT NULL,
+    title_en    TEXT NOT NULL,
+    title_fa    TEXT NOT NULL,
+    summary_fa  TEXT NOT NULL,
+    impact_fa   TEXT NOT NULL,
+    url         TEXT NOT NULL,
+    message_id  INTEGER NOT NULL,
+    status      TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_flashes_created ON flashes(created_at);
+CREATE TABLE IF NOT EXISTS flash_items (
+    item_id  TEXT PRIMARY KEY,
+    flash_id TEXT,
+    state    TEXT NOT NULL,
+    ts       TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_flash_items_flash ON flash_items(flash_id);
 """
 
 
