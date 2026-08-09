@@ -15,7 +15,10 @@ possibly same vessel) — 4th incident this week vs the ADNOC baseline
 (14+ targeted, 1 killed), Oman warns attacks may derail talks; (3)
 **Kpler: 8 Hormuz transits Friday vs 130–140/day pre-war** — retire the
 "flows ~half" figure, physical normalization is confidence-gated and
-slow even post-text. Corridor: Araghchi "very close", Oman
+slow even post-text; (4) **Sunday: Houthi drone hit Aramco's 400kbpd
+Jazan refinery** — fire out, no casualties reported; first Saudi
+energy-infra strike this cycle, Houthi/Red-Sea axis not Iran-direct,
+contained (alerted 09:00Z scan). Corridor: Araghchi "very close", Oman
 "constructive", Vance confirms US-Iran track + expects pre-war export
 levels — a gap Iran priced at seven unmet demands. **Crowding: UBS
 $5,000 target on top of net spec +9.5% w/w, GVZ +10% w/w, RSI14 66 —
@@ -36,8 +39,10 @@ capped by CPI.**
 - **Kinetic tail (~25%):** the baseline (vessel hits, no casualties)
   is priced and was shrugged all week; the tail needs escalation
   beyond it — mass-casualty hit, Saudi/UAE energy-infra strike,
-  attribution fight → 4500+ through the 200DMA. Saturday's attack is
-  baseline unless Monday's open says otherwise.
+  attribution fight → 4500+ through the 200DMA. Saturday's ADNOC hit
+  and Sunday's contained Jazan strike read as baseline unless Monday's
+  open says otherwise; Iran-attributed or production-denting is what
+  re-prices.
 
 ## What flips me
 
@@ -69,7 +74,7 @@ print ≥4496.7 before Tue 12:30Z (flat, 0.65, 3d). Scored today: `e29d9c5c` HIT
 
 #20 Tue 12 Aug 12:45Z CPI deepdive. Weekly retro today (timer; four
 lessons + aba1ae09 queued). Globex reopens Mon 02:00 Dubai — scans
-check Saturday-attack pricing. 2-hourly scans: corridor/SNSC,
+check Saturday-ADNOC + Sunday-Jazan pricing. 2-hourly scans: corridor/SNSC,
 escalation vs the ADNOC baseline, Saudi-strike thread.
 
 ## Desk-local
