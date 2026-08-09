@@ -377,14 +377,11 @@ the fetch path.
 ### Failure alerting (`jamasp-alert@`)
 
 Every `jamasp-*` unit carries `OnFailure=jamasp-alert@%n.service`, plus a
-drop-in for `certbot.service`. The template runs `jamasp alert <unit>`, which
-puts the unit's state and last 15 journal lines into a Telegram message
-(Persian lead line, English technical body — unit names, states and log lines
-are English, and translating the frame around them makes them harder to act
-on at 3am, not easier).
+drop-in for `certbot.service`, so a failed unit reaches the desk Telegram
+instead of sitting in the journal.
 
-Install: `ops/systemd/jamasp-alert@.service` goes in through the ordinary
-step-5 loop. The certbot drop-in is separate:
+`ops/systemd/jamasp-alert@.service` installs through the ordinary step-5 loop.
+The certbot drop-in is separate:
 
 ```bash
 ssh jamasp 'mkdir -p /etc/systemd/system/certbot.service.d'
@@ -393,33 +390,7 @@ ssh jamasp 'cp /home/jamasp/Jamasp/ops/systemd-root/certbot.service.d/onfailure.
 ssh jamasp 'systemctl daemon-reload'
 ```
 
-Four things here are easy to get wrong:
-
-1. **`SupplementaryGroups=systemd-journal` is load-bearing.** The `jamasp`
-   user is not in that group, and `journalctl -u <another unit>` returns an
-   **empty string rather than a permission error** for a user outside it. Drop
-   the line and every alert ships a blank log section that reads as "the unit
-   failed quietly" instead of "we cannot see its logs". `compose()` labels the
-   empty case explicitly for the same reason.
-2. **`%i`, never `%I`.** `%I` unescapes `-` to `/`, which mangles every unit
-   name here (`jamasp-authd.service` → `jamasp/authd.service`).
-3. **`OnFailure=jamasp-alert@%n.service` resolves to
-   `jamasp-alert@jamasp-authd.service.service`** — the doubled suffix is
-   correct, not a typo. `%n` is the full unit name including `.service`, and
-   the trailing `.service` is the alerter's own type suffix. Write it with
-   only one and `%i` loses the suffix, so the alert names the wrong unit and
-   the suppression key stops matching.
-4. **Alerts are suppressed per unit for an hour** (`ALERT_WINDOW_MINUTES`).
-   `jamasp-dispatch` fires every 5 minutes, so a persistent failure would
-   otherwise send ~288 messages a day, and an alert channel that storms is one
-   people mute.
-
-`jamasp-alert@.service` deliberately has **no `OnFailure=` of its own** — an
-alerter that alerts about its own failure loops. It exits non-zero on a failed
-send instead, so a broken alerter lands in `systemctl --failed`.
-
-Test it by injecting a real failure, never by reading the config. Use a
-throwaway unit so production is untouched:
+Verify by injecting a real failure, never by reading the config:
 
 ```bash
 ssh jamasp 'systemd-run --unit=alert-selftest.service \
@@ -430,19 +401,13 @@ journalctl -u "jamasp-alert@alert-selftest.service.service" -n 10 --no-pager
 systemctl reset-failed alert-selftest.service'
 ```
 
-Expect `alerted for alert-selftest.service` and a Telegram message. Confirm
-delivery actually succeeded rather than trusting the exit code alone —
-`notify_log.ok` is the authority:
+Expect `alerted for alert-selftest.service` and a Telegram message.
 
-```bash
-ssh jamasp 'su - jamasp -c "cd ~/Jamasp && uv run python -c \"
-import sqlite3; c=sqlite3.connect(\\\"state/jamasp.db\\\")
-print(*c.execute(\\\"SELECT ts,ok FROM notify_log ORDER BY ts DESC LIMIT 3\\\"))\""'
-```
-
-Running `jamasp alert` by hand from a plain shell will log `ok=0`: the env
-file with `JAMASP_TG_TOKEN` is loaded by the unit's `EnvironmentFile=`, not by
-your login shell. That is a testing artifact, not a fault.
+> **The `alerting` skill (`.claude/skills/alerting/SKILL.md`) is the
+> authority on this layer** — the traps (`%i` vs `%I`, the deliberately
+> doubled `.service` suffix, `SupplementaryGroups=systemd-journal`, the
+> one-hour suppression window), the diagnostic table, and the design
+> decisions that must not be "fixed". Read it before changing anything here.
 
 ### Hardening (post-launch branch review, C1/M2)
 

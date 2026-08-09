@@ -57,12 +57,22 @@ def gather(unit: str, run=_run) -> dict[str, str]:
         info.setdefault(prop, "")
 
     try:
-        info["journal"] = run(
+        journal = run(
             ["journalctl", "-u", unit, "-n", str(JOURNAL_LINES), "--no-pager"]
         )
     except Exception:
-        info["journal"] = ""
+        journal = ""
 
+    # journalctl does not return an empty string when it has nothing to show:
+    # it prints the literal `-- No entries --` on stdout. That is also exactly
+    # what a *permission* problem looks like from here — a caller outside the
+    # systemd-journal group gets this marker rather than an error. Normalise
+    # it to empty so compose() takes the explicit "cannot read" branch instead
+    # of rendering the marker as though the unit had logged nothing.
+    if journal.strip().lower() == "-- no entries --":
+        journal = ""
+
+    info["journal"] = journal
     return info
 
 

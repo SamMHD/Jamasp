@@ -86,7 +86,7 @@ current on their own. They trigger on development work, not on analysis runs —
 a brief or scan should never invoke them.
 
 `.claude/skills/` holds only Jamasp's own skills: `brief`, `scan`,
-`deepdive`, `retro`, `deploy`, `access-whitelist`.
+`deepdive`, `retro`, `deploy`, `access-whitelist`, `alerting`.
 
 The web control panel lives in `panel/` (Next.js; see
 `docs/superpowers/specs/2026-08-01-jamasp-panel-design.md`). It reads

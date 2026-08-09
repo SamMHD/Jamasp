@@ -246,3 +246,29 @@ def test_alert_exits_zero_on_a_successful_send(tmp_path, monkeypatch):
     )
 
     assert result.exit_code == 0, result.output
+
+
+def test_no_entries_marker_counts_as_unreadable():
+    """journalctl does not return an empty string when it has nothing to show
+    — it prints the literal `-- No entries --` to stdout, which is truthy.
+
+    That is precisely what a permission problem looks like: the jamasp user
+    outside the systemd-journal group gets this marker, not an error. Treating
+    it as content renders 'the unit logged nothing' and hides the actual
+    cause, which is the failure mode the explicit branch exists to prevent.
+    """
+    run = FakeRunner(show={"Result": "exit-code"}, journal="-- No entries --")
+    info = gather("nginx.service", run=run)
+
+    assert info["journal"] == ""
+    assert "systemd-journal" in compose("nginx.service", info)
+
+
+def test_no_entries_marker_is_matched_case_insensitively():
+    run = FakeRunner(show={}, journal="  -- no entries --  ")
+    assert gather("nginx.service", run=run)["journal"] == ""
+
+
+def test_real_log_lines_are_kept():
+    run = FakeRunner(show={}, journal="Aug 09 16:03 Jamasp sh[1]: SELFTEST")
+    assert "SELFTEST" in gather("nginx.service", run=run)["journal"]
