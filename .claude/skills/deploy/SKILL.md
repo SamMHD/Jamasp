@@ -273,8 +273,11 @@ of which restructure `panel/` — it's still the same `next start` on
    `docs/superpowers/specs/2026-08-08-panel-public-access-design.md`'s
    Architecture section for the full breakdown of what each layer does and
    doesn't guarantee.
-2. **nginx** — terminates TLS (Let's Encrypt, DNS-01) and challenges with
-   HTTP basic auth before reverse-proxying to `127.0.0.1:3300`.
+2. **nginx** — terminates TLS (Let's Encrypt, DNS-01) and admits a request
+   under `satisfy any` if **either** the Cloudflare Access JWT validates
+   (via the `jamasp-authd` sidecar, below) **or** HTTP basic auth succeeds,
+   before reverse-proxying to `127.0.0.1:3300`. In normal browser use the
+   JWT satisfies this and no password is ever requested.
 3. **Cloudflare Access** — a one-time-PIN gate on the hostname at the edge,
    in front of both of the above.
 
@@ -287,8 +290,89 @@ of which restructure `panel/` — it's still the same `next start` on
 | `ops/systemd-root/jamasp-edge.service` | `/etc/systemd/system/` | load the table at boot, `Before=nginx.service` |
 | `ops/systemd-root/jamasp-cf-ranges.service` + `.timer` | `/etc/systemd/system/` | daily refresh (`OnCalendar=*-*-* 04:17:00`, `RandomizedDelaySec=30m`) — shortened from weekly post-launch |
 | `ops/systemd-root/nginx.service.d/requires-jamasp-edge.conf` | `/etc/systemd/system/nginx.service.d/` | `Requires=`/`After=jamasp-edge.service` — without it, nginx starts (fail-open) even when the lockdown failed to load, since `Before=` alone is ordering, not a dependency |
-| `ops/nginx/jamasp-panel.conf` | `/etc/nginx/sites-available/`, symlinked into `sites-enabled/` | public vhost + catch-all `444` default servers |
+| `ops/nginx/jamasp-panel.conf` | `/etc/nginx/sites-available/`, symlinked into `sites-enabled/` | public vhost + catch-all `444` default servers; `satisfy any` over `auth_request` + `auth_basic` |
+| `ops/systemd/jamasp-authd.service` | `/etc/systemd/system/` **via the ordinary step-5 loop** (it must run as `jamasp`, so it belongs in `ops/systemd/`, not `-root/`) | the Access JWT sidecar on `127.0.0.1:3301` |
 | `panel/next.config.ts` | built into the panel | `experimental.serverActions.allowedOrigins: ["jamasp.mahdanian.xyz"]` — without this, pages render fine but every Server Action POST silently fails Origin checking |
+
+### The Access JWT sidecar (`jamasp-authd`)
+
+`jamasp authd` validates the `Cf-Access-Jwt-Assertion` header that Cloudflare
+attaches to every proxied request, so an Access-authenticated browser reaches
+the panel without a second password prompt. Basic auth stays as the fallback
+— it is what closes the tenant-spoofing hole in item 1 above.
+
+Install:
+
+```bash
+# state dir must exist and be owned by jamasp BEFORE first start
+ssh jamasp 'install -d -o jamasp -g jamasp -m 0755 /home/jamasp/.local/state/jamasp'
+# then the ordinary step-5 loop, or for this unit alone:
+ssh jamasp 'sed -e "s|%h|/home/jamasp|g" -e "/^\[Service\]/a User=jamasp" \
+  /home/jamasp/Jamasp/ops/systemd/jamasp-authd.service \
+  > /etc/systemd/system/jamasp-authd.service'
+ssh jamasp 'systemctl daemon-reload && systemctl enable --now jamasp-authd'
+```
+
+Two values must be in `~/.config/jamasp/env`, and the daemon **refuses to
+start** without them:
+
+```
+JAMASP_ACCESS_AUD=<the Access application's AUD tag>
+JAMASP_ACCESS_TEAM_DOMAIN=mahdanian-saman-81.cloudflareaccess.com
+```
+
+Refusing to start is deliberate. An empty AUD would skip the check that pins
+a token to *this* application, and the daemon would accept a validly-signed
+Access token from *any* Cloudflare team. Loud failure beats silent
+acceptance. (Handy cross-check: the AUD appears as `kid=` in the 302 redirect
+from `curl -sSI https://jamasp.mahdanian.xyz/`.)
+
+The JWKS is cached in memory for an hour and mirrored to
+`~/.local/state/jamasp/access-jwks.json`. That file is a last-known-good
+backstop, not a speed cache: it is what lets the daemon restart during a
+Cloudflare outage with working keys instead of starting blind. A failed
+refresh keeps the previous keys and logs a warning; it never empties them.
+
+> **Trap: the `error_page 500 502 503 504 = @access_denied` mapping in the
+> `/_access-check` location is load-bearing.** nginx's `satisfy any` treats
+> only 401 and 403 as "this handler denied, try the next one". Any 5xx —
+> which is exactly what a refused, hung, or dead `jamasp-authd` produces —
+> finalises the request instead, skipping basic auth entirely. Without that
+> mapping, "the sidecar is down" becomes a hard 500 for everyone *including*
+> someone typing the correct password, which is the lockout the fallback
+> exists to prevent. Do not drop it when tidying the config. The short
+> `proxy_connect_timeout`/`proxy_read_timeout` are part of the same
+> guarantee: they stop a hung sidecar stalling every page load for 60s.
+
+Verify it, from the host over loopback (`iif lo accept` lets these through
+the lockdown, and hitting the origin directly takes Cloudflare out of the
+path so the origin's own decision is what you observe):
+
+```bash
+R="--resolve jamasp.mahdanian.xyz:443:127.0.0.1 https://jamasp.mahdanian.xyz/"
+ssh jamasp "curl -sS -o /dev/null -w 'no-creds:%{http_code}\n' $R"   # expect 401
+# Restart in the SAME invocation so a dropped connection can't leave it stopped:
+ssh jamasp "systemctl stop jamasp-authd
+  curl -sS -o /dev/null -w 'authd-down:%{http_code}\n' $R            # expect 401, NOT 500
+  curl -sSI $R | grep -i www-authenticate                            # expect the Basic challenge
+  systemctl start jamasp-authd"
+```
+
+Measured on 2026-08-09: stopped → 401; SIGSTOP-hung → 401 in 2.04s.
+
+| Symptom | Likely cause | Check |
+|---|---|---|
+| Password prompt where there was none | sidecar down, or JWKS stale | `systemctl status jamasp-authd`, `journalctl -u jamasp-authd` |
+| Hard 500 instead of a prompt | `error_page` mapping lost from the check location | `grep -A2 access_denied /etc/nginx/sites-available/jamasp-panel.conf` |
+| Sidecar won't start | env vars missing | `grep -c JAMASP_ACCESS ~/.config/jamasp/env` (expect 2) |
+| Every request 403 at the sidecar | AUD mismatch after recreating the Access app | compare `JAMASP_ACCESS_AUD` with the `kid=` in the 302 redirect |
+| Panel reachable with no auth at all | both checks wrongly passing | `curl -I` from the host; expect 401, never 200 |
+
+A note on testing it by hand: a token like `eyJ...fQ.e30.x` is rejected
+*before* the key lookup, because `x` is not valid base64 — so it proves
+nothing about JWKS or signature checking and leaves no log line. Use a
+structurally valid RS256 token with an unknown `kid` if you want to exercise
+the fetch path.
 
 ### Hardening (post-launch branch review, C1/M2)
 

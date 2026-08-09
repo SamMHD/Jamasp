@@ -12,12 +12,13 @@ skill covers only the identity layer — who Cloudflare Access lets through.
 |---|---|
 | nftables on the origin | Accepts 80/443 only from Cloudflare ranges |
 | **Cloudflare Access** | **The allow-list this skill edits** |
-| nginx basic auth | Fallback credential, user `desk` |
+| nginx basic auth | Fallback only — used when the Access JWT is absent or unverifiable |
 
-Adding someone here is **not** enough on its own: they also need the basic
-auth password (in the operator's password manager). Both are required until
-the Access-JWT work in
-`docs/superpowers/specs/2026-08-09-access-jwt-origin-auth-design.md` lands.
+Adding someone here **is** enough. Since the Access-JWT work landed
+(2026-08-09), a browser session that clears Access is admitted by the origin
+on its JWT alone — there is no password to hand over. The basic auth
+credential remains as an operator fallback for when the JWT path is
+unavailable; it is not part of granting someone access.
 
 ## Identifiers
 
