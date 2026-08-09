@@ -9,6 +9,7 @@ from pathlib import Path
 import click
 import httpx
 
+from jamasp import authd as authd_mod
 from jamasp import calendarview as calendarview_mod
 from jamasp import cluster as cluster_mod
 from jamasp import db as db_mod
@@ -379,3 +380,50 @@ def predictions_score(pred_id, outcome, note, pred_path, db_path, config_dir):
     except (KeyError, ValueError) as exc:
         raise click.ClickException(str(exc))
     click.echo(f"scored {e['id']} {outcome}: {e['claim']}")
+
+
+@main.command()
+@click.option("--host", default="127.0.0.1", show_default=True)
+@click.option("--port", default=3301, show_default=True, type=int)
+@click.option(
+    "--jwks-cache",
+    default=None,
+    help="last-known-good JWKS path [default: ~/.local/state/jamasp/access-jwks.json]",
+)
+def authd(host, port, jwks_cache):
+    """Run the Cloudflare Access JWT sidecar for nginx's auth_request."""
+    import logging
+    import os
+
+    from jamasp.accessjwt import AccessVerifier, JwksCache
+
+    logging.basicConfig(
+        level=logging.INFO, format="%(levelname)s %(name)s: %(message)s"
+    )
+
+    audience = os.environ.get("JAMASP_ACCESS_AUD", "").strip()
+    team_domain = os.environ.get("JAMASP_ACCESS_TEAM_DOMAIN", "").strip()
+    if not audience or not team_domain:
+        # Fail closed and loudly. Defaulting the audience to empty would skip
+        # the check that pins a token to THIS application, accepting any
+        # Access token from any Cloudflare team.
+        raise click.ClickException(
+            "JAMASP_ACCESS_AUD and JAMASP_ACCESS_TEAM_DOMAIN must both be set "
+            "(see ~/.config/jamasp/env)"
+        )
+
+    team_domain = team_domain.removeprefix("https://").rstrip("/")
+    issuer = f"https://{team_domain}"
+
+    cache_path = Path(
+        jwks_cache
+        or os.environ.get("JAMASP_ACCESS_JWKS_CACHE")
+        or Path.home() / ".local/state/jamasp/access-jwks.json"
+    )
+
+    jwks = JwksCache(f"{issuer}/cdn-cgi/access/certs", cache_path)
+    verifier = AccessVerifier(jwks, audience=audience, issuer=issuer)
+
+    server = authd_mod.build_server(verifier, host=host, port=port)
+    click.echo(f"jamasp authd listening on {host}:{port} for {issuer}", err=True)
+    server.serve_forever()
