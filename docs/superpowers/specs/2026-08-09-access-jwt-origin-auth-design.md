@@ -1,8 +1,9 @@
 # Access JWT Origin Authentication — Design Spec
 
 **Date:** 2026-08-09
-**Status:** Draft — open decisions at the end need a ruling before planning
+**Status:** Decided — all three open decisions ruled 2026-08-09, see the end
 **Extends:** `2026-08-08-panel-public-access-design.md` (the basic-auth layer)
+**Plan:** `docs/superpowers/plans/2026-08-09-access-jwt-origin-auth.md`
 
 ## Purpose
 
@@ -95,17 +96,25 @@ Unchanged: nftables lockdown, Cloudflare Access at the edge, nginx
 terminating TLS and reverse-proxying to the panel on `127.0.0.1:3300`, panel
 still localhost-bound with no auth of its own.
 
-Changed: nginx gains JWT validation alongside the existing basic auth.
+Changed: nginx gains JWT validation alongside the existing basic auth, via a
+new localhost-bound sidecar on `127.0.0.1:3301`.
 
 ```
 browser → Cloudflare edge (Access issues JWT)
         → origin :443   (nftables: Cloudflare ranges only)
         → nginx         satisfy any:
-                          (a) valid Access JWT  → allow, no prompt
-                          (b) valid basic auth  → allow
-                          neither               → 401 basic auth challenge
-        → 127.0.0.1:3300
+                          (a) auth_request → 127.0.0.1:3301 /auth
+                                200 → allow, no prompt
+                                403 → denied, try (b)
+                                5xx → mapped to 403 by error_page
+                          (b) valid basic auth → allow
+                          neither → 401 basic auth challenge
+        → 127.0.0.1:3300  (panel, unchanged)
 ```
+
+The sidecar binds loopback only. It is never proxied to directly and has no
+route from the outside; nginx reaches it solely through the `internal`
+check location.
 
 ### The critical implementation property: fail closed, then fall through
 
@@ -127,24 +136,96 @@ password prompt" — not merely that the config loads.
 
 | Option | Cost | Assessment |
 |---|---|---|
-| **njs module** (`libnginx-mod-http-js`, 0.9.4 available in apt on this host) | ~50 lines JS + JWKS handling | Recommended. In-process, no extra service or port. njs ships crypto primitives sufficient for RS256. |
-| **`auth_request` to a local validator** (small Go/Python service) | New service, new unit, new failure mode | More mature JWT libraries, but another daemon to supervise and another thing that can be down. |
+| **`auth_request` to a local validator** (Python + PyJWT on `127.0.0.1:3301`) | New service, new unit, new failure mode | **Chosen.** Signature and claim verification are done by a library many people have attacked, not by hand-rolled code. The cost is a second process — see "The sidecar's own failure mode" below, which is not optional to handle. |
+| **njs module** (`libnginx-mod-http-js`, 0.9.4 in apt on this host) | ~50 lines JS + JWKS handling | Fewer moving parts and no extra daemon, but the RS256 verification would be ours to write against njs crypto primitives. Rejected in favour of a battle-tested library. |
 | **Next.js middleware** | No nginx change | Rejected: contradicts the panel spec's "no in-app auth" boundary and puts the security decision inside the app being protected. |
+
+Python rather than Go: it lands in the existing `uv` venv alongside the
+`jamasp` CLI, deploys the way everything else here already does, and adds no
+toolchain or build step to the host. PyJWT is the reference Python
+implementation and its RS256 path is backed by `cryptography`.
+
+The daemon is a `jamasp` CLI subcommand (`jamasp authd`), matching how every
+other long-running piece of this system is started.
+
+### The sidecar's own failure mode — and why `error_page` is load-bearing
+
+This is the specific cost of choosing a sidecar over njs, and getting it
+wrong quietly breaks the no-lockout guarantee that motivated the whole
+fallback design.
+
+Under `satisfy any`, nginx treats **401 and 403** from an access-phase
+handler as "this handler denied, try the next one". Any *other* status —
+including the **500/502/504** nginx produces when an `auth_request` upstream
+is refused, hung, or dead — is not a denial. It finalises the request
+immediately. Basic auth is never consulted.
+
+So the naive configuration turns "the sidecar is down" into **500 for
+everyone**, including someone typing the correct basic auth password. That
+is precisely the lockout the fallback exists to prevent, reintroduced by the
+mechanism meant to avoid it.
+
+The fix is to convert upstream failure into a denial *inside* the check
+location, so it re-enters the normal fall-through path:
+
+```nginx
+location = /_access-check {
+    internal;
+    proxy_pass              http://127.0.0.1:3301/auth;
+    proxy_pass_request_body off;
+    proxy_set_header        Content-Length "";
+    proxy_connect_timeout   1s;
+    proxy_read_timeout      2s;
+
+    # Sidecar refused, hung or dead must read as "denied", not "error" —
+    # 5xx escapes `satisfy any` and finalises the request, bypassing the
+    # basic auth fallback entirely.
+    error_page 500 502 503 504 = @access_denied;
+}
+
+location @access_denied {
+    internal;
+    return 403;
+}
+```
+
+The short timeouts matter for the same reason: a hung sidecar must fail fast
+into that path rather than stalling every page load for the default 60s.
+
+**This must be proven by stopping the service and observing a 401, not by
+reading the config.** A `502 → 403 → basic auth prompt` chain is exactly the
+kind of thing that looks right and behaves otherwise.
 
 ### JWKS handling
 
 Cloudflare rotates signing keys, so the key set cannot be baked in.
 
-Recommended: a systemd timer fetches the JWKS to `/etc/nginx/access-jwks.json`
-every few hours; njs reads that file. This keeps network I/O out of the
-request path and reuses the **fail-closed pattern already proven** by
-`refresh-cf-ranges.sh` — if the fetch fails or returns something implausible,
-the previous JWKS stays and the script exits non-zero rather than writing an
-empty key set.
+The sidecar parses the key set with PyJWT's `PyJWKSet` and caches it in
+memory with a TTL (default 1h). Every successful fetch is written to a
+last-known-good file; on startup — or after a failed refresh — that file is
+what the validator uses. This reuses the **fail-closed cache pattern already
+proven** by `refresh-cf-ranges.sh`: never replace good data with nothing, and
+make the failure visible in the log rather than silently degrading.
+
+A refresh failure therefore has no request-path impact at all; the previous
+keys stay live. A restart during a Cloudflare outage still comes up with
+working keys instead of starting blind.
 
 Cloudflare publishes new keys before retiring old ones and serves both during
-overlap, so a few hours of staleness is tolerable. And because of the basic
-auth fallback, even total JWKS failure degrades to a password prompt.
+overlap, so an hour of staleness is tolerable. And because of the basic auth
+fallback, even total JWKS failure degrades to a password prompt.
+
+### Configuration, and why it refuses to start without it
+
+The AUD tag and team domain come from the environment
+(`JAMASP_ACCESS_AUD`, `JAMASP_ACCESS_TEAM_DOMAIN`), read from the existing
+`~/.config/jamasp/env`. **The daemon exits non-zero if either is unset.**
+
+This is a fail-closed requirement, not tidiness. A validator that defaulted
+`aud` to empty and skipped the audience check would accept *any* Cloudflare
+Access token from *any* team — the "validator allows everything" row in the
+failure table, arrived at through a missing environment variable. Refusing
+to start is loud; silently accepting everything is not.
 
 ## Rollout
 
@@ -172,26 +253,41 @@ Positive:
 - With no JWT, basic auth credentials still grant access.
 
 Negative — each must fall through to a **401 basic auth challenge**, never a
-pass-through:
+pass-through and never a 5xx:
 - No `Cf-Access-Jwt-Assertion` header at all.
 - A syntactically valid JWT signed by the **wrong key** (self-signed, correct
   `aud`). Proves signature verification is real.
 - A valid signature with the **wrong `aud`**. Proves the token is pinned to
   this application.
+- A valid signature with the **wrong `iss`**.
 - An **expired** token.
-- JWKS file missing or corrupt — validator denies, basic auth still works.
+- A token whose header says `alg: none`, and one re-signed with `alg: HS256`
+  using the RSA public key as the HMAC secret. Proves algorithm confusion is
+  not possible.
+- Backstop JWKS file missing or corrupt — validator denies, basic auth works.
+- **`jamasp-authd` stopped** — the `error_page` path. Must give 401, not 500.
+- **`jamasp-authd` hung** (e.g. `SIGSTOP`) — must give 401 within ~3s, not a
+  60s stall.
 
-The wrong-key and wrong-`aud` cases are the ones worth writing carefully. A
-missing-header test passes even in a completely broken implementation, and
-under `satisfy any` a broken validator is invisible unless tested this way.
+The wrong-key, wrong-`aud` and algorithm-confusion cases are the ones worth
+writing carefully. A missing-header test passes even in a completely broken
+implementation, and under `satisfy any` a broken validator is invisible
+unless tested this way.
+
+The two service-failure cases are equally load-bearing but for the opposite
+reason: they are the ones that fail *closed on the wrong axis*, taking the
+panel down rather than letting an attacker in.
 
 ## Failure modes
 
 | Failure | Behaviour |
 |---|---|
-| JWKS fetch fails | Previous key set stays live; refresh exits non-zero. No request-path impact. |
+| JWKS fetch fails | Previous key set stays live, in memory or from the backstop file. Logged. No request-path impact. |
 | JWKS stale past rotation | JWT rejected → basic auth prompt returns. Degraded UX, not an outage. |
-| njs module missing after an nginx upgrade | `nginx -t` fails; nginx does not reload. Fails closed. |
+| Backstop file missing or corrupt at startup | Empty key set → every JWT denied → basic auth prompt, until the first successful fetch. Fails closed. |
+| **Sidecar down, hung, or crash-looping** | `error_page` maps 5xx to 403 → basic auth prompt. **Only correct if that mapping is present** — without it, hard 500 for everyone. |
+| Sidecar fails to start (missing `JAMASP_ACCESS_AUD`) | Unit fails loudly; requests get the basic auth prompt via the row above. |
+| `pyjwt`/`cryptography` missing after a bad deploy | Sidecar won't start; same as above. |
 | Access app deleted or misconfigured | No valid JWT → basic auth still guards the origin. |
 | Validator has a bug and denies everything | Basic auth prompt returns; panel still reachable. |
 | Validator has a bug and allows everything | **Worst case** — silently removes the JWT layer. Only the negative tests above catch this. |
@@ -208,15 +304,16 @@ under `satisfy any` a broken validator is invisible unless tested this way.
 - Service tokens for non-browser/CLI access — none needed today.
 - Removing basic auth. Explicitly retained as the fallback.
 
-## Open decisions (need a ruling before planning)
+## Decisions (ruled 2026-08-09)
 
-1. **njs vs. `auth_request` sidecar.** Recommendation: njs — fewer moving
-   parts, no extra daemon.
-2. **JWKS refresh via systemd timer + file, vs. njs fetching at runtime with
-   an in-memory cache.** Recommendation: timer + file, matching the existing
-   `refresh-cf-ranges.sh` pattern and keeping network I/O out of the request
-   path.
-3. **Should the basic auth password be rotated** when this lands? It has been
-   shared in a chat transcript. Recommendation: yes, rotate as part of the
-   work — it is a one-line `htpasswd` regeneration, and the fallback becomes
-   more load-bearing under this design, not less.
+1. **Vehicle: `auth_request` sidecar**, against the original njs
+   recommendation. Rationale given: prefer the battle-tested option for the
+   part that is actually security-critical — signature and claim
+   verification. Accepted cost: a second process, and the `error_page`
+   handling above becomes mandatory rather than nice-to-have.
+2. **JWKS: library cache + on-disk backstop.** In-memory TTL cache written
+   through to a last-known-good file, so a cold start during a Cloudflare
+   outage still comes up with usable keys. No separate systemd timer.
+3. **Rotate the basic auth password** as part of this work. It has been
+   through a chat transcript, and this design leaves it load-bearing: it is
+   the layer holding the Cloudflare tenant-spoofing line described above.
