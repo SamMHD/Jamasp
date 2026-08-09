@@ -1,6 +1,7 @@
 [Unit]
 Description=Jamasp panel — web control panel on 127.0.0.1:3300
 After=network.target
+OnFailure=jamasp-alert@%n.service
 
 [Service]
 WorkingDirectory=%h/Jamasp/panel

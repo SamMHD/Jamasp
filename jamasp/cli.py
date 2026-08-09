@@ -459,3 +459,28 @@ def authd(host, port, jwks_cache):
     server = authd_mod.build_server(verifier, host=host, port=port)
     click.echo(f"jamasp authd listening on {host}:{port} for {issuer}", err=True)
     server.serve_forever()
+
+
+@main.command("alert")
+@click.argument("unit")
+@click.option("--dry-run", is_flag=True, help="print the message instead of sending")
+@db_opt
+@cfg_opt
+def alert_cmd(unit, dry_run, db_path, config_dir):
+    """Send a Telegram alert that systemd UNIT failed (OnFailure= target)."""
+    from jamasp import alert as alert_mod
+
+    settings = load_settings(Path(config_dir) / "settings.yaml")
+    text = alert_mod.compose(unit, alert_mod.gather(unit))
+    if dry_run:
+        click.echo(text)
+        return
+
+    conn = db_mod.connect(Path(db_path))
+    if not alert_mod.should_send(conn, unit):
+        click.echo(f"suppressed: {unit} already alerted within the window")
+        return
+    # _notify_safe swallows Telegram hiccups and best-effort logs to the DB:
+    # this runs because something already failed, so it must not fail too.
+    runner_mod._notify_safe(conn, settings, text)
+    click.echo(f"alerted for {unit}")

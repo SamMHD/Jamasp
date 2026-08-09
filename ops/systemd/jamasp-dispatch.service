@@ -1,5 +1,6 @@
 [Unit]
 Description=Jamasp dispatcher — fire due wakeup-queue entries
+OnFailure=jamasp-alert@%n.service
 
 [Service]
 Type=oneshot

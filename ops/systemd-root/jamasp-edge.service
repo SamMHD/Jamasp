@@ -3,6 +3,7 @@ Description=Jamasp origin lockdown — restrict 80/443 to Cloudflare ranges
 After=network-online.target
 Wants=network-online.target
 Before=nginx.service
+OnFailure=jamasp-alert@%n.service
 
 [Service]
 Type=oneshot

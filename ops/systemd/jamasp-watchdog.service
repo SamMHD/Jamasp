@@ -1,5 +1,6 @@
 [Unit]
 Description=Jamasp watchdog — verify timers and state are healthy
+OnFailure=jamasp-alert@%n.service
 
 [Service]
 Type=oneshot

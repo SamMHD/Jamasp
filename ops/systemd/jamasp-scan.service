@@ -1,5 +1,6 @@
 [Unit]
 Description=Jamasp scan — intraday news/price check for urgent moves
+OnFailure=jamasp-alert@%n.service
 
 [Service]
 Type=oneshot

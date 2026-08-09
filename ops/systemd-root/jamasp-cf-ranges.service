@@ -2,6 +2,7 @@
 Description=Refresh Cloudflare source ranges for the Jamasp origin lockdown
 After=network-online.target jamasp-edge.service
 Requires=jamasp-edge.service
+OnFailure=jamasp-alert@%n.service
 
 [Service]
 Type=oneshot
