@@ -66,10 +66,17 @@ regularly (`## CPI decision tree (tomorrow 12:30Z, wakeup #20)`,
 verbatim.
 
 **Text is hard-wrapped at ~72 characters, so regexes must run on unwrapped
-text.** A line-based search for the weights line found it in 1 of 10 versions;
-the same pattern on unwrapped text found it in 10 of 10. The format itself is
-consistent: `Weights 70/5/25 (base/event-bearish/kinetic), conviction …`,
-with the triplet changing between runs (`65/10/25` on 2026-08-07).
+text.** How much this bites depends on where the wrap happens to fall, which
+shifts run to run. Measured against real history: a line-based search for the
+full bolded weights sentence (`**Weights … conviction … .**`) finds it in only
+1 of 10 versions, because that span reliably crosses a wrap; a line-based
+search for just the triplet and its parenthetical currently finds it in 6 of 6
+fixtures, because that shorter span happens to fit on one line each time.
+Unwrapping makes both succeed and removes the dependence on wrap position — the
+narrow pattern's present luck is not a reason to skip it. The format itself is
+consistent: `Weights 70/5/25 (base/event-bearish/kinetic), conviction …`, with
+the triplet changing between runs (`65/10/25` on 2026-08-07 scan, `55/20/25` on
+the 2026-08-07 deepdive).
 
 **A structured sidecar was considered and rejected.** Having the agent emit
 `state/stance.yaml` would require changing CLAUDE.md rule 5 plus the `brief`,
