@@ -170,3 +170,36 @@ export function getPriceSeries(symbol: string, sinceIso: string): PricePoint[] {
     "SELECT ts, value FROM prices WHERE symbol = ? AND ts >= ? ORDER BY ts"
   ).all(symbol, sinceIso) as PricePoint[]);
 }
+
+/**
+ * Newest row per symbol in one query. The overview needs nine series at
+ * once (spot, two SMAs, two pivots, RSI, ATR, GVZ, net spec); nine separate
+ * `latest()` round trips is the shape this avoids. Symbols with no rows are
+ * absent from the result rather than mapped to null.
+ */
+export function latestPrices(symbols: string[]): Record<string, { ts: string; value: number }> {
+  if (symbols.length === 0) return {};
+  const placeholders = symbols.map(() => "?").join(",");
+  return q(db => {
+    const rows = db.prepare(
+      `SELECT p.symbol, p.ts, p.value FROM prices p
+       WHERE p.symbol IN (${placeholders})
+         AND p.ts = (SELECT MAX(b.ts) FROM prices b WHERE b.symbol = p.symbol)`
+    ).all(...symbols) as { symbol: string; ts: string; value: number }[];
+    return Object.fromEntries(rows.map(r => [r.symbol, { ts: r.ts, value: r.value }]));
+  });
+}
+
+/**
+ * Value of the newest row at or before `ts`, or null if the series does not
+ * reach back that far.
+ *
+ * At-or-before, never at-or-after: gold has overnight and weekend gaps, so
+ * the first row *after* a cutoff can sit hours away and would silently skew
+ * a 24h delta. This matches jamasp/ingest/prices.py#row_at_or_before, which
+ * is what pricesummary.py's `_delta` uses for the brief — the panel's 24h
+ * change must be computed the same way the Telegram brief computes it.
+ */
+export function priceAtOrBeforeValue(symbol: string, ts: string): number | null {
+  return q(db => priceAtOrBefore(db, symbol, ts));
+}

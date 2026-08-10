@@ -1,6 +1,7 @@
-import { beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import { execFileSync } from "node:child_process";
 import path from "node:path";
+import Database from "better-sqlite3";
 
 let db: typeof import("../lib/db");
 
@@ -69,5 +70,57 @@ describe("db layer", () => {
       .toBe("2026-08-01T07:00:00Z");
     expect(perType.map(r => r.run_type).sort())
       .toEqual(["brief", "deepdive", "retro", "scan"]);
+  });
+});
+
+describe("latestPrices", () => {
+  it("returns the newest row per requested symbol", () => {
+    const out = db.latestPrices(["GC", "GC_SMA200"]);
+    expect(out.GC).toEqual({ ts: "2026-08-01T08:00:00Z", value: 3325.0 });
+    expect(out.GC_SMA200).toEqual({ ts: "2026-08-01T06:00:00Z", value: 3400.0 });
+  });
+
+  it("omits symbols with no rows rather than returning nulls", () => {
+    const out = db.latestPrices(["GC", "NOPE"]);
+    expect(out.GC).toBeDefined();
+    expect(out.NOPE).toBeUndefined();
+  });
+
+  it("returns an empty object for an empty symbol list without querying", () => {
+    expect(db.latestPrices([])).toEqual({});
+  });
+
+  it("does not touch the database for an empty symbol list", () => {
+    // The size check above is guaranteed to hold even without the early
+    // return: SQLite treats `IN ()` as always-false, not a syntax error, so
+    // a missing guard would still yield `{}`. This spy is what actually
+    // proves the short-circuit fires.
+    const spy = vi.spyOn(Database.prototype, "prepare");
+    try {
+      db.latestPrices([]);
+      expect(spy).not.toHaveBeenCalled();
+    } finally {
+      spy.mockRestore();
+    }
+  });
+});
+
+describe("priceAtOrBeforeValue", () => {
+  it("returns the newest value at or before the cutoff, not the next one after it", () => {
+    // Rows: 07-25 3290, 07-31 3310.5, 08-01 3325. A cutoff mid-gap must
+    // return the earlier row, never jump forward.
+    expect(db.priceAtOrBeforeValue("GC", "2026-07-28T00:00:00Z")).toBe(3290.0);
+  });
+
+  it("includes a row exactly on the cutoff", () => {
+    expect(db.priceAtOrBeforeValue("GC", "2026-07-31T08:00:00Z")).toBe(3310.5);
+  });
+
+  it("returns null when nothing precedes the cutoff", () => {
+    expect(db.priceAtOrBeforeValue("GC", "2026-07-01T00:00:00Z")).toBeNull();
+  });
+
+  it("returns null for an unknown symbol", () => {
+    expect(db.priceAtOrBeforeValue("NOPE", "2026-08-01T08:00:00Z")).toBeNull();
   });
 });
