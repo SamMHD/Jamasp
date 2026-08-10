@@ -517,6 +517,25 @@ describe("parseWeights", () => {
   it("is null on a degraded stance", () => {
     expect(parseStance("garbage").weights).toBeNull();
   });
+
+  it("does not match a weights line that is still hard-wrapped", () => {
+    // parseWeights contracts for already-unwrapped input. If WEIGHTS_RE's
+    // [^)\n] were relaxed to [^)], the negated class would match across the
+    // wrap and this would return a result — the guard would be silently
+    // dead. This test is the tripwire that keeps it honest.
+    const wrapped = "Weights 70/5/25 (base/event-bearish/\nkinetic), conviction capped by CPI.";
+    expect(parseWeights(wrapped)).toBeNull();
+    expect(parseWeights(unwrapParagraphs(wrapped))).toEqual([
+      { label: "base", pct: 70 },
+      { label: "event-bearish", pct: 5 },
+      { label: "kinetic", pct: 25 },
+    ]);
+  });
+
+  it("returns null when a label is empty, rather than silently reindexing", () => {
+    expect(parseWeights("Weights 70/5/25 (unknown/base//kinetic)")).toBeNull();
+    expect(parseWeights("Weights 70/5/25 (base//kinetic)")).toBeNull();
+  });
 });
 ```
 
@@ -548,10 +567,13 @@ export function parseWeights(viewBody: string): StanceWeight[] | null {
   const m = WEIGHTS_RE.exec(viewBody);
   if (!m) return null;
   const pcts = [Number(m[1]), Number(m[2]), Number(m[3])];
-  const labels = m[4].split("/").map(s => s.trim()).filter(Boolean);
-  // A mismatch means the format drifted; render nothing rather than
-  // mislabelled chips.
-  if (labels.length !== pcts.length) return null;
+  const labels = m[4].split("/").map(s => s.trim());
+  // Compare the split as-is and reject empty segments. Filtering empties
+  // first would let a spurious label and an empty one cancel out —
+  // "(unknown/base//kinetic)" would yield three confidently mislabelled
+  // chips instead of null. A mismatch means the format drifted; render
+  // nothing rather than mislabelled chips.
+  if (labels.length !== pcts.length || labels.some(l => l === "")) return null;
   return pcts.map((pct, i) => ({ label: labels[i], pct }));
 }
 ```
@@ -565,7 +587,9 @@ Add `weights: StanceWeight[] | null;` to the `ParsedStance` type, `weights: null
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `cd panel && npx vitest run test/stance.test.ts`
-Expected: PASS, 29 tests (22 from Tasks 1–2 plus 7 new).
+Expected: PASS, 31 tests (22 from Tasks 1–2 plus 9 new).
+
+Then prove the newline guard is real: temporarily relax `[^)\n]` to `[^)]`, confirm the hard-wrapped tripwire test FAILS (30 pass / 1 fail), and restore. An untested guard is a guard that will be "simplified" away later.
 
 - [ ] **Step 5: Commit**
 
