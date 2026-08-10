@@ -2,6 +2,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { unwrapParagraphs } from "../lib/stance";
+import { parseStance } from "../lib/stance";
 
 const FIXTURE_DIR = path.resolve(__dirname, "fixtures/stance");
 const fixture = (name: string) =>
@@ -81,5 +82,72 @@ describe("unwrapParagraphs", () => {
   it("is idempotent", () => {
     const once = unwrapParagraphs(fixture("brief-2026-08-10"));
     expect(unwrapParagraphs(once)).toBe(once);
+  });
+});
+
+describe("parseStance", () => {
+  it("extracts the H1 date and updated-note", () => {
+    const p = parseStance(fixture("brief-2026-08-10"));
+    expect(p.asOf).toBe("2026-08-10");
+    expect(p.updatedNote).toBe("updated 07:50 Dubai, Monday brief");
+  });
+
+  it("handles an H1 with no parenthetical", () => {
+    const p = parseStance("# Stance — 2026-08-01\n\nlead\n\n## View\n\nbody");
+    expect(p.asOf).toBe("2026-08-01");
+    expect(p.updatedNote).toBeNull();
+  });
+
+  it("finds all six canonical sections in every real fixture", () => {
+    for (const [name, text] of allFixtures()) {
+      const p = parseStance(text);
+      for (const key of ["view", "whatFlipsMe", "openPredictions",
+                         "wakeups", "deskLocal", "sourcingHealth"] as const) {
+        expect(p.sections[key], `${name} is missing ${key}`).toBeDefined();
+      }
+      expect(p.degraded).toBe(false);
+    }
+  });
+
+  it("matches headings by prefix despite parenthetical suffixes", () => {
+    const p = parseStance(fixture("scan-2026-08-07"));
+    // "## Open predictions (Friday cohort scores Sat 00:15Z, wakeup #19)"
+    expect(p.sections.openPredictions!.heading).toContain("(");
+    expect(p.sections.openPredictions!.body).not.toBe("");
+  });
+
+  it("is case-insensitive on headings", () => {
+    const p = parseStance("# S — 2026-08-01\n\n## VIEW\n\nbody\n");
+    expect(p.sections.view!.body.trim()).toBe("body");
+  });
+
+  it("preserves unrecognised sections in document order", () => {
+    const p = parseStance(fixture("brief-2026-08-10"));
+    // This version carries "## CPI decision tree (tomorrow 12:30Z, wakeup #20)".
+    expect(p.extra.map(s => s.heading).join(" | ")).toContain("CPI decision tree");
+  });
+
+  it("captures the preamble verbatim, without the H1", () => {
+    const p = parseStance("# Stance — 2026-08-01\n\n**EVENT-PENDING:** lead text\n\n## View\n\nbody");
+    expect(p.preamble.trim()).toBe("**EVENT-PENDING:** lead text");
+    expect(p.preamble).not.toContain("# Stance");
+  });
+
+  it("degrades to raw when there is no ## View", () => {
+    const p = parseStance("just some prose with no structure at all");
+    expect(p.degraded).toBe(true);
+    expect(p.raw).toBe("just some prose with no structure at all");
+    expect(p.sections.view).toBeUndefined();
+  });
+
+  it("degrades on empty input without throwing", () => {
+    const p = parseStance("");
+    expect(p.degraded).toBe(true);
+    expect(p.extra).toEqual([]);
+  });
+
+  it("always returns raw as the original text, not the unwrapped text", () => {
+    const src = fixture("brief-2026-08-09");
+    expect(parseStance(src).raw).toBe(src);
   });
 });

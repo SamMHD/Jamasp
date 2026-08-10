@@ -52,3 +52,88 @@ export function unwrapParagraphs(text: string): string {
   }
   return out.join("\n");
 }
+
+export type StanceKey =
+  | "view" | "whatFlipsMe" | "openPredictions"
+  | "wakeups" | "deskLocal" | "sourcingHealth";
+
+export type StanceSection = { heading: string; body: string };
+
+export type ParsedStance = {
+  asOf: string | null;
+  updatedNote: string | null;
+  preamble: string;
+  sections: Partial<Record<StanceKey, StanceSection>>;
+  extra: StanceSection[];
+  raw: string;
+  degraded: boolean;
+};
+
+/**
+ * Canonical key -> heading prefix, matched case-insensitively. Prefix
+ * matching is required: real headings carry run-specific suffixes such as
+ * "## Open predictions (Friday cohort scores Sat 00:15Z, wakeup #19)".
+ * Order matters only for readability; keys are disjoint.
+ */
+const SECTION_PREFIXES: readonly (readonly [StanceKey, string])[] = [
+  ["view", "view"],
+  ["whatFlipsMe", "what flips me"],
+  ["openPredictions", "open predictions"],
+  ["wakeups", "wakeups"],
+  ["deskLocal", "desk-local"],
+  ["sourcingHealth", "sourcing health"],
+] as const;
+
+function classify(heading: string): StanceKey | null {
+  const h = heading.trim().toLowerCase();
+  for (const [key, prefix] of SECTION_PREFIXES) if (h.startsWith(prefix)) return key;
+  return null;
+}
+
+export function parseStance(text: string): ParsedStance {
+  const empty: ParsedStance = {
+    asOf: null, updatedNote: null, preamble: "",
+    sections: {}, extra: [], raw: text, degraded: true,
+  };
+  if (!text.trim()) return empty;
+
+  const lines = unwrapParagraphs(text).split("\n");
+
+  // H1 — "# Stance — 2026-08-10 (updated 07:50 Dubai, Monday brief)"
+  const h1 = lines.find(l => /^#\s/.test(l)) ?? "";
+  const asOf = /(\d{4}-\d{2}-\d{2})/.exec(h1)?.[1] ?? null;
+  const updatedNote = /\(([^)]*)\)/.exec(h1)?.[1] ?? null;
+
+  const preambleLines: string[] = [];
+  const sections: Partial<Record<StanceKey, StanceSection>> = {};
+  const extra: StanceSection[] = [];
+  let current: StanceSection | null = null;
+  let seenH1 = false;
+
+  for (const line of lines) {
+    if (!seenH1 && /^#\s/.test(line)) { seenH1 = true; continue; }
+    const h2 = /^##\s+(.*)$/.exec(line);
+    if (h2) {
+      const heading = h2[1].trim();
+      current = { heading, body: "" };
+      const key = classify(heading);
+      // First occurrence wins; a repeated heading lands in extra rather than
+      // silently overwriting the earlier one.
+      if (key && !sections[key]) sections[key] = current;
+      else extra.push(current);
+      continue;
+    }
+    if (current) current.body += (current.body ? "\n" : "") + line;
+    else if (seenH1) preambleLines.push(line);
+  }
+
+  for (const s of Object.values(sections)) s.body = s.body.trim();
+  for (const s of extra) s.body = s.body.trim();
+
+  return {
+    asOf, updatedNote,
+    preamble: preambleLines.join("\n").trim(),
+    sections, extra, raw: text,
+    degraded: sections.view === undefined,
+  };
+}
