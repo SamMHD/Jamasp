@@ -10,18 +10,25 @@
  * rendered verbatim, never parsed.
  */
 
-/** Lines that begin a new block and must never be folded into the previous one. */
-const BLOCK_START = /^\s*(#{1,6}\s|[-*+]\s|\d+[.)]\s|>|\||\s*$)/;
+/**
+ * Lines that begin a new block and must never be folded into the previous
+ * one. `>` only starts a blockquote when followed by whitespace or nothing
+ * (a bare `>`) — `>40%`, as in a wrapped comparison, is prose, not a quote.
+ */
+const BLOCK_START = /^\s*(#{1,6}\s|[-*+]\s|\d+[.)]\s|>(\s|$)|\|)/;
 const HEADING = /^\s*#{1,6}\s/;
 
 /**
  * Join hard-wrapped continuation lines into their paragraph.
  *
  * Stance prose is wrapped at ~72 characters, which breaks any line-based
- * regex: searching the raw text for the weights line finds it in 1 of 10
- * real versions; searching unwrapped text finds it in 10 of 10. Run this
- * before any other matching. Blank lines, headings, list-item starts, block
- * quotes, table rows and fenced code are all preserved.
+ * regex. On the six committed fixtures: the bolded weights sentence
+ * (`**Weights ... **`) matches a whole-text search in 1 of 6 raw versions
+ * and 6 of 6 unwrapped versions; the narrower `Weights a/b/c (...)` triplet
+ * currently happens to fit on one line in all six raw versions, which is
+ * luck about where the ~72-char wrap lands, not a property of the format.
+ * Run this before any other matching. Blank lines, headings, list-item
+ * starts, block quotes, table rows and fenced code are all preserved.
  */
 export function unwrapParagraphs(text: string): string {
   const out: string[] = [];
