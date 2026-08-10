@@ -3,7 +3,10 @@ watchlist:
     why: >
       dominant driver of real yields and hence gold. Logan wants a HIKE
       (explicit, 31 Jul); Kashkari/Hammack dissent same direction; Barkin calls
-      the next decision a "close call." Payrolls 7 Aug is the next test.
+      the next decision a "close call." Jul payrolls (-23K, -103K revisions,
+      AHE +0.1%) gutted the 57%-priced Sept hike; CPI 12 Aug is the hawks'
+      comeback shot (decision tree in stance.md). Prediction ec71ce01: no
+      Sept hike, 0.8.
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -13,111 +16,58 @@ watchlist:
   - theme: warsh-credibility
     why: >
       debasement channel; best explanation for gold holding $4,000+ against a
-      2.41% real yield. Jackson Hole late August is the set piece.
+      2.4% real yield. Jackson Hole late August is the set piece. Adjacent
+      feeds: yen 158 despite BoJ debating faster hikes; PBOC weak yuan fix +
+      SGE gold +5.8% w/w in CNY (10 Aug) — local-currency debasement bids
+      are broadening. Cook-firing push renewed 7 Aug keeps Fed-independence
+      risk armed.
     since: 2026-07-31
 
   - theme: middle-east-risk-premium
     why: >
-      REWRITTEN 4 Aug (history in reports/2026/08/2026-08-03-brief.md and
-      2026-08-04-brief.md). The kinetic floor is now a PATTERN: Aug 1 Limah
-      (tanker engine room disabled), Aug 2 Khasab near-miss (UKMTO-
-      corroborated, crew safe — IRNA aflame photo unverified/likely
-      misattributed), Aug 3 22:00Z cargo vessel STRUCK 20nm NE Khasab —
-      UKMTO Warning 104-26, classified an ATTACK, unattributed. Arbaeen
-      focal window Tue–Wed. Rezaei (adviser to Supreme Leader Mojtaba
-      Khamenei): US warships forcing an "unauthorised route" will be
-      struck; "Hormuz will not be reopened on Washington's terms" — the
-      escort-convoy miscalculation is the sharpest edge. Trump set a
-      TUESDAY deadline for complete reopening ("last chance before
-      decapitation"; talks "underway" — Tehran denies). Both regimes in
-      force and tightening: IRGC transit authorisation + US blockade (44
-      vessels redirected per CENTCOM, tankers disabled, Lincoln on
-      station); flows ~half pre-war; IMO: ~6,000 seafarers stranded. Real
-      motion remains the Iran–Oman compromise route (Araghchi "final
-      stages") — Tehran-authorized, so Rezaei's threat does NOT cover it;
-      corridor signed + spun as reopening is still the bearish tail, but
-      narrowed. Base rate: five prior halt announcements, all broken.
-      Premium fully unwinds only on a SIGNED text. UPDATED 5 Aug: deadline
-      lapsed 03:00Z unmet (50db7544 HIT) — no strike; instead US-Iran-Oman
-      interim deal near (60-day managed corridor, inbound Iranian waters /
-      outbound Omani, mine clearance in 30d), Wednesday announcement
-      targeted, Iranian leadership approved Tuesday. Iran FM spox: not a
-      full reopening. Hormuz kinetics quiet 30h+; Red Sea escalating
-      separately (first sinking 4 Aug, HRA widened). Watch: Trump speech
-      20:30Z Wed (wakeup #17), announcement shape + Iranian co-
-      confirmation, mine-clearance milestone once signed, further UKMTO
-      advisories, Mojtaba–Pezeshkian power struggle over Hormuz policy.
-      UPDATED 6 Aug: kinetic floor re-confirmed — UKMTO incident ~00:30Z
-      (two explosions, vessel/crew safe) inside the deal endgame. Deal
-      thread: Iran-Oman route COORDINATES agreed, joint statement "final
-      stages" (Baghaei/IRNA), but Iran says Oman-only deal guarantees
-      nothing and a US official publicly contradicts the Iranian account
-      (no permission, no tolls) — fees (5-7% / ~3% / 0) still the core
-      unresolved term. Trump "tomorrow or the next day"; Rubio: no final
-      agreement. Friday window closes Sat 03:59 Dubai, colliding with
-      payrolls. UPDATED 7 Aug: deal shape firmed — Al Hadath/Al Arabiya
-      (high-ranking sources): 60-day outline, inbound-Iran/outbound-Oman
-      routes, ZERO transit fees, regional demining, then US-Iran return
-      to MoU Paragraph 5; gate is SNSC approval, timing "within days"
-      (Friday slip-risk up). Hostile-vessel bar (in force since 28 Feb)
-      proposed as a term of the reopened corridor — reroutes more tonnage
-      than any fee layer. New unverified kinetic: Iranian forces
-      "confrontation with hostile enemy targets" at the strait mouth
-      ~18:10Z 6 Aug, two explosions heard on Qeshm, officials deny a
-      strike, Tasnim promises "achievements" — no UKMTO/gcaptain
-      corroboration yet. Saudi warns of imminent IRGC-coordinated
-      Iraqi-militia/Houthi strike on its energy infrastructure, possibly
-      timed to derail talks; Houthis killed 58 Yemeni govt forces +
-      injured 11 civilians in Saudi (spoiler thesis materializing on the
-      Yemen axis). Prediction 3d8416e4 tests the zero-fee shape. UPDATED
-      8 Aug: Friday window closed EMPTY — only "progress" per a US
-      official (19:04Z), no text, no Iranian co-confirmation; oil −8% w/w
-      has pre-traded the deal. Weekend window live, SNSC approval the
-      gate; 3d8416e4 matures Sunday, 985e77d0 extends the no-text default
-      through Monday. Gold ignored the corridor tape all week — a landed
-      deal is an oil event first; gold exposure via rates only. UPDATED
-      9 Aug: Iran attached SEVEN conditions to full reopening (SNSC
-      chief Zolghadr: shut until US "corrects its behaviour" — end
-      threats, end the war permanently, lift port blockade, withdraw US
-      forces from region, war compensation, lift sanctions, release
-      frozen assets; US unresponsive) and IRGC says Tehran's conditions,
-      not the Oman talks, decide the strait — an Iran-Oman text is
-      officially NOT a reopening, so the bearish tail's payload shrinks
-      even if it lands. Deal shape: temporary route first, new Traffic
-      Separation Scheme later; control/coordination unresolved.
-      Saturday 8 Aug: ADNOC vessel targeted by Iranian missile (no
-      casualties; UKMTO-via-press Khasab hit possibly same vessel) —
-      4th incident this week, inside the endgame, unpriced at Fri
-      settle; Oman warns attacks may derail talks. Kpler: 8 transits
-      Friday vs 130-140/day pre-war (retire "flows ~half" — that was
-      UAE exports); normalization is confidence-gated and slow even
-      post-text. Vance: US-Iran track live, expects pre-war export
-      levels — gap vs Iran's 7 conditions is the story.
+      COMPRESSED 10 Aug to current state — the 1–9 Aug event log lives in
+      reports/2026/08/ briefs. Two regimes in force since late Feb/Mar:
+      IRGC transit authorisation (Tehran-designated northern route, radio
+      hails, drone overflights) vs US blockade enforcing the southern
+      corridor (CENTCOM 9 Aug: 53 vessels redirected, 2 disabled, 2
+      boarded). Kinetic BASELINE is a priced pattern: repeated
+      vessel strikes near Limah/Khasab/Kumzar, usually no casualties —
+      JMIC counts 84 confirmed incidents since 1 Mar, threat SEVERE,
+      attack "highly likely" (9 Aug); UKMTO 108-26 logged the 8 Aug ADNOC
+      hit (1 crew killed + 20 injured earlier in the ADNOC fleet's week).
+      Gold shrugs the baseline in both directions; only beyond-baseline
+      arms the tail (mass casualties, US-asset loss, Saudi/UAE
+      energy-infra hit — Jazan 9 Aug was contained/Houthi). OPEN: unverified
+      10 Aug X-sourced claim of cruise-missile tanker-ablaze on the
+      southern corridor + MQ-9 downed — first scan checks verification.
+      Physical: traffic ~7% of pre-war (8 cargo + 2 tankers on 8 Aug vs
+      ~138/day 2025); mines + GNSS interference; ~6,000 seafarers
+      stranded; hostile-vessel bar (since 28 Feb) reroutes more tonnage
+      than any fee layer. Diplomacy: Iran-Oman corridor talks (60-day
+      outline, inbound-Iran/outbound-Oman, zero-fee shape) BUT Iran
+      attached seven maximalist conditions (9 Aug, SNSC chief Zolghadr;
+      IRGC: conditions, not talks, decide) — an Iran-Oman text is
+      officially NOT a reopening, so the bearish-tail payload keeps
+      shrinking. Trump "low keying it" (9 Aug). Base rate: five halt
+      announcements, all broken; announcement-timing predictions 0/3
+      last week. Premium unwinds only on a signed, co-confirmed,
+      normalization-verified text. Structural default: 3353195f (no
+      co-confirmed text by Thu 13 Aug). Red Sea is a separate axis:
+      Houthis widening the blockade, Bab el-Mandeb ~27/day vs 61
+      historical.
     since: 2026-07-31
 
   - theme: energy-pce-passthrough
     why: >
       June core PCE 3.3% was flattered by energy -5.9% / gasoline -9.2%, which
       the BEA attributes to a temporary Middle East easing that has since
-      reversed (crude +~20% on the month). July UMich 1y inflation expectations
-      eased, but that survey predates the crude move — same flattery. July/August
-      prints should be worse. Central event for the Fed path. AMENDED 2 Aug:
-      two new drags — OPEC+ set for a September quota increase, and the US-Iran
-      pause (if it holds) softens crude. Passthrough stays live only until a
-      Hormuz deal LANDS. ISM prices-paid printed 71.1 on 3 Aug (from 73.0 —
-      first easing; prediction 951d8286: Aug < 71.1). Next reads: July CPI/PCE,
-      then Aug ISM ~1 Sep. Crude's new lower base (~$80 WTI) accelerates the
-      rollover while it holds. CONFIRMED LIVE 6 Aug: deal hopes → crude
-      slide (WTI ~$75) → hike bets cooled → gold 7-week high. The theme's
-      mechanism is now the marginal gold driver, running in reverse
-      (disinflationary leg). Deal landing accelerates it; payrolls can
-      override it. UPDATED 7 Aug: disinflationary leg reversed again —
-      Brent 82.49 (+3.8%) / WTI ~77.3 on the hostile-vessel-bar proposal
-      + Saudi strike warning; passthrough direction now whipsaws with
-      the deal tape. Resolution needs a LANDED deal, not headlines.
-      UPDATED 8 Aug: whipsawed back — crude −8% w/w on corridor hopes
-      (Brent ~83.4); disinflationary leg on while hopes hold. CPI 12 Aug
-      is the first hard read of the July passthrough.
+      reversed. Direction now whipsaws with the Hormuz deal tape (crude -8%
+      w/w on corridor hopes into 8 Aug, then +2% at the 10 Aug reopen as
+      hopes drifted); resolution needs a LANDED deal, not headlines.
+      Sell-side split marks the range: Citi Q3 Brent $80 ("war drags on")
+      vs Goldman sub-$70 (10 Aug). ISM prices-paid 71.1 on 3 Aug (from
+      73.0, first easing; prediction 951d8286: Aug < 71.1). CPI 12 Aug is
+      the first hard read of the July passthrough; then Aug ISM ~1 Sep.
     since: 2026-07-31
 
   - theme: india-gold-formalisation
@@ -137,7 +87,9 @@ watchlist:
       (31 Jul, record momentum crash + forced $45bn liquidation) says that money
       is NOT yet in gold. Constructive counterweight added 1 Aug: Tether bought
       14t in Q2 — a price-insensitive, non-CB, non-ETF holder. Downgraded on
-      leverage, upgraded on structural bid.
+      leverage, upgraded on structural bid. Adjacent: net spec +9.5% w/w and
+      UBS $5,000 target (near-term risk flagged 9 Aug) — the crowding is in
+      futures, not perps, for now.
     since: 2026-07-31
 # REMOVED 4 Aug: gold-basis-lbma-comex — resolved. 3 Aug PM fix pair printed
 # $56 (fix 4028.15 vs GC 4084.3, ±5 min), inside the $50-90 Dec-26 fair-carry
