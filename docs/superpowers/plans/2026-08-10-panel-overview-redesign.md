@@ -1354,15 +1354,93 @@ export function TechnicalPanel({ tech, series, now }: {
 }
 ```
 
-- [ ] **Step 3: Typecheck and lint**
+- [ ] **Step 3: Test the degradation branches**
+
+The E2E in Task 10 renders one fixture in one state, so it exercises the happy
+path only. These are the branches it cannot reach. Task 6 established the
+pattern — `renderToStaticMarkup` from `react-dom/server`, no new dependencies,
+and `vitest.config.mts` already carries the `@/` alias.
+
+Create `panel/test/technical-panel.test.tsx`:
+
+```tsx
+import { renderToStaticMarkup } from "react-dom/server";
+import { describe, expect, it } from "vitest";
+import { TechnicalPanel } from "../components/technical-panel";
+import type { GoldTechnicals } from "../lib/technicals";
+
+const NOW = new Date("2026-08-01T12:00:00Z");
+
+const full: GoldTechnicals = {
+  spot: { value: 3325, ts: "2026-08-01T08:00:00Z", delta24h: 14.5, pct24h: 0.438 },
+  levels: [
+    { label: "200DMA", value: 3400, kind: "ma", side: "above" },
+    { label: "spot", value: 3325, kind: "spot", side: "at" },
+    { label: "50DMA", value: 3250, kind: "ma", side: "below" },
+  ],
+  regime: "above 50DMA, below 200DMA",
+  indicators: { rsi14: 58.4, atr14: 42.1, gvz: 18.7, netSpec: 9.5 },
+  indicatorsAsOf: "2026-08-01T06:00:00Z",
+  stale: false,
+};
+
+const render = (tech: GoldTechnicals) =>
+  renderToStaticMarkup(<TechnicalPanel tech={tech} series={[]} now={NOW} />);
+
+describe("TechnicalPanel", () => {
+  it("renders the regime and indicator readout when data is present", () => {
+    const html = render(full);
+    expect(html).toContain("above 50DMA, below 200DMA");
+    expect(html).toContain("RSI14");
+    expect(html).toContain("200DMA");
+  });
+
+  it("shows 'no price data yet' and no ladder when spot is null", () => {
+    const html = render({ ...full, spot: null });
+    expect(html).toContain("no price data yet");
+    expect(html).not.toContain("200DMA");
+  });
+
+  it("shows 'insufficient data' when the regime could not be derived", () => {
+    const html = render({ ...full, regime: null });
+    expect(html).toContain("insufficient data");
+  });
+
+  it("warns when the technicals feed is stale", () => {
+    const html = render({ ...full, stale: true });
+    expect(html).toContain("stale");
+  });
+
+  it("stays silent about staleness when the feed is fresh", () => {
+    expect(render(full)).not.toContain("stale");
+  });
+
+  it("never renders a buy/sell verdict", () => {
+    // config/sources.yaml: technicals annotate the macro read, they must not
+    // originate calls. No wording here may read as an instruction.
+    const html = render(full).toLowerCase();
+    for (const word of ["strong buy", "strong sell", "recommend", "signal", "target"]) {
+      expect(html).not.toContain(word);
+    }
+  });
+});
+```
+
+Run: `cd panel && npx vitest run test/technical-panel.test.tsx`
+Expected: PASS, 6 tests.
+
+Then delete the `tech.spot === null` guard in `technical-panel.tsx` and confirm the
+"no price data yet" test fails. Restore it.
+
+- [ ] **Step 4: Typecheck and lint**
 
 Run: `cd panel && npx tsc --noEmit && npm run lint`
 Expected: no errors.
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
-git add panel/components/sparkline.tsx panel/components/technical-panel.tsx
+git add panel/components/sparkline.tsx panel/components/technical-panel.tsx panel/test/technical-panel.test.tsx
 git commit -m "feat(panel): technical panel with ladder, regime and indicators
 
 Sparkline is server-rendered inline SVG rather than recharts, so the
@@ -1471,15 +1549,105 @@ export function FundamentalPanel({ stance, items, now }: {
 }
 ```
 
-- [ ] **Step 2: Typecheck and lint**
+- [ ] **Step 2: Test the degradation branches**
+
+This panel has more fallback paths than any other component in the plan, and
+Task 10's E2E renders exactly one stance in one state. Create
+`panel/test/fundamental-panel.test.tsx`:
+
+```tsx
+import { renderToStaticMarkup } from "react-dom/server";
+import { describe, expect, it } from "vitest";
+import { FundamentalPanel } from "../components/fundamental-panel";
+import { parseStance } from "../lib/stance";
+import type { ItemRow } from "../lib/db";
+
+const NOW = new Date("2026-08-01T12:00:00Z");
+
+const STANCE = `# Stance — 2026-08-01 (updated 12:05 Dubai)
+
+**EVENT-PENDING:** lead paragraph text.
+
+## View
+
+**Weights 70/5/25 (base/event-bearish/kinetic), conviction medium-high.**
+
+## What flips me
+
+- Settle below 3250.
+
+## Extra section from the agent
+
+Ad-hoc content.
+`;
+
+const item = (id: string, headline: string): ItemRow => ({
+  id, source: "reuters", published_at: "2026-08-01T10:00:00Z",
+  headline, lede: null, url: "https://example.test/a", topic: "gold",
+  cluster_id: null, fetched_at: "2026-08-01T10:05:00Z", read_at: null,
+});
+
+const render = (stance: ReturnType<typeof parseStance> | null, items: ItemRow[] = []) =>
+  renderToStaticMarkup(<FundamentalPanel stance={stance} items={items} now={NOW} />);
+
+describe("FundamentalPanel", () => {
+  it("renders weight chips, preamble and sections", () => {
+    const html = render(parseStance(STANCE));
+    expect(html).toContain("base");
+    expect(html).toContain("70");
+    expect(html).toContain("lead paragraph text");
+    expect(html).toContain("What flips me");
+  });
+
+  it("renders unrecognised sections rather than dropping them", () => {
+    expect(render(parseStance(STANCE))).toContain("Extra section from the agent");
+  });
+
+  it("shows 'no stance yet' when there is no stance file", () => {
+    expect(render(null)).toContain("no stance yet");
+  });
+
+  it("falls back to raw markdown on an unparseable stance", () => {
+    const html = render(parseStance("just prose, no structure at all"));
+    expect(html).toContain("just prose, no structure at all");
+    expect(html).toContain("unrecognised format");
+  });
+
+  it("omits the chips when no weights line is present", () => {
+    const html = render(parseStance("# S — 2026-08-01\n\n## View\n\nno triplet here"));
+    expect(html).not.toContain("%</");
+  });
+
+  it("shows 'no items' with an empty headline list, stance still rendered", () => {
+    const html = render(parseStance(STANCE), []);
+    expect(html).toContain("no items");
+    expect(html).toContain("What flips me");
+  });
+
+  it("renders headlines with source and link", () => {
+    const html = render(parseStance(STANCE), [item("i1", "Gold holds 3300")]);
+    expect(html).toContain("Gold holds 3300");
+    expect(html).toContain("reuters");
+    expect(html).toContain("https://example.test/a");
+  });
+});
+```
+
+Run: `cd panel && npx vitest run test/fundamental-panel.test.tsx`
+Expected: PASS, 7 tests.
+
+Then delete the `stance.degraded` branch in `fundamental-panel.tsx` and confirm
+the raw-markdown fallback test fails. Restore it.
+
+- [ ] **Step 3: Typecheck and lint**
 
 Run: `cd panel && npx tsc --noEmit && npm run lint`
 Expected: no errors.
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
-git add panel/components/fundamental-panel.tsx
+git add panel/components/fundamental-panel.tsx panel/test/fundamental-panel.test.tsx
 git commit -m "feat(panel): fundamental panel from parsed stance
 
 Preamble renders verbatim — its bold labels are improvised every run,
