@@ -41,7 +41,7 @@ alert — all useful, none of it the market.
 | Preamble handling | Rendered verbatim as markdown — not parsed into bullets |
 | Technical panel content | Levels ladder + regime lead; sparkline secondary; no chart overlays |
 | Ladder level sources | Database only — no levels scraped from stance prose |
-| Regime rule | Ported from `jamasp/pricesummary.py:56-62`, not reinvented |
+| Regime rule | Ported from `jamasp/pricesummary.py#_tech_line`, not reinvented |
 | Buy/sell verdict | **None** — honours `config/sources.yaml:283` |
 | Existing ops content | Compact status strip + full-width warnings; nothing deleted |
 
@@ -153,7 +153,7 @@ export type GoldTechnicals = {
   prose (for example "4300 psychological") are deliberately excluded —
   regex-hunting numbers out of narrative is exactly the fragility this design
   avoids elsewhere.
-- `regime` is a direct port of `jamasp/pricesummary.py:56-62`: `above both`,
+- `regime` is a direct port of `jamasp/pricesummary.py#_tech_line`: `above both`,
   `below both`, `above 50DMA, below 200DMA`, `below 50DMA, above 200DMA`. The
   Python is the reference implementation; the port exists so the panel and the
   Telegram brief can never disagree. A comment in both files points at the
@@ -243,11 +243,24 @@ ranges, plus a stale-indicator variant.
 **E2E** — `panel/e2e/smoke.spec.ts` gains an assertion that the overview
 renders both panel headings, the ladder, and the status strip.
 
-**Drift guard for the ported regime rule** — the four regime cases are
-asserted in `technicals.test.ts` against the exact strings
-`jamasp/pricesummary.py` produces, and reciprocal comments are added to both
-`lib/technicals.ts` and `pricesummary.py` naming the other as the paired
-implementation. No cross-language test harness: vitest does not invoke Python.
+**Drift guard for the ported regime rule** — asserted on **both** sides, with
+symbolic cross-references rather than line numbers.
+
+- `technicals.test.ts` asserts all four regime strings plus the strict-`>`
+  boundary.
+- `tests/test_pricesummary.py` asserts the same four strings plus the
+  boundary. Without this the guard is one-sided: the Python suite originally
+  covered only `"below both"`, so rewording `"above both"` or relaxing `>` to
+  `>=` left all 221 Python tests green while the desk-facing Telegram brief
+  silently diverged from the panel.
+- Reciprocal comments in `lib/technicals.ts` and `pricesummary.py` name each
+  other as the paired implementation, by symbol (`#deriveRegime`,
+  `#_tech_line`) and never by line number — inserting the reciprocal comment
+  shifted the Python block and invalidated a line-number citation on its very
+  first use.
+
+No cross-language test harness: vitest does not invoke Python. Each suite
+pins the same four strings independently.
 
 ## Out of scope
 

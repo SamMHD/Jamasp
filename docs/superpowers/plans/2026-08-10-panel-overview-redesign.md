@@ -15,7 +15,7 @@
 - **The panel never writes.** Reads are read-only SQLite plus `node:fs`. Every mutation in this codebase goes through the `jamasp` CLI. This plan adds no writes at all.
 - **No buy/sell verdict anywhere in the technical panel.** `config/sources.yaml:283` records that TradingView's `Recommend.All` gauge is deliberately not stored, because "technicals annotate the macro read, they must not originate calls."
 - **No price levels scraped from stance prose.** Ladder levels come from the `prices` table only.
-- **The `regime` string is a port of `jamasp/pricesummary.py:56-62`, not a reimplementation.** Exact output strings: `above both`, `below both`, `above 50DMA, below 200DMA`, `below 50DMA, above 200DMA`. Comparisons are strict `>`, matching the Python.
+- **The `regime` string is a port of `jamasp/pricesummary.py#_tech_line`, not a reimplementation.** Exact output strings: `above both`, `below both`, `above 50DMA, below 200DMA`, `below 50DMA, above 200DMA`. Comparisons are strict `>`, matching the Python.
 - **All stance regexes run on unwrapped text.** Stance prose is hard-wrapped at ~72 characters, and *where* the wrap falls shifts run to run. Measured on real history: matching the full bolded weights sentence (`**Weights … conviction … .**`) line-by-line succeeds in only 1 of 10 versions, because that span reliably crosses a wrap; matching just the triplet and its parenthetical succeeds line-by-line in all 6 fixtures, because that shorter span happens to fit on one line each time. Unwrapping removes the dependence on wrap position entirely — do not treat the narrow pattern's current luck as a reason to skip it.
 - **No agent contract change.** Do not touch `CLAUDE.md`, `.claude/skills/`, the `jamasp` CLI, or any state file format.
 - **Read `node_modules/next/dist/docs/` before writing Next.js code** — per `panel/AGENTS.md`, this Next version has breaking changes versus training data.
@@ -786,7 +786,7 @@ const base: TechnicalsInput = {
 };
 
 describe("deriveTechnicals — regime", () => {
-  // These four strings must match jamasp/pricesummary.py:56-62 exactly.
+  // These four strings must match jamasp/pricesummary.py#_tech_line exactly.
   it("above both", () => {
     expect(deriveTechnicals({ ...base, spot: q(3500) }, NOW).regime).toBe("above both");
   });
@@ -978,7 +978,12 @@ export type GoldTechnicals = {
   stale: boolean;
 };
 
-/** Symbols the overview reads, in the order lib/db.ts#latestPrices wants them. */
+/**
+ * The set of series the overview reads in one batch. Order carries no
+ * meaning — `latestPrices` returns a Record keyed by symbol. Spread it at
+ * the call site (`[...TECHNICAL_SYMBOLS]`): this is a readonly `as const`
+ * tuple and `latestPrices` takes a mutable `string[]`.
+ */
 export const TECHNICAL_SYMBOLS = [
   "GC", "GC_SMA50", "GC_SMA200", "GC_PIV_S1", "GC_PIV_R1",
   "GC_RSI14", "GC_ATR14", "^GVZ", "GC_NET_SPEC",
@@ -993,7 +998,7 @@ export const TECHNICAL_SYMBOLS = [
 const STALE_MS = 12 * 3600_000;
 
 /**
- * Paired implementation: jamasp/pricesummary.py:56-62. These four strings
+ * Paired implementation: jamasp/pricesummary.py#_tech_line. These four strings
  * are what the Telegram brief prints, so the panel must not paraphrase them
  * or the two surfaces will quietly disagree. Comparison is strict `>`, as
  * in the Python — spot exactly on an SMA counts as not-above.
@@ -1083,7 +1088,9 @@ In `jamasp/pricesummary.py`, directly above the `above50, above200 = …` line i
 - [ ] **Step 5: Run tests to verify they pass**
 
 Run: `cd panel && npx vitest run test/technicals.test.ts`
-Expected: PASS, 20 tests.
+Expected: PASS, 23 tests.
+
+Then audit every conditional you wrote — the null checks, the `indicatorsAsOf` empty case, the staleness comparison, the `pct24h` divide-by-zero guard, `side()`'s spot-missing branch. Delete each in turn and confirm a test fails. Two holes were found this way when the task was first implemented; a guard no test protects will be "simplified" away later.
 
 Then confirm the Python is unbroken: `cd /Users/saman/Rabin/Jamasp && uv run pytest tests/ -q`
 Expected: PASS (comment-only change).
@@ -1094,7 +1101,7 @@ Expected: PASS (comment-only change).
 git add panel/lib/technicals.ts panel/test/technicals.test.ts jamasp/pricesummary.py
 git commit -m "feat(panel): derive the gold levels ladder and regime
 
-Regime is a port of pricesummary.py:56-62 with reciprocal comments in
+Regime is a port of pricesummary.py#_tech_line with reciprocal comments in
 both files, so the panel and the Telegram brief cannot drift. Staleness
 tracks the TradingView set only — GVZ and CFTC net spec have unrelated
 cadences and would mask a dead technicals feed.
@@ -1828,7 +1835,7 @@ RSI that pricesummary.py already treats as noise."
 | `priceAtOrBeforeValue` for a gap-safe 24h delta, matching `pricesummary.py` | 4, consumed in 10 |
 | Fixture technical series | 4 |
 | `lib/technicals.ts` levels, DB-only | 5 |
-| Regime ported from `pricesummary.py:56-62` + drift guard comments | 5 |
+| Regime ported from `pricesummary.py#_tech_line` + drift guard comments | 5 |
 | 12h staleness | 5 |
 | No buy/sell verdict | 5 (absence), 10 (E2E assertion) |
 | `level-ladder.tsx` | 6 |
