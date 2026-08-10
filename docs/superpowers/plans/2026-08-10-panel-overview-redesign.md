@@ -29,7 +29,7 @@
 |---|---|
 | `panel/lib/stance.ts` | **Create.** Pure parsing of `stance.md` text → `ParsedStance`. No I/O. |
 | `panel/lib/technicals.ts` | **Create.** Pure derivation of ladder + regime + staleness from quotes. No I/O. |
-| `panel/lib/db.ts` | **Modify.** Add `latestPrices(symbols)` batch query. |
+| `panel/lib/db.ts` | **Modify.** Add `latestPrices(symbols)` batch query and export `priceAtOrBeforeValue(symbol, ts)`. |
 | `panel/components/level-ladder.tsx` | **Create.** Presentational ladder + exported `ladderGaps` helper. |
 | `panel/components/sparkline.tsx` | **Create.** Inline-SVG sparkline, server-rendered, no recharts. |
 | `panel/components/technical-panel.tsx` | **Create.** Composes ladder, regime, indicators, sparkline. |
@@ -564,7 +564,7 @@ yields null so drift shows up as missing chips, not wrong ones."
 
 **Interfaces:**
 - Consumes: nothing.
-- Produces: `latestPrices(symbols: string[]): Record<string, { ts: string; value: number }>`.
+- Produces: `latestPrices(symbols: string[]): Record<string, { ts: string; value: number }>` and `priceAtOrBefore(symbol: string, ts: string): number | null`.
 
 - [ ] **Step 1: Add the technical series to the fixture**
 
@@ -609,6 +609,26 @@ describe("latestPrices", () => {
     expect(db.latestPrices([])).toEqual({});
   });
 });
+
+describe("priceAtOrBeforeValue", () => {
+  it("returns the newest value at or before the cutoff, not the next one after it", () => {
+    // Rows: 07-25 3290, 07-31 3310.5, 08-01 3325. A cutoff mid-gap must
+    // return the earlier row, never jump forward.
+    expect(db.priceAtOrBeforeValue("GC", "2026-07-28T00:00:00Z")).toBe(3290.0);
+  });
+
+  it("includes a row exactly on the cutoff", () => {
+    expect(db.priceAtOrBeforeValue("GC", "2026-07-31T08:00:00Z")).toBe(3310.5);
+  });
+
+  it("returns null when nothing precedes the cutoff", () => {
+    expect(db.priceAtOrBeforeValue("GC", "2026-07-01T00:00:00Z")).toBeNull();
+  });
+
+  it("returns null for an unknown symbol", () => {
+    expect(db.priceAtOrBeforeValue("NOPE", "2026-08-01T08:00:00Z")).toBeNull();
+  });
+});
 ```
 
 Match the existing import style at the top of `test/db.test.ts` (it already imports the module and points `JAMASP_ROOT` at the fixture root — follow whatever that file does; do not add a second setup path).
@@ -642,6 +662,31 @@ export function latestPrices(symbols: string[]): Record<string, { ts: string; va
   });
 }
 ```
+
+Then export the existing private `priceAtOrBefore` helper for reuse. There is
+already a module-private `priceAtOrBefore(db, symbol, ts)` at `lib/db.ts:144`
+used by `getPriceSnapshots`; **do not duplicate it.** Add this public wrapper
+beneath it, leaving the private one and its callers untouched:
+
+```ts
+/**
+ * Value of the newest row at or before `ts`, or null if the series does not
+ * reach back that far.
+ *
+ * At-or-before, never at-or-after: gold has overnight and weekend gaps, so
+ * the first row *after* a cutoff can sit hours away and would silently skew
+ * a 24h delta. This matches jamasp/ingest/prices.py#row_at_or_before, which
+ * is what pricesummary.py's `_delta` uses for the brief — the panel's 24h
+ * change must be computed the same way the Telegram brief computes it.
+ */
+export function priceAtOrBeforeValue(symbol: string, ts: string): number | null {
+  return q(db => priceAtOrBefore(db, symbol, ts));
+}
+```
+
+The name differs from the private helper deliberately — `priceAtOrBeforeValue`
+returns a bare value, the private `priceAtOrBefore` returns a row and takes an
+open connection.
 
 - [ ] **Step 5: Run tests to verify they pass**
 
@@ -1609,7 +1654,9 @@ export default function Overview() {
 
   // --- technical ---
   const p = db.latestPrices([...TECHNICAL_SYMBOLS]);
-  const spot24h = db.getPriceSeries("GC", dayAgo)[0]?.value ?? null;
+  // At-or-before, matching pricesummary.py's _delta — the first row *after*
+  // the cutoff can sit hours away across an overnight or weekend gap.
+  const spot24h = db.priceAtOrBeforeValue("GC", dayAgo);
   const tech = deriveTechnicals({
     spot: p.GC ?? null,
     spot24hAgo: spot24h,
@@ -1730,6 +1777,7 @@ RSI that pricesummary.py already treats as noise."
 | Prefix heading match, `extra[]` preserved, preamble verbatim, `degraded` fallback | 2 |
 | `weights` regex, null on mismatch | 3 |
 | `latestPrices` batch helper | 4 |
+| `priceAtOrBeforeValue` for a gap-safe 24h delta, matching `pricesummary.py` | 4, consumed in 10 |
 | Fixture technical series | 4 |
 | `lib/technicals.ts` levels, DB-only | 5 |
 | Regime ported from `pricesummary.py:56-62` + drift guard comments | 5 |
