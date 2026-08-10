@@ -54,6 +54,10 @@ def _tech_line(conn: sqlite3.Connection, prefix: str, vals: dict[str, sqlite3.Ro
     spot = prices.latest(conn, prefix)
     sma50, sma200 = v("SMA50"), v("SMA200")
     if spot is not None and sma50 is not None and sma200 is not None:
+        # Paired implementation: panel/lib/technicals.ts#deriveRegime. These
+        # four strings also render in the web panel; change both or they
+        # disagree. Strict `>` is load-bearing — spot exactly on an SMA is
+        # not "above".
         above50, above200 = spot["value"] > sma50, spot["value"] > sma200
         if above50 == above200:
             regime = "above both" if above50 else "below both"
