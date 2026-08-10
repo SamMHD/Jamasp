@@ -40,7 +40,14 @@ export type GoldTechnicals = {
   stale: boolean;
 };
 
-/** Symbols the overview reads, in the order lib/db.ts#latestPrices wants them. */
+/**
+ * The full set of price series the overview page reads in one batch, passed
+ * to lib/db.ts#latestPrices — which returns a Record keyed by symbol, so
+ * order here carries no meaning. `latestPrices` takes a mutable `string[]`;
+ * spread this at the call site (`[...TECHNICAL_SYMBOLS]`) rather than
+ * passing it directly, or the `as const` readonly tuple fails to satisfy
+ * that parameter (TS2345).
+ */
 export const TECHNICAL_SYMBOLS = [
   "GC", "GC_SMA50", "GC_SMA200", "GC_PIV_S1", "GC_PIV_R1",
   "GC_RSI14", "GC_ATR14", "^GVZ", "GC_NET_SPEC",
@@ -55,10 +62,10 @@ export const TECHNICAL_SYMBOLS = [
 const STALE_MS = 12 * 3600_000;
 
 /**
- * Paired implementation: jamasp/pricesummary.py:56-62. These four strings
- * are what the Telegram brief prints, so the panel must not paraphrase them
- * or the two surfaces will quietly disagree. Comparison is strict `>`, as
- * in the Python — spot exactly on an SMA counts as not-above.
+ * Paired implementation: jamasp/pricesummary.py#_tech_line. These four
+ * strings are what the Telegram brief prints, so the panel must not
+ * paraphrase them or the two surfaces will quietly disagree. Comparison is
+ * strict `>`, as in the Python — spot exactly on an SMA counts as not-above.
  */
 function deriveRegime(spot: number, sma50: number, sma200: number): string {
   const above50 = spot > sma50;

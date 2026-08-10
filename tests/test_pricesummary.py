@@ -48,3 +48,27 @@ def test_stale_series_shows_na_not_zero(tmp_path):
     assert "24h: n/a" in out
     assert "7d: n/a" in out
     assert "+0.00%" not in out
+
+
+def _regime_line(tmp_path, name, spot, sma50, sma200):
+    conn = db.connect(tmp_path / f"{name}.db")
+    ts = "2026-07-31T22:00:00Z"
+    prices.store_price(conn, "GC", ts, spot)
+    prices.store_price(conn, "GC_SMA50", ts, sma50)
+    prices.store_price(conn, "GC_SMA200", ts, sma200)
+    return pricesummary.render(conn, now="2026-08-01T09:00:00Z")
+
+
+def test_all_four_regime_strings(tmp_path):
+    # The web panel ports these exact strings — panel/lib/technicals.ts#deriveRegime.
+    # Assert all four here so a reworded string fails in CI rather than silently
+    # disagreeing with the panel on the desk.
+    assert "spot above both" in _regime_line(tmp_path, "a", 4600.0, 4200.0, 4500.0)
+    assert "spot below both" in _regime_line(tmp_path, "b", 4100.0, 4200.0, 4500.0)
+    assert "spot above 50DMA, below 200DMA" in _regime_line(tmp_path, "c", 4300.0, 4200.0, 4500.0)
+    assert "spot below 50DMA, above 200DMA" in _regime_line(tmp_path, "d", 4300.0, 4500.0, 4200.0)
+
+
+def test_regime_comparison_is_strict(tmp_path):
+    # Spot exactly on both SMAs is "below both" — strict `>`, matching the panel.
+    assert "spot below both" in _regime_line(tmp_path, "eq", 4200.0, 4200.0, 4200.0)

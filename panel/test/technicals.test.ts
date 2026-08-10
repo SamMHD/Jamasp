@@ -15,7 +15,7 @@ const base: TechnicalsInput = {
 };
 
 describe("deriveTechnicals — regime", () => {
-  // These four strings must match jamasp/pricesummary.py:56-62 exactly.
+  // These four strings must match jamasp/pricesummary.py#_tech_line exactly.
   it("above both", () => {
     expect(deriveTechnicals({ ...base, spot: q(3500) }, NOW).regime).toBe("above both");
   });
