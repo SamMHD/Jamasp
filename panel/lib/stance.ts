@@ -109,10 +109,11 @@ export function parseWeights(viewBody: string): StanceWeight[] | null {
   const m = WEIGHTS_RE.exec(viewBody);
   if (!m) return null;
   const pcts = [Number(m[1]), Number(m[2]), Number(m[3])];
-  const labels = m[4].split("/").map(s => s.trim()).filter(Boolean);
-  // A mismatch means the format drifted; render nothing rather than
-  // mislabelled chips.
-  if (labels.length !== pcts.length) return null;
+  const labels = m[4].split("/").map(s => s.trim());
+  // Compare against the split as-is: filtering empties first would let a
+  // spurious label and an empty one cancel out into a wrong-but-plausible
+  // result. A mismatch means the format drifted — render nothing.
+  if (labels.length !== pcts.length || labels.some(l => l === "")) return null;
   return pcts.map((pct, i) => ({ label: labels[i], pct }));
 }
 

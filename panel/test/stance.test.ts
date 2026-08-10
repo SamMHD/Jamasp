@@ -176,6 +176,25 @@ describe("parseWeights", () => {
     expect(parseWeights("Weights 70/5/25 (base/kinetic)")).toBeNull();
   });
 
+  it("returns null when a label is empty, rather than silently reindexing", () => {
+    expect(parseWeights("Weights 70/5/25 (unknown/base//kinetic)")).toBeNull();
+    expect(parseWeights("Weights 70/5/25 (base//kinetic)")).toBeNull();
+  });
+
+  it("does not match a weights line that is still hard-wrapped", () => {
+    // parseWeights contracts for already-unwrapped input. If WEIGHTS_RE's
+    // [^)\n] were relaxed to [^)], the negated class would match across the
+    // wrap and this would return a result — the guard would be silently
+    // dead. This test is the tripwire that keeps it honest.
+    const wrapped = "Weights 70/5/25 (base/event-bearish/\nkinetic), conviction capped by CPI.";
+    expect(parseWeights(wrapped)).toBeNull();
+    expect(parseWeights(unwrapParagraphs(wrapped))).toEqual([
+      { label: "base", pct: 70 },
+      { label: "event-bearish", pct: 5 },
+      { label: "kinetic", pct: 25 },
+    ]);
+  });
+
   it("surfaces weights on the parsed stance for every real fixture", () => {
     for (const [name, text] of allFixtures()) {
       const p = parseStance(text);
