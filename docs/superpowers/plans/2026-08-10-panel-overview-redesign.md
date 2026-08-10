@@ -612,7 +612,7 @@ yields null so drift shows up as missing chips, not wrong ones."
 
 **Interfaces:**
 - Consumes: nothing.
-- Produces: `latestPrices(symbols: string[]): Record<string, { ts: string; value: number }>` and `priceAtOrBefore(symbol: string, ts: string): number | null`.
+- Produces: `latestPrices(symbols: string[]): Record<string, { ts: string; value: number }>` and `priceAtOrBeforeValue(symbol: string, ts: string): number | null`. The latter is named to avoid colliding with the module-private `priceAtOrBefore(db, symbol, ts)` it wraps.
 
 - [ ] **Step 1: Add the technical series to the fixture**
 
