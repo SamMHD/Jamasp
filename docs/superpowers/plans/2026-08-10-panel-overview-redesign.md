@@ -140,21 +140,34 @@ describe("unwrapParagraphs", () => {
    * that currently doesn't occur, so the parser keeps working when it does.
    */
   it("recovers a weights line split across a wrap", () => {
-    const re = /Weights\s+(\d+)\s*\/\s*(\d+)\s*\/\s*(\d+)\s*\(([^)]+)\)/i;
+    // [^)\n] cannot span a wrap. With [^)] this test would pass even if
+    // unwrapParagraphs were the identity function, because a negated class
+    // matches \n in JS.
+    const re = /Weights\s+(\d+)\s*\/\s*(\d+)\s*\/\s*(\d+)\s*\([^)\n]+\)/i;
     const wrapped = "**Weights 70/5/25 (base/event-bearish/\nkinetic), conviction capped by CPI.**";
-    expect(wrapped.split("\n").some(line => re.test(line))).toBe(false);
+    expect(re.test(wrapped)).toBe(false);
     expect(re.test(unwrapParagraphs(wrapped))).toBe(true);
   });
 
-  it("recovers the full bolded weights sentence, which does cross a wrap in real history", () => {
-    // Line-based matching of this wider span succeeds in only 1 of 10 real
-    // versions; after unwrapping it succeeds in all six fixtures.
-    const sentence = /\*\*Weights[^*]*\*\*/;
-    const hits = allFixtures().filter(([, text]) => sentence.test(unwrapParagraphs(text)));
-    const rawHits = allFixtures().filter(([, text]) =>
-      text.split("\n").some(line => sentence.test(line)));
-    expect(hits.length).toBe(6);
+  it("recovers the full bolded weights sentence, which crosses a wrap in real history", () => {
+    // Raw and unwrapped are compared on the same whole-text basis, so the
+    // difference measured here is unwrapping and nothing else. Verified:
+    // 1 of 6 raw, 6 of 6 unwrapped.
+    const sentence = /\*\*Weights[^*\n]*\*\*/;
+    const rawHits = allFixtures().filter(([, text]) => sentence.test(text));
+    const unwrappedHits = allFixtures().filter(([, text]) => sentence.test(unwrapParagraphs(text)));
     expect(rawHits.length).toBeLessThan(6);
+    expect(unwrappedHits.length).toBe(6);
+  });
+
+  it("joins a continuation line starting with a comparison, not a blockquote", () => {
+    const src = "- Fed speakers dismiss the payrolls print + Sept-hike odds rebound\n  >40% + GC loses 4300 → alibi rejected.";
+    expect(unwrapParagraphs(src))
+      .toBe("- Fed speakers dismiss the payrolls print + Sept-hike odds rebound >40% + GC loses 4300 → alibi rejected.");
+  });
+
+  it("still treats a real blockquote as a block boundary", () => {
+    expect(unwrapParagraphs("intro line\n> quoted text")).toBe("intro line\n> quoted text");
   });
 
   it("is idempotent", () => {
@@ -186,8 +199,13 @@ Create `panel/lib/stance.ts`:
  * rendered verbatim, never parsed.
  */
 
-/** Lines that begin a new block and must never be folded into the previous one. */
-const BLOCK_START = /^\s*(#{1,6}\s|[-*+]\s|\d+[.)]\s|>|\||\s*$)/;
+/**
+ * Lines that begin a new block and must never be folded into the previous
+ * one. `>` only starts a blockquote when followed by whitespace or nothing
+ * (a bare `>`) — `>40%`, as in a wrapped comparison, is prose, not a quote,
+ * and appears as a real continuation line in two of the six fixtures.
+ */
+const BLOCK_START = /^\s*(#{1,6}\s|[-*+]\s|\d+[.)]\s|>(\s|$)|\|)/;
 const HEADING = /^\s*#{1,6}\s/;
 
 /**
@@ -226,7 +244,9 @@ export function unwrapParagraphs(text: string): string {
 - [ ] **Step 5: Run tests to verify they pass**
 
 Run: `cd panel && npx vitest run test/stance.test.ts`
-Expected: PASS, 9 tests. (All nine assertions were verified against a reference implementation while this plan was written — if one fails, suspect the implementation, not the expectation.)
+Expected: PASS, 12 tests.
+
+Then prove the tripwire actually works: temporarily stub `unwrapParagraphs` to `text => text`, re-run, and confirm the two wrap-recovery tests FAIL (7 failures in total — the exact-equality tests fail too). Restore with `git checkout -- panel/lib/stance.ts` and confirm 12 pass again. A test suite that stays green against a no-op is not protecting anything.
 
 - [ ] **Step 6: Commit**
 
@@ -517,8 +537,12 @@ export type StanceWeight = { label: string; pct: number };
  * The triplet changes between runs; the shape has held across every real
  * version inspected. Input must already be unwrapped (parseStance bodies
  * are), or the line will be missed when it spans a wrap.
+ *
+ * `[^)\n]` rather than `[^)]` is deliberate: a negated class matches `\n`
+ * in JS, so `[^)]` would quietly match across a wrap and disguise a missing
+ * unwrap step. Keep the newline exclusion.
  */
-const WEIGHTS_RE = /Weights\s+(\d+)\s*\/\s*(\d+)\s*\/\s*(\d+)\s*\(([^)]+)\)/i;
+const WEIGHTS_RE = /Weights\s+(\d+)\s*\/\s*(\d+)\s*\/\s*(\d+)\s*\(([^)\n]+)\)/i;
 
 export function parseWeights(viewBody: string): StanceWeight[] | null {
   const m = WEIGHTS_RE.exec(viewBody);
