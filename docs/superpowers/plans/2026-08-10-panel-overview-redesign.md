@@ -446,7 +446,7 @@ export function parseStance(text: string): ParsedStance {
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `cd panel && npx vitest run test/stance.test.ts`
-Expected: PASS, 19 tests.
+Expected: PASS, 22 tests (12 from Task 1 plus 10 new).
 
 - [ ] **Step 5: Commit**
 
@@ -565,7 +565,7 @@ Add `weights: StanceWeight[] | null;` to the `ParsedStance` type, `weights: null
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `cd panel && npx vitest run test/stance.test.ts`
-Expected: PASS, 26 tests.
+Expected: PASS, 29 tests (22 from Tasks 1–2 plus 7 new).
 
 - [ ] **Step 5: Commit**
 
