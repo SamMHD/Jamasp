@@ -65,6 +65,7 @@ export type ParsedStance = {
   preamble: string;
   sections: Partial<Record<StanceKey, StanceSection>>;
   extra: StanceSection[];
+  weights: StanceWeight[] | null;
   raw: string;
   degraded: boolean;
 };
@@ -90,10 +91,35 @@ function classify(heading: string): StanceKey | null {
   return null;
 }
 
+export type StanceWeight = { label: string; pct: number };
+
+/**
+ * "Weights 70/5/25 (base/event-bearish/kinetic), conviction medium-high."
+ * The triplet changes between runs; the shape has held across every real
+ * version inspected. Input must already be unwrapped (parseStance bodies
+ * are), or the line will be missed when it spans a wrap.
+ *
+ * `[^)\n]` rather than `[^)]` is deliberate: a negated class matches `\n`
+ * in JS, so `[^)]` would quietly match across a wrap and disguise a missing
+ * unwrap step. Keep the newline exclusion.
+ */
+const WEIGHTS_RE = /Weights\s+(\d+)\s*\/\s*(\d+)\s*\/\s*(\d+)\s*\(([^)\n]+)\)/i;
+
+export function parseWeights(viewBody: string): StanceWeight[] | null {
+  const m = WEIGHTS_RE.exec(viewBody);
+  if (!m) return null;
+  const pcts = [Number(m[1]), Number(m[2]), Number(m[3])];
+  const labels = m[4].split("/").map(s => s.trim()).filter(Boolean);
+  // A mismatch means the format drifted; render nothing rather than
+  // mislabelled chips.
+  if (labels.length !== pcts.length) return null;
+  return pcts.map((pct, i) => ({ label: labels[i], pct }));
+}
+
 export function parseStance(text: string): ParsedStance {
   const empty: ParsedStance = {
     asOf: null, updatedNote: null, preamble: "",
-    sections: {}, extra: [], raw: text, degraded: true,
+    sections: {}, extra: [], weights: null, raw: text, degraded: true,
   };
   if (!text.trim()) return empty;
 
@@ -133,7 +159,9 @@ export function parseStance(text: string): ParsedStance {
   return {
     asOf, updatedNote,
     preamble: preambleLines.join("\n").trim(),
-    sections, extra, raw: text,
+    sections, extra,
+    weights: sections.view ? parseWeights(sections.view.body) : null,
+    raw: text,
     degraded: sections.view === undefined,
   };
 }

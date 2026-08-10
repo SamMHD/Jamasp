@@ -3,6 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { unwrapParagraphs } from "../lib/stance";
 import { parseStance } from "../lib/stance";
+import { parseWeights } from "../lib/stance";
 
 const FIXTURE_DIR = path.resolve(__dirname, "fixtures/stance");
 const fixture = (name: string) =>
@@ -149,5 +150,45 @@ describe("parseStance", () => {
   it("always returns raw as the original text, not the unwrapped text", () => {
     const src = fixture("brief-2026-08-09");
     expect(parseStance(src).raw).toBe(src);
+  });
+});
+
+describe("parseWeights", () => {
+  it("splits the triplet against its parenthetical labels", () => {
+    expect(parseWeights("**Weights 70/5/25 (base/event-bearish/kinetic), conviction medium-high.**"))
+      .toEqual([
+        { label: "base", pct: 70 },
+        { label: "event-bearish", pct: 5 },
+        { label: "kinetic", pct: 25 },
+      ]);
+  });
+
+  it("reads a different triplet from a different run", () => {
+    expect(parseWeights("Weights 65/10/25 (base/event-bearish/kinetic), conviction medium-high.")
+      ?.map(w => w.pct)).toEqual([65, 10, 25]);
+  });
+
+  it("returns null when the line is absent", () => {
+    expect(parseWeights("no weights here")).toBeNull();
+  });
+
+  it("returns null rather than a partial render on a label-count mismatch", () => {
+    expect(parseWeights("Weights 70/5/25 (base/kinetic)")).toBeNull();
+  });
+
+  it("surfaces weights on the parsed stance for every real fixture", () => {
+    for (const [name, text] of allFixtures()) {
+      const p = parseStance(text);
+      expect(p.weights, `${name} has no weights`).not.toBeNull();
+      expect(p.weights!.reduce((a, w) => a + w.pct, 0), `${name} weights sum`).toBe(100);
+    }
+  });
+
+  it("leaves weights null when the View section has no weights line", () => {
+    expect(parseStance("# S — 2026-08-01\n\n## View\n\nno triplet here").weights).toBeNull();
+  });
+
+  it("is null on a degraded stance", () => {
+    expect(parseStance("garbage").weights).toBeNull();
   });
 });
