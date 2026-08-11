@@ -117,6 +117,86 @@ export function parseWeights(viewBody: string): StanceWeight[] | null {
   return pcts.map((pct, i) => ({ label: labels[i], pct }));
 }
 
+/**
+ * A section body split at its top-level list items. Presentational only:
+ * everything is preserved — intro before the first bullet, the bullets,
+ * and any trailing prose after them — so a renderer can restyle the
+ * bullets and still show the body verbatim. Bodies arrive already
+ * unwrapped (parseStance bodies are), so each bullet is one line.
+ */
+export type SectionBullets = { intro: string; bullets: string[]; after: string };
+
+const BULLET = /^\s*[-*+]\s+(.+)$/;
+
+export function extractBullets(body: string): SectionBullets {
+  const intro: string[] = [];
+  const bullets: string[] = [];
+  const after: string[] = [];
+  for (const line of body.split("\n")) {
+    const m = BULLET.exec(line);
+    if (m) bullets.push(m[1].trim());
+    else (bullets.length === 0 ? intro : after).push(line);
+  }
+  return {
+    intro: intro.join("\n").trim(),
+    bullets,
+    after: after.join("\n").trim(),
+  };
+}
+
+/**
+ * A falsifier bullet split at its first "→" — the analyst's own
+ * condition → consequence arrow, present in every real "What flips me"
+ * bullet inspected but nowhere guaranteed. No arrow simply means no
+ * split: the whole text is the condition and nothing is invented.
+ */
+export type Falsifier = { condition: string; consequence: string | null };
+
+export function splitFalsifier(text: string): Falsifier {
+  const i = text.indexOf("→");
+  if (i === -1) return { condition: text.trim(), consequence: null };
+  return {
+    condition: text.slice(0, i).trim(),
+    consequence: text.slice(i + 1).trim() || null,
+  };
+}
+
+/**
+ * Which weight slot a View bullet belongs to, by the same evidence the
+ * weights line itself rests on: real View bullets open with the scenario
+ * label ("**Base (~70%):** …", "**Kinetic tail (~25%):** …") whose first
+ * word matches the weights parenthetical ("base/event-bearish/kinetic").
+ * Prefix match, longest label wins (so "base" can never shadow a
+ * hypothetical "base-x"). Null when nothing matches — the bullet renders
+ * plain rather than wearing a colour it cannot prove.
+ */
+export function scenarioSlot(bullet: string, weights: StanceWeight[]): number | null {
+  const text = bullet.toLowerCase().replace(/^[*_\s]+/, "");
+  let best: number | null = null;
+  let bestLen = 0;
+  for (let i = 0; i < weights.length; i++) {
+    const label = weights[i].label.toLowerCase();
+    if (label && text.startsWith(label) && label.length > bestLen) {
+      best = i;
+      bestLen = label.length;
+    }
+  }
+  return best;
+}
+
+/**
+ * Whole days between the stance's H1 date and now, both taken as UTC
+ * dates. 0 = same day, 1 = yesterday's stance (normal before today's
+ * brief lands), ≥2 = a brief has been missed. Null when the date cannot
+ * be parsed — unknown age must not render as fresh.
+ */
+export function stanceAgeDays(asOf: string, now: Date): number | null {
+  const then = Date.parse(`${asOf}T00:00:00Z`);
+  if (!Number.isFinite(then)) return null;
+  const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  return Math.round((today - then) / 86400_000);
+}
+
 export function parseStance(text: string): ParsedStance {
   const empty: ParsedStance = {
     asOf: null, updatedNote: null, preamble: "",
