@@ -75,6 +75,11 @@ INSERT INTO items VALUES
 INSERT INTO prices VALUES
  ('GC','2026-07-25T08:00:00Z',3290.0),('GC','2026-07-31T08:00:00Z',3310.5),('GC','2026-08-01T08:00:00Z',3325.0),
  ('DXY','2026-07-31T08:00:00Z',104.2),('DXY','2026-08-01T08:00:00Z',103.8),
+ -- Driver tiles, three states on one screen: DX-Y.NYB has two prints (a
+ -- populated tile with sparkline), ^TNX has one (value, no trend line),
+ -- and the remaining driver symbols have no rows at all ("no data").
+ ('DX-Y.NYB','2026-07-31T08:00:00Z',104.9),('DX-Y.NYB','2026-08-01T08:00:00Z',103.8),
+ ('^TNX','2026-08-01T08:00:00Z',4.29),
  -- GC technicals: spot 3325 sits above SMA50 and below SMA200, which
  -- exercises the mixed regime branch. Ladder order (desc) is therefore
  -- SMA200 3400, pivot R1 3390, spot 3325, SMA50 3250, pivot S1 3180.

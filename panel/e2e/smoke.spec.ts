@@ -22,34 +22,60 @@ test("brief reader renders fixture report", async ({ page }) => {
   await expect(page.getByText("Morning Brief")).toBeVisible();
 });
 
-test("overview renders both market panels", async ({ page }) => {
+test("overview renders the market instrument panels", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", e => errors.push(String(e)));
   await page.goto("/");
 
-  // Fundamental: heading, a parsed weight chip, a stance section, headlines.
+  // Fundamental: heading, the weight bar's text legend, a stance section,
+  // headlines.
   await expect(page.getByRole("heading", { name: "Fundamental" })).toBeVisible();
   await expect(page.getByText("base 70%")).toBeVisible();
   await expect(page.getByRole("heading", { name: "What flips me" })).toBeVisible();
   await expect(page.getByText("Latest headlines")).toBeVisible();
 
-  // Technical: heading, ladder rows, regime line, indicator readout.
+  // Technical: heading, the server-rendered spot chart, ladder rows, regime
+  // line, and the RSI gauge with the fixture's exact reading in its name.
+  const technical = page.getByRole("region", { name: "Technical" });
   await expect(page.getByRole("heading", { name: "Technical" })).toBeVisible();
+  await expect(technical.locator('svg[aria-label^="gold futures"]')).toBeVisible();
   // Exact match: the stance prose itself contains "200DMA" as a substring
   // (in the View and What-flips-me bullets), which collides with a plain
   // substring getByText and produces a Playwright strict-mode violation.
-  await expect(page.getByText("200DMA", { exact: true })).toBeVisible();
-  await expect(page.getByText("pivot S1")).toBeVisible();
-  await expect(page.getByText("above 50DMA, below 200DMA")).toBeVisible();
-  await expect(page.getByText("RSI14")).toBeVisible();
+  await expect(technical.getByText("200DMA", { exact: true })).toBeVisible();
+  await expect(technical.getByText("pivot S1")).toBeVisible();
+  await expect(technical.getByText("above 50DMA, below 200DMA")).toBeVisible();
+  await expect(technical.locator('svg[aria-label="RSI14 58.4"]')).toBeVisible();
 
   // The fixture's newest GC bar is fixed at 2026-08-01, so the page is
   // permanently in the frozen-feed state — the 24h reference must be refused
-  // rather than computed against the latest row itself. This is the only
-  // check of app/page.tsx's own wiring: handing the lookup the wrong "latest"
-  // timestamp passes every unit test and renders "= 0 (0.00%)" here.
-  await expect(page.getByText("24h —")).toBeVisible();
+  // rather than computed against the latest row itself. Both the GC hero and
+  // the GVZ tile now honestly dash (`.first()` because several instruments
+  // are frozen at once); the GC seam itself is pinned against this same
+  // fixture database in spot-delta.test.tsx, and the fabricated-flat
+  // renderings are asserted absent below.
+  await expect(technical.getByText("24h —").first()).toBeVisible();
   await expect(page.getByText("0.00%")).toHaveCount(0);
+  await expect(page.getByText("= 0")).toHaveCount(0);
+
+  // Drivers: a populated tile (value + honest dash), a single-print tile,
+  // and the four symbols with no fixture rows each stating "no data".
+  const drivers = page.getByRole("region", { name: "Drivers" });
+  await expect(drivers.getByText("DXY")).toBeVisible();
+  await expect(drivers.getByText("103.8")).toBeVisible();
+  await expect(drivers.getByText("4.29")).toBeVisible();
+  await expect(drivers.getByText("no data")).toHaveCount(4);
+
+  // Forecast record: hit rate over the decisive pair, full ledger counts,
+  // the matured-unscored amber flag, and the calibration chart.
+  const record = page.getByRole("region", { name: "Forecast record" });
+  // .first(): the calibration chart's left axis label is also "50%" with
+  // this fixture ledger; the hit-rate figure precedes it in the DOM.
+  await expect(record.getByText("50%").first()).toBeVisible();
+  await expect(record.getByText("hit rate · 2 decisive")).toBeVisible();
+  await expect(record.getByText("1 hit · 1 miss · 1 unclear · 0 open")).toBeVisible();
+  await expect(record.getByText("2 awaiting score")).toBeVisible();
+  await expect(record.locator('svg[aria-label^="calibration"]')).toBeVisible();
 
   // The panel must never render a buy/sell verdict.
   await expect(page.getByText(/strong buy|strong sell|recommend/i)).toHaveCount(0);

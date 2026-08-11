@@ -63,7 +63,13 @@ export default function Overview() {
     gvz: p["^GVZ"] ?? null,
     netSpec: p.GC_NET_SPEC ?? null,
   }, now);
-  const series = db.getPriceSeries("GC", iso(new Date(now.getTime() - 10 * 86400_000)));
+  // Chart window anchored to the newest GC bar, not to `now`: when the feed
+  // freezes the desk should see the final ten days of shape — the hero age
+  // and the x-axis dates state the staleness — rather than an emptying box
+  // as wall-clock time drifts past a window no new bars are entering.
+  const series = spot
+    ? db.getPriceSeries("GC", iso(new Date(new Date(spot.ts).getTime() - 10 * 86400_000)))
+    : [];
   // Gauge-row context. Each delta goes through the same honest-reference
   // lookup as the GC hero: a frozen series yields null, rendered "24h —".
   const gvz = p["^GVZ"] ?? null;
