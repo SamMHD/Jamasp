@@ -69,6 +69,23 @@ describe("HorizonStrip", () => {
     expect(html).toContain("+3 more within 7d");
   });
 
+  it("labels all seven day boundaries when none crowds the left edge", () => {
+    const html = render({ events: [ev({})] }); // NOW is 09:00Z, first midnight 15h out
+    const dayLabels = html.match(/>(Sun|Mon|Tue|Wed|Thu|Fri|Sat) \d+</g) ?? [];
+    expect(dayLabels).toHaveLength(7);
+    expect(html).toContain(">now<");
+  });
+
+  it("skips only the day label that would sit over the gutter near midnight", () => {
+    const lateNow = new Date("2026-08-11T23:30:00Z"); // first midnight 30min out
+    const html = renderToStaticMarkup(
+      <HorizonStrip horizon={deriveHorizon(
+        { events: [ev({ starts_at: "2026-08-12T12:30:00Z" })], predictions: [], wakeups: [] },
+        lateNow)} now={lateNow} />);
+    const dayLabels = html.match(/>(Sun|Mon|Tue|Wed|Thu|Fri|Sat) \d+</g) ?? [];
+    expect(dayLabels).toHaveLength(6);
+  });
+
   it("renders a designed empty state instead of a bare axis", () => {
     const html = render({});
     expect(html).toContain("nothing on the horizon");

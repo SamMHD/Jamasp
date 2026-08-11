@@ -104,8 +104,10 @@ export function HorizonStrip({ horizon, now }: { horizon: Horizon; now: Date }) 
                 <g key={ms}>
                   <line x1={tx.toFixed(1)} x2={tx.toFixed(1)} y1="8" y2={AXIS_Y}
                     stroke="var(--border)" strokeWidth="1" />
-                  {/* skip a label crowding the "now" corner */}
-                  {tx - GUTTER > 30 && (
+                  {/* a midnight hugging the left edge would set its centred
+                      label over the gutter; skip it — the next one names the
+                      day and the list rows carry exact times */}
+                  {tx - GUTTER > 22 && (
                     <text x={tx.toFixed(1)} y={H - 4} fontSize="10" textAnchor="middle"
                       fill="var(--muted-foreground)">
                       {WEEKDAYS[d.getUTCDay()]} {d.getUTCDate()}
@@ -116,7 +118,9 @@ export function HorizonStrip({ horizon, now }: { horizon: Horizon; now: Date }) 
             })}
             <line x1={GUTTER} x2={W - RIGHT_PAD} y1={AXIS_Y} y2={AXIS_Y}
               stroke="var(--border)" strokeWidth="1" />
-            <text x={GUTTER} y={H - 4} fontSize="10" textAnchor="start"
+            {/* end-anchored into the gutter so it can never collide with the
+                first day label, whatever hour the render lands on */}
+            <text x={GUTTER - 4} y={H - 4} fontSize="10" textAnchor="end"
               fill="var(--muted-foreground)">now</text>
 
             {/* lane labels — identity by text, never colour alone */}
