@@ -98,7 +98,7 @@ export default function Overview() {
           {warnings.map((w, i) => (
             <div key={i} className={w.severity === "red"
               ? "rounded border border-destructive bg-destructive/10 px-3 py-2 text-sm text-destructive"
-              : "rounded border border-amber-900 bg-amber-950/50 px-3 py-2 text-sm text-amber-300"}>
+              : "rounded border border-amber-400 bg-amber-100/60 px-3 py-2 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-300"}>
               {w.text}
             </div>
           ))}
