@@ -2006,8 +2006,12 @@ test("overview renders both market panels", async ({ page }) => {
 
   // Technical: heading, ladder rows, regime line, indicator readout.
   await expect(page.getByRole("heading", { name: "Technical" })).toBeVisible();
-  await expect(page.getByText("200DMA")).toBeVisible();
-  await expect(page.getByText("pivot S1")).toBeVisible();
+  // exact:true is required: the fixture stance's own prose mentions 200DMA
+  // twice, so a substring match hits 4 elements and trips Playwright's
+  // strict mode. Exact matching isolates the ladder's own <span>, which is
+  // what proves the ladder rendered.
+  await expect(page.getByText("200DMA", { exact: true })).toBeVisible();
+  await expect(page.getByText("pivot S1", { exact: true })).toBeVisible();
   await expect(page.getByText("above 50DMA, below 200DMA")).toBeVisible();
   await expect(page.getByText("RSI14")).toBeVisible();
 
