@@ -66,6 +66,67 @@ export function getItems(opts?: { limit?: number; offset?: number; source?: stri
   ).all(...args, o.limit ?? 200, o.offset ?? 0) as ItemRow[]);
 }
 
+/** Newest published_at across all items; null on an empty table. */
+export function newestItemTs(): string | null {
+  return q(db => (db.prepare("SELECT MAX(published_at) ts FROM items").get() as
+    { ts: string | null }).ts);
+}
+
+/**
+ * Item counts per UTC day per topic, aggregated in SQL — the overview's
+ * news-volume chart must not pull two weeks of full rows to count them.
+ */
+export function itemVolumeByDay(sinceIso: string): { day: string; topic: string; n: number }[] {
+  return q(db => db.prepare(
+    `SELECT substr(published_at, 1, 10) day, topic, COUNT(*) n
+     FROM items WHERE published_at >= ? GROUP BY day, topic ORDER BY day`
+  ).all(sinceIso) as { day: string; topic: string; n: number }[]);
+}
+
+export type ClusterHeadRow = ItemRow & { sources_n: number };
+
+/**
+ * Newest cluster representatives with the number of distinct sources
+ * carrying each story. The head convention matches getUnreadCount:
+ * `cluster_id = id` marks the representative, NULL means unclustered
+ * (counted as its own single source — the subquery would otherwise return
+ * 0 for NULL and claim a sourceless story).
+ */
+export function getClusterHeads(limit: number): ClusterHeadRow[] {
+  return q(db => db.prepare(
+    `SELECT i.*, CASE WHEN i.cluster_id IS NULL THEN 1 ELSE
+       (SELECT COUNT(DISTINCT c.source) FROM items c WHERE c.cluster_id = i.cluster_id)
+     END AS sources_n
+     FROM items i WHERE i.cluster_id = i.id OR i.cluster_id IS NULL
+     ORDER BY i.published_at DESC LIMIT ?`
+  ).all(limit) as ClusterHeadRow[]);
+}
+
+/**
+ * The story most sources carried since the cutoff — a story on four wires
+ * is a different signal from a story on one, so a single-source cluster
+ * never qualifies (HAVING >= 2). Ties break toward the larger cluster.
+ * The representative row is fetched by the head convention (id =
+ * cluster_id) and can predate the cutoff: a story that broke earlier but
+ * is still being picked up is still the top story.
+ */
+export function topStory(sinceIso: string):
+  { item: ItemRow; sources: number; items: number } | null {
+  return q(db => {
+    const top = db.prepare(
+      `SELECT cluster_id, COUNT(DISTINCT source) sources_n, COUNT(*) items_n
+       FROM items WHERE published_at >= ? AND cluster_id IS NOT NULL
+       GROUP BY cluster_id HAVING COUNT(DISTINCT source) >= 2
+       ORDER BY sources_n DESC, items_n DESC, cluster_id LIMIT 1`
+    ).get(sinceIso) as { cluster_id: string; sources_n: number; items_n: number } | undefined;
+    if (!top) return null;
+    const item = db.prepare("SELECT * FROM items WHERE id = ?")
+      .get(top.cluster_id) as ItemRow | undefined;
+    if (!item) return null;
+    return { item, sources: top.sources_n, items: top.items_n };
+  });
+}
+
 export function getItemFilters(): { sources: string[]; topics: string[] } {
   return q(db => ({
     sources: (db.prepare("SELECT DISTINCT source FROM items ORDER BY source").all() as
@@ -169,4 +230,56 @@ export function getPriceSeries(symbol: string, sinceIso: string): PricePoint[] {
   return q(db => db.prepare(
     "SELECT ts, value FROM prices WHERE symbol = ? AND ts >= ? ORDER BY ts"
   ).all(symbol, sinceIso) as PricePoint[]);
+}
+
+/**
+ * Newest row per symbol in one query. The overview needs nine series at
+ * once (spot, two SMAs, two pivots, RSI, ATR, GVZ, net spec); nine separate
+ * `latest()` round trips is the shape this avoids. Symbols with no rows are
+ * absent from the result rather than mapped to null.
+ */
+export function latestPrices(symbols: string[]): Record<string, { ts: string; value: number }> {
+  if (symbols.length === 0) return {};
+  const placeholders = symbols.map(() => "?").join(",");
+  return q(db => {
+    const rows = db.prepare(
+      `SELECT p.symbol, p.ts, p.value FROM prices p
+       WHERE p.symbol IN (${placeholders})
+         AND p.ts = (SELECT MAX(b.ts) FROM prices b WHERE b.symbol = p.symbol)`
+    ).all(...symbols) as { symbol: string; ts: string; value: number }[];
+    return Object.fromEntries(rows.map(r => [r.symbol, { ts: r.ts, value: r.value }]));
+  });
+}
+
+/**
+ * The value a delta should be measured *against*: the newest row at or before
+ * `ts`, but only when that row is a different observation from the latest one
+ * (`latestTs`). Null otherwise — no reference exists.
+ *
+ * At-or-before, never at-or-after: gold has overnight and weekend gaps, so
+ * the first row *after* a cutoff can sit hours away and would silently skew
+ * a 24h delta. This matches jamasp/ingest/prices.py#row_at_or_before.
+ *
+ * The `ts >= latestTs` rejection is the other half, and it is why this is a
+ * delta-reference lookup rather than a bare row lookup. When a series has
+ * not printed since the cutoff, the newest row at or before the cutoff *is*
+ * the latest row, so subtracting the two fabricates a confident "unchanged,
+ * 0.00%". That is not exotic: COMEX gold closes Friday ~21:00Z and reopens
+ * Sunday ~23:00Z, and parse_yahoo_chart_json stamps rows with the market bar
+ * timestamp rather than fetch time, so from Saturday ~21:00Z the 24h cutoff
+ * falls before Friday's last bar for roughly 26 hours every weekend. The
+ * guard is jamasp/pricesummary.py#_delta's, which prints "n/a" in exactly
+ * this case — the panel's 24h change must be computed the same way the
+ * Telegram brief computes it, and a null here renders as "24h —".
+ */
+export function priceDeltaReference(
+  symbol: string, ts: string, latestTs: string,
+): number | null {
+  return q(db => {
+    const r = db.prepare(
+      "SELECT ts, value FROM prices WHERE symbol = ? AND ts <= ? ORDER BY ts DESC LIMIT 1"
+    ).get(symbol, ts) as { ts: string; value: number } | undefined;
+    if (r === undefined || r.ts >= latestTs) return null;
+    return r.value;
+  });
 }
