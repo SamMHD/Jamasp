@@ -1619,10 +1619,31 @@ const render = (stance: ReturnType<typeof parseStance> | null, items: ItemRow[] 
 describe("FundamentalPanel", () => {
   it("renders weight chips, preamble and sections", () => {
     const html = render(parseStance(STANCE));
-    expect(html).toContain("base");
-    expect(html).toContain("70");
+    // "base 70%" is chip-only. Asserting bare "base" or "70" would pass even
+    // with the chips deleted, because the View body renders the markdown
+    // "Weights 70/5/25 (base/event-bearish/kinetic)" — the two blocks would
+    // mask each other and neither assertion could fail.
+    expect(html).toContain("base 70%");
+    expect(html).toContain("event-bearish 5%");
     expect(html).toContain("lead paragraph text");
     expect(html).toContain("What flips me");
+  });
+
+  it("renders the View section with its heading and body", () => {
+    const html = render(parseStance(STANCE));
+    expect(html).toContain("View");
+    expect(html).toContain("conviction medium-high");
+  });
+
+  it("shows the stance date and updated-note in the header", () => {
+    const html = render(parseStance(STANCE));
+    expect(html).toContain("2026-08-01");
+    expect(html).toContain("updated 12:05 Dubai");
+  });
+
+  it("omits the header line when the stance has no date", () => {
+    const html = render(parseStance("**lead**\n\n## View\n\nbody"));
+    expect(html).not.toContain("stance 20");
   });
 
   it("renders unrecognised sections rather than dropping them", () => {
@@ -1660,10 +1681,14 @@ describe("FundamentalPanel", () => {
 ```
 
 Run: `cd panel && npx vitest run test/fundamental-panel.test.tsx`
-Expected: PASS, 7 tests.
+Expected: PASS, 10 tests.
 
-Then delete the `stance.degraded` branch in `fundamental-panel.tsx` and confirm
-the raw-markdown fallback test fails. Restore it.
+Then delete each of these four blocks in turn, confirm a test fails, and
+restore: the `stance.degraded` branch, the as-of header line, the weights-chips
+block, and the `View` section render. All four must be individually
+undeletable. If a block can be removed with the suite green, the assertion
+naming it is measuring something another block also produces — find the
+overlap rather than adjusting the assertion until it looks covered.
 
 - [ ] **Step 3: Typecheck and lint**
 
