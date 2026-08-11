@@ -18,10 +18,12 @@ blockade." Deal window dead near-term; 985e77d0 HIT (family ~7-for-7).
 C-in-C, **Azmaei IRGC Navy (Hormuz operator)**, Taeb Basij, Abdollahi
 chief of staff; Rezaee to SNSC (replacing Zolghadr). Hardline wartime
 consolidation, leader unseen (health speculation). Doctrine-change watch
-on the corridor force. (3) **Sirik claims persist unverified** — second
-UNCONFIRMED report (further launches, framed as enforcement vs
-southern-corridor users); ~30h, zero UKMTO/CENTCOM/operator confirmation
-of tanker-ablaze / MQ-9 / new launches. Claim 1d282df6: no verification
+on the corridor force. (3) **Sirik claims persist unverified ~40h** — 11 Aug
+PM deep dive swept gcaptain/AJ/Gulf News/National: zero UKMTO/CENTCOM/
+operator confirmation of tanker-ablaze / MQ-9 / new launches. Reuters PM
+adds a NAMELESS "missile strike reported in Gulf" (no vessel/position;
+tripwire 0aaec9a2) — the day's casualties are Red Sea-side (4 crew, Bab
+al-Mandab, Houthi-attributed), not corridor. 1d282df6: no verification
 by Thu 23:59Z (0.6). (4) **Hammack twice on wires**: "should already be
 raising," multiple hikes — hawks pre-positioned for CPI. (5) Debasement
 feed intact: PBOC 6.7900 fix vs 6.7497 est; BoJ Sept-hike sources but yen
@@ -66,8 +68,10 @@ fresh directional predictions before the print.**
 settle <50DMA (0.6, ~21 Aug); `951d8286` Aug prices-paid <71.1 (~1 Sep);
 `772323d6` no 200DMA tag pre-CPI (0.65, Wed 12:30Z); `3353195f` no
 co-confirmed corridor text by Thu 23:59Z (0.7); NEW `1d282df6` Sirik
-claims unverified through Thu 23:59Z (0.6). Scored today: `985e77d0` HIT,
-`5fef3d21` HIT (Mon settle ~4455).
+claims unverified through Thu 23:59Z (0.6); NEW `0aaec9a2` 11 Aug Gulf
+strike report gets no named vessel by Thu 23:59Z (0.55, correlated with
+1d282df6). Scored today: `985e77d0` HIT, `5fef3d21` HIT (Mon settle
+~4455).
 
 ## Wakeups
 
@@ -81,7 +85,9 @@ Physical throughput ~7% of pre-war; rerouting, insurance, provenance
 premia entrenched regardless of deal tape — that is the desk story.
 Dueling-corridor regime unchanged; Sirik claims, if real, mean Iran is
 firing on southern-corridor users — hostile-vessel bar rises further. Red
-Sea separate axis (Bab el-Mandeb ~27/day vs 61). BA suspension to Oct 31,
+Sea separate axis turned LETHAL 11 Aug: cargo ship hit in Bab al-Mandab,
+4 crew killed; al-Makha port strike killed 7 — war-risk premia harden
+there; transits ~25/day vs 61. BA suspension to Oct 31,
 ~6,000 seafarers stranded. Fed-independence channel armed: Cook-firing
 push, Warsh/Jackson Hole late Aug. SGE +4.7% w/w says the CNY bid is
 structural. Oil buffer thin: US emergency crude <300M bbl, diesel
