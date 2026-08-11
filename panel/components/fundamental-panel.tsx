@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Markdown } from "@/components/markdown";
+import { WeightBar } from "@/components/weight-bar";
 import { Badge } from "@/components/ui/badge";
 import type { ItemRow } from "@/lib/db";
 import type { ParsedStance, StanceSection } from "@/lib/stance";
@@ -20,7 +21,7 @@ export function FundamentalPanel({ stance, items, now }: {
   stance: ParsedStance | null; items: ItemRow[]; now: Date;
 }) {
   return (
-    <section className="rounded border border-border p-4">
+    <section aria-label="Fundamental" className="rounded border border-border p-4">
       <div className="mb-2 flex items-baseline justify-between gap-2">
         <h2 className="font-medium">
           Fundamental
@@ -43,12 +44,8 @@ export function FundamentalPanel({ stance, items, now }: {
       ) : (
         <>
           {stance.weights && (
-            <div className="mb-3 flex flex-wrap gap-2">
-              {stance.weights.map(w => (
-                <Badge key={w.label} variant="secondary" className="tabular-nums">
-                  {w.label} {w.pct}%
-                </Badge>
-              ))}
+            <div className="mb-4">
+              <WeightBar weights={stance.weights} />
             </div>
           )}
           {stance.preamble && <Markdown text={stance.preamble} />}
