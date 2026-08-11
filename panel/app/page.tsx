@@ -39,11 +39,16 @@ export default function Overview() {
 
   // --- technical ---
   const p = db.latestPrices([...TECHNICAL_SYMBOLS]);
+  const spot = p.GC ?? null;
   // At-or-before, matching pricesummary.py's _delta — the first row *after*
-  // the cutoff can sit hours away across an overnight or weekend gap.
-  const spot24h = db.priceAtOrBeforeValue("GC", dayAgo);
+  // the cutoff can sit hours away across an overnight or weekend gap. Passing
+  // the latest GC timestamp is what lets the lookup refuse to compare the
+  // latest row against itself: when GC has not printed since the cutoff (every
+  // weekend, ~26h) the reference is null and the panel renders "24h —" rather
+  // than a confident flat zero.
+  const spot24h = spot ? db.priceDeltaReference("GC", dayAgo, spot.ts) : null;
   const tech = deriveTechnicals({
-    spot: p.GC ?? null,
+    spot,
     spot24hAgo: spot24h,
     sma50: p.GC_SMA50 ?? null,
     sma200: p.GC_SMA200 ?? null,

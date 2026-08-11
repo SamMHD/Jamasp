@@ -1,3 +1,4 @@
+import { isValidElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { FundamentalPanel } from "../components/fundamental-panel";
@@ -32,6 +33,26 @@ const item = (id: string, headline: string): ItemRow => ({
 const render = (stance: ReturnType<typeof parseStance> | null, items: ItemRow[] = []) =>
   renderToStaticMarkup(<FundamentalPanel stance={stance} items={items} now={NOW} />);
 
+/** Every key that appears twice among the same array of siblings. */
+function duplicateSiblingKeys(node: ReactNode): string[] {
+  const dups: string[] = [];
+  const visit = (n: unknown): void => {
+    if (Array.isArray(n)) {
+      const seen = new Set<string>();
+      for (const child of n) {
+        if (!isValidElement(child) || child.key === null) continue;
+        if (seen.has(child.key)) dups.push(child.key);
+        seen.add(child.key);
+      }
+      n.forEach(visit);
+      return;
+    }
+    if (isValidElement(n)) visit((n.props as { children?: unknown }).children);
+  };
+  visit(node);
+  return dups;
+}
+
 describe("FundamentalPanel", () => {
   it("renders weight chips, preamble and sections", () => {
     const html = render(parseStance(STANCE));
@@ -62,6 +83,40 @@ describe("FundamentalPanel", () => {
 
   it("renders unrecognised sections rather than dropping them", () => {
     expect(render(parseStance(STANCE))).toContain("Extra section from the agent");
+  });
+
+  // Headings in `extra` are free-form agent prose: two ad-hoc sections can
+  // share a title, and a repeated "## View" is routed to extra rather than
+  // overwriting the first. Keying on the heading alone collides.
+  //
+  // Asserted on the element tree, not on the markup: React's static renderer
+  // emits both sections and does not warn, so duplicate keys are invisible in
+  // HTML. The damage is client-side, where this page re-renders on every
+  // AutoRefresh tick and the reconciler matches siblings by key.
+  it("gives repeated extra headings distinct React keys", () => {
+    const dup = `# S — 2026-08-01
+
+## View
+
+body
+
+## Watching
+
+first block
+
+## Watching
+
+second block
+`;
+    const parsed = parseStance(dup);
+    expect(parsed.extra.map(s => s.heading)).toEqual(["Watching", "Watching"]);
+
+    expect(duplicateSiblingKeys(FundamentalPanel({ stance: parsed, items: [], now: NOW })))
+      .toEqual([]);
+
+    const html = render(parsed);
+    expect(html).toContain("first block");
+    expect(html).toContain("second block");
   });
 
   it("shows 'no stance yet' when there is no stance file", () => {

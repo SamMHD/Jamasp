@@ -94,4 +94,22 @@ describe("TechnicalPanel", () => {
     const html = render({ ...full, indicatorsAsOf: null });
     expect(html).not.toContain("indicators");
   });
+
+  // `stale` covers the six TradingView series only, and those carry fetch
+  // timestamps while GC carries the market bar timestamp — so the TradingView
+  // set keeps ticking over exactly when the spot feed freezes. Without this
+  // age, nothing on the panel can say the price itself is old, and a Yahoo
+  // outage (which has happened: see the stooq -> Yahoo switch in
+  // config/sources.yaml) would present a days-old price as current fact.
+  it("renders the age of the spot quote", () => {
+    // spot.ts 08:00Z against NOW 12:00Z. The indicator line reads "6h ago",
+    // so this string belongs to the spot quote alone.
+    expect(render(full)).toContain("4h ago");
+  });
+
+  it("shows the spot age even when the indicator feed reports fresh", () => {
+    const html = render({ ...full, stale: false, indicatorsAsOf: "2026-08-01T11:59:00Z" });
+    expect(html).toContain("1m ago");   // indicators, freshly fetched
+    expect(html).toContain("4h ago");   // spot, four hours behind them
+  });
 });

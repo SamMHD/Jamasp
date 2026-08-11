@@ -53,6 +53,17 @@ export function TechnicalPanel({ tech, series, now }: {
                 </>
               )}
             </span>
+            {/* Unconditional, and deliberately not an amber alarm. `stale`
+                above tracks the six TradingView series only, which are
+                stamped with fetch time — so it keeps ticking over precisely
+                when GC, stamped with market bar time, freezes. Nothing else
+                on this panel can say the price itself is old. A threshold
+                alarm would fire ~26h every weekend when the market is
+                legitimately shut and train the desk to ignore it; a plain age
+                is self-interpreting in both directions. */}
+            <span className="ml-2 text-xs text-muted-foreground">
+              {fmtAge(tech.spot.ts, now)}
+            </span>
           </div>
         )}
       </div>

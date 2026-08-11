@@ -191,15 +191,34 @@ export function latestPrices(symbols: string[]): Record<string, { ts: string; va
 }
 
 /**
- * Value of the newest row at or before `ts`, or null if the series does not
- * reach back that far.
+ * The value a delta should be measured *against*: the newest row at or before
+ * `ts`, but only when that row is a different observation from the latest one
+ * (`latestTs`). Null otherwise — no reference exists.
  *
  * At-or-before, never at-or-after: gold has overnight and weekend gaps, so
  * the first row *after* a cutoff can sit hours away and would silently skew
- * a 24h delta. This matches jamasp/ingest/prices.py#row_at_or_before, which
- * is what pricesummary.py's `_delta` uses for the brief — the panel's 24h
- * change must be computed the same way the Telegram brief computes it.
+ * a 24h delta. This matches jamasp/ingest/prices.py#row_at_or_before.
+ *
+ * The `ts >= latestTs` rejection is the other half, and it is why this is a
+ * delta-reference lookup rather than a bare row lookup. When a series has
+ * not printed since the cutoff, the newest row at or before the cutoff *is*
+ * the latest row, so subtracting the two fabricates a confident "unchanged,
+ * 0.00%". That is not exotic: COMEX gold closes Friday ~21:00Z and reopens
+ * Sunday ~23:00Z, and parse_yahoo_chart_json stamps rows with the market bar
+ * timestamp rather than fetch time, so from Saturday ~21:00Z the 24h cutoff
+ * falls before Friday's last bar for roughly 26 hours every weekend. The
+ * guard is jamasp/pricesummary.py#_delta's, which prints "n/a" in exactly
+ * this case — the panel's 24h change must be computed the same way the
+ * Telegram brief computes it, and a null here renders as "24h —".
  */
-export function priceAtOrBeforeValue(symbol: string, ts: string): number | null {
-  return q(db => priceAtOrBefore(db, symbol, ts));
+export function priceDeltaReference(
+  symbol: string, ts: string, latestTs: string,
+): number | null {
+  return q(db => {
+    const r = db.prepare(
+      "SELECT ts, value FROM prices WHERE symbol = ? AND ts <= ? ORDER BY ts DESC LIMIT 1"
+    ).get(symbol, ts) as { ts: string; value: number } | undefined;
+    if (r === undefined || r.ts >= latestTs) return null;
+    return r.value;
+  });
 }

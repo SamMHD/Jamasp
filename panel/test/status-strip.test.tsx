@@ -163,8 +163,11 @@ describe("FooterStrip", () => {
   // quiet desk with nothing scheduled and no alerts fired is the common case.
   it("renders all three absent states together without crashing", () => {
     const html = renderFooter({ wakeup: undefined, event: undefined, lastAlert: undefined, now: NOW });
-    expect(html).toContain("none pending");
-    expect(html).toContain("nothing upcoming");
-    expect(html).toContain("none");
+    expect(html).toContain("next wakeup: none pending");
+    expect(html).toContain("next event: nothing upcoming");
+    // Qualified by its label: a bare "none" is satisfied by the wakeup
+    // branch's "none pending" a few spans earlier, so it asserted nothing at
+    // all about the last-alert fallback.
+    expect(html).toContain("last alert: none");
   });
 });

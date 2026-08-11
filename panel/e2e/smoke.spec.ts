@@ -43,6 +43,14 @@ test("overview renders both market panels", async ({ page }) => {
   await expect(page.getByText("above 50DMA, below 200DMA")).toBeVisible();
   await expect(page.getByText("RSI14")).toBeVisible();
 
+  // The fixture's newest GC bar is fixed at 2026-08-01, so the page is
+  // permanently in the frozen-feed state — the 24h reference must be refused
+  // rather than computed against the latest row itself. This is the only
+  // check of app/page.tsx's own wiring: handing the lookup the wrong "latest"
+  // timestamp passes every unit test and renders "= 0 (0.00%)" here.
+  await expect(page.getByText("24h —")).toBeVisible();
+  await expect(page.getByText("0.00%")).toHaveCount(0);
+
   // The panel must never render a buy/sell verdict.
   await expect(page.getByText(/strong buy|strong sell|recommend/i)).toHaveCount(0);
 

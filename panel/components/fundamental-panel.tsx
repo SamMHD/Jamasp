@@ -54,7 +54,11 @@ export function FundamentalPanel({ stance, items, now }: {
           {stance.preamble && <Markdown text={stance.preamble} />}
           {stance.sections.view && <Section section={stance.sections.view} />}
           {stance.sections.whatFlipsMe && <Section section={stance.sections.whatFlipsMe} />}
-          {stance.extra.map(s => <Section key={s.heading} section={s} />)}
+          {/* Index-qualified: headings in `extra` are free-form agent prose and
+              can repeat (two ad-hoc sections with the same title, or a second
+              "## View", which parseStance routes here rather than overwriting
+              the first). A bare heading key would collide. */}
+          {stance.extra.map((s, i) => <Section key={`${i}-${s.heading}`} section={s} />)}
         </>
       )}
 

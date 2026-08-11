@@ -134,6 +134,40 @@ describe("parseStance", () => {
     expect(p.preamble).not.toContain("# Stance");
   });
 
+  // Nothing prescribes the "# Stance — <date>" H1: CLAUDE.md rule 5 asks only
+  // for a page that gets rewritten, and the run skills only for "current view,
+  // key drivers, conviction". The H1 is an emergent habit of the prose held
+  // by convention across the six captured versions. When it drifts away, the
+  // lead paragraph — the analyst's actual headline read — must not vanish
+  // behind a panel that still looks complete, because `degraded` keys off
+  // `## View` and would report this stance healthy.
+  it("captures the preamble when the stance has no H1 at all", () => {
+    const p = parseStance("**EVENT-PENDING:** lead text\n\n## View\n\nbody");
+    expect(p.preamble.trim()).toBe("**EVENT-PENDING:** lead text");
+    expect(p.degraded).toBe(false);
+    expect(p.asOf).toBeNull();
+    expect(p.sections.view!.body.trim()).toBe("body");
+  });
+
+  it("captures content that appears before the H1", () => {
+    const p = parseStance("lead before the title\n\n# Stance — 2026-08-01\n\nlead after\n\n## View\n\nbody");
+    expect(p.preamble).toContain("lead before the title");
+    expect(p.preamble).toContain("lead after");
+    expect(p.preamble).not.toContain("# Stance");
+    expect(p.asOf).toBe("2026-08-01");
+  });
+
+  it("leaves the six real fixtures' preambles unchanged — H1 out, lead in", () => {
+    for (const [name, text] of allFixtures()) {
+      const p = parseStance(text);
+      expect(p.preamble, `${name} has no preamble`).not.toBe("");
+      // The H1 is consumed, not folded into the preamble.
+      expect(p.preamble.split("\n").some(l => /^#\s/.test(l)), `${name} kept its H1`)
+        .toBe(false);
+      expect(p.preamble, `${name} leaked a ## heading`).not.toContain("\n## ");
+    }
+  });
+
   it("degrades to raw when there is no ## View", () => {
     const p = parseStance("just some prose with no structure at all");
     expect(p.degraded).toBe(true);

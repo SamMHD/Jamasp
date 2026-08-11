@@ -91,10 +91,16 @@ describe("deriveTechnicals — levels", () => {
     });
   });
 
-  it("marks every level as at when spot is missing, rather than fabricating above/below", () => {
+  // "at" would be a claim — every level tagged at-the-money — and an exported
+  // type must not carry a claim the data cannot support. The ladder conveys
+  // above/below by sorted position and reads `side` not at all today, so this
+  // is only ever load-bearing for a future consumer, which is exactly who
+  // would inherit the lie.
+  it("marks every level unknown when spot is missing, rather than fabricating above/below/at", () => {
     const t = deriveTechnicals({ ...base, spot: null }, NOW);
     expect(t.levels.map(l => l.label)).toEqual(["200DMA", "pivot R1", "50DMA", "pivot S1"]);
-    expect(t.levels.every(l => l.side === "at")).toBe(true);
+    expect(t.levels.every(l => l.side === "unknown")).toBe(true);
+    expect(t.levels.some(l => l.side === "at")).toBe(false);
   });
 });
 

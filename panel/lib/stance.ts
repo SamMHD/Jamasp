@@ -150,8 +150,14 @@ export function parseStance(text: string): ParsedStance {
       else extra.push(current);
       continue;
     }
+    // `else`, not `else if (seenH1)`: nothing prescribes the stance format —
+    // CLAUDE.md rule 5 asks only for "under one page, rewritten" — so the
+    // "# Stance — <date>" H1 is an emergent habit of the prose, not a
+    // contract. Keying preamble capture off it meant a stance that opened
+    // with its lead paragraph parsed as healthy (degraded keys off
+    // sections.view) while the analyst's headline read vanished silently.
     if (current) current.body += (current.body ? "\n" : "") + line;
-    else if (seenH1) preambleLines.push(line);
+    else preambleLines.push(line);
   }
 
   for (const s of Object.values(sections)) s.body = s.body.trim();

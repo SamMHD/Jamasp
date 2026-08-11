@@ -29,7 +29,7 @@
 |---|---|
 | `panel/lib/stance.ts` | **Create.** Pure parsing of `stance.md` text → `ParsedStance`. No I/O. |
 | `panel/lib/technicals.ts` | **Create.** Pure derivation of ladder + regime + staleness from quotes. No I/O. |
-| `panel/lib/db.ts` | **Modify.** Add `latestPrices(symbols)` batch query and export `priceAtOrBeforeValue(symbol, ts)`. |
+| `panel/lib/db.ts` | **Modify.** Add `latestPrices(symbols)` batch query and export `priceAtOrBeforeValue(symbol, ts)` (post-review: `priceDeltaReference(symbol, ts, latestTs)` — see the amendment in Task 4). |
 | `panel/components/level-ladder.tsx` | **Create.** Presentational ladder + exported `ladderGaps` helper. |
 | `panel/components/sparkline.tsx` | **Create.** Inline-SVG sparkline, server-rendered, no recharts. |
 | `panel/components/technical-panel.tsx` | **Create.** Composes ladder, regime, indicators, sparkline. |
@@ -613,6 +613,14 @@ yields null so drift shows up as missing chips, not wrong ones."
 **Interfaces:**
 - Consumes: nothing.
 - Produces: `latestPrices(symbols: string[]): Record<string, { ts: string; value: number }>` and `priceAtOrBeforeValue(symbol: string, ts: string): number | null`. The latter is named to avoid colliding with the module-private `priceAtOrBefore(db, symbol, ts)` it wraps.
+
+> **Amended after the whole-branch review.** `priceAtOrBeforeValue` shipped
+> without the second half of `pricesummary.py#_delta`'s guard, so a GC series
+> that had not printed since the cutoff — every weekend, ~26h — returned the
+> latest row itself and the panel rendered `= 0 (0.00%)`. It was replaced by
+> `priceDeltaReference(symbol, ts, latestTs)`, which returns null in that case;
+> `page.tsx` passes the latest GC timestamp. The Step 2/4 snippets below record
+> what was originally instructed, not what is in the tree.
 
 - [ ] **Step 1: Add the technical series to the fixture**
 
@@ -2066,7 +2074,7 @@ RSI that pricesummary.py already treats as noise."
 | Prefix heading match, `extra[]` preserved, preamble verbatim, `degraded` fallback | 2 |
 | `weights` regex, null on mismatch | 3 |
 | `latestPrices` batch helper | 4 |
-| `priceAtOrBeforeValue` for a gap-safe 24h delta, matching `pricesummary.py` | 4, consumed in 10 |
+| `priceDeltaReference` for a gap-safe 24h delta, matching `pricesummary.py` (shipped as `priceAtOrBeforeValue`; renamed and given the missing `>= latestTs` guard after the whole-branch review) | 4, consumed in 10 |
 | Fixture technical series | 4 |
 | `lib/technicals.ts` levels, DB-only | 5 |
 | Regime ported from `pricesummary.py#_tech_line` + drift guard comments | 5 |

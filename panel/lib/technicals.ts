@@ -14,7 +14,15 @@
 
 export type Quote = { ts: string; value: number };
 export type LevelKind = "ma" | "pivot" | "spot";
-export type LevelSide = "above" | "below" | "at";
+/**
+ * "unknown" exists so a missing spot cannot be encoded as a claim. With no
+ * price there is no above/below/at to state, and defaulting to "at" would tag
+ * every level as at-the-money in an exported type — a lie any future consumer
+ * would inherit. Today's ladder conveys above/below by sorted position and
+ * reads no `side` at all; that is a property of the current layout, not of
+ * this type.
+ */
+export type LevelSide = "above" | "below" | "at" | "unknown";
 export type Level = { label: string; value: number; kind: LevelKind; side: LevelSide };
 
 export type TechnicalsInput = {
@@ -75,7 +83,8 @@ function deriveRegime(spot: number, sma50: number, sma200: number): string {
 }
 
 function side(value: number, spot: number | null): LevelSide {
-  if (spot === null || value === spot) return "at";
+  if (spot === null) return "unknown";
+  if (value === spot) return "at";
   return value > spot ? "above" : "below";
 }
 
