@@ -1714,8 +1714,19 @@ an unparseable stance falls back to raw markdown with a badge."
 - Create: `panel/components/status-strip.tsx`
 
 **Interfaces:**
-- Consumes: `AgentRunRow`, `WakeupRow`, `EventRow`, `NotifyLogRow` from `lib/db.ts`; existing `RunBadge`.
+- Consumes: `AgentRunRow`, `WakeupRow`, `EventRow`, `NotifyLogRow` from `lib/db.ts`.
 - Produces: `<StatusStrip … />` and `<FooterStrip … />`.
+
+**Deliberately NOT `RunBadge`.** It renders a full `<Badge>` pill; this strip
+needs a 2×2 dot, so it carries its own small `DOT` status map. That duplicates
+the status→colour semantics in `run-badge.tsx`, which is the codebase's existing
+convention (each component owns its mapping, cf. `stat-card.tsx`) — but if a new
+run status is ever added, both need updating.
+
+**`lastRuns` must come from `db.lastRunPerType()`, never `db.getAgentRuns(N)`.**
+The strip does a `.find()` per run type, so a fixed-size window would report an
+infrequent type (retro runs weekly) as "never run". `lib/db.ts` documents this
+footgun for a different consumer.
 
 - [ ] **Step 1: Write the components**
 
