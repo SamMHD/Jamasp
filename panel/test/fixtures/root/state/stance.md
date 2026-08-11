@@ -16,6 +16,7 @@ Watching the Fed's September signal.
 
 - Settle below 3250 without news — respect it.
 - A 200DMA tag at 3400 on volume.
+- A verified corridor text → oil event first; reread the weights.
 
 ## Open predictions
 

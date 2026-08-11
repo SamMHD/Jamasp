@@ -27,12 +27,42 @@ test("overview renders the market instrument panels", async ({ page }) => {
   page.on("pageerror", e => errors.push(String(e)));
   await page.goto("/");
 
-  // Fundamental: heading, the weight bar's text legend, a stance section,
-  // headlines.
+  // Fundamental: heading, the weight bar's text legend, the falsifier rows
+  // (condition split from consequence at the analyst's arrow — the
+  // condition ends its own element), the watchlist chip, and the stance-age
+  // amber (the fixture stance is dated 2026-08-01, permanently ≥2d old
+  // against the real clock).
+  const fundamental = page.getByRole("region", { name: "Fundamental" });
   await expect(page.getByRole("heading", { name: "Fundamental" })).toBeVisible();
   await expect(page.getByText("base 70%")).toBeVisible();
   await expect(page.getByRole("heading", { name: "What flips me" })).toBeVisible();
-  await expect(page.getByText("Latest headlines")).toBeVisible();
+  await expect(fundamental.getByText("A verified corridor text", { exact: true })).toBeVisible();
+  await expect(fundamental.getByText("fed-rate-path")).toBeVisible();
+  await expect(fundamental.getByText(/\d+d old/)).toBeVisible();
+
+  // Horizon: the fixture's pending wakeup #1 (due 2026-08-02) is overdue
+  // forever against the real clock, and both fixture predictions matured
+  // before any future render — so these states are time-stable. The events
+  // lane is deliberately not asserted here: the fixture's FOMC row drifts
+  // in and out of the 7-day window as the calendar advances; populated
+  // lanes are pinned with a fixed clock in horizon-strip.test.tsx.
+  const horizon = page.getByRole("region", { name: "Horizon" });
+  await expect(horizon.getByText("#1 deepdive")).toBeVisible();
+  await expect(horizon.getByText("1 overdue")).toBeVisible();
+  await expect(horizon.getByText("overdue", { exact: true })).toBeVisible();
+  await expect(horizon.getByText("0 maturing")).toBeVisible();
+
+  // News flow: the volume chart is anchored to the newest fixture item
+  // (2026-08-01), so its window never empties as real time passes; the
+  // headline list is cluster representatives — i3 is folded under i1 and
+  // its headline must not appear; the feed age is stated unconditionally.
+  const news = page.getByRole("region", { name: "News flow" });
+  await expect(news.locator('svg[aria-label^="news volume"]')).toBeVisible();
+  await expect(news.getByText("Latest headlines")).toBeVisible();
+  await expect(news.getByText("Gold steadies as dollar slips")).toBeVisible();
+  await expect(news.getByText("cnbc_finance").first()).toBeVisible();
+  await expect(news.getByText(/last item/)).toBeVisible();
+  await expect(page.getByText("Dollar slides on jobs data")).toHaveCount(0);
 
   // Technical: heading, the server-rendered spot chart, ladder rows, regime
   // line, and the RSI gauge with the fixture's exact reading in its name.
