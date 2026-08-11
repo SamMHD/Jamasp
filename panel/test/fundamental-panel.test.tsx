@@ -35,10 +35,29 @@ const render = (stance: ReturnType<typeof parseStance> | null, items: ItemRow[] 
 describe("FundamentalPanel", () => {
   it("renders weight chips, preamble and sections", () => {
     const html = render(parseStance(STANCE));
-    expect(html).toContain("base");
-    expect(html).toContain("70");
+    // "base 70%" is chip-only: the View body's markdown says
+    // "Weights 70/5/25 (base/event-bearish/kinetic)", never this shape.
+    expect(html).toContain("base 70%");
+    expect(html).toContain("event-bearish 5%");
     expect(html).toContain("lead paragraph text");
     expect(html).toContain("What flips me");
+  });
+
+  it("renders the View section with its heading and body", () => {
+    const html = render(parseStance(STANCE));
+    expect(html).toContain("View");
+    expect(html).toContain("conviction medium-high");
+  });
+
+  it("shows the stance date and updated-note in the header", () => {
+    const html = render(parseStance(STANCE));
+    expect(html).toContain("2026-08-01");
+    expect(html).toContain("updated 12:05 Dubai");
+  });
+
+  it("omits the header line when the stance has no date", () => {
+    const html = render(parseStance("**lead**\n\n## View\n\nbody"));
+    expect(html).not.toContain("stance 20");
   });
 
   it("renders unrecognised sections rather than dropping them", () => {
