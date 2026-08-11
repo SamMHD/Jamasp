@@ -1299,10 +1299,32 @@ function num(v: number | null, digits = 1): string {
   return v === null ? "—" : v.toLocaleString(undefined, { maximumFractionDigits: digits });
 }
 
+// Four distinct states, because "unknown" and "flat" are not the same claim
+// and neither is a rise: null means no 24h reference row exists at all, so
+// it must not fall through to "0" and read as a genuine flat move.
+type Direction = "up" | "down" | "flat" | "unknown";
+
+const DIR_TONE: Record<Direction, string> = {
+  up: "text-emerald-400",
+  down: "text-destructive",
+  flat: "text-muted-foreground",
+  unknown: "text-muted-foreground",
+};
+
+const DIR_MARK: Record<Direction, string> = { up: "▲", down: "▼", flat: "=", unknown: "" };
+
+function direction(delta: number | null): Direction {
+  if (delta === null) return "unknown";
+  if (delta > 0) return "up";
+  if (delta < 0) return "down";
+  return "flat";
+}
+
 export function TechnicalPanel({ tech, series, now }: {
   tech: GoldTechnicals; series: PricePoint[]; now: Date;
 }) {
-  const up = (tech.spot?.delta24h ?? 0) >= 0;
+  const delta = tech.spot?.delta24h ?? null;
+  const dir = direction(delta);
   return (
     <section className="rounded border border-border p-4">
       <div className="mb-4 flex items-baseline justify-between gap-2">
@@ -1313,9 +1335,13 @@ export function TechnicalPanel({ tech, series, now }: {
         {tech.spot && (
           <div className="tabular-nums">
             <span className="text-xl font-semibold">{num(tech.spot.value)}</span>
-            <span className={cls("ml-2 text-sm", up ? "text-emerald-400" : "text-destructive")}>
-              {up ? "▲" : "▼"} {num(Math.abs(tech.spot.delta24h ?? 0))}
-              {tech.spot.pct24h !== null && ` (${num(Math.abs(tech.spot.pct24h), 2)}%)`}
+            <span className={cls("ml-2 text-sm", DIR_TONE[dir])}>
+              {dir === "unknown" ? "24h —" : (
+                <>
+                  {DIR_MARK[dir]} {num(Math.abs(delta!))}
+                  {tech.spot.pct24h !== null && ` (${num(Math.abs(tech.spot.pct24h), 2)}%)`}
+                </>
+              )}
             </span>
           </div>
         )}
