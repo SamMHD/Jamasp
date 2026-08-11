@@ -169,4 +169,18 @@ describe("deriveTechnicals — indicators", () => {
     expect(deriveTechnicals({ ...base, atr14: null }, NOW).indicators)
       .toEqual({ rsi14: 58.4, atr14: null, gvz: 18.7, netSpec: 9.5 });
   });
+
+  // GVZ and net spec sit outside indicatorsAsOf/stale by design; the tiles
+  // that render them must be able to state each series' own age instead.
+  it("carries per-cadence timestamps for GVZ and net spec", () => {
+    const t = deriveTechnicals(base, NOW);
+    expect(t.gvzAsOf).toBe("2026-08-01T07:00:00Z");
+    expect(t.netSpecAsOf).toBe("2026-07-28T00:00:00Z");
+  });
+
+  it("nulls the per-cadence timestamps when the series are absent", () => {
+    const t = deriveTechnicals({ ...base, gvz: null, netSpec: null }, NOW);
+    expect(t.gvzAsOf).toBeNull();
+    expect(t.netSpecAsOf).toBeNull();
+  });
 });

@@ -16,6 +16,8 @@ const full: GoldTechnicals = {
   indicators: { rsi14: 58.4, atr14: 42.1, gvz: 18.7, netSpec: 9.5 },
   indicatorsAsOf: "2026-08-01T06:00:00Z",
   stale: false,
+  gvzAsOf: "2026-08-01T07:00:00Z",
+  netSpecAsOf: "2026-07-28T00:00:00Z",
 };
 
 const render = (tech: GoldTechnicals) =>
