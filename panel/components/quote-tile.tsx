@@ -48,6 +48,11 @@ export function Delta({ delta, digits = 2, label = "24h", tone = "direction" }: 
  * single print renders the value with no line. The age line is
  * unconditional for a live value: on this dashboard a reading without its
  * age is a claim of freshness nothing has verified.
+ *
+ * `delta` is tri-state: a number is a change, null means "no honest
+ * reference exists" (renders "<period> —"), and undefined means the tile
+ * makes no change claim at all (e.g. ATR, where a day-over-day diff is
+ * not something the desk reads) — no delta slot renders.
  */
 export function QuoteTile({ label, value, digits = 2, ts, delta, deltaLabel = "24h",
   deltaTone = "direction", series, note, now, className }: {
@@ -55,7 +60,7 @@ export function QuoteTile({ label, value, digits = 2, ts, delta, deltaLabel = "2
   value: number | null;
   digits?: number;
   ts: string | null;
-  delta: number | null;
+  delta?: number | null;
   deltaLabel?: string;
   deltaTone?: "direction" | "neutral";
   series?: PricePoint[];
@@ -72,9 +77,11 @@ export function QuoteTile({ label, value, digits = 2, ts, delta, deltaLabel = "2
         <>
           <div className="mt-0.5 flex flex-wrap items-baseline gap-x-2">
             <span className="text-lg font-semibold">{num(value, digits)}</span>
-            <span className="text-xs">
-              <Delta delta={delta} digits={digits} label={deltaLabel} tone={deltaTone} />
-            </span>
+            {delta !== undefined && (
+              <span className="text-xs">
+                <Delta delta={delta} digits={digits} label={deltaLabel} tone={deltaTone} />
+              </span>
+            )}
           </div>
           {series && series.length >= 2 && (
             <Sparkline points={series} stroke="var(--muted-foreground)"

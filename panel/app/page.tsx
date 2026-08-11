@@ -5,6 +5,7 @@ import { TechnicalPanel } from "@/components/technical-panel";
 import { FooterStrip, StatusStrip } from "@/components/status-strip";
 import * as db from "@/lib/db";
 import * as files from "@/lib/files";
+import { printDelta } from "@/lib/drivers";
 import { deriveSourceHealth, deriveWarnings } from "@/lib/health";
 import { parseStance } from "@/lib/stance";
 import { deriveTechnicals, TECHNICAL_SYMBOLS } from "@/lib/technicals";
@@ -60,6 +61,13 @@ export default function Overview() {
     netSpec: p.GC_NET_SPEC ?? null,
   }, now);
   const series = db.getPriceSeries("GC", iso(new Date(now.getTime() - 10 * 86400_000)));
+  // Gauge-row context. Each delta goes through the same honest-reference
+  // lookup as the GC hero: a frozen series yields null, rendered "24h —".
+  const gvz = p["^GVZ"] ?? null;
+  const gvzRef = gvz ? db.priceDeltaReference("^GVZ", dayAgo, gvz.ts) : null;
+  const gvzSeries = db.getPriceSeries("^GVZ", iso(new Date(now.getTime() - 7 * 86400_000)));
+  const netSpecDelta = printDelta(
+    db.getPriceSeries("GC_NET_SPEC", iso(new Date(now.getTime() - 35 * 86400_000))));
 
   return (
     <div>
@@ -83,7 +91,9 @@ export default function Overview() {
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
         <FundamentalPanel stance={stance} items={items} now={now} />
-        <TechnicalPanel tech={tech} series={series} now={now} />
+        <TechnicalPanel tech={tech} series={series} gvzSeries={gvzSeries}
+          gvzDelta={gvz && gvzRef !== null ? gvz.value - gvzRef : null}
+          netSpecDelta={netSpecDelta?.delta ?? null} now={now} />
       </div>
 
       <FooterStrip wakeup={db.getWakeups("pending")[0]}

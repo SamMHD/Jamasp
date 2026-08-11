@@ -66,6 +66,17 @@ describe("QuoteTile", () => {
     expect(html).not.toContain("<svg");
   });
 
+  it("renders no delta slot at all when the tile makes no change claim", () => {
+    // undefined delta = not applicable — distinct from null ("reference
+    // missing"), which must still render "24h —".
+    const html = renderToStaticMarkup(
+      <QuoteTile label="ATR14" value={105.1} digits={1} ts="2026-08-09T21:32:04Z"
+        note="1.4% of spot" now={NOW} />);
+    expect(html).toContain("105.1");
+    expect(html).not.toContain("24h");
+    expect(html).not.toContain("—");
+  });
+
   it("carries a cadence note when given one", () => {
     const html = renderToStaticMarkup(
       <QuoteTile label="Net spec" value={190648} digits={0} ts="2026-08-04T00:00:00Z"

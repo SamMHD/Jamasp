@@ -88,7 +88,10 @@ describe("TechnicalPanel", () => {
 
   it("omits the percent parenthetical when pct24h is unknown", () => {
     const html = render({ ...full, spot: { ...full.spot!, pct24h: null } });
-    expect(html).not.toContain("%");
+    // "%)"' rather than a bare "%": the gauge row legitimately prints
+    // percent-shaped copy now (ATR's "x% of spot"), so the assertion pins
+    // the parenthetical itself — the exact shape "(0.44%)" takes.
+    expect(html).not.toContain("%)");
     expect(html).toContain("14.5"); // the absolute delta still renders
   });
 
