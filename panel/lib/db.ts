@@ -66,6 +66,67 @@ export function getItems(opts?: { limit?: number; offset?: number; source?: stri
   ).all(...args, o.limit ?? 200, o.offset ?? 0) as ItemRow[]);
 }
 
+/** Newest published_at across all items; null on an empty table. */
+export function newestItemTs(): string | null {
+  return q(db => (db.prepare("SELECT MAX(published_at) ts FROM items").get() as
+    { ts: string | null }).ts);
+}
+
+/**
+ * Item counts per UTC day per topic, aggregated in SQL — the overview's
+ * news-volume chart must not pull two weeks of full rows to count them.
+ */
+export function itemVolumeByDay(sinceIso: string): { day: string; topic: string; n: number }[] {
+  return q(db => db.prepare(
+    `SELECT substr(published_at, 1, 10) day, topic, COUNT(*) n
+     FROM items WHERE published_at >= ? GROUP BY day, topic ORDER BY day`
+  ).all(sinceIso) as { day: string; topic: string; n: number }[]);
+}
+
+export type ClusterHeadRow = ItemRow & { sources_n: number };
+
+/**
+ * Newest cluster representatives with the number of distinct sources
+ * carrying each story. The head convention matches getUnreadCount:
+ * `cluster_id = id` marks the representative, NULL means unclustered
+ * (counted as its own single source — the subquery would otherwise return
+ * 0 for NULL and claim a sourceless story).
+ */
+export function getClusterHeads(limit: number): ClusterHeadRow[] {
+  return q(db => db.prepare(
+    `SELECT i.*, CASE WHEN i.cluster_id IS NULL THEN 1 ELSE
+       (SELECT COUNT(DISTINCT c.source) FROM items c WHERE c.cluster_id = i.cluster_id)
+     END AS sources_n
+     FROM items i WHERE i.cluster_id = i.id OR i.cluster_id IS NULL
+     ORDER BY i.published_at DESC LIMIT ?`
+  ).all(limit) as ClusterHeadRow[]);
+}
+
+/**
+ * The story most sources carried since the cutoff — a story on four wires
+ * is a different signal from a story on one, so a single-source cluster
+ * never qualifies (HAVING >= 2). Ties break toward the larger cluster.
+ * The representative row is fetched by the head convention (id =
+ * cluster_id) and can predate the cutoff: a story that broke earlier but
+ * is still being picked up is still the top story.
+ */
+export function topStory(sinceIso: string):
+  { item: ItemRow; sources: number; items: number } | null {
+  return q(db => {
+    const top = db.prepare(
+      `SELECT cluster_id, COUNT(DISTINCT source) sources_n, COUNT(*) items_n
+       FROM items WHERE published_at >= ? AND cluster_id IS NOT NULL
+       GROUP BY cluster_id HAVING COUNT(DISTINCT source) >= 2
+       ORDER BY sources_n DESC, items_n DESC, cluster_id LIMIT 1`
+    ).get(sinceIso) as { cluster_id: string; sources_n: number; items_n: number } | undefined;
+    if (!top) return null;
+    const item = db.prepare("SELECT * FROM items WHERE id = ?")
+      .get(top.cluster_id) as ItemRow | undefined;
+    if (!item) return null;
+    return { item, sources: top.sources_n, items: top.items_n };
+  });
+}
+
 export function getItemFilters(): { sources: string[]; topics: string[] } {
   return q(db => ({
     sources: (db.prepare("SELECT DISTINCT source FROM items ORDER BY source").all() as

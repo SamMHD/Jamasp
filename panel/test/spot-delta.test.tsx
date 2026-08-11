@@ -27,11 +27,10 @@ const iso = (d: Date) => d.toISOString().replace(/\.\d{3}Z$/, "Z");
 
 /** Mirrors app/page.tsx's wiring; keep the two in step. */
 function overviewTechnical(now: Date) {
+  const dayAgo = iso(new Date(now.getTime() - 86400_000));
   const p = db.latestPrices([...TECHNICAL_SYMBOLS]);
   const spot = p.GC ?? null;
-  const spot24hAgo = spot
-    ? db.priceDeltaReference("GC", iso(new Date(now.getTime() - 86400_000)), spot.ts)
-    : null;
+  const spot24hAgo = spot ? db.priceDeltaReference("GC", dayAgo, spot.ts) : null;
   const tech = deriveTechnicals({
     spot, spot24hAgo,
     sma50: p.GC_SMA50 ?? null, sma200: p.GC_SMA200 ?? null,
@@ -39,9 +38,16 @@ function overviewTechnical(now: Date) {
     rsi14: p.GC_RSI14 ?? null, atr14: p.GC_ATR14 ?? null,
     gvz: p["^GVZ"] ?? null, netSpec: p.GC_NET_SPEC ?? null,
   }, now);
+  // The GVZ tile goes through the same honest-reference lookup as the GC
+  // hero, so this harness must wire it the same way the page does — a
+  // frozen GVZ feed shows its own "24h —", and the live-feed assertion
+  // below ("no unknown-dash anywhere") covers both instruments.
+  const gvz = p["^GVZ"] ?? null;
+  const gvzRef = gvz ? db.priceDeltaReference("^GVZ", dayAgo, gvz.ts) : null;
   return {
     tech,
-    html: renderToStaticMarkup(<TechnicalPanel tech={tech} series={[]} now={now} />),
+    html: renderToStaticMarkup(<TechnicalPanel tech={tech} series={[]}
+      gvzDelta={gvz && gvzRef !== null ? gvz.value - gvzRef : null} now={now} />),
   };
 }
 

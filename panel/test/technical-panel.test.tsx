@@ -16,6 +16,8 @@ const full: GoldTechnicals = {
   indicators: { rsi14: 58.4, atr14: 42.1, gvz: 18.7, netSpec: 9.5 },
   indicatorsAsOf: "2026-08-01T06:00:00Z",
   stale: false,
+  gvzAsOf: "2026-08-01T07:00:00Z",
+  netSpecAsOf: "2026-07-28T00:00:00Z",
 };
 
 const render = (tech: GoldTechnicals) =>
@@ -86,7 +88,10 @@ describe("TechnicalPanel", () => {
 
   it("omits the percent parenthetical when pct24h is unknown", () => {
     const html = render({ ...full, spot: { ...full.spot!, pct24h: null } });
-    expect(html).not.toContain("%");
+    // "%)"' rather than a bare "%": the gauge row legitimately prints
+    // percent-shaped copy now (ATR's "x% of spot"), so the assertion pins
+    // the parenthetical itself — the exact shape "(0.44%)" takes.
+    expect(html).not.toContain("%)");
     expect(html).toContain("14.5"); // the absolute delta still renders
   });
 

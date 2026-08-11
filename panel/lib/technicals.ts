@@ -46,6 +46,15 @@ export type GoldTechnicals = {
                 gvz: number | null; netSpec: number | null };
   indicatorsAsOf: string | null;
   stale: boolean;
+  /**
+   * GVZ (hourly Yahoo) and net spec (weekly CFTC) run on their own cadences,
+   * deliberately outside `indicatorsAsOf`/`stale` (which track the
+   * TradingView set only — see the staleness comment below). Each tile must
+   * state its own age, so each carries its own timestamp; null when the
+   * series has no rows at all.
+   */
+  gvzAsOf: string | null;
+  netSpecAsOf: string | null;
 };
 
 /**
@@ -143,5 +152,7 @@ export function deriveTechnicals(input: TechnicalsInput, now: Date = new Date())
     indicatorsAsOf,
     stale: indicatorsAsOf !== null
       && now.getTime() - new Date(indicatorsAsOf).getTime() > STALE_MS,
+    gvzAsOf: input.gvz?.ts ?? null,
+    netSpecAsOf: input.netSpec?.ts ?? null,
   };
 }

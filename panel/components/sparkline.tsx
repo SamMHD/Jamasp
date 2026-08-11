@@ -6,7 +6,9 @@ import { cls } from "@/lib/format";
  * beneath the ladder, and pulling in a client component for it would make
  * the whole panel client-side.
  */
-export function Sparkline({ points, className }: { points: PricePoint[]; className?: string }) {
+export function Sparkline({ points, className, stroke = "var(--chart-1)" }: {
+  points: PricePoint[]; className?: string; stroke?: string;
+}) {
   if (points.length < 2) return null;
   const values = points.map(p => p.value);
   const min = Math.min(...values);
@@ -22,7 +24,7 @@ export function Sparkline({ points, className }: { points: PricePoint[]; classNa
     <svg viewBox="0 0 100 100" preserveAspectRatio="none"
       className={cls("h-10 w-full", className)} role="img"
       aria-label={`gold price trend, ${points.length} points`}>
-      <path d={d} fill="none" stroke="var(--chart-1)" strokeWidth="1.5"
+      <path d={d} fill="none" stroke={stroke} strokeWidth="1.5"
         vectorEffect="non-scaling-stroke" />
     </svg>
   );

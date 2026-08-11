@@ -75,6 +75,11 @@ INSERT INTO items VALUES
 INSERT INTO prices VALUES
  ('GC','2026-07-25T08:00:00Z',3290.0),('GC','2026-07-31T08:00:00Z',3310.5),('GC','2026-08-01T08:00:00Z',3325.0),
  ('DXY','2026-07-31T08:00:00Z',104.2),('DXY','2026-08-01T08:00:00Z',103.8),
+ -- Driver tiles, three states on one screen: DX-Y.NYB has two prints (a
+ -- populated tile with sparkline), ^TNX has one (value, no trend line),
+ -- and the remaining driver symbols have no rows at all ("no data").
+ ('DX-Y.NYB','2026-07-31T08:00:00Z',104.9),('DX-Y.NYB','2026-08-01T08:00:00Z',103.8),
+ ('^TNX','2026-08-01T08:00:00Z',4.29),
  -- GC technicals: spot 3325 sits above SMA50 and below SMA200, which
  -- exercises the mixed regime branch. Ladder order (desc) is therefore
  -- SMA200 3400, pivot R1 3390, spot 3325, SMA50 3250, pivot S1 3180.
@@ -84,6 +89,11 @@ INSERT INTO prices VALUES
  ('GC_PIV_R1','2026-08-01T06:00:00Z',3390.0),
  ('GC_RSI14','2026-08-01T06:00:00Z',58.4),
  ('GC_ATR14','2026-08-01T06:00:00Z',42.1),
+ -- Two GVZ prints a day apart: at the live-feed instant the spot-delta
+ -- test reads (2026-08-01T12:00Z) the earlier row is a genuine 24h
+ -- reference, so the whole panel can be asserted free of the unknown-dash;
+ -- at the frozen instant both GC and GVZ honestly show "24h —".
+ ('^GVZ','2026-07-31T06:00:00Z',17.9),
  ('^GVZ','2026-08-01T07:00:00Z',18.7),
  ('GC_NET_SPEC','2026-07-28T00:00:00Z',9.5);
 INSERT INTO source_errors VALUES ('investing_commodities','2026-08-01T07:50:00Z','HTTP 403');

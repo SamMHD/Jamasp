@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { unwrapParagraphs } from "../lib/stance";
 import { parseStance } from "../lib/stance";
 import { parseWeights } from "../lib/stance";
+import { extractBullets, scenarioSlot, splitFalsifier, stanceAgeDays } from "../lib/stance";
 
 const FIXTURE_DIR = path.resolve(__dirname, "fixtures/stance");
 const fixture = (name: string) =>
@@ -243,5 +244,116 @@ describe("parseWeights", () => {
 
   it("is null on a degraded stance", () => {
     expect(parseStance("garbage").weights).toBeNull();
+  });
+});
+
+describe("extractBullets", () => {
+  it("splits a body into intro, bullets, and trailing prose", () => {
+    const b = extractBullets("lead sentence.\n\n- first bullet\n- second bullet\n\ntrailing note.");
+    expect(b.intro).toBe("lead sentence.");
+    expect(b.bullets).toEqual(["first bullet", "second bullet"]);
+    expect(b.after).toBe("trailing note.");
+  });
+
+  it("handles a body with no bullets — everything is intro", () => {
+    const b = extractBullets("just prose\nmore prose");
+    expect(b.bullets).toEqual([]);
+    expect(b.intro).toBe("just prose\nmore prose");
+    expect(b.after).toBe("");
+  });
+
+  it("preserves markdown inside bullets verbatim", () => {
+    const b = extractBullets("- **Base (~70%):** dips get `bought`.");
+    expect(b.bullets).toEqual(["**Base (~70%):** dips get `bought`."]);
+  });
+
+  it("finds the What-flips-me bullets in every real fixture", () => {
+    for (const [name, text] of allFixtures()) {
+      const s = parseStance(text).sections.whatFlipsMe;
+      expect(s, `${name} lacks whatFlipsMe`).toBeDefined();
+      expect(extractBullets(s!.body).bullets.length, `${name} bullets`).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe("splitFalsifier", () => {
+  it("splits condition from consequence at the first arrow", () => {
+    expect(splitFalsifier("Settle below 4300 tonight → respect it."))
+      .toEqual({ condition: "Settle below 4300 tonight", consequence: "respect it." });
+  });
+
+  it("keeps later arrows inside the consequence", () => {
+    expect(splitFalsifier("a → b → c").consequence).toBe("b → c");
+  });
+
+  it("returns the whole text as condition when no arrow exists", () => {
+    expect(splitFalsifier("Settle below 3250 without news — respect it."))
+      .toEqual({ condition: "Settle below 3250 without news — respect it.", consequence: null });
+  });
+
+  it("nulls an empty consequence after a trailing arrow", () => {
+    expect(splitFalsifier("condition →").consequence).toBeNull();
+  });
+
+  it("splits every real-fixture falsifier that carries an arrow", () => {
+    for (const [name, text] of allFixtures()) {
+      const body = parseStance(text).sections.whatFlipsMe!.body;
+      for (const b of extractBullets(body).bullets) {
+        if (!b.includes("→")) continue;
+        const f = splitFalsifier(b);
+        expect(f.condition.length, `${name}: empty condition`).toBeGreaterThan(0);
+        expect(f.consequence, `${name}: empty consequence`).not.toBeNull();
+      }
+    }
+  });
+});
+
+describe("scenarioSlot", () => {
+  const W = [
+    { label: "base", pct: 70 },
+    { label: "event-bearish", pct: 5 },
+    { label: "kinetic", pct: 25 },
+  ];
+
+  it("matches a bold-labelled bullet to its weight slot", () => {
+    expect(scenarioSlot("**Base (~70%):** dips get bought", W)).toBe(0);
+    expect(scenarioSlot("**Event-bearish (~5%), formality:** re-arms only on…", W)).toBe(1);
+    expect(scenarioSlot("**Kinetic tail (~25%):** baseline is priced", W)).toBe(2);
+  });
+
+  it("returns null for a bullet that matches no label", () => {
+    // Real case: deepdive-2026-08-07 opens its third bullet
+    // "**Bullish-kinetic tail…**" against a "kinetic" label — no prefix
+    // match, so it must render plain rather than guess a slot.
+    expect(scenarioSlot("**Bullish-kinetic tail (~25%):** Hormuz explosions", W)).toBeNull();
+  });
+
+  it("prefers the longest matching label regardless of slot order", () => {
+    // base-x first: a naive first-match would stop at slot 1 ("base"),
+    // a naive last-match at slot 1 too — only longest-wins returns 0.
+    const shadow = [{ label: "base-x", pct: 50 }, { label: "base", pct: 50 }];
+    expect(scenarioSlot("**base-x:** text", shadow)).toBe(0);
+    expect(scenarioSlot("**base only:** text", shadow)).toBe(1);
+  });
+
+  it("matches the first View bullet to slot 0 in every real fixture", () => {
+    for (const [name, text] of allFixtures()) {
+      const p = parseStance(text);
+      const bullets = extractBullets(p.sections.view!.body).bullets;
+      expect(bullets.length, `${name} view bullets`).toBeGreaterThan(0);
+      expect(scenarioSlot(bullets[0], p.weights!), `${name} first bullet`).toBe(0);
+    }
+  });
+});
+
+describe("stanceAgeDays", () => {
+  it("computes whole UTC days between the H1 date and now", () => {
+    expect(stanceAgeDays("2026-08-10", new Date("2026-08-10T23:59:00Z"))).toBe(0);
+    expect(stanceAgeDays("2026-08-10", new Date("2026-08-11T00:01:00Z"))).toBe(1);
+    expect(stanceAgeDays("2026-08-08", new Date("2026-08-10T09:00:00Z"))).toBe(2);
+  });
+
+  it("returns null for an unparseable date — unknown age must not read fresh", () => {
+    expect(stanceAgeDays("not-a-date", new Date())).toBeNull();
   });
 });
