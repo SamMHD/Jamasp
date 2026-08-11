@@ -18,7 +18,7 @@ import { cls } from "@/lib/format";
  * the split. Weights that fail to sum positive likewise get no bar: the
  * widths would be fabrication.
  */
-const SLOT_VARS = ["var(--viz-1)", "var(--viz-2)", "var(--viz-3)"] as const;
+export const SLOT_VARS = ["var(--viz-1)", "var(--viz-2)", "var(--viz-3)"] as const;
 
 export function WeightBar({ weights }: { weights: StanceWeight[] }) {
   if (weights.length === 0) return null;

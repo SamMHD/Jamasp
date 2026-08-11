@@ -2,6 +2,8 @@ import { AutoRefresh } from "@/components/auto-refresh";
 import { PageHeader } from "@/components/page-header";
 import { DriverPanel } from "@/components/driver-panel";
 import { FundamentalPanel } from "@/components/fundamental-panel";
+import { HorizonStrip } from "@/components/horizon-strip";
+import { NewsFlow } from "@/components/news-flow";
 import { PredictionPanel } from "@/components/prediction-panel";
 import { TechnicalPanel } from "@/components/technical-panel";
 import { FooterStrip, StatusStrip } from "@/components/status-strip";
@@ -10,6 +12,8 @@ import * as files from "@/lib/files";
 import { calibrationBins } from "@/lib/calibration";
 import { deriveDriver, printDelta, DRIVER_SPECS } from "@/lib/drivers";
 import { deriveSourceHealth, deriveWarnings } from "@/lib/health";
+import { deriveHorizon } from "@/lib/horizon";
+import { deriveNewsPulse } from "@/lib/newsflow";
 import { parseStance } from "@/lib/stance";
 import { deriveTechnicals, TECHNICAL_SYMBOLS } from "@/lib/technicals";
 import { fmtUtc } from "@/lib/format";
@@ -39,7 +43,21 @@ export default function Overview() {
   // --- fundamental ---
   const stanceText = files.readStance();
   const stance = stanceText === null ? null : parseStance(stanceText);
-  const items = db.getItems({ limit: 8 });
+  const watchlist = files.readWatchlist();
+  const preds = files.readPredictions();
+  const pendingWakeups = db.getWakeups("pending");
+  const horizon = deriveHorizon(
+    { events: db.getEvents(7, now), predictions: preds, wakeups: pendingWakeups }, now);
+  // News-volume window anchored to the newest item (see lib/newsflow.ts);
+  // the SQL cutoff is a day wider than the 14-day day-window so its first
+  // day is never a partial count.
+  const lastItemTs = db.newestItemTs();
+  const volume = lastItemTs
+    ? db.itemVolumeByDay(iso(new Date(new Date(lastItemTs).getTime() - 14 * 86400_000)))
+    : [];
+  const pulse = deriveNewsPulse(volume, lastItemTs);
+  const heads = db.getClusterHeads(8);
+  const top = db.topStory(iso(new Date(now.getTime() - 48 * 3600_000)));
 
   // --- technical ---
   const p = db.latestPrices([...TECHNICAL_SYMBOLS]);
@@ -88,7 +106,6 @@ export default function Overview() {
   });
 
   // --- forecast record ---
-  const preds = files.readPredictions();
   const predStats = files.predictionStats(preds, now);
 
   return (
@@ -118,8 +135,10 @@ export default function Overview() {
       </div>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-5">
-        <div className="lg:col-span-3">
-          <FundamentalPanel stance={stance} items={items} now={now} />
+        <div className="flex flex-col gap-4 lg:col-span-3">
+          <FundamentalPanel stance={stance} watchlist={watchlist} now={now} />
+          <HorizonStrip horizon={horizon} now={now} />
+          <NewsFlow pulse={pulse} heads={heads} top={top} lastItemTs={lastItemTs} now={now} />
         </div>
         <div className="flex flex-col gap-4 lg:col-span-2">
           <DriverPanel drivers={drivers} now={now} />
@@ -127,7 +146,7 @@ export default function Overview() {
         </div>
       </div>
 
-      <FooterStrip wakeup={db.getWakeups("pending")[0]}
+      <FooterStrip wakeup={pendingWakeups[0]}
         event={db.getEvents(14, now)[0]} lastAlert={db.getNotifyLog(1)[0]} now={now} />
     </div>
   );
