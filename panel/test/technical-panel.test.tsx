@@ -58,13 +58,30 @@ describe("TechnicalPanel", () => {
     }
   });
 
-  // Guard audit: every fixture above uses a positive delta24h, so these three
+  // Guard audit: every fixture above uses a positive delta24h, so these
   // branches are unreached by the tests the brief specifies. See task-7-report.md.
 
-  it("shows a down arrow, not up, when the 24h move is negative", () => {
-    const html = render({ ...full, spot: { ...full.spot!, delta24h: -14.5, pct24h: -0.438 } });
+  it("states a missing 24h reference rather than rendering it as zero", () => {
+    const html = render({ ...full, spot: { ...full.spot!, delta24h: null, pct24h: null } });
+    expect(html).toContain("24h —");
+    expect(html).not.toContain("▲");
+    expect(html).not.toContain("▼");
+  });
+
+  it("renders an exactly-flat 24h as neither a rise nor a fall", () => {
+    const html = render({ ...full, spot: { ...full.spot!, delta24h: 0, pct24h: 0 } });
+    expect(html).not.toContain("▲");
+    expect(html).not.toContain("▼");
+  });
+
+  it("renders a fall with the down marker", () => {
+    const html = render({ ...full, spot: { ...full.spot!, delta24h: -14.5, pct24h: -0.44 } });
     expect(html).toContain("▼");
     expect(html).not.toContain("▲");
+  });
+
+  it("renders a rise with the up marker", () => {
+    expect(render(full)).toContain("▲");
   });
 
   it("omits the percent parenthetical when pct24h is unknown", () => {
