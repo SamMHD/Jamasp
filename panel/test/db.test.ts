@@ -1,6 +1,7 @@
-import { beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import { execFileSync } from "node:child_process";
 import path from "node:path";
+import Database from "better-sqlite3";
 
 let db: typeof import("../lib/db");
 
@@ -69,5 +70,81 @@ describe("db layer", () => {
       .toBe("2026-08-01T07:00:00Z");
     expect(perType.map(r => r.run_type).sort())
       .toEqual(["brief", "deepdive", "retro", "scan"]);
+  });
+});
+
+describe("latestPrices", () => {
+  it("returns the newest row per requested symbol", () => {
+    const out = db.latestPrices(["GC", "GC_SMA200"]);
+    expect(out.GC).toEqual({ ts: "2026-08-01T08:00:00Z", value: 3325.0 });
+    expect(out.GC_SMA200).toEqual({ ts: "2026-08-01T06:00:00Z", value: 3400.0 });
+  });
+
+  it("omits symbols with no rows rather than returning nulls", () => {
+    const out = db.latestPrices(["GC", "NOPE"]);
+    expect(out.GC).toBeDefined();
+    expect(out.NOPE).toBeUndefined();
+  });
+
+  it("returns an empty object for an empty symbol list without querying", () => {
+    expect(db.latestPrices([])).toEqual({});
+  });
+
+  it("does not touch the database for an empty symbol list", () => {
+    // The size check above is guaranteed to hold even without the early
+    // return: SQLite treats `IN ()` as always-false, not a syntax error, so
+    // a missing guard would still yield `{}`. This spy is what actually
+    // proves the short-circuit fires.
+    const spy = vi.spyOn(Database.prototype, "prepare");
+    try {
+      db.latestPrices([]);
+      expect(spy).not.toHaveBeenCalled();
+    } finally {
+      spy.mockRestore();
+    }
+  });
+});
+
+// GC fixture rows: 07-25 3290, 07-31 3310.5, 08-01T08:00Z 3325 (the latest).
+const GC_LATEST = "2026-08-01T08:00:00Z";
+
+describe("priceDeltaReference", () => {
+  it("returns the newest value at or before the cutoff, not the next one after it", () => {
+    // A cutoff mid-gap must return the earlier row, never jump forward.
+    expect(db.priceDeltaReference("GC", "2026-07-28T00:00:00Z", GC_LATEST)).toBe(3290.0);
+  });
+
+  it("includes a row exactly on the cutoff", () => {
+    expect(db.priceDeltaReference("GC", "2026-07-31T08:00:00Z", GC_LATEST)).toBe(3310.5);
+  });
+
+  it("returns null when nothing precedes the cutoff", () => {
+    expect(db.priceDeltaReference("GC", "2026-07-01T00:00:00Z", GC_LATEST)).toBeNull();
+  });
+
+  it("returns null for an unknown symbol", () => {
+    expect(db.priceDeltaReference("NOPE", "2026-08-01T08:00:00Z", GC_LATEST)).toBeNull();
+  });
+
+  // The weekend case, and the reason this is not a bare at-or-before lookup.
+  // COMEX gold closes Friday ~21:00Z; rows carry the market bar timestamp, so
+  // from Saturday ~21:00Z the 24h cutoff falls *after* the last bar and the
+  // newest-at-or-before row is the latest row itself. Subtracting it from
+  // itself would print "= 0 (0.00%)" — gold asserted unchanged — for ~26h
+  // every weekend, while jamasp/pricesummary.py#_delta prints "n/a".
+  it("returns null when the series has not printed since the cutoff", () => {
+    // Cutoff 2026-08-02, latest bar 08-01T08:00Z: the row found *is* the
+    // latest row.
+    expect(db.priceDeltaReference("GC", "2026-08-02T00:00:00Z", GC_LATEST)).toBeNull();
+  });
+
+  it("returns null when the reference row is exactly the latest row", () => {
+    expect(db.priceDeltaReference("GC", GC_LATEST, GC_LATEST)).toBeNull();
+  });
+
+  it("still returns a reference when one older row exists before the latest", () => {
+    // Same cutoff shape as the weekend case but with the latest row a bar
+    // later — isolates the >= guard from the at-or-before lookup.
+    expect(db.priceDeltaReference("GC", "2026-08-01T00:00:00Z", GC_LATEST)).toBe(3310.5);
   });
 });
