@@ -1,11 +1,14 @@
 import { AutoRefresh } from "@/components/auto-refresh";
 import { PageHeader } from "@/components/page-header";
+import { DriverPanel } from "@/components/driver-panel";
 import { FundamentalPanel } from "@/components/fundamental-panel";
+import { PredictionPanel } from "@/components/prediction-panel";
 import { TechnicalPanel } from "@/components/technical-panel";
 import { FooterStrip, StatusStrip } from "@/components/status-strip";
 import * as db from "@/lib/db";
 import * as files from "@/lib/files";
-import { printDelta } from "@/lib/drivers";
+import { calibrationBins } from "@/lib/calibration";
+import { deriveDriver, printDelta, DRIVER_SPECS } from "@/lib/drivers";
 import { deriveSourceHealth, deriveWarnings } from "@/lib/health";
 import { parseStance } from "@/lib/stance";
 import { deriveTechnicals, TECHNICAL_SYMBOLS } from "@/lib/technicals";
@@ -69,6 +72,19 @@ export default function Overview() {
   const netSpecDelta = printDelta(
     db.getPriceSeries("GC_NET_SPEC", iso(new Date(now.getTime() - 35 * 86400_000))));
 
+  // --- drivers (cross-asset) ---
+  const weekAgo = iso(new Date(now.getTime() - 7 * 86400_000));
+  const driverQuotes = db.latestPrices(DRIVER_SPECS.map(s => s.symbol));
+  const drivers = DRIVER_SPECS.map(spec => {
+    const quote = driverQuotes[spec.symbol] ?? null;
+    const ref = quote ? db.priceDeltaReference(spec.symbol, dayAgo, quote.ts) : null;
+    return deriveDriver(spec, quote, ref, db.getPriceSeries(spec.symbol, weekAgo));
+  });
+
+  // --- forecast record ---
+  const preds = files.readPredictions();
+  const predStats = files.predictionStats(preds, now);
+
   return (
     <div>
       <AutoRefresh />
@@ -89,11 +105,20 @@ export default function Overview() {
         </div>
       )}
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
-        <FundamentalPanel stance={stance} items={items} now={now} />
+      <div className="mt-4">
         <TechnicalPanel tech={tech} series={series} gvzSeries={gvzSeries}
           gvzDelta={gvz && gvzRef !== null ? gvz.value - gvzRef : null}
           netSpecDelta={netSpecDelta?.delta ?? null} now={now} />
+      </div>
+
+      <div className="mt-4 grid gap-4 lg:grid-cols-5">
+        <div className="lg:col-span-3">
+          <FundamentalPanel stance={stance} items={items} now={now} />
+        </div>
+        <div className="flex flex-col gap-4 lg:col-span-2">
+          <DriverPanel drivers={drivers} now={now} />
+          <PredictionPanel stats={predStats} bins={calibrationBins(preds)} />
+        </div>
       </div>
 
       <FooterStrip wakeup={db.getWakeups("pending")[0]}
