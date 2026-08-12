@@ -1,103 +1,95 @@
-# Stance — 2026-08-11 (updated ~07:50 Dubai, Tuesday brief)
+# Stance — 2026-08-12 (updated ~07:45 Dubai, Wednesday brief)
 
-**EVENT-PENDING: CPI Wed 12 Aug 12:30Z (16:30 Dubai) is the branch point;
-conviction capped, positioned to react.** Gold ran +2.03% Mon to 4472.5
-(10-week high, +8.66% 7d) — **with ^TNX up (4.70) and DXY flat**: the leg
-is FOMO/China/debasement + oil-led inflation, NOT rates. Overbought
-(intraday RSI ~77) and crowded (net spec +9.5% w/w at 4 Aug stamp, GVZ
-27.9) into a binary print. 200DMA 4498.2 is 26 pts overhead; support 4300
-psych, then 4227.3, 50DMA 4189.4.
+**EVENT-PENDING: CPI TODAY 12:30Z (16:30 Dubai); conviction capped,
+positioned to react, no fresh directional predictions.** Gold coiling at
+4466.9 (-0.23%) just under the 200DMA 4500.1 (33 pts overhead); RSI cooled
+77→67.9, GVZ -6.9%, ^TNX 4.686 — the market leans benign-CPI (Hatzius
+agrees). Crowded book (net spec +9.5% w/w at 4 Aug stamp) = air pocket
+below 4300 on a hot core, gap risk above 4500 on escalation. Support 4300
+psych, 4227.3, 50DMA 4186.3.
 
-**New since Monday:** (1) **Reparations wall** — Iran conditions reopening
-on US compensation for 5 months of strikes; Trump counter-demands (names
-Lebanon/Syria/Yemen/Gaza), inserts it into ALL future talks; IRGC full
-gate restated (sanctions + blockade + threats + compensation). Brent
-+4.25% intraday, ~$88, $100-risk talk; Trump: "100% control, infallible
-blockade." Deal window dead near-term; 985e77d0 HIT (family ~7-for-7).
-(2) **Mojtaba reshuffle** — first major military decrees: Vahidi IRGC
-C-in-C, **Azmaei IRGC Navy (Hormuz operator)**, Taeb Basij, Abdollahi
-chief of staff; Rezaee to SNSC (replacing Zolghadr). Hardline wartime
-consolidation, leader unseen (health speculation). Doctrine-change watch
-on the corridor force. (3) **Sirik claims persist unverified ~40h** — 11 Aug
-PM deep dive swept gcaptain/AJ/Gulf News/National: zero UKMTO/CENTCOM/
-operator confirmation of tanker-ablaze / MQ-9 / new launches. Reuters PM
-adds a NAMELESS "missile strike reported in Gulf" (no vessel/position;
-tripwire 0aaec9a2) — the day's casualties are Red Sea-side (4 crew, Bab
-al-Mandab, Houthi-attributed), not corridor. 1d282df6: no verification
-by Thu 23:59Z (0.6). (4) **Hammack twice on wires**: "should already be
-raising," multiple hikes — hawks pre-positioned for CPI. (5) Debasement
-feed intact: PBOC 6.7900 fix vs 6.7497 est; BoJ Sept-hike sources but yen
-159.3, Tokyo passive; Warsh-vs-debt skepticism now mainstream.
+**New since Tuesday:** (1) **US live-fire on a blockade-runner** — WSJ:
+US forces fired on a Panama-flagged ship breaching the Iranian-port
+blockade (early Tue). First press-confirmed live-fire this cycle; no
+casualties → inside blockade baseline, no re-weight, but enforcement
+friction is drifting kinetic. (2) **Rezaei speaks as SNSC secretary**
+(reshuffle cadre's first policy act): Hormuz stays shut until US changes
+behaviour + meets conditions, EVEN IF the Oman track progresses — an
+Iran-Oman text is officially NOT a reopening. Mediators ran the other way
+(Qatar: talks "advanced stage"; Pakistan: US-Iran close) — oil whipped $3,
+closed mid-range ~$89 (+44% YTD). (3) **Hormuz transits ~6/day** (~5% of
+pre-war, half of last week); EIA: output not restored before end-2027.
+(4) **Red Sea double-tap** — *Tihamah* toll revised to 6 (4 crew + 2
+rescuers; second strike hit the rescue op); Houthi Saudi-blockade axis,
+separate from Hormuz. (5) **Tether Alloy wind-down is benign** (extracted):
+$836K collateral vs 146t/$18.8bn stash (+14t Q2), XAUT reaffirmed —
+structural bid UPGRADED (146t on file now, was "14t Q2"). (6) **Sirik
+~56h unverified**; PBOC fix 6.7882 vs 6.7430 est; Japan yields up on oil,
+yen 159.4.
 
 ## View
 
 **Weights 70/5/25 (base/event-bearish/kinetic), conviction capped by CPI.**
 
-- **Base (~70%):** pre-CPI drift, dips bought. 200DMA is the magnet but
-  772323d6 (no tag pre-CPI, 0.65) holds the line — if it tags, score the
-  miss same-run and respect the momentum signal.
-- **Event-bearish (~5%), formality:** reparations standoff pushed the deal
-  further away; re-arms only on US-Iran breakthrough + verified transit
-  normalization.
-- **Kinetic tail (~25%):** baseline (vessel hits, no casualties) priced.
-  Drift is toward escalation (reshuffle, corridor-enforcement claims) but
-  nothing verified → no re-weight. Arms on: Sirik-family verification,
-  mass-casualty hit, confirmed US-asset loss, Saudi/UAE energy-infra
-  strike — then 4500+ through the 200DMA. Crowded book now cuts both
-  ways: air pocket below 4300 on hot CPI, gap risk above on escalation.
+- **Base (~70%):** pre-CPI coil, dips bought, 200DMA the magnet if core is
+  soft. Divergence watch: benign CPI + still no 200DMA take = positioning
+  finding, not patience — say so in the deepdive.
+- **Event-bearish (~5%), formality:** Rezaei formalized Oman ≠ reopening;
+  re-arms only on US-Iran breakthrough + verified transit normalization.
+- **Kinetic tail (~25%):** blockade-runner fire and Red Sea lethality are
+  drift, not verification — baseline priced. Arms on: Sirik-family
+  verification, mass-casualty corridor hit, confirmed US-asset loss,
+  Saudi/UAE energy-infra strike — then 4500+ through the 200DMA.
 
-## CPI decision tree (Wed 12:30Z, wakeup #20)
+## CPI decision tree (TODAY 12:30Z, wakeup #20)
 
 Hot core + payrolls dismissed → hike case revives; restore event-bearish
 weight, stress-test 4300/4227.3 (crowded book = fast unwind). Hot core +
 soft jobs accepted → stagflation mix, gold-supportive both channels. Soft
-core → ec71ce01 (no Sept hike, 0.8) hardens, 200DMA path clears. **No
-fresh directional predictions before the print.**
+core → ec71ce01 (no Sept hike, 0.8) hardens, 200DMA path clears. Score
+772323d6 at the print. **No fresh directional predictions before it.**
 
 ## What flips me (pre-CPI)
 
 - Sirik-family verifies (1d282df6 falsifier) → kinetic tail arms now.
-- Co-confirmed corridor text (3353195f falsifier) → oil event; read
-  against seven-conditions frame before touching gold weights.
-- 200DMA tag pre-CPI (772323d6 falsifier) → momentum stronger than the
-  event-caution frame; score it and say so.
+- Co-confirmed corridor text (3353195f falsifier) → oil event only; Rezaei
+  has pre-declared it not-a-reopening — read via oil, not gold weights.
+- 200DMA tag pre-CPI (772323d6 falsifier) → momentum beat the event frame;
+  score it and respect it.
 
 ## Open predictions
 
 `ec71ce01` no Sept hike (0.8, ~17 Sep); `3e704df1` 200DMA tag before any
 settle <50DMA (0.6, ~21 Aug); `951d8286` Aug prices-paid <71.1 (~1 Sep);
-`772323d6` no 200DMA tag pre-CPI (0.65, Wed 12:30Z); `3353195f` no
-co-confirmed corridor text by Thu 23:59Z (0.7); NEW `1d282df6` Sirik
-claims unverified through Thu 23:59Z (0.6); NEW `0aaec9a2` 11 Aug Gulf
-strike report gets no named vessel by Thu 23:59Z (0.55, correlated with
-1d282df6). Scored today: `985e77d0` HIT, `5fef3d21` HIT (Mon settle
-~4455).
+`772323d6` no 200DMA tag pre-CPI (0.65, TODAY 12:30Z); `3353195f` no
+co-confirmed corridor text by Thu 23:59Z (0.7); `1d282df6` Sirik claims
+unverified through Thu 23:59Z (0.6); `0aaec9a2` 11 Aug Gulf strike report
+gets no named vessel by Thu 23:59Z (0.55). NB: the WSJ Panama-flagged
+incident is a DIFFERENT event (US gunfire, 11 Aug early) — does not score
+0aaec9a2 (Reuters nameless missile report, 10 Aug PM).
 
 ## Wakeups
 
-#20 Wed 12 Aug 12:45Z CPI deepdive (only pending). Scans 09:00–23:00
-Dubai; overnight gap 23:00–09:00 by design — escalation overnight lands
-on the morning brief.
+#20 TODAY 12:45Z CPI deepdive. NEW: Fri 00:15Z (04:15 Dubai) Thursday
+tripwire close — 3353195f/1d282df6/0aaec9a2 mature 23:59Z inside the
+overnight scan gap (scans 09:00–23:00 Dubai only).
 
 ## Desk-local
 
-Physical throughput ~7% of pre-war; rerouting, insurance, provenance
-premia entrenched regardless of deal tape — that is the desk story.
-Dueling-corridor regime unchanged; Sirik claims, if real, mean Iran is
-firing on southern-corridor users — hostile-vessel bar rises further. Red
-Sea separate axis turned LETHAL 11 Aug: cargo ship hit in Bab al-Mandab,
-4 crew killed; al-Makha port strike killed 7 — war-risk premia harden
-there; transits ~25/day vs 61. BA suspension to Oct 31,
-~6,000 seafarers stranded. Fed-independence channel armed: Cook-firing
-push, Warsh/Jackson Hole late Aug. SGE +4.7% w/w says the CNY bid is
-structural. Oil buffer thin: US emergency crude <300M bbl, diesel
-squeezed.
+Physical throughput now ~5% of pre-war (6 transits/day); rerouting,
+insurance, provenance premia entrenched regardless of deal tape. Red Sea
+axis hardening: double-tap tactics + Saudi-blockade targeting raise crew
+risk and war-risk premia; Bab al-Mandeb transits ~25/day vs 61. ~6,000
+seafarers stranded; BA suspension to Oct 31. Fed-independence channel
+armed: Cook-firing push, Warsh/Jackson Hole late Aug. SGE +5.4% w/w — CNY
+bid structural. Tether 146t = a standing price-insensitive physical bid.
+Oil buffer thin; Libya NOC force-majeure warning broadens supply risk.
 
 ## Sourcing health
 
-`gold_spot` erroring, zero items 24h — XAU AM/PM stale at 7 Aug; DFII10
-stale at 7 Aug (real-yield read 4 days old into CPI). Calendar feed alive
-(19 events/14d) but flaky — verify times independently. 403 wall
-unchanged (Press TV, Tasnim, IRNA, ukmto.org, centcom.mil, investing.com,
+DFII10 + XAU fixes recovered to 10 Aug stamps (were 7 Aug) — still 2 days
+stale into CPI; `gold_spot` still erroring, zero items 24h, GC remains the
+spot proxy. Calendar feed alive (15 events/14d). 403 wall unchanged
+(Press TV, Tasnim, IRNA, ukmto.org, centcom.mil, investing.com,
 MarketWatch, Google News). UKMTO/CENTCOM via press relay only — corridor
 "quiet" is unobserved, not safe.

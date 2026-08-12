@@ -138,6 +138,36 @@ events:
     action: wakeup added 2026-08-12 12:45Z (deepdive on the print vs
       consensus, core m/m the decisive line; check hike-odds repricing)
 
+  - date: 2026-08-13
+    time_dubai: "16:30 (12:30Z)"
+    title: US PPI (Jul) + jobless claims — passthrough second read
+    why: >
+      Day-after companion to CPI on the energy-passthrough thread
+      (951d8286): July's oil leg (Brent +44% YTD, Hormuz shut) should show
+      in pipeline prices first. Read through the CPI-branch lens set by
+      wakeup #20 — it confirms or muddies whatever CPI says, it does not
+      set its own branch.
+    action: >
+      covered by the ~17:00 Dubai scan; the CPI deepdive (wakeup #20)
+      escalates to a dedicated wakeup only if CPI prints hot enough to
+      make PPI a live hike-case input.
+
+  - date: 2026-08-14
+    time_dubai: "04:15 (00:15Z Fri)"
+    title: Thursday tripwire window close — corridor/Sirik cohort scores
+    why: >
+      3353195f (no co-confirmed corridor text, 0.7), 1d282df6 (Sirik
+      claims unverified, 0.6) and 0aaec9a2 (no named vessel for the
+      10 Aug nameless Gulf strike report, 0.55) all mature Thu 23:59Z —
+      which falls inside the overnight scan gap (scans run 09:00–23:00
+      Dubai). Without a wakeup the scoring slips half a day.
+    action: >
+      wakeup added 2026-08-14 00:15Z (deepdive: sweep gcaptain/AJ/Gulf
+      News/National + UKMTO/CENTCOM press relays for late verification,
+      score all three, re-weight kinetic tail if any verified. NB the WSJ
+      Panama-flagged live-fire incident is a different event and does not
+      score 0aaec9a2.)
+
   - date: 2026-08-04
     time_dubai: "all day (through 5 Aug)"
     title: Arbaeen anniversary — Iranian revenge-narrative focal date
