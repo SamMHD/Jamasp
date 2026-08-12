@@ -29,8 +29,9 @@ Auth domain:  mahdanian-saman-81.cloudflareaccess.com
 IdP:          one-time PIN (email)
 ```
 
-Allow-list as of 2026-08-09: `saman@mahdanian.xyz` and
-`mahdanian.saman@gmail.com`.
+Allow-list as of 2026-08-12: `saman@mahdanian.xyz`,
+`mahdanian.saman@gmail.com` and `kifepull@gmail.com` — one policy,
+"Desk operators" (`06f40e4a-449f-4d42-955d-1753442c8f4b`).
 
 **Do not trust that line — confirm with the read in step 1.** It is a snapshot
 of mutable state living in a file that is not updated when the state changes.
