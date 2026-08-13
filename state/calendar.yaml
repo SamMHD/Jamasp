@@ -211,6 +211,22 @@ events:
     action: covered by the ~17:00 Dubai scan; the 11 Sep CPI deepdive
       (wakeup #26) reads it as context.
 
+  - date: 2026-08-16
+    time_dubai: "05:00 (Sun; deadline Sat 15 Aug 23:59Z)"
+    title: Jizan refinery verification window closes — kinetic trigger cocked
+    why: >
+      Houthis claimed a 2-drone "precise hit" on Aramco's Jazan refinery
+      (Saba, 13 Aug). Deepdive #27 verified the CLAIM but not the strike:
+      no Saudi/Aramco statement, no damage/production report, oil shrugged.
+      The stance kinetic-tail trigger "Saudi/UAE energy-infra strike" is
+      cocked, not fired — it fires on Saudi/Aramco confirmation, credible
+      imagery, or any production impact, at which point the tail arms and
+      weights move. Silence through the window = hollow-claim base case
+      (8f491cb0, 0.7) and the trigger re-cocks for the next claim
+      (a64b23c1: new Houthi attack claim on Saudi target by 20 Aug, 0.8).
+    action: wakeup #28 (Sun 01:00Z deepdive) scores 8f491cb0 and closes or
+      arms the trigger; 2-hourly scans arm it EARLIER on any verification.
+
   - date: 2026-09-11
     time_dubai: "16:30"
     title: US CPI (Aug) — first print carrying the second oil shock
