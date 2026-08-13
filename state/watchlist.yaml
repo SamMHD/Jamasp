@@ -2,12 +2,14 @@ watchlist:
   - theme: fed-rate-path
     why: >
       dominant driver of real yields and hence gold. Logan wants a HIKE
-      (explicit, 31 Jul); Kashkari/Hammack dissent same direction; Barkin calls
-      the next decision a "close call." Jul payrolls (-23K, -103K revisions,
-      AHE +0.1%) gutted the 57%-priced Sept hike; CPI 12 Aug is the hawks'
-      comeback shot (decision tree in stance.md); Hammack pre-positioned
-      twice on wires 10-11 Aug ("should already be raising", multiple hikes,
-      not restrictive enough). Prediction ec71ce01: no Sept hike, 0.8.
+      (explicit, 31 Jul); Kashkari/Hammack dissent same direction; Hammack
+      pre-positioned twice on wires 10-11 Aug. Jul payrolls (-23K, -103K
+      revisions) gutted the 57%-priced Sept hike; CPI 12 Aug (hawks'
+      comeback shot) printed BENIGN — core +0.2% m/m, back at pre-war 2.5%
+      y/y; Sept hike odds ~42%. Hike case now needs hot Aug data (payrolls
+      4 Sep, CPI 11 Sep) carrying the second oil shock. Hold-path consensus
+      hardening (Daiwa on-hold; Goldman flags hotter core PCE ~28 Aug as
+      the next test). Prediction ec71ce01: no Sept hike, 0.8.
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -63,6 +65,15 @@ watchlist:
       reopening ("shut until US changes behaviour", conditions stand)
       while Qatar/Pakistan talk up progress — oil chops, closes ~$89;
       Hormuz transits ~6/day (~5% of pre-war, half of last week's ~11).
+      12-13 Aug: CENTCOM tally 59 redirected (+4 d/d) / 3 disabled / 2
+      boarded; WSJ live-fire runner NAMED — Vela Nova, Panama-flagged,
+      MH-60 Hellfires to engine room, Gulf of Oman (does NOT score
+      0aaec9a2, different event); Trump claims "total control", CENTCOM's
+      narrower line = open to neutral traffic only, Iran says still
+      blocked; talks deadlocked at the reparations wall. Ladder
+      warn->redirect->disable->board operating inside baseline. IEA Aug
+      OMR: stocks <7.9bn bbl, thinnest since Apr 2025 — tail payload now
+      convex, no inventory cushion.
       Base rate: five halt announcements, all broken;
       announcement-timing predictions 0/3 that week. Premium unwinds
       only on a signed, co-confirmed, normalization-verified text.
@@ -82,8 +93,15 @@ watchlist:
       hopes drifted); resolution needs a LANDED deal, not headlines.
       Sell-side split marks the range: Citi Q3 Brent $80 ("war drags on")
       vs Goldman sub-$70 (10 Aug). ISM prices-paid 71.1 on 3 Aug (from
-      73.0, first easing; prediction 951d8286: Aug < 71.1). CPI 12 Aug is
-      the first hard read of the July passthrough; then Aug ISM ~1 Sep.
+      73.0, first easing; prediction 951d8286: Aug < 71.1). CPI 12 Aug
+      printed the July passthrough BENIGN (core +0.2% m/m). IEA Aug OMR
+      (12 Aug) cuts both ways: demand -1.6 mb/d 2026 (Hormuz + prices =
+      demand destruction, softens passthrough) BUT 3Q deficit doubled to
+      1.8 mb/d and stocks lowest since Apr 2025 (no buffer if supply is
+      hit). EIA US build +17.4M vs IEA global draw -2.2 mb/d Jul =
+      US-local surplus, global deficit. PPI 13 Aug is the pipeline read
+      (new prediction: headline >= +0.3%); then Aug ISM ~1 Sep, Aug CPI
+      11 Sep carries the second oil shock.
     since: 2026-07-31
 
   - theme: india-gold-formalisation
@@ -105,9 +123,11 @@ watchlist:
       holds 146t / $18.8bn (+14t in Q2), largest private holder outside
       CBs/sovereigns; the Alloy wind-down (by 17 Sep) is housekeeping —
       $836K collateral, 5 positions — and XAUT explicitly reaffirmed. A
-      standing price-insensitive, non-CB, non-ETF physical bid. Adjacent:
-      net spec +9.5% w/w and UBS $5,000 target (near-term risk flagged
-      9 Aug) — the crowding is in futures, not perps, for now.
+      standing price-insensitive, non-CB, non-ETF physical bid. 12 Aug:
+      Tether lifted its Metalla (gold/silver royalties) stake to 14% —
+      the bid now extends up the supply chain, not just bar hoarding.
+      Adjacent: net spec +9.5% w/w and UBS $5,000 target (near-term risk
+      flagged 9 Aug) — the crowding is in futures, not perps, for now.
     since: 2026-07-31
 # REMOVED 4 Aug: gold-basis-lbma-comex — resolved. 3 Aug PM fix pair printed
 # $56 (fix 4028.15 vs GC 4084.3, ±5 min), inside the $50-90 Dec-26 fair-carry

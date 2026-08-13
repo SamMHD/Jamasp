@@ -137,6 +137,15 @@ events:
       Also first test of energy-PCE passthrough easing (951d8286 thread).
     action: wakeup added 2026-08-12 12:45Z (deepdive on the print vs
       consensus, core m/m the decisive line; check hike-odds repricing)
+    outcome: >
+      RESOLVED 12 Aug — the soft branch: headline +0.1% m/m / 3.4% y/y,
+      core +0.2% m/m in line / 2.5% y/y (back at pre-war Jan-Feb level;
+      first oil shock left no scar). Sept hike odds ~42%. ec71ce01
+      hardened; 772323d6 scored HIT at the print; divergence clock
+      e3a35539 recorded (200DMA tag by Fri 23:59Z, 0.6) after gold
+      stalled below 4501.8 despite the benign print. NB run-130 lesson:
+      the 12:45Z wakeup fired before ingest landed the CPI items —
+      post-print wakeups now scheduled at print+45min (see #26).
 
   - date: 2026-08-13
     time_dubai: "16:30 (12:30Z)"
