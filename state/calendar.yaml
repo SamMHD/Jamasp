@@ -273,6 +273,23 @@ events:
       into it — add a dedicated wakeup only if the FOMC/BOJ week opens
       with the hike case revived (core PCE ~28 Aug the gate).
 
+  - date: 2026-08-28
+    time_dubai: "16:30 (12:30Z)"
+    title: US core PCE (Jul) — the hike-case gate
+    why: >
+      With CPI benign and PPI flat, the September hike case (Logan/
+      Kashkari/Hammack; odds ~35% after PPI) has exactly one data gate
+      left before the Sept 15-16 FOMC pre-period: July core PCE. Goldman
+      flagged it hotter; Goolsbee's "golden path" says otherwise. Hot =
+      hike case revives into a crowded gold book (net spec +9.5% w/w at
+      the 4 Aug stamp) — ec71ce01 (no Sept hike, 0.8) under threat,
+      stress-test 4300/4227.3. Benign = no-hike sealed; debasement and
+      momentum limbs carry the base case into the FOMC-BOJ convergence
+      window. Also scores the new 4450-cap prediction recorded today.
+    action: >
+      wakeup added 2026-08-28 13:15Z (deepdive on the print — 45 min
+      post-print per the run-130 lesson so ingest lands the items first).
+
   - date: 2026-09-11
     time_dubai: "16:30"
     title: US CPI (Aug) — first print carrying the second oil shock

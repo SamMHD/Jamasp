@@ -1,94 +1,86 @@
-# Stance — 2026-08-14 (deepdive #23 tripwire close, ~04:30 Dubai)
+# Stance — 2026-08-14 (Friday brief, ~07:30 Dubai)
 
-**Thursday cohort scored 3/3 hits; PPI folded: flat 0.0% m/m (9a757c1a
-MISS — passthrough thesis failed CPI then PPI).** Sept hike odds ~35%
-(from ~50%), 2y −6bp, S&P record 7798.99. GC closed 4415.9 (−1.31%);
-200DMA 4503.1 ~87 pts overhead, `e3a35539` needs +1.9% Friday — verdict
-at #25. **New and verified: IRGC attacked two ADNOC vessels transiting
-Hormuz Thu evening 13 Aug** (ADNOC + UAE MoFA confirmed; no injuries, no
-names yet). UAE invoked UNSCR 2817 and called it IRGC "piracy" — sharpest
-UAE attribution of the cycle; USS George Washington = second carrier
-inbound. Kinetic tail NOT armed: Sirik never verified, Jizan still
-claim-only (8f491cb0, window to Sat 23:59Z).
+**GC 4377.6 (−2.0% 24h) after a second 4450 rejection — on a benign-rates,
+record-S&P, IRGC-attack tape.** Dollar flat, 10y DOWN: not a rates move. War
+premium derating with oil + crowded longs (net spec +9.5% w/w @4 Aug)
+distributing; GVZ −6.7% = haven hedges unwound into equity strength.
+`e3a35539` (200DMA 4501.8 tag) matures tonight on miss-track — #25 (Sat
+00:15Z) scores it and formalizes the momentum-limb demotion. **Correction
+vs yesterday: USS George Washington RELIEVES Lincoln (planned rotation,
+~200 days no port call) — NOT a second carrier.** US answer to the 13-Aug
+ADNOC attack is economic-first: Bessent isolation package "like the world
+has never seen" lands NEXT WEEK; blockade sealing Iranian ports. ADNOC
+vessels still nameless ~30h in (71096269, window Sat 23:59Z).
 
 ## View
 
-**Weights 70/5/25 (base/event-bearish/kinetic), conviction uncapped.**
+**Weights 70/5/25 (base/event-bearish/kinetic); momentum limb demoted.**
 
-- **Base (~70%):** rates channel mildly friendlier — flat PPI + benign
-  CPI cut hike odds to ~35%; Fed split open (Barkin "open question" vs
-  voter Hammack wanting hikes), core PCE ~28 Aug the gate. Yet both
-  benign prints failed to tag the 200DMA: burden of proof stays on the
-  bulls; miss Friday = positioning finding (crowded book, 4500
-  seller-defended) → demote momentum limb at #25, not intraday.
-  Debasement underbid broadening: JPY 159.4 re-testing 160
-  post-intervention (BOJ 17–18 Sep the credible lever), SGE +3.3% w/w,
-  Fitch AA+ affirm removes a downgrade catalyst. Support 4300 psych,
-  4227.3, 50DMA 4183.6.
-- **Event-bearish (~5%):** unchanged — corridor window closed empty again
-  (3353195f hit) with the opposite signature: an IRGC attack inside the
-  strait. US "9 mb/d exports" tape sits against an 8-transit day
-  (one-week low; pre-war ~130) — narrative until transit counts recover.
-- **Kinetic tail (~25%):** baseline strikes priced; tempo persists into a
-  market derating war premium (oil −2% Thursday on IEA demand cut, China
-  stockpile draws, non-Gulf supply — Brent 87.07). That drains the daily
-  war bid but makes the convexity cheaper: a beyond-baseline event hits
-  an oil market priced for demand destruction with the thinnest buffer
-  since Apr 2025 — gaps through 4500, no cushion. Composition: Houthi–
-  Saudi axis live (Jizan claim, port blockade, 4 tankers); **UAE axis
-  sharpened — first formal IRGC-piracy attribution + carrier #2.** Arming
-  triggers (verification-gated): mass-casualty corridor hit, confirmed
-  US-asset loss, verified Saudi/UAE energy-infra production impact
-  (Jizan fires it immediately), ADNOC transit suspension (da6f26d5
-  falsifier — that's a supply event, read via oil first).
+- **Base (~70%):** rates friendly (hike odds ~35%, CPI+PPI benign, Goolsbee
+  "golden path" vs voter Hammack "act now"; core PCE ~28 Aug the gate) but
+  the marginal seller sits at 4450 — two rejections on bullish news. Burden
+  of proof on the bulls until a settle >4450; support 4300 psych, 4227.3,
+  50DMA 4183.6. Debasement underbid (JPY 159.4, Furusawa "intervention at
+  any level", SGE +3.3% w/w, Tether 146t) is the floor, not the impulse.
+- **Event-bearish (~5%):** corridor diplomacy deadlocked at the reparations
+  wall; Saudi-led MMDC going operational (13 joined, Jeddah) + CENTCOM
+  Falcon Strike drone task force = the regime entrenching, not resolving.
+- **Kinetic tail (~25%):** weight held, composition corrected. Softer:
+  carrier ROTATION not augmentation; Iraq axis cooling (retaliation for
+  29-Jul US-Saudi strikes postponed, first Iraqi security visit to Riyadh,
+  KSA "cherished neighbour"); MBS–CENTCOM (Adm. Cooper) de-escalation
+  meeting; US response economic not kinetic. Sharper: Bessent package next
+  week = fresh Iranian-response trigger; Jizan window open (8f491cb0, Sat
+  23:59Z); Houthi–Saudi axis live (a64b23c1); oil buffer thinnest since
+  Apr 2025 — beyond-baseline still gaps through 4500 with no cushion.
+  Arming triggers unchanged: mass-casualty corridor hit, US-asset loss,
+  verified Saudi/UAE energy-infra production impact, ADNOC transit halt
+  (da6f26d5 — supply event, read via oil first).
 
 ## What flips me
 
-- Jizan damage/production verifies (8f491cb0 falsifier) → kinetic tail
-  ARMS retroactively; re-weight and alert desk same run.
-- `e3a35539` tags Friday → momentum limb validated. Misses → demote
-  momentum limb; heuristic #3: the miss names the price-setter, NOT the
-  direction — no bearish flip on it alone.
-- ADNOC/UAE announce a Hormuz transit halt (da6f26d5) → supply event,
-  oil-led reassessment same run.
-- 13 Aug ADNOC vessels stay nameless past Sat 23:59Z (71096269) →
-  naming rule degraded; corridor-verification epistemics reviewed at retro.
-- Hot core PCE ~28 Aug → hike case revives into a crowded book;
-  `ec71ce01` under threat, stress-test 4300/4227.3.
+- GC settles >4450 → distribution read dead, 4503 opens; momentum limb
+  re-promoted at #25 or same run.
+- Jizan verifies (8f491cb0 falsifier) → tail ARMS retroactively, re-weight
+  and alert desk same run.
+- ADNOC/UAE transit halt (da6f26d5) → supply event, oil-led reassessment.
+- Vessels stay nameless past Sat 23:59Z (71096269) → naming rule degraded,
+  corridor epistemics to retro.
+- US kinetic strike on Iranian territory (new pred falsifier, ≤21 Aug) →
+  economic-first read wrong, tail re-weighted immediately.
+- Hot core PCE ~28 Aug → hike case revives into a crowded book; ec71ce01
+  threatened; stress-test 4300/4227.3.
 
 ## Open predictions
 
-`ec71ce01` no Sept hike (0.8, ~17 Sep); `3e704df1` 200DMA tag before any
-settle <50DMA (0.6, ~21 Aug); `e3a35539` GC tags 4501.8 by Fri 23:59Z
-(0.6); `951d8286` Aug prices-paid <71.1 (~1 Sep); `9557c060` Brent no
-settle <$80 through 21 Aug (0.65); `8f491cb0` no confirmed Jizan
-damage/production impact by Sat 15 Aug 23:59Z (0.7); `a64b23c1` new
-Houthi claim on Saudi target by 20 Aug (0.8). NEW (#23): `71096269`
-ADNOC vessels named by Sat 15 Aug 23:59Z (0.75); `da6f26d5` no ADNOC
-transit suspension through 20 Aug 23:59Z (0.7).
+`ec71ce01` no Sept hike (0.8, ~17 Sep); `3e704df1` 200DMA before <50DMA
+(0.6, ~21 Aug); `e3a35539` 4501.8 tag by TONIGHT 23:59Z (0.6, miss-track);
+`951d8286` Aug prices-paid <71.1 (~1 Sep); `9557c060` Brent no settle <$80
+thru 21 Aug (0.65); `8f491cb0` no Jizan verification by Sat (0.7);
+`a64b23c1` new Houthi claim on Saudi by 20 Aug (0.8); `71096269` ADNOC
+names by Sat (0.75); `da6f26d5` no transit halt thru 20 Aug (0.7). NEW
+(brief): no GC settle >4450 before core PCE 28 Aug (0.6); US response to
+ADNOC attack stays economic thru 21 Aug (0.7).
 
 ## Wakeups
 
-#25 Sat 00:15Z divergence-clock verdict (scores e3a35539, folds retail
-sales + UoM). #28 Sun 01:00Z Jizan close-out (scores 8f491cb0 +
-71096269; arms or re-cocks energy-infra trigger; feeds retro). #26
-11 Sep 13:15Z Aug-CPI deepdive.
+#25 Sat 00:15Z divergence verdict (e3a35539 + retail sales/UoM fold). #28
+Sun 01:00Z Jizan + naming close-out (8f491cb0, 71096269; arms/re-cocks
+trigger; feeds retro). NEW: 28 Aug 13:15Z core-PCE deepdive (the gate).
+#26 11 Sep 13:15Z Aug-CPI.
 
 ## Desk-local
 
-Hormuz transits ~8/day one-week low (pre-war ~130); rerouting/insurance/
-provenance premia entrenched; Fujairah bypass pipeline ~50% complete. Red
-Sea axis: Houthi blockade of Saudi ports, Bab al-Mandeb ~25/day vs 61.
-Fed-independence channel armed: Warsh/Jackson Hole late Aug. FOMC 15–16
-Sep + BOJ 17–18 Sep = the September convergence window. Tether: 146t
-standing bid. Oil buffer thin (IEA) — US-local surplus, global deficit.
+Hormuz ~8/day (pre-war ~130); Bab al-Mandeb ~25/day vs 61. Fujairah bypass
+~50%. Retail sales 16:30 + UoM 18:00 Dubai today (medium; #25 folds).
+Jackson Hole/Warsh late Aug; FOMC 15–16 Sep → BOJ 17–18 Sep convergence.
+Baltic theater new (Latvia drone shootdown, Finland restrictions) — watch
+only. Tether 146t standing bid.
 
 ## Sourcing health
 
 `gold_spot`, `gold_vol`, `yield_10y_nominal` erroring, no items 24h — GC
-stays the spot proxy. DFII10 12 Aug (2.42); DTWEXBGS 7 Aug stale. No AJ
-items in the 61-item overnight delta — corridor "quiet" on AJ is
-unobserved, not safe. 403 wall unchanged (Press TV, Tasnim, IRNA,
-ukmto.org, centcom.mil, investing.com, Arab News, MarketWatch, Google
-News). Extract cache serves stale text on repeat URLs — use fresh URLs
-when re-checking ADNOC naming/Jizan.
+stays spot proxy. DFII10 12 Aug (2.42); DTWEXBGS 7 Aug stale. 403 wall
+unchanged (Press TV, Tasnim, IRNA, ukmto.org, centcom.mil, investing.com,
+Arab News, MarketWatch, Google News). Extract cache serves stale text on
+repeat URLs — fresh URLs when re-checking naming/Jizan.
