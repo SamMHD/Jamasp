@@ -4,6 +4,10 @@
 #
 # NOTE 2026-08-02: the `jamasp calendar` feed is REPAIRED (14 events/14d,
 # was 0). Hand-built entries below are judgment layered on the feed again.
+# NOTE 2026-08-15: feed BROKEN again — 0 events/14d despite FOMC minutes,
+# Japan GDP/CPI, UK/Canada CPI all inside the window. Week-ahead rebuilt by
+# hand from the actionforex/Wells Fargo preview in this brief; flag for
+# repair (development work, not an analysis-run fix).
 events:
   - date: 2026-08-03
     time_dubai: "~22:00-02:00 (Mon afternoon US time; unscheduled)"
@@ -289,6 +293,39 @@ events:
     action: >
       wakeup added 2026-08-28 13:15Z (deepdive on the print — 45 min
       post-print per the run-130 lesson so ingest lands the items first).
+
+  - date: 2026-08-20
+    time_dubai: "22:00 (18:00Z)"
+    title: FOMC July minutes — the hike-bar language check
+    why: >
+      June minutes signaled a "low bar to hiking"; since the July meeting,
+      payrolls printed negative, CPI benign, PPI flat — the swing votes
+      (Williams/Waller/Jefferson) are the read. Wells Fargo expects
+      "patient" with the minutes slightly dated versus a more dovish
+      median today. Hike-trigger guideposts, if any, are the headline for
+      gold: concrete triggers = event-bearish weight back up; patient +
+      no guideposts = no-hike view (ec71ce01, 0.8) hardens ahead of the
+      core-PCE gate 28 Aug. Prediction 540428e8: Sept-hike odds stay <50%
+      through 24h post-release (0.7).
+    action: >
+      wakeup #30 added 2026-08-20 18:45Z (print+45, run-130 lesson) —
+      deepdive reads coverage, checks odds reaction, scores 540428e8 at
+      Thu 20:00Z or MISS-flags early.
+
+  - date: 2026-08-21
+    time_dubai: "early morning (Japan JST Friday)"
+    title: Japan July CPI (with Q2 GDP Mon 17 Aug) — the BoJ/yen leg
+    why: >
+      Headline seen rising to 2.0%, core-core 1.9% (Wells Fargo); firmer
+      prints + strong GDP = BoJ normalization case builds into the
+      17-18 Sep meeting, days after the FOMC. Feeds the debasement limb
+      directly: yen at 159.3 after failed intervention is a pillar of the
+      gold floor — a credible BoJ tightening path is the one thing that
+      erodes it from the currency side.
+    action: >
+      no wakeup — Friday's brief (~07:30 Dubai) reads it natively;
+      escalate to a deepdive only if the print moves USDJPY >1% or BoJ
+      commentary turns explicit on September.
 
   - date: 2026-09-11
     time_dubai: "16:30"
