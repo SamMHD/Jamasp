@@ -11,6 +11,29 @@ by the weekly /retro. One bullet per lesson: date, observation, suggested rule.
   after the print, not 15; (2) a deepdive that finds its inputs missing must
   reschedule itself via `wakeup add`, never exit quietly; (3) every agent run
   commits, even a no-op — a silent exit-0 run is invisible to alerting.
+- 2026-08-16: the extract stale-cache trap FIRED mid-run during the Jizan
+  close-out (run ~#28): the AJ /where/saudi-arabia/ index was served from a
+  13 Aug 20:31Z snapshot on a 16 Aug read — its "port and refinery" lede was
+  claim-day coverage masquerading as fresh, and only the extract_cache
+  fetched_at column exposed it. Same run, the date-check discipline caught a
+  July 9 Reuters "Hormuz near standstill" piece that pattern-matched
+  perfectly to this week's tape (would have falsely threatened da6f26d5/
+  599d9586 and the toll-not-stoppage read). Suggested rules: (1) before
+  trusting any index/section extract, check `extract_cache.fetched_at` for
+  that URL — one SQL query; bust stale entries with a query-param variant;
+  (2) undated agency copy inside gcaptain/index extracts must be dated from
+  its own dateline (e.g. "LONDON, July 9 (Reuters)"), never from where it
+  appears.
+- 2026-08-16: naming rule degraded — 71096269 MISS: three operator-confirmed
+  ADNOC hits (13-14 Aug) still nameless ~60h on across gcaptain, wires
+  (Reuters/Bloomberg both sourcing WAM), Gulf News; every prior verified
+  corridor hit this cycle was named in 24-48h (Dynacom 20 Jul, ADNOC 7-8
+  Aug). Either UAE is now withholding names deliberately (info-control on
+  Iran-attributed hits) or the flag-state/registry channel has gone quiet.
+  Suggested rule for retro: the echo-not-event naming test (0aaec9a2) can no
+  longer treat "named within 48h" as a verification requirement for
+  operator-confirmed hits — operator confirmation stands alone; namelessness
+  downgrades detail, not the event.
 - 2026-08-15: e3a35539 (200DMA 4501.8 tag) HIT at 13 Aug 00:35Z, but the
   13 Aug brief declared the level "untagged" ~3h AFTER the print, and the
   14 Aug brief + stance carried "miss-track" for two more runs — three
