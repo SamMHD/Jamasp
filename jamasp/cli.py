@@ -167,6 +167,7 @@ def _flash_line(stats: dict) -> str:
         f"{stats['not_gold']} not gold, {stats['unreadable']} unreadable, "
         f"{stats['burst']} over cap, {stats['stale']} stale, "
         f"{stats.get('born_old', 0)} born old, "
+        f"{stats.get('skipped_locked', 0)} skipped (locked), "
         f"{stats['errors']} errors"
     )
 
@@ -201,7 +202,9 @@ def flash_rollup(dry_run, db_path, config_dir):
     click.echo(
         f"rollup: {stats['items']} items, {stats['sent']} sent, "
         f"{stats['carried']} carried, "
-        f"{stats['below_floor']} below floor, {stats['errors']} errors"
+        f"{stats['below_floor']} below floor, "
+        f"{stats.get('skipped_locked', 0)} skipped (locked), "
+        f"{stats['errors']} errors"
     )
 
 
