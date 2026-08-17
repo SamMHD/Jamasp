@@ -42,11 +42,15 @@ For every NEW id decide two things:
    - 4: changes the setup — Fed speakers shifting rate odds, ECB/BOJ policy
      signals, large ETF or physical flows, an auction tail.
    - 3: context — routine macro prints landing in line, geopolitical
-     follow-ups, mining corporate news.
+     follow-ups, mining corporate news. Also a gold price-action recap that
+     names no new driver ("gold retreats on profit-taking", "bullion takes a
+     breather"): the desk already watches the tape, so only the driver is
+     news, never the move itself.
    - 2: adjacent — oil, equity or FX moves with no gold transmission channel.
    - 1: noise — scheduled technical-analysis columns ("EUR/USD Daily
-     Outlook"), the PBOC daily fix, option expiries, retail price notes,
-     history and opinion pieces.
+     Outlook"), the PBOC daily fix, option expiries, retail or consumer gold
+     pricing ("UAE gold prices retreat, giving buyers relief"), content-free
+     look-ahead teasers, history and opinion pieces.
    Judge the substance, not how dramatic the wording is: a routine print
    written excitedly is still a 3, and a plainly-worded rate signal is a 4.
 
@@ -327,11 +331,28 @@ def parse_rollup_response(text: str) -> list[tuple[str, list[str]]]:
     return groups
 
 
-def render_rollup(groups: Sequence[tuple[str, Sequence[str]]]) -> str:
-    """The channel message for one rollup window."""
+def render_rollup(
+    groups: Sequence[tuple[str, Sequence[str]]], carried: int = 0
+) -> str:
+    """The channel message for one rollup window.
+
+    `carried` names the held items that did not fit this window, so a capped
+    rollup says what it deferred instead of looking complete.
+    """
     parts = ["📋 جمع‌بندی اخبار"]
     for theme, lines in groups:
         parts.append("")
-        parts.append(f"**{ROLLUP_THEMES.get(theme, ROLLUP_THEMES['other'])}**")
+        # No markdown: send_telegram posts without parse_mode, so "**" would
+        # reach the channel as literal asterisks.
+        parts.append(f"▪️ {ROLLUP_THEMES.get(theme, ROLLUP_THEMES['other'])}")
         parts.extend(f"• {line}" for line in lines)
-    return latin_digits("\n".join(parts))
+    if carried:
+        parts.append("")
+        parts.append(f"و {carried} خبر دیگر در جمع‌بندی بعدی.")
+    text = latin_digits("\n".join(parts))
+    # Telegram rejects anything past 4096 outright. An over-long rollup would
+    # fail the send, leave every item held, and make the next window bigger —
+    # a wedge that never clears itself. Truncating always delivers.
+    if len(text) > MAX_CHARS:
+        text = text[: MAX_CHARS - 1] + "…"
+    return text

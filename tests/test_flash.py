@@ -920,8 +920,41 @@ def test_run_rollup_with_nothing_held_is_a_no_op(tmp_path):
     conn = db.connect(tmp_path / "t.db")
     poster = FakePoster()
     stats = flash.run_rollup(conn, SETTINGS, post=poster, run_model=rollup_model())
-    assert stats == {"items": 0, "sent": 0, "below_floor": 0, "errors": 0}
+    assert stats == {"items": 0, "sent": 0, "below_floor": 0, "carried": 0,
+                     "errors": 0}
     assert poster.calls == []
+
+
+def test_run_rollup_caps_items_and_carries_the_rest(tmp_path):
+    """Without a ceiling a backlog renders past Telegram's limit, the send fails,
+    every item stays held, and the next window is larger still — a permanent wedge."""
+    conn = db.connect(tmp_path / "t.db")
+    ids = seed(conn, [("reuters", f"Story {n}", 1) for n in range(25)])
+    _hold(conn, ids)
+    settings = {**SETTINGS, "flash": {**SETTINGS["flash"], "rollup_max_items": 20}}
+    poster = FakePoster()
+    stats = flash.run_rollup(conn, settings, post=poster, run_model=rollup_model())
+    assert stats["sent"] == 1
+    assert stats["items"] == 20 and stats["carried"] == 5
+    assert "جمع‌بندی بعدی" in poster.calls[0][1]["text"]
+    still_held = conn.execute(
+        "SELECT COUNT(*) c FROM flash_items WHERE state = 'held'"
+    ).fetchone()["c"]
+    rolled = conn.execute(
+        "SELECT COUNT(*) c FROM flash_items WHERE state = 'rolled_up'"
+    ).fetchone()["c"]
+    assert (rolled, still_held) == (20, 5)
+
+
+def test_run_rollup_cap_defaults_to_a_bounded_number(tmp_path):
+    """The ceiling must apply even when settings.yaml predates it."""
+    conn = db.connect(tmp_path / "t.db")
+    ids = seed(conn, [("reuters", f"Story {n}", 1) for n in range(60)])
+    _hold(conn, ids)
+    poster = FakePoster()
+    stats = flash.run_rollup(conn, SETTINGS, post=poster, run_model=rollup_model())
+    assert stats["items"] == flash.DEFAULT_ROLLUP_MAX_ITEMS
+    assert stats["carried"] == 60 - flash.DEFAULT_ROLLUP_MAX_ITEMS
 
 
 def test_rollup_preserves_the_tier_it_was_scored_at(tmp_path):

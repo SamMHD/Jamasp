@@ -460,15 +460,35 @@ def _run_pass(conn, settings, sources, post, run_model, emit, dry_run, stats):
 
 
 DEFAULT_ROLLUP_MIN_ITEMS = 3
+# Ceiling per rollup. Telegram hard-rejects past 4096 chars, and a rejected send
+# leaves every item held — so the next window is larger and the rollup wedges
+# permanently. 20 one-line items sit well inside the limit; the remainder is
+# carried, named in the message, and drains at the head of the next window.
+DEFAULT_ROLLUP_MAX_ITEMS = 20
 
 
-def held_items(conn: sqlite3.Connection) -> list[sqlite3.Row]:
-    """Held items with the fields the rollup prompt needs, oldest first."""
-    return conn.execute(
+def held_items(
+    conn: sqlite3.Connection, limit: int | None = None
+) -> list[sqlite3.Row]:
+    """Held items with the fields the rollup prompt needs, oldest first.
+
+    Oldest-first with a limit means a carried-over item drains at the head of
+    the queue rather than being starved by a steady arrival of newer ones.
+    """
+    sql = (
         "SELECT i.id, i.source, i.headline, i.lede, i.published_at, f.tier"
         " FROM flash_items f JOIN items i ON i.id = f.item_id"
-        " WHERE f.state = 'held' ORDER BY i.published_at",
-    ).fetchall()
+        " WHERE f.state = 'held' ORDER BY i.published_at"
+    )
+    if limit is None:
+        return conn.execute(sql).fetchall()
+    return conn.execute(f"{sql} LIMIT ?", (limit,)).fetchall()
+
+
+def held_count(conn: sqlite3.Connection) -> int:
+    return conn.execute(
+        "SELECT COUNT(*) c FROM flash_items WHERE state = 'held'"
+    ).fetchone()["c"]
 
 
 def run_rollup(
@@ -485,7 +505,7 @@ def run_rollup(
     failure the items stay held and the next window retries them. Never raises
     — the timer that drives this must not fail on a model hiccup.
     """
-    stats = {"items": 0, "sent": 0, "below_floor": 0, "errors": 0}
+    stats = {"items": 0, "sent": 0, "below_floor": 0, "carried": 0, "errors": 0}
     try:
         return _rollup_pass(conn, settings, post, run_model, emit, dry_run, stats)
     except Exception as exc:
@@ -502,8 +522,11 @@ def _rollup_pass(conn, settings, post, run_model, emit, dry_run, stats):
     if not cfg.get("enabled"):
         return stats
     run_model = run_model or _run_model
-    rows = held_items(conn)
+    total_held = held_count(conn)
+    cap = cfg.get("rollup_max_items", DEFAULT_ROLLUP_MAX_ITEMS)
+    rows = held_items(conn, limit=cap)
     stats["items"] = len(rows)
+    stats["carried"] = max(0, total_held - len(rows))
     if not rows:
         return stats
     floor = cfg.get("rollup_min_items", DEFAULT_ROLLUP_MIN_ITEMS)
@@ -529,7 +552,7 @@ def _rollup_pass(conn, settings, post, run_model, emit, dry_run, stats):
                 flashtext.build_rollup_prompt(items),
             )
         )
-        text = flashtext.render_rollup(groups)
+        text = flashtext.render_rollup(groups, carried=stats["carried"])
     except Exception as exc:
         log_error(conn, exc)
         stats["errors"] += 1
