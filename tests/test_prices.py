@@ -149,3 +149,33 @@ def test_store_and_query(tmp_path):
     assert prices.latest(conn, "XAUUSD")["value"] == 3412.55
     assert prices.value_at_or_before(conn, "XAUUSD", "2026-07-29T12:00:00Z") == 3390.0
     assert prices.value_at_or_before(conn, "XAUUSD", "2026-07-28T00:00:00Z") is None
+
+
+def test_window_extremes_finds_intraday_touch(tmp_path):
+    # The e3a35539 failure: gold tagged 4501.8 at 00:35Z in the Asia
+    # overnight and settled back. Endpoint prices can't see that touch —
+    # a MAX/MIN over the window can.
+    conn = db.connect(tmp_path / "j.db")
+    prices.store_price(conn, "GC", "2026-08-12T20:00:00Z", 4468.0)
+    prices.store_price(conn, "GC", "2026-08-13T00:35:00Z", 4501.8)
+    prices.store_price(conn, "GC", "2026-08-13T08:00:00Z", 4471.0)
+    ext = prices.window_extremes(conn, "GC", "2026-08-12T18:00:00Z", "2026-08-13T12:00:00Z")
+    assert ext["high"] == 4501.8
+    assert ext["high_ts"] == "2026-08-13T00:35:00Z"
+    assert ext["low"] == 4468.0
+    assert ext["low_ts"] == "2026-08-12T20:00:00Z"
+
+
+def test_window_extremes_respects_bounds(tmp_path):
+    conn = db.connect(tmp_path / "j.db")
+    prices.store_price(conn, "GC", "2026-08-11T00:00:00Z", 4600.0)  # before window
+    prices.store_price(conn, "GC", "2026-08-12T20:00:00Z", 4468.0)
+    prices.store_price(conn, "GC", "2026-08-14T00:00:00Z", 4300.0)  # after window
+    ext = prices.window_extremes(conn, "GC", "2026-08-12T00:00:00Z", "2026-08-13T00:00:00Z")
+    assert ext["high"] == 4468.0 and ext["low"] == 4468.0
+
+
+def test_window_extremes_empty_window(tmp_path):
+    conn = db.connect(tmp_path / "j.db")
+    ext = prices.window_extremes(conn, "GC", "2026-08-12T00:00:00Z", "2026-08-13T00:00:00Z")
+    assert ext == {"high": None, "high_ts": None, "low": None, "low_ts": None}

@@ -187,3 +187,30 @@ def row_at_or_before(conn: sqlite3.Connection, symbol: str, ts: str) -> sqlite3.
         "SELECT ts, value FROM prices WHERE symbol = ? AND ts <= ? ORDER BY ts DESC LIMIT 1",
         (symbol, ts),
     ).fetchone()
+
+
+def window_extremes(
+    conn: sqlite3.Connection, symbol: str, start: str, end: str
+) -> dict:
+    """Highest and lowest print in [start, end], with when each happened.
+
+    A level claim is settled by the extremes of its window, not by its
+    endpoints: an overnight touch that mean-reverts before the next run is
+    invisible to price_then/price_now but decides the claim.
+    """
+    hi = conn.execute(
+        "SELECT ts, value FROM prices WHERE symbol = ? AND ts >= ? AND ts <= ?"
+        " ORDER BY value DESC, ts LIMIT 1",
+        (symbol, start, end),
+    ).fetchone()
+    lo = conn.execute(
+        "SELECT ts, value FROM prices WHERE symbol = ? AND ts >= ? AND ts <= ?"
+        " ORDER BY value ASC, ts LIMIT 1",
+        (symbol, start, end),
+    ).fetchone()
+    return {
+        "high": hi["value"] if hi else None,
+        "high_ts": hi["ts"] if hi else None,
+        "low": lo["value"] if lo else None,
+        "low_ts": lo["ts"] if lo else None,
+    }

@@ -51,6 +51,20 @@ def _record(conn, run_type, task, started_at, exit_code, status) -> None:
     conn.commit()
 
 
+def _git_head() -> str | None:
+    """Current HEAD commit, or None if this isn't a usable git checkout.
+
+    None means "can't tell" — callers must not read it as "nothing changed".
+    """
+    try:
+        proc = subprocess.run(
+            ["git", "rev-parse", "HEAD"], capture_output=True, text=True, timeout=10
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return proc.stdout.strip() if proc.returncode == 0 else None
+
+
 def _execute_once(cmd: list[str], timeout: int) -> tuple[int | None, str]:
     """Run once; return (exit_code, status) where status is ok|failed|timeout.
 
@@ -107,16 +121,29 @@ def run_agent(
         )
         return "deferred"
     timeout = cfg["timeouts_seconds"][run_type]
+    head_before = _git_head()
     exit_code, status = _execute_once(cmd, timeout)
     if status != "ok":  # one retry, immediately
         exit_code, status = _execute_once(cmd, timeout)
+    # Every run commits (CLAUDE.md rule 4), so exit 0 with HEAD untouched
+    # means the run did nothing — the failure mode that made the 12 Aug CPI
+    # deepdive invisible. Deliberately not retried: an empty run may still
+    # have posted to Telegram, and a blind re-run risks a double post.
+    if status == "ok" and head_before is not None and _git_head() == head_before:
+        status = "empty"
     _record(conn, run_type, task, started_at, exit_code, status)
     if status != "ok" and notify_on_failure:
-        _notify_safe(
-            conn,
-            settings,
-            f"Jamasp FAILURE: {run_type} run {status} after retry"
-            + (f" (task: {task})" if task else "")
-            + f", exit={exit_code}.",
-        )
+        if status == "empty":
+            text = (
+                f"Jamasp EMPTY RUN: {run_type} exited 0 but committed nothing"
+                + (f" (task: {task})" if task else "")
+                + " — inputs missing, or it gave up silently. Not retried."
+            )
+        else:
+            text = (
+                f"Jamasp FAILURE: {run_type} run {status} after retry"
+                + (f" (task: {task})" if task else "")
+                + f", exit={exit_code}."
+            )
+        _notify_safe(conn, settings, text)
     return status

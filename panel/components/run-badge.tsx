@@ -4,7 +4,8 @@ import { Badge } from "@/components/ui/badge";
  * `ok` is a plain success; `deferred` means the daily cap was already reached
  * so the run was skipped — benign, not a failure, and deliberately excluded
  * from the cap count by `runsTodayDubai`. Only real failures (`failed`,
- * `timeout`, ...) get the destructive treatment.
+ * `timeout`, `empty` — exited 0 having committed nothing) get the
+ * destructive treatment.
  */
 export function runBadge(status: string): { variant: "secondary" | "destructive" | "outline"; className?: string } {
   if (status === "ok") return { variant: "secondary" };
