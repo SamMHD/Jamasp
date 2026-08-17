@@ -34,3 +34,16 @@ flash:
   extract_chars: 4000
   decide_cmd: ["claude", "-p", "--model", "sonnet"]
   write_cmd: ["claude", "-p", "--model", "sonnet"]
+  # Tiering (docs/superpowers/specs/2026-08-17-flash-tiering-design.md).
+  # At or above post_tier_min goes straight to the channel; at or above
+  # rollup_tier_min waits for a rollup; below that never reaches the channel
+  # but stays in the DB for inbox/brief/scan. Thresholds live here because the
+  # tier definitions are a judgement to tune once a week of tier data exists.
+  post_tier_min: 4
+  rollup_tier_min: 3
+  # Fewer than this many held stories in a window: skip the send and let them
+  # roll into the next one. A near-empty rollup costs more attention than it
+  # returns. The times themselves are the timer's business, not the code's —
+  # see ops/systemd/jamasp-flash-rollup.timer.
+  rollup_min_items: 3
+  rollup_cmd: ["claude", "-p", "--model", "sonnet"]

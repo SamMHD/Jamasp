@@ -44,14 +44,14 @@ def test_parse_decide_response_normalizes():
     text = 'ok:\n```json\n{"bbb": {"gold": true, "dup_of": "aaa"},' \
            ' "ccc": {"gold": false, "dup_of": null}}\n```'
     assert flashtext.parse_decide_response(text) == {
-        "bbb": {"gold": True, "dup_of": "aaa"},
-        "ccc": {"gold": False, "dup_of": None},
+        "bbb": {"gold": True, "dup_of": "aaa", "tier": None},
+        "ccc": {"gold": False, "dup_of": None, "tier": None},
     }
 
 
 def test_parse_decide_response_tolerates_missing_keys():
     assert flashtext.parse_decide_response('{"bbb": {"gold": true}}') == {
-        "bbb": {"gold": True, "dup_of": None}
+        "bbb": {"gold": True, "dup_of": None, "tier": None}
     }
 
 
@@ -205,3 +205,96 @@ def test_render_message_truncates():
     )
     assert len(text) <= flashtext.MAX_CHARS
     assert text.endswith("…")
+
+
+def test_decide_prompt_asks_for_a_tier_with_definitions():
+    prompt = flashtext.build_decide_prompt(
+        [], [{"id": "a", "source": "s", "headline": "h", "lede": "l"}]
+    )
+    assert '"tier"' in prompt
+    # the five definitions have to travel with the request; a bare 1-5 scale
+    # gets scored on vividness, which is what the 16 Aug retro named
+    for marker in ("5", "4", "3", "2", "1"):
+        assert marker in prompt
+    assert "moves gold now" in prompt
+
+
+def test_parse_decide_response_reads_tier():
+    out = flashtext.parse_decide_response(
+        '{"a": {"gold": true, "dup_of": null, "tier": 5},'
+        ' "b": {"gold": true, "dup_of": null, "tier": "2"}}'
+    )
+    assert out["a"]["tier"] == 5
+    assert out["b"]["tier"] == 2  # a stringified number is still a number
+
+
+def test_parse_decide_response_tier_absent_is_none():
+    out = flashtext.parse_decide_response('{"a": {"gold": true, "dup_of": null}}')
+    assert out["a"]["tier"] is None
+
+
+def test_parse_decide_response_rejects_out_of_range_tier():
+    out = flashtext.parse_decide_response(
+        '{"a": {"gold": true, "dup_of": null, "tier": 9},'
+        ' "b": {"gold": true, "dup_of": null, "tier": "high"}}'
+    )
+    assert out["a"]["tier"] is None
+    assert out["b"]["tier"] is None
+
+
+ROLLUP_ITEMS = [
+    {"id": "a", "source": "Reuters", "headline": "PPI in line at 4.7%",
+     "lede": "Producer prices matched forecasts."},
+    {"id": "b", "source": "gCaptain", "headline": "Corridor transit down 4%",
+     "lede": "Transits eased for a third week."},
+]
+
+
+def test_build_rollup_prompt_asks_for_grouped_persian_lines():
+    prompt = flashtext.build_rollup_prompt(ROLLUP_ITEMS)
+    assert "PPI in line at 4.7%" in prompt
+    assert "rates_dollar" in prompt and "geopolitics" in prompt
+    assert "metals_mining" in prompt and "other" in prompt
+    # one line per story, carrying the transmission channel — the whole point
+    # of a rollup over a headline dump
+    assert "transmission" in prompt.lower()
+
+
+def test_parse_rollup_response_normalizes_groups():
+    out = flashtext.parse_rollup_response(
+        '```json\n{"groups": [{"theme": "rates_dollar", "lines": ["خط ۱", "خط ۲"]},'
+        ' {"theme": "geopolitics", "lines": ["خط ۳"]}]}\n```'
+    )
+    assert out == [("rates_dollar", ["خط ۱", "خط ۲"]), ("geopolitics", ["خط ۳"])]
+
+
+def test_parse_rollup_response_folds_unknown_theme_into_other():
+    # a mislabelled group must not lose the desk its news
+    out = flashtext.parse_rollup_response(
+        '{"groups": [{"theme": "crypto_moon", "lines": ["خط"]}]}'
+    )
+    assert out == [("other", ["خط"])]
+
+
+def test_parse_rollup_response_drops_empty_groups():
+    out = flashtext.parse_rollup_response(
+        '{"groups": [{"theme": "rates_dollar", "lines": []},'
+        ' {"theme": "other", "lines": ["خط"]}]}'
+    )
+    assert out == [("other", ["خط"])]
+
+
+def test_parse_rollup_response_raises_without_usable_lines():
+    with pytest.raises(ValueError):
+        flashtext.parse_rollup_response('{"groups": []}')
+
+
+def test_render_rollup_puts_a_persian_header_over_each_group():
+    text = flashtext.render_rollup(
+        [("rates_dollar", ["خط ۱"]), ("geopolitics", ["خط ۲"])]
+    )
+    # numerals come back Latin — CLAUDE.md rule 3 applies to rollups too
+    assert "خط 1" in text and "خط 2" in text
+    # headers are Persian, and every group is labelled
+    assert text.count("**") >= 4 or text.count("—") >= 2
+    assert "rates_dollar" not in text, "raw theme keys must not reach the channel"

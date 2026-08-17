@@ -1,0 +1,9 @@
+[Unit]
+Description=Send the Jamasp news-channel rollup at 08:00, 12:00, 16:00 and 20:00 Dubai
+
+[Timer]
+OnCalendar=*-*-* 08,12,16,20:00:00 Asia/Dubai
+Persistent=true
+
+[Install]
+WantedBy=timers.target
