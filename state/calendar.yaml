@@ -8,6 +8,10 @@
 # Japan GDP/CPI, UK/Canada CPI all inside the window. Week-ahead rebuilt by
 # hand from the actionforex/Wells Fargo preview in this brief; flag for
 # repair (development work, not an analysis-run fix).
+# NOTE 2026-08-17: feed REPAIRED (21 events/14d) — and it caught a
+# hand-built error: FOMC minutes are Wed 19 Aug 18:00Z, not 20 Aug
+# (wakeup #30 cancelled → #32 at 19 Aug 18:45Z). Trust-but-verify the
+# hand-built entries below against the feed for another week.
 events:
   - date: 2026-08-03
     time_dubai: "~22:00-02:00 (Mon afternoon US time; unscheduled)"
@@ -294,8 +298,8 @@ events:
       wakeup added 2026-08-28 13:15Z (deepdive on the print — 45 min
       post-print per the run-130 lesson so ingest lands the items first).
 
-  - date: 2026-08-20
-    time_dubai: "22:00 (18:00Z)"
+  - date: 2026-08-19
+    time_dubai: "22:00 (18:00Z) — DATE CORRECTED 17 Aug (was 20 Aug; repaired feed)"
     title: FOMC July minutes — the hike-bar language check
     why: >
       June minutes signaled a "low bar to hiking"; since the July meeting,
@@ -308,9 +312,31 @@ events:
       core-PCE gate 28 Aug. Prediction 540428e8: Sept-hike odds stay <50%
       through 24h post-release (0.7).
     action: >
-      wakeup #30 added 2026-08-20 18:45Z (print+45, run-130 lesson) —
-      deepdive reads coverage, checks odds reaction, scores 540428e8 at
-      Thu 20:00Z or MISS-flags early.
+      wakeup #32 (2026-08-19 18:45Z; replaces cancelled #30 which sat a
+      day late on the hand-built date) — deepdive reads coverage, checks
+      odds reaction, MISS-flags 540428e8 early if odds >50%; definitive
+      scoring Thu 18:00Z (+24h) via scans / #31.
+
+  - date: 2026-08-17
+    time_dubai: "all day (deadline day; overnight closed by wakeup #33)"
+    title: US-Iran 60-day memorandum expires — extension disputed
+    why: >
+      First state appearance of the Islamabad-brokered 60-day ceasefire
+      memorandum (Gulf News, extracted 17 Aug): deadline arrives today.
+      Tehran on record there are NO extension talks; Pakistani government
+      sources claim extension agreed 12 Aug, duration unsettled — one-side
+      sourced, does not verify (rule 8). IRGC deputy Javani (IRIB):
+      military action now takes "offensive form" with "strategic
+      surprises" under Mojtaba's decrees. Expiry + Bessent-package week
+      concentrates the kinetic-tail watch in ~72h; but corridor coercion
+      never paused under the ceasefire (3 ADNOC hits 13-15 Aug), so lapse
+      is a rhetoric change until actions move beyond baseline.
+    action: >
+      wakeup #33 (2026-08-18 01:00Z deepdive) closes expiry day:
+      co-confirmed extension vs lapse, Javani follow-through, early
+      Bessent news; scores 4cf94ab6 early only on a joint text. 2-hourly
+      scans cover daytime; prediction 4cf94ab6 (no co-confirmed extension
+      text by Wed 20 Aug 23:59Z, 0.7) matures Thursday.
 
   - date: 2026-08-21
     time_dubai: "early morning (Japan JST Friday)"
