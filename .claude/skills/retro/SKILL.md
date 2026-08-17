@@ -49,10 +49,24 @@ Search the week's Telegram feedback forwarded into the repo (grep
 piece of feedback from Saman gets an explicit response in the retro report:
 adopted (how) or declined (why).
 
+## 4.5 File code gaps as todos, don't re-raise them
+
+Any finding that needs a **code, config or ops** change — a source to wire, a
+parser to write, a threshold to revisit — goes in `docs/todo/` as a file (see
+the `todos` skill), not only into the report and not only into the Telegram
+summary. Check `grep -lE '^status: (open|in-progress)' docs/todo/[0-9]*.md` first
+and append to an existing item rather than opening a second one.
+
+The 2, 9 and 16 Aug 2026 retros each re-raised the same `config/sources.yaml`
+gap in a Telegram line and nothing moved for three weeks. **If you are about to
+write "re-raised again", write a todo file instead.** And before reporting
+something as broken, run it in this same run — two of the dev tasks carried in
+Aug 2026 were phantoms that survived on restatement alone.
+
 ## 5. Deliver + close out
 
 - Persian summary of the scorecard (≤8 lines) → `uv run jamasp notify -`.
-- `git add -A reports/ state/ && git commit -m "jamasp: retro YYYY-MM-DD"`.
+- `git add -A reports/ state/ docs/todo/ && git commit -m "jamasp: retro YYYY-MM-DD"`.
 
 Phase 3 (not yet): source-quality analysis and gated self-edit proposals on
 a branch. Do not attempt them.
