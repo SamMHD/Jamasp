@@ -63,30 +63,73 @@ def record(
         conn.commit()
 
 
+# Share of each batch held for the items closest to the age cliff. Ordering
+# purely by published_at DESC lets every tick's fresh arrivals outrank items
+# already near expiry, which then retire unclassified — a burst of TA columns
+# can bury a material headline it happens to outrank.
+_OLDEST_RESERVE = 1 / 3
+
+_CANDIDATE_SQL = (
+    "SELECT i.* FROM items i"
+    " LEFT JOIN flash_items f ON f.item_id = i.id"
+    " WHERE f.item_id IS NULL AND i.published_at >= ?"
+    " ORDER BY i.published_at {} LIMIT ?"
+)
+
+
 def candidates(
     conn: sqlite3.Connection, max_age_hours: int, limit: int
 ) -> list[sqlite3.Row]:
-    """Unprocessed items inside the age window, newest first."""
-    return conn.execute(
-        "SELECT i.* FROM items i"
-        " LEFT JOIN flash_items f ON f.item_id = i.id"
-        " WHERE f.item_id IS NULL AND i.published_at >= ?"
-        " ORDER BY i.published_at DESC LIMIT ?",
-        (_since(max_age_hours), limit),
-    ).fetchall()
+    """Unprocessed items inside the age window, newest first.
 
-
-def retire_stale(conn: sqlite3.Connection, max_age_hours: int) -> int:
-    """Mark unprocessed items past the window as skipped_stale. They never post."""
-    cur = conn.execute(
-        "INSERT INTO flash_items (item_id, flash_id, state, ts)"
-        " SELECT i.id, NULL, 'skipped_stale', ? FROM items i"
-        " LEFT JOIN flash_items f ON f.item_id = i.id"
-        " WHERE f.item_id IS NULL AND i.published_at < ?",
-        (utcnow(), _since(max_age_hours)),
+    Most of the batch goes to the newest items — a news channel's value is
+    freshness — but `_OLDEST_RESERVE` of it is kept for those closest to
+    ageing out, so a sustained burst can't starve them.
+    """
+    since = _since(max_age_hours)
+    reserve = int(limit * _OLDEST_RESERVE)
+    oldest = (
+        conn.execute(_CANDIDATE_SQL.format("ASC"), (since, reserve)).fetchall()
+        if reserve
+        else []
     )
+    picked = {r["id"]: r for r in oldest}
+    for row in conn.execute(_CANDIDATE_SQL.format("DESC"), (since, limit)):
+        if len(picked) >= limit:
+            break
+        picked.setdefault(row["id"], row)
+    # newest first, as before: the reserve changes which items are in the
+    # batch, not the order they're handed downstream
+    return sorted(picked.values(), key=lambda r: r["published_at"], reverse=True)
+
+
+def retire_stale(conn: sqlite3.Connection, max_age_hours: int) -> dict[str, int]:
+    """Mark unprocessed items past the window as skipped. They never post.
+
+    Returns `{"stale": n, "born_old": m}` — two states, because the causes are
+    unrelated and one is not a defect: `skipped_born_old` was already outside
+    the window when first fetched (feed archive entries, a first-ingest
+    backfill) and was never postable; `skipped_stale` was fresh when we saw it
+    and aged out before being classified, which is the only one of the two
+    worth alarming on. Reporting one conflated total made a 70-item
+    starvation read as 4143.
+    """
+    now, since = utcnow(), _since(max_age_hours)
+    # Two statements rather than one CASE, so each rowcount is exactly the
+    # number of rows that pass inserted — no counting back by timestamp.
+    counts = {}
+    for state, age_test in (("skipped_born_old", ">="), ("skipped_stale", "<")):
+        counts[state] = conn.execute(
+            "INSERT INTO flash_items (item_id, flash_id, state, ts)"
+            f" SELECT i.id, NULL, '{state}', ? FROM items i"
+            " LEFT JOIN flash_items f ON f.item_id = i.id"
+            " WHERE f.item_id IS NULL AND i.published_at < ?"
+            "   AND (julianday(i.fetched_at) - julianday(i.published_at)) * 24"
+            f"       {age_test} ?",
+            (now, since, max_age_hours),
+        ).rowcount
     conn.commit()
-    return cur.rowcount
+    return {"stale": counts["skipped_stale"], "born_old": counts["skipped_born_old"]}
 
 
 def posted_flashes(conn: sqlite3.Connection, hours: int = 24) -> list[sqlite3.Row]:
@@ -265,7 +308,7 @@ def run_flash(
 ) -> dict[str, int]:
     """One flash pass. Never raises; every failure is counted and logged."""
     stats = {"posted": 0, "dup": 0, "not_gold": 0, "unreadable": 0, "stale": 0,
-             "burst": 0, "errors": 0}
+             "born_old": 0, "burst": 0, "errors": 0}
     try:
         return _run_pass(conn, settings, sources, post, run_model, emit, dry_run,
                          stats)
@@ -300,7 +343,7 @@ def _run_pass(conn, settings, sources, post, run_model, emit, dry_run, stats):
         return stats
 
     if not dry_run:
-        stats["stale"] = retire_stale(conn, cfg["max_age_hours"])
+        stats.update(retire_stale(conn, cfg["max_age_hours"]))
     pending = candidates(conn, cfg["max_age_hours"], cfg["classify_batch_max"])
     if not pending:
         return stats

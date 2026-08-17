@@ -164,6 +164,7 @@ def _flash_line(stats: dict) -> str:
         f"flash: {stats['posted']} posted, {stats['dup']} updated, "
         f"{stats['not_gold']} not gold, {stats['unreadable']} unreadable, "
         f"{stats['burst']} over cap, {stats['stale']} stale, "
+        f"{stats.get('born_old', 0)} born old, "
         f"{stats['errors']} errors"
     )
 

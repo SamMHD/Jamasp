@@ -52,16 +52,18 @@ def test_candidates_honours_limit(tmp_path):
 def test_retire_stale_marks_only_old_unprocessed(tmp_path):
     conn = db.connect(tmp_path / "t.db")
     fresh, old = seed(conn, [("a", "Fresh", 1), ("b", "Old", 9)])
-    assert flash.retire_stale(conn, 6) == 1
+    assert flash.retire_stale(conn, 6) == {"stale": 0, "born_old": 1}
     row = conn.execute(
         "SELECT state FROM flash_items WHERE item_id = ?", (old,)
     ).fetchone()
-    assert row["state"] == "skipped_stale"
+    # seed() fetches everything now, so a 9h-old item was already past the
+    # window when first seen — born old, never postable, not starvation.
+    assert row["state"] == "skipped_born_old"
     assert conn.execute(
         "SELECT COUNT(*) c FROM flash_items WHERE item_id = ?", (fresh,)
     ).fetchone()["c"] == 0
     # idempotent: a second pass finds nothing new
-    assert flash.retire_stale(conn, 6) == 0
+    assert flash.retire_stale(conn, 6) == {"stale": 0, "born_old": 0}
 
 
 def test_posted_flashes_window_and_published_at(tmp_path):
@@ -502,7 +504,7 @@ def test_run_flash_disabled_by_settings(tmp_path, monkeypatch):
     stats = flash.run_flash(conn, settings, SOURCES, post=poster,
                             run_model=model({}))
     assert stats == {"posted": 0, "dup": 0, "not_gold": 0, "unreadable": 0, "stale": 0,
-                     "burst": 0, "errors": 0}
+                     "born_old": 0, "burst": 0, "errors": 0}
     assert poster.calls == []
 
 
@@ -662,3 +664,63 @@ def test_run_flash_dry_run_does_not_retire_stale(tmp_path, monkeypatch):
     )
     assert stats["stale"] == 0
     assert conn.execute("SELECT COUNT(*) c FROM flash_items").fetchone()["c"] == 0
+
+
+def _set_fetched_at(conn, item_id, ts):
+    conn.execute("UPDATE items SET fetched_at = ? WHERE id = ?", (ts, item_id))
+    conn.commit()
+
+
+def test_retire_stale_separates_born_old_from_starved(tmp_path):
+    # 85% of the host's 4143 skipped_stale rows were >48h old at retirement:
+    # feed archive entries and the first-ingest backfill, correctly never
+    # flashed. Only ~70 were genuinely starved. One state for both made the
+    # number read as a pipeline defect thirty times bigger than it is.
+    conn = db.connect(tmp_path / "t.db")
+    born_old, starved = seed(conn, [("a", "Archive item", 30), ("b", "Was fresh", 8)])
+    # the archive item was already 30h old the moment we first saw it
+    _set_fetched_at(conn, born_old, ago(0.2))
+    # the other was 1h old when fetched — inside the window, then aged out
+    _set_fetched_at(conn, starved, ago(7))
+
+    assert flash.retire_stale(conn, 6) == {"stale": 1, "born_old": 1}
+    states = dict(
+        conn.execute(
+            "SELECT item_id, state FROM flash_items WHERE item_id IN (?, ?)",
+            (born_old, starved),
+        ).fetchall()
+    )
+    assert states[born_old] == "skipped_born_old"
+    assert states[starved] == "skipped_stale"
+
+
+def test_candidates_reserves_slots_for_the_oldest_at_risk(tmp_path):
+    # published_at DESC alone means a burst of fresh arrivals outranks items
+    # already close to the 6h cliff on every tick, so they age out
+    # unclassified. Reserve part of the batch for the closest to expiry.
+    conn = db.connect(tmp_path / "t.db")
+    specs = [("fresh", f"Fresh {i}", 0.1) for i in range(20)]
+    specs += [("aging", f"Aging {i}", 5.5) for i in range(5)]
+    ids = seed(conn, specs)
+    aging = set(ids[20:])
+
+    picked = {r["id"] for r in flash.candidates(conn, max_age_hours=6, limit=10)}
+    assert len(picked) == 10
+    # without a reserve every slot goes to the 20 fresh items and none of the
+    # aging ones ever get classified before retire_stale takes them
+    assert picked & aging, "no aging item made the batch"
+
+
+def test_run_pass_reports_stale_and_born_old_separately(tmp_path, monkeypatch):
+    # The `flash:` line is where a human or an agent reads this pipeline's
+    # health. One conflated "stale" count is what made a 70-item starvation
+    # look like 4143.
+    conn = db.connect(tmp_path / "t.db")
+    born_old, starved = seed(conn, [("a", "Archive", 30), ("b", "Was fresh", 8)])
+    _set_fetched_at(conn, born_old, ago(0.2))
+    _set_fetched_at(conn, starved, ago(7))
+    stats = flash.run_flash(
+        conn, SETTINGS, [], post=lambda *a, **k: None, run_model=lambda *a: "[]"
+    )
+    assert stats["stale"] == 1
+    assert stats["born_old"] == 1
