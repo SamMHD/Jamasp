@@ -200,6 +200,7 @@ def flash_rollup(dry_run, db_path, config_dir):
     )
     click.echo(
         f"rollup: {stats['items']} items, {stats['sent']} sent, "
+        f"{stats['carried']} carried, "
         f"{stats['below_floor']} below floor, {stats['errors']} errors"
     )
 

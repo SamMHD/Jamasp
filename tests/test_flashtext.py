@@ -295,6 +295,32 @@ def test_render_rollup_puts_a_persian_header_over_each_group():
     )
     # numerals come back Latin — CLAUDE.md rule 3 applies to rollups too
     assert "خط 1" in text and "خط 2" in text
-    # headers are Persian, and every group is labelled
-    assert text.count("**") >= 4 or text.count("—") >= 2
+    # headers are Persian, and every group is labelled. Asserted by label rather
+    # than by markup: send_telegram sets no parse_mode, so the marker has to be a
+    # literal glyph and "**" would reach the channel as asterisks.
+    assert flashtext.ROLLUP_THEMES["rates_dollar"] in text
+    assert flashtext.ROLLUP_THEMES["geopolitics"] in text
     assert "rates_dollar" not in text, "raw theme keys must not reach the channel"
+
+
+def test_render_rollup_truncates_to_the_telegram_ceiling():
+    """An unbounded rollup would exceed Telegram's 4096 and be rejected outright,
+    leaving every item held — so the next window is bigger and it never recovers."""
+    groups = [("rates_dollar", ["x" * 300 for _ in range(40)])]
+    text = flashtext.render_rollup(groups)
+    assert len(text) <= flashtext.MAX_CHARS
+    assert text.endswith("…")
+
+
+def test_render_rollup_carries_a_note_when_items_are_deferred():
+    text = flashtext.render_rollup(
+        [("rates_dollar", ["یک خط"])], carried=4
+    )
+    assert "4" in text and "جمع‌بندی بعدی" in text
+
+
+def test_render_rollup_emits_no_markdown():
+    """send_telegram posts without parse_mode, so ** would show as literal stars."""
+    text = flashtext.render_rollup([("rates_dollar", ["یک خط"])])
+    assert "**" not in text
+    assert flashtext.ROLLUP_THEMES["rates_dollar"] in text
