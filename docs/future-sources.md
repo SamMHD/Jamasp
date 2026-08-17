@@ -186,3 +186,44 @@ dead so nobody re-chases it.
   (PDF/dashboard), **Borsa Istanbul premium** (paid), **DGJG Dubai retail
   rate** (no feed; derivable in-house).
 - **DXY vol index** — discontinued; no free replacement exists.
+
+## Addendum 2026-08-17 — maritime and Iranian press
+
+Filling the two gaps the 2/9/16 Aug retros kept raising. Every candidate was
+fetched **and** extracted from the host through production code; extraction
+matters as much as the feed, because a page that extracts to nothing is worse
+than one that fails outright (see `gnews_gold`, removed 08-08).
+
+### Added
+
+- **gcaptain** (`https://gcaptain.com/feed/`) — 12 items/3d, articles extract
+  1.7–3.0k chars. Playbook #4 already assumed this source existed; now it does.
+- **Maritime Executive** (`https://maritime-executive.com/articles.rss`) —
+  56 items/5d, extracts 2.4–3.7k. Serves playbook #9's incident-feed
+  requirement, since UKMTO's own pages 403 any plain client.
+- **Mehr News English** (`https://en.mehrnews.com/rss`) — 30 items/21h,
+  extracts 867–966 chars (Mehr's copy is genuinely short). One side's account:
+  playbook #1 and #8 apply.
+
+### Verified working but deliberately not added
+
+- **Splash247** (`https://splash247.com/feed/`) — 10 items/6h, fine feed.
+  gcaptain + Maritime Executive already cover the corridor; a third maritime
+  source is volume without new information.
+
+### Rejected, with reasons
+
+- **IRNA English** (`https://en.irna.ir/rss`) — feed parses and looks healthy,
+  but article pages extract to **~70 chars**. Extraction "succeeds" and says
+  nothing, which poisons any article read rather than failing loudly. Restore
+  only behind a real extractor for that site.
+- **Tasnim English** — DNS does not resolve from the host.
+- **Press TV** — TLS chain fails to verify from the host (`CERTIFICATE_VERIFY_FAILED`).
+
+### Note on volume
+
+These three add roughly +45 items/day into a pipeline whose news channel
+already posts ~90 messages a weekday, so all three run hourly rather than
+half-hourly. Flash tiering
+(`docs/superpowers/specs/2026-08-17-flash-tiering-brief.md`) is what makes the
+channel readable; until it ships, expect a modest bump.

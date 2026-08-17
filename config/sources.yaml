@@ -89,6 +89,51 @@ sources:
     interval_minutes: 30
     topic: regional
     display: The National
+  # gcaptain / maritime_executive: added 2026-08-17, approved by Saman after
+  # three retros (2, 9, 16 Aug) re-raised the maritime blind spot with no
+  # channel to reach a dev session. The 28 Jul Jordan missile attack and the
+  # 29 Jul Damietta FSRU strike — each moved Brent >8% intraday — were
+  # invisible to the general feeds. Both verified from the host through
+  # production code: feeds parse, and article pages extract (gcaptain
+  # 1.7-3.0k chars, Maritime Executive 2.4-3.7k), which is what playbook #4
+  # assumed without it ever being in the config. Hourly, not 30-min: the
+  # channel already carries ~90 posts/weekday and flash tiering is not built
+  # yet (docs/superpowers/specs/2026-08-17-flash-tiering-brief.md).
+  - name: gcaptain
+    type: rss
+    url: https://gcaptain.com/feed/
+    interval_minutes: 60
+    topic: maritime
+    display: gCaptain
+  - name: maritime_executive
+    type: rss
+    # The incident feed playbook #9 asks for. UKMTO's own pages are 403-dark
+    # to any plain HTTP client, so no-incident claims have been scoped by
+    # hand; this is the highest-volume trade source that actually covers
+    # corridor incidents (56 items over 5 days at verification).
+    url: https://maritime-executive.com/articles.rss
+    interval_minutes: 60
+    topic: maritime
+    display: Maritime Executive
+  # splash247: verified working (10 items/6h) but not added — gcaptain plus
+  # Maritime Executive already cover the corridor, and a third maritime feed
+  # is volume without new information. Revisit if a gap shows up.
+  # mehr_en: added 2026-08-17 — Iranian press, approved alongside the
+  # maritime feeds. Of four Iranian outlets tried from the host it is the only
+  # one that both fetches and extracts (867-966 chars; Mehr's copy is short).
+  # Treat as one side's account: playbook #1 (confirm who-does-what-to-whom
+  # before it enters stance) and #8 (one-side-sourced claims cap at 0.5).
+  # NOT added, with reasons — irna_en: feed parses, but article pages extract
+  # to ~70 chars, the same "extracts cleanly and says nothing" failure that
+  # got gnews_gold removed on 08-08, and it would poison any article read.
+  # tasnim_en: DNS does not resolve from the host. presstv: TLS chain fails
+  # to verify from the host.
+  - name: mehr_en
+    type: rss
+    url: https://en.mehrnews.com/rss
+    interval_minutes: 60
+    topic: regional
+    display: Mehr News
   # saxo_research / actionforex / fxempire_forecasts / forexlive /
   # gold_eagle: added 2026-07-31 — technical-analysis/trader-commentary
   # tier, all verified from the Hetzner host on the plain jamasp-UA path.
