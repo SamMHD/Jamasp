@@ -39,6 +39,91 @@ def test_extract_uses_cache(tmp_path):
     assert len(calls) == 1  # second call served from cache
 
 
+FRESH_HTML = (
+    "<html><body><article><p>"
+    + "Gold tagged the 200DMA in the Asia overnight. " * 40
+    + "</p></article></body></html>"
+)
+
+
+def _seed_cache(conn, url, text, fetched_at):
+    conn.execute(
+        "INSERT INTO extract_cache (url, fetched_at, text) VALUES (?, ?, ?)",
+        (url, fetched_at, text),
+    )
+    conn.commit()
+
+
+def test_extract_refetches_when_cache_older_than_max_age(tmp_path):
+    # 16 Aug: an AJ index page cached three days earlier was served as fresh.
+    # With a max age, a stale entry must be re-fetched, not replayed.
+    conn = db.connect(tmp_path / "t.db")
+    _seed_cache(conn, "https://e/index", "three-day-old snapshot", "2026-08-13T09:00:00Z")
+    calls = []
+
+    def fake_fetch(url):
+        calls.append(url)
+        return FRESH_HTML
+
+    text = extract.extract_url(
+        conn,
+        "https://e/index",
+        max_chars=2000,
+        fetch=fake_fetch,
+        max_age_hours=6,
+        now="2026-08-16T09:00:00Z",
+    )
+    assert calls == ["https://e/index"]
+    assert "Asia overnight" in text
+    assert "three-day-old snapshot" not in text
+    row = conn.execute(
+        "SELECT fetched_at, text FROM extract_cache WHERE url = ?", ("https://e/index",)
+    ).fetchone()
+    assert row["fetched_at"] == "2026-08-16T09:00:00Z"  # entry replaced, not duplicated
+    assert row["text"] == text
+
+
+def test_extract_serves_cache_within_max_age(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    _seed_cache(conn, "https://e/index", "cached an hour ago", "2026-08-16T08:00:00Z")
+    calls = []
+
+    text = extract.extract_url(
+        conn,
+        "https://e/index",
+        max_chars=2000,
+        fetch=lambda u: calls.append(u) or FRESH_HTML,
+        max_age_hours=6,
+        now="2026-08-16T09:00:00Z",
+    )
+    assert calls == []
+    assert text == "cached an hour ago"
+
+
+def test_extract_ignores_cache_age_by_default(tmp_path):
+    # flash extracts article bodies, which never change — no max age means
+    # the cache stays authoritative however old it is.
+    conn = db.connect(tmp_path / "t.db")
+    _seed_cache(conn, "https://e/a", "ancient article body", "2026-01-01T00:00:00Z")
+    calls = []
+
+    text = extract.extract_url(
+        conn,
+        "https://e/a",
+        max_chars=2000,
+        fetch=lambda u: calls.append(u) or FRESH_HTML,
+    )
+    assert calls == []
+    assert text == "ancient article body"
+
+
+def test_cached_at_reports_entry_age(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    assert extract.cached_at(conn, "https://e/missing") is None
+    _seed_cache(conn, "https://e/a", "body", "2026-08-16T08:00:00Z")
+    assert extract.cached_at(conn, "https://e/a") == "2026-08-16T08:00:00Z"
+
+
 ARTICLE_HTML = (
     "<html><body><article><p>"
     + "Gold steadied as yields fell after the auction. " * 30

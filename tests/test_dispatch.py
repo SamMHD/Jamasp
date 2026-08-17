@@ -142,3 +142,19 @@ def test_cli_dry_run_fires_nothing(tmp_path, monkeypatch):
     assert out.exit_code == 0 and "deepdive" in out.output
     row = conn.execute("SELECT status, attempts FROM wakeups").fetchone()
     assert row["status"] == "pending" and row["attempts"] == 0
+
+
+def test_empty_wakeup_run_stays_pending_for_retry(tmp_path, monkeypatch):
+    # A dispatched deepdive that found its inputs missing (12 Aug CPI: ran
+    # 15 min after the print, committed nothing) must not be marked done —
+    # leaving it pending lets the next tick catch the data.
+    conn = db.connect(tmp_path / "j.db")
+    wid = wakeup.add(conn, "2026-08-01T06:00:00Z", "deepdive", "read CPI")
+    monkeypatch.setattr(
+        dispatch.runner, "run_agent",
+        lambda c, s, rt, task=None, dry_run=False, notify_on_failure=True: "empty",
+    )
+    monkeypatch.setattr(dispatch.runner, "_notify_safe", lambda c, s, t: None)
+    assert dispatch.run_due(conn, SETTINGS, now="2026-08-01T07:00:00Z") == [(wid, "empty")]
+    row = conn.execute("SELECT * FROM wakeups WHERE id=?", (wid,)).fetchone()
+    assert row["status"] == "pending" and row["attempts"] == 1

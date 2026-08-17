@@ -90,16 +90,48 @@ def score(
     return entry
 
 
+def open_unscored(path: Path, now: str | None = None) -> list[dict]:
+    """Unscored predictions that have not yet matured."""
+    now_dt = datetime.fromisoformat((now or utcnow()).replace("Z", "+00:00"))
+    out = []
+    for e in load(path):
+        if e["outcome"] is not None:
+            continue
+        created = datetime.fromisoformat(e["created_at"].replace("Z", "+00:00"))
+        if created + timedelta(days=e["horizon_days"]) > now_dt:
+            out.append(e)
+    return out
+
+
 def render_due(
-    conn: sqlite3.Connection, path: Path, symbol: str, now: str | None = None
+    conn: sqlite3.Connection,
+    path: Path,
+    symbol: str,
+    now: str | None = None,
+    include_open: bool = False,
 ) -> str:
+    """Matured unscored predictions, annotated with the window's price action.
+
+    `window_high`/`window_low` are what settle a level claim — an overnight
+    touch that mean-reverts is invisible to price_then/price_now. With
+    `include_open`, still-running claims are listed too (`matured: false`),
+    so a run can read a live claim's status off the DB instead of recalling
+    it from an earlier run's narrative.
+    """
     now_ts = now or utcnow()
-    entries = due(path, now=now_ts)
-    lines = [f"# jamasp predictions due — {len(entries)} matured, unscored"]
-    for e in entries:
+    entries = [(e, True) for e in due(path, now=now_ts)]
+    if include_open:
+        entries += [(e, False) for e in open_unscored(path, now=now_ts)]
+    matured_n = sum(1 for _, m in entries if m)
+    header = f"# jamasp predictions due — {matured_n} matured, unscored"
+    if include_open:
+        header += f"; {len(entries) - matured_n} still open"
+    lines = [header]
+    for e, matured in entries:
         then = prices.row_at_or_before(conn, symbol, e["created_at"])
         latest_row = prices.row_at_or_before(conn, symbol, now_ts)
         annotated = dict(e)
+        annotated["matured"] = matured
         annotated["price_then"] = then["value"] if then else None
         annotated["price_now"] = latest_row["value"] if latest_row else None
         if then and latest_row and then["value"]:
@@ -108,5 +140,13 @@ def render_due(
             )
         else:
             annotated["move_pct"] = None
+        annotated.update(
+            {
+                f"window_{k}": v
+                for k, v in prices.window_extremes(
+                    conn, symbol, e["created_at"], now_ts
+                ).items()
+            }
+        )
         lines.append(json.dumps(annotated, ensure_ascii=False))
     return "\n".join(lines)

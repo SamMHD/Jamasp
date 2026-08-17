@@ -138,12 +138,24 @@ def inbox(mark_read, cap, db_path, config_dir):
 
 @main.command()
 @click.argument("url")
+@click.option("--fresh", is_flag=True, help="ignore any cached copy and re-fetch")
 @db_opt
 @cfg_opt
-def extract(url, db_path, config_dir):
-    """Print readability-extracted article text (cached, truncated)."""
+def extract(url, fresh, db_path, config_dir):
+    """Print readability-extracted article text (cached, truncated).
+
+    The first line carries the extract's `fetched_at` and age, so a stale
+    index-page snapshot can't be read as the live tape.
+    """
     conn, _, settings = _common(db_path, config_dir)
-    click.echo(extract_mod.extract_url(conn, url, settings["extract_max_chars"]))
+    max_age = 0 if fresh else settings.get("extract_max_age_hours", 6)
+    text = extract_mod.extract_url(
+        conn, url, settings["extract_max_chars"], max_age_hours=max_age
+    )
+    fetched_at = extract_mod.cached_at(conn, url)
+    age = extract_mod._age_hours(fetched_at, db_mod.utcnow())
+    click.echo(f"# extract {url} — fetched_at {fetched_at} ({age:.1f}h ago)")
+    click.echo(text)
 
 
 def _flash_line(stats: dict) -> str:
@@ -388,14 +400,26 @@ def predictions_list(pred_path, db_path, config_dir):
 
 
 @predictions_group.command("due")
+@click.option(
+    "--open", "include_open", is_flag=True,
+    help="also list still-running claims (for checking a live level's status)",
+)
 @pred_path_opt
 @db_opt
 @cfg_opt
-def predictions_due(pred_path, db_path, config_dir):
-    """Matured, unscored predictions annotated with the actual price move."""
+def predictions_due(include_open, pred_path, db_path, config_dir):
+    """Matured, unscored predictions annotated with the actual price move.
+
+    Every entry carries `window_high`/`window_low` over the claim's window,
+    which is what settles a level claim — endpoints miss an overnight touch.
+    """
     conn, _, settings = _common(db_path, config_dir)
     symbol = settings.get("predictions", {}).get("price_symbol", "GC")
-    click.echo(predictions_mod.render_due(conn, Path(pred_path), symbol))
+    click.echo(
+        predictions_mod.render_due(
+            conn, Path(pred_path), symbol, include_open=include_open
+        )
+    )
 
 
 @predictions_group.command("score")

@@ -12,6 +12,11 @@ Cheap run. Target: a few thousand tokens, sub-minute. The default outcome is
 
 - Read `state/stance.md`.
 - Run `uv run jamasp inbox` and `uv run jamasp price`.
+- If the stance carries a live level claim, run
+  `uv run jamasp predictions due --open` and read its `window_high` /
+  `window_low` before repeating that claim's status. An overnight touch that
+  mean-reverts is invisible in the latest print, and a scan is exactly where
+  stale narrative status gets copied forward.
 
 ## 2. Decide
 

@@ -109,6 +109,18 @@ describe("StatusStrip — per-run-type dots", () => {
     expect(html).toContain("bg-amber-400");
   });
 
+  // An `empty` run exited 0, burnt a slot from the daily cap, and committed
+  // nothing — a problem needing attention, not an unknown. Grey would read as
+  // never-run; runBadge already treats it as destructive, so the dot matches.
+  it("colors an empty run destructive, not the unknown-status grey", () => {
+    const html = render({
+      ...BASE,
+      lastRuns: [...BASE_RUNS, run("retro", "empty", "2026-08-01T09:00:00Z")],
+    });
+    expect(html).toContain("retro: empty");
+    expect(html).not.toMatch(/rounded-full bg-muted-foreground"/);
+  });
+
   // Guard audit: `DOT[r.status] ?? "bg-muted-foreground"`. An unrecognised
   // status string must not vanish (undefined class) or silently borrow
   // another status's color, and its fallback grey must read as distinct

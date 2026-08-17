@@ -207,8 +207,16 @@ def test_notify_cli_dry_run_does_not_log(tmp_path):
 
 
 def test_run_cmd_ok_exits_zero(tmp_path, monkeypatch):
+    import itertools
+
+    from jamasp import runner as runner_mod
+
     monkeypatch.delenv("JAMASP_TG_TOKEN", raising=False)
     monkeypatch.delenv("JAMASP_TG_CHAT", raising=False)
+    # HEAD has to move for the run to count as done — the fake agent commits
+    # nothing, so without this it is correctly reported `empty`.
+    counter = itertools.count()
+    monkeypatch.setattr(runner_mod, "_git_head", lambda: f"head{next(counter)}")
     cfg = _write_configs(tmp_path, "sources: []\n", _runs_yaml("ok"))
     dbp = tmp_path / "j.db"
     runner = CliRunner()
@@ -401,3 +409,114 @@ def test_wakeup_cancel_cli(tmp_path):
     assert f"cancelled wakeup #{wid}" in cancel.output
     bad = r.invoke(cli.main, ["wakeup", "cancel", "999", "--db", db, "--config-dir", "config"])
     assert bad.exit_code != 0
+
+
+def test_extract_prints_freshness_header(tmp_path):
+    # The agent must see how old an extract is without having to ask the
+    # cache table — a 13 Aug snapshot read as live cost a wrong stance on
+    # 16 Aug. The header carries fetched_at and age above the text.
+    from datetime import datetime, timedelta, timezone
+
+    cfg = _write_configs(tmp_path, "sources: []\n")
+    dbp = tmp_path / "j.db"
+    conn = db.connect(dbp)
+    two_hours_ago = (datetime.now(timezone.utc) - timedelta(hours=2)).strftime(
+        "%Y-%m-%dT%H:%M:%SZ"
+    )
+    conn.execute(
+        "INSERT INTO extract_cache (url, fetched_at, text) VALUES (?, ?, ?)",
+        ("https://aj.example/saudi", two_hours_ago, "two-hour-old snapshot"),
+    )
+    conn.commit()
+    result = CliRunner().invoke(
+        main,
+        ["extract", "https://aj.example/saudi", "--db", str(dbp), "--config-dir", str(cfg)],
+    )
+    assert result.exit_code == 0, result.output
+    header = result.output.splitlines()[0]
+    assert "https://aj.example/saudi" in header
+    assert two_hours_ago in header
+    assert "2.0h ago" in header
+    assert "two-hour-old snapshot" in result.output
+
+
+def test_extract_fresh_flag_busts_cache(tmp_path, monkeypatch):
+    from jamasp import extract as extract_mod
+
+    cfg = _write_configs(tmp_path, "sources: []\n")
+    dbp = tmp_path / "j.db"
+    conn = db.connect(dbp)
+    conn.execute(
+        "INSERT INTO extract_cache (url, fetched_at, text) VALUES (?, ?, ?)",
+        ("https://aj.example/saudi", "2026-08-13T09:00:00Z", "three-day-old snapshot"),
+    )
+    conn.commit()
+    monkeypatch.setattr(
+        extract_mod,
+        "_default_fetch",
+        lambda url: "<html><body><article><p>" + "Fresh copy of the page. " * 40
+        + "</p></article></body></html>",
+    )
+    result = CliRunner().invoke(
+        main,
+        ["extract", "https://aj.example/saudi", "--fresh",
+         "--db", str(dbp), "--config-dir", str(cfg)],
+    )
+    assert result.exit_code == 0, result.output
+    assert "Fresh copy of the page" in result.output
+    assert "three-day-old snapshot" not in result.output
+
+
+def test_predictions_due_open_flag(tmp_path):
+    from jamasp.ingest import prices
+
+    cfg = _write_configs(tmp_path, "sources: []\n")
+    dbp = tmp_path / "j.db"
+    conn = db.connect(dbp)
+    prices.store_price(conn, "GC", "2026-08-12T05:00:00Z", 4468.0)
+    prices.store_price(conn, "GC", "2026-08-13T00:35:00Z", 4501.8)
+    pred = tmp_path / "p.jsonl"
+    r = CliRunner()
+    add = r.invoke(main, [
+        "predictions", "add", "gold tags 4500 by Friday",
+        "--direction", "up", "--horizon-days", "30", "--confidence", "0.8",
+        "--path", str(pred), "--db", str(dbp), "--config-dir", str(cfg),
+    ])
+    assert add.exit_code == 0, add.output
+
+    without = r.invoke(main, [
+        "predictions", "due",
+        "--path", str(pred), "--db", str(dbp), "--config-dir", str(cfg),
+    ])
+    assert without.exit_code == 0, without.output
+    assert "gold tags 4500" not in without.output
+
+    with_open = r.invoke(main, [
+        "predictions", "due", "--open",
+        "--path", str(pred), "--db", str(dbp), "--config-dir", str(cfg),
+    ])
+    assert with_open.exit_code == 0, with_open.output
+    assert "gold tags 4500" in with_open.output
+    assert "4501.8" in with_open.output
+    assert "still open" in with_open.output
+
+
+def test_run_cmd_empty_exits_zero(tmp_path, monkeypatch):
+    # run_agent already Telegrams the desk about an empty run; exiting
+    # non-zero would additionally trip the unit's OnFailure alert and
+    # notify twice for one event.
+    from jamasp import runner as runner_mod
+
+    monkeypatch.delenv("JAMASP_TG_TOKEN", raising=False)
+    monkeypatch.delenv("JAMASP_TG_CHAT", raising=False)
+    monkeypatch.setattr(runner_mod, "_git_head", lambda: "unchanged")
+    cfg = _write_configs(tmp_path, "sources: []\n", _runs_yaml("ok"))
+    dbp = tmp_path / "j.db"
+    out = CliRunner().invoke(
+        main, ["run", "scan", "--db", str(dbp), "--config-dir", str(cfg)]
+    )
+    assert "scan: empty" in out.output
+    assert out.exit_code == 0
+    conn = db.connect(dbp)
+    rows = conn.execute("SELECT status FROM agent_runs").fetchall()
+    assert [r["status"] for r in rows] == ["empty"]
