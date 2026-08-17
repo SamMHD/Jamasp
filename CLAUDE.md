@@ -91,7 +91,15 @@ current on their own. They trigger on development work, not on analysis runs —
 a brief or scan should never invoke them.
 
 `.claude/skills/` holds only Jamasp's own skills: `brief`, `scan`,
-`deepdive`, `retro`, `deploy`, `access-whitelist`, `alerting`.
+`deepdive`, `retro`, `deploy`, `access-whitelist`, `alerting`, `todos`.
+
+Outstanding code, config and ops gaps live in `docs/todo/` — one file per
+item, convention in `docs/todo/README.md`, and the **`todos` skill** covers
+recording, working and closing them. It is a different queue from
+`state/lessons-inbox.md` (analysis lessons, consumed by `/retro`) and from the
+wakeup queue (analysis runs to do later): an analysis run that finds a *code*
+gap files it in `docs/todo/` and carries on, rather than fixing Jamasp
+mid-run or re-raising it in a Telegram line that reaches nobody.
 
 The web control panel lives in `panel/` (Next.js; see
 `docs/superpowers/specs/2026-08-01-jamasp-panel-design.md`). It reads
