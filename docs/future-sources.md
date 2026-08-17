@@ -227,3 +227,24 @@ already posts ~90 messages a weekday, so all three run hourly rather than
 half-hourly. Flash tiering
 (`docs/superpowers/specs/2026-08-17-flash-tiering-brief.md`) is what makes the
 channel readable; until it ships, expect a modest bump.
+
+### Calendar horizon — no free replacement found (2026-08-17)
+
+`ff_calendar` fetches `ff_calendar_thisweek.json`, so the calendar can never
+see beyond the current week, and `jamasp calendar` used to label its output
+"next 14d" regardless — which the 9 and 16 Aug retros read as a dead feed
+rather than a horizon. Probed for a drop-in replacement and found none:
+
+- `ff_calendar_nextweek.json`, `_lastweek`, `_thismonth`, `_nextmonth`,
+  `_tomorrow` on `nfs.faireconomy.media` — all **404**. Only `thisweek` exists.
+- **BLS release schedule** (`/schedule/news_release/bls.ics` and the HTML
+  schedule) — **403 from the host even through the WARP proxy fallback**. The
+  low-volume `bls_latest.rss` feed still works; the schedule pages do not.
+- **Federal Reserve** — no `.ics` or FOMC-dates feed at the obvious paths.
+- **TreasuryDirect announced auctions**
+  (`/TA_WS/securities/announced?format=json&days=90`) — **works, 200, ~385KB**.
+  Not wired up: auction dates are a narrow slice of what a calendar is for, but
+  this is the one live lead if the far horizon ever matters enough.
+
+Until one of those changes, the ~7-day horizon is a property of the source, not
+a bug, and `state/calendar.yaml` is where further-out events belong.

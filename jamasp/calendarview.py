@@ -26,7 +26,20 @@ def render(
     ).fetchall()
     if impact_min != "all":
         rows = [r for r in rows if r["impact"] in DEFAULT_IMPACTS]
-    lines = [f"# jamasp calendar — {len(rows)} events next {days}d (times: UTC + Dubai)"]
+    # The only calendar source is ff_calendar_thisweek.json, so the feed never
+    # reaches beyond the current week however many days are asked for. Saying
+    # "next 14d" without that caveat got read as an outage by two retros
+    # rather than as a horizon; state the real coverage instead.
+    covered_to = conn.execute("SELECT MAX(starts_at) m FROM events").fetchone()["m"]
+    header = f"# jamasp calendar — {len(rows)} events next {days}d (times: UTC + Dubai)"
+    if covered_to is None:
+        header += " — no events stored; run `jamasp ingest`"
+    else:
+        header += (
+            f"; feed covers to {covered_to[:10]}, further out is"
+            " state/calendar.yaml, not this feed"
+        )
+    lines = [header]
     for r in rows:
         dt = datetime.fromisoformat(r["starts_at"].replace("Z", "+00:00"))
         lines.append(json.dumps({
