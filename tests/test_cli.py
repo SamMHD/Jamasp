@@ -391,7 +391,7 @@ sources:
     )
     assert result.exit_code == 0
     assert calls == [1]
-    assert "flash: 1 posted, 2 updated" in result.output
+    assert "flash: 1 posted, 0 held, 0 low tier, 0 no tier, 2 updated" in result.output
 
 
 def test_wakeup_cancel_cli(tmp_path):
@@ -542,3 +542,19 @@ def test_flash_rollup_command_reports_and_dry_runs(tmp_path, monkeypatch):
     )
     assert out.exit_code == 0, out.output
     assert "rollup: 5 items, 1 sent" in out.output
+
+
+def test_flash_line_reports_tier_outcomes():
+    # A live tick classified 30 items and the line accounted for 11 of them:
+    # held and low-tier were invisible, which is the same conflated-counter
+    # mistake that made skipped_stale unreadable.
+    from jamasp.cli import _flash_line
+
+    line = _flash_line({
+        "posted": 1, "dup": 1, "not_gold": 9, "unreadable": 0, "burst": 0,
+        "stale": 0, "born_old": 82, "held": 12, "low_tier": 7, "no_tier": 2,
+        "errors": 0,
+    })
+    assert "12 held" in line
+    assert "7 low tier" in line
+    assert "2 no tier" in line
