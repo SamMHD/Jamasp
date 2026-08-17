@@ -534,7 +534,8 @@ def test_flash_rollup_command_reports_and_dry_runs(tmp_path, monkeypatch):
     )
     monkeypatch.setattr(
         flash_mod, "run_rollup",
-        lambda *a, **k: {"items": 5, "sent": 1, "below_floor": 0, "errors": 0},
+        lambda *a, **k: {"items": 5, "sent": 1, "below_floor": 0, "carried": 2,
+                         "errors": 0},
     )
     out = CliRunner().invoke(
         main,
@@ -542,6 +543,7 @@ def test_flash_rollup_command_reports_and_dry_runs(tmp_path, monkeypatch):
     )
     assert out.exit_code == 0, out.output
     assert "rollup: 5 items, 1 sent" in out.output
+    assert "2 carried" in out.output
 
 
 def test_flash_line_reports_tier_outcomes():

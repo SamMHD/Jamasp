@@ -46,4 +46,9 @@ flash:
   # returns. The times themselves are the timer's business, not the code's —
   # see ops/systemd/jamasp-flash-rollup.timer.
   rollup_min_items: 3
+  # Ceiling per rollup. Telegram hard-rejects past 4096 chars and a rejected
+  # send leaves every item held, so an uncapped backlog wedges the rollup for
+  # good. Anything over the cap is carried, named in the message, and goes out
+  # at the head of the next window.
+  rollup_max_items: 20
   rollup_cmd: ["claude", "-p", "--model", "sonnet"]
