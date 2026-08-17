@@ -36,9 +36,22 @@ For every NEW id decide two things:
      "Gold hits record" and "Gold pulls back from record" are two stories.
    - When unsure, use null. A duplicate message is a smaller failure than a
      suppressed story.
+3. "tier": how much this item matters to a gold desk, 1-5.
+   - 5: moves gold now — an FOMC decision, a CPI/PPI surprise, central-bank
+     gold buying, war escalation touching supply or safe-haven demand.
+   - 4: changes the setup — Fed speakers shifting rate odds, ECB/BOJ policy
+     signals, large ETF or physical flows, an auction tail.
+   - 3: context — routine macro prints landing in line, geopolitical
+     follow-ups, mining corporate news.
+   - 2: adjacent — oil, equity or FX moves with no gold transmission channel.
+   - 1: noise — scheduled technical-analysis columns ("EUR/USD Daily
+     Outlook"), the PBOC daily fix, option expiries, retail price notes,
+     history and opinion pieces.
+   Judge the substance, not how dramatic the wording is: a routine print
+   written excitedly is still a 3, and a plainly-worded rate signal is a 4.
 
 Respond with ONLY a JSON object mapping each NEW id to
-{"gold": bool, "dup_of": id or null}. No other text.
+{"gold": bool, "dup_of": id or null, "tier": 1-5}. No other text.
 
 """
 
@@ -138,6 +151,19 @@ def build_decide_prompt(
     return f"{DECIDE_HEADER}POSTED:\n{posted_block}\n\nNEW:\n{new_block}\n"
 
 
+def _tier(raw: object) -> int | None:
+    """A 1-5 tier, or None when the model didn't give a usable one.
+
+    None is a real answer, not a default: the caller decides what an unscored
+    item does, and it must not be silently treated as low.
+    """
+    try:
+        value = int(raw)
+    except (TypeError, ValueError):
+        return None
+    return value if 1 <= value <= 5 else None
+
+
 def parse_decide_response(text: str) -> dict[str, dict]:
     verdicts = {}
     for item_id, raw in _json_object(text).items():
@@ -147,6 +173,7 @@ def parse_decide_response(text: str) -> dict[str, dict]:
         verdicts[str(item_id)] = {
             "gold": bool(raw.get("gold")),
             "dup_of": str(dup) if dup else None,
+            "tier": _tier(raw.get("tier")),
         }
     return verdicts
 
@@ -231,3 +258,80 @@ def render_message(
     if len(text) > MAX_CHARS:
         text = text[: MAX_CHARS - 1] + "…"
     return text
+
+
+# Fixed theme keys, so rendering stays deterministic whatever the model returns.
+# Persian labels are ours, not the model's — a raw key must never reach the
+# channel, and a mislabelled group is folded into `other` rather than dropped:
+# losing the desk a story is worse than filing it under the wrong header.
+ROLLUP_THEMES = {
+    "rates_dollar": "نرخ‌ها و دلار",
+    "geopolitics": "ژئوپلیتیک",
+    "metals_mining": "فلزات و معادن",
+    "other": "سایر",
+}
+
+ROLLUP_HEADER = """You are the news desk for a physical gold trading company, writing the
+periodic roundup of stories that matter but did not each warrant their own
+alert.
+
+ITEMS lists them as id<TAB>source<TAB>headline<TAB>lede.
+
+Write ONE Persian line per item. Each line states the fact and its
+transmission channel to gold — why a gold desk should care, or that it
+mostly shouldn't. Keep numbers and tickers in Latin script. No preamble, no
+per-line source attribution, no markdown inside a line.
+
+Group the lines under these themes, using exactly these keys:
+  "rates_dollar"  — rates, the dollar, inflation prints, central-bank policy
+  "geopolitics"   — conflict, sanctions, shipping and corridor risk
+  "metals_mining" — gold, silver, miners, physical and ETF flows
+  "other"         — anything that fits none of the above
+
+Omit a theme entirely if it has no lines. Merge items that turn out to be the
+same story into one line.
+
+Respond with ONLY a JSON object:
+{"groups": [{"theme": "<key>", "lines": ["<persian line>", ...]}]}
+No other text.
+
+"""
+
+
+def build_rollup_prompt(items: Sequence[Mapping]) -> str:
+    block = "\n".join(
+        f"{i['id']}\t{_one_line(i['source'])}\t{_one_line(i['headline'])}"
+        f"\t{_one_line(i.get('lede') or '')}"
+        for i in items
+    )
+    return f"{ROLLUP_HEADER}ITEMS:\n{block}\n"
+
+
+def parse_rollup_response(text: str) -> list[tuple[str, list[str]]]:
+    """Themed groups of Persian lines, in the order the model returned them."""
+    groups: list[tuple[str, list[str]]] = []
+    for raw in _json_object(text).get("groups") or []:
+        if not isinstance(raw, dict):
+            continue
+        lines = [
+            str(line).strip()
+            for line in (raw.get("lines") or [])
+            if str(line).strip()
+        ]
+        if not lines:
+            continue
+        theme = str(raw.get("theme") or "other")
+        groups.append((theme if theme in ROLLUP_THEMES else "other", lines))
+    if not groups:
+        raise ValueError("rollup response carried no usable lines")
+    return groups
+
+
+def render_rollup(groups: Sequence[tuple[str, Sequence[str]]]) -> str:
+    """The channel message for one rollup window."""
+    parts = ["📋 جمع‌بندی اخبار"]
+    for theme, lines in groups:
+        parts.append("")
+        parts.append(f"**{ROLLUP_THEMES.get(theme, ROLLUP_THEMES['other'])}**")
+        parts.extend(f"• {line}" for line in lines)
+    return latin_digits("\n".join(parts))

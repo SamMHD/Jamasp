@@ -1,3 +1,5 @@
+import sqlite3
+
 from jamasp import db
 
 
@@ -75,3 +77,41 @@ def test_flashes_requires_message_id(tmp_path):
             " summary_fa, impact_fa, url, message_id, status)"
             " VALUES ('a','t','t','en','fa','s','i','https://e/1', NULL, 'sent')"
         )
+
+
+def test_connect_adds_missing_flash_item_columns(tmp_path):
+    # connect() only runs CREATE TABLE IF NOT EXISTS, so a database created
+    # before tiering never gains the new columns without an explicit step —
+    # and the deployed one is 9MB of live history that can't be recreated.
+    path = tmp_path / "old.db"
+    old = sqlite3.connect(path)
+    old.executescript(
+        "CREATE TABLE flash_items ("
+        " item_id TEXT PRIMARY KEY, flash_id TEXT, state TEXT NOT NULL, ts TEXT NOT NULL);"
+    )
+    old.execute(
+        "INSERT INTO flash_items (item_id, flash_id, state, ts)"
+        " VALUES ('i1', NULL, 'posted', '2026-08-01T00:00:00Z')"
+    )
+    old.commit()
+    old.close()
+
+    conn = db.connect(path)
+    cols = {r["name"] for r in conn.execute("PRAGMA table_info(flash_items)")}
+    assert {"tier", "rollup_id"} <= cols
+    # the pre-existing row survives, with NULLs in the new columns
+    row = conn.execute("SELECT * FROM flash_items WHERE item_id = 'i1'").fetchone()
+    assert row["state"] == "posted" and row["tier"] is None
+    conn.close()
+
+    # idempotent: a second connect must not fail on duplicate columns
+    again = db.connect(path)
+    assert {"tier", "rollup_id"} <= {
+        r["name"] for r in again.execute("PRAGMA table_info(flash_items)")
+    }
+
+
+def test_connect_creates_rollups_table(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    cols = {r["name"] for r in conn.execute("PRAGMA table_info(rollups)")}
+    assert {"id", "created_at", "text_fa", "message_id", "status"} <= cols

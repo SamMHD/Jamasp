@@ -97,8 +97,8 @@ flash pass disables itself and logs to `source_errors`; ingestion, briefs, and
 scans are unaffected.
 
 ### 5. systemd units
-All 12 unit files (6 services + 6 timers: ingest, brief, scan, dispatch,
-retro, watchdog) live in `ops/systemd/` in this repo — copy them onto the
+All 14 unit files (7 services + 7 timers: ingest, brief, scan, dispatch,
+retro, watchdog, flash-rollup) live in `ops/systemd/` in this repo — copy them onto the
 host rather than hand-writing units. Use **system** units
 (`/etc/systemd/system/`, `User=jamasp`) when you have root; use **user**
 units (`~/.config/systemd/user/`, plus `loginctl enable-linger jamasp` and
@@ -135,7 +135,7 @@ Enable in two stages — the deterministic infra first, the agentic runs
 after the human handoff:
 ```bash
 # (drop --user for system units)
-systemctl --user enable --now jamasp-ingest.timer jamasp-dispatch.timer jamasp-watchdog.timer
+systemctl --user enable --now jamasp-ingest.timer jamasp-dispatch.timer jamasp-watchdog.timer jamasp-flash-rollup.timer
 # jamasp-brief.timer, jamasp-scan.timer, jamasp-retro.timer stay DISABLED
 # until the human steps below are done
 ```

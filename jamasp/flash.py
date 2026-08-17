@@ -53,15 +53,33 @@ def record(
     flash_id: str | None,
     state: str,
     commit: bool = True,
+    tier: int | None = None,
+    rollup_id: int | None = None,
 ) -> None:
     conn.execute(
-        "INSERT OR REPLACE INTO flash_items (item_id, flash_id, state, ts)"
-        " VALUES (?, ?, ?, ?)",
-        (item_id, flash_id, state, utcnow()),
+        "INSERT OR REPLACE INTO flash_items"
+        " (item_id, flash_id, state, ts, tier, rollup_id)"
+        " VALUES (?, ?, ?, ?, ?, ?)",
+        (item_id, flash_id, state, utcnow(), tier, rollup_id),
     )
     if commit:
         conn.commit()
 
+
+def held_item_ids(conn: sqlite3.Connection) -> set[str]:
+    """Items classified for a rollup and not yet sent in one."""
+    return {
+        r["item_id"]
+        for r in conn.execute("SELECT item_id FROM flash_items WHERE state = 'held'")
+    }
+
+
+# Tier boundaries, overridable in config: at or above post_tier_min goes to
+# the channel now, at or above rollup_tier_min waits for a rollup, below that
+# never reaches the channel. Config rather than constants because the tier
+# definitions are a judgement that needs tuning once a week of data exists.
+DEFAULT_POST_TIER_MIN = 4
+DEFAULT_ROLLUP_TIER_MIN = 3
 
 # Share of each batch held for the items closest to the age cliff. Ordering
 # purely by published_at DESC lets every tick's fresh arrivals outrank items
@@ -190,7 +208,8 @@ UNREADABLE = object()  # the write model refused: source text was not an article
 
 
 def _publish(
-    conn, item, cfg, display, chat, post, run_model, emit, dry_run, extract_max
+    conn, item, cfg, display, chat, post, run_model, emit, dry_run, extract_max,
+    tier=None,
 ):
     """Post one new story.
 
@@ -250,7 +269,7 @@ def _publish(
                  fields["summary_fa"], fields["impact_fa"], item["url"],
                  message_id),
             )
-            record(conn, item["id"], item["id"], "posted", commit=False)
+            record(conn, item["id"], item["id"], "posted", commit=False, tier=tier)
     except Exception as exc:
         log_error(conn, exc)
         return None
@@ -308,7 +327,8 @@ def run_flash(
 ) -> dict[str, int]:
     """One flash pass. Never raises; every failure is counted and logged."""
     stats = {"posted": 0, "dup": 0, "not_gold": 0, "unreadable": 0, "stale": 0,
-             "born_old": 0, "burst": 0, "errors": 0}
+             "born_old": 0, "held": 0, "low_tier": 0, "no_tier": 0,
+             "burst": 0, "errors": 0}
     try:
         return _run_pass(conn, settings, sources, post, run_model, emit, dry_run,
                          stats)
@@ -363,6 +383,9 @@ def _run_pass(conn, settings, sources, post, run_model, emit, dry_run, stats):
     display = config_mod.display_names(sources)
     extract_max = settings.get("extract_max_chars", DEFAULT_EXTRACT_MAX_CHARS)
     budget = cfg["max_posts_per_tick"]
+    post_tier_min = cfg.get("post_tier_min", DEFAULT_POST_TIER_MIN)
+    rollup_tier_min = cfg.get("rollup_tier_min", DEFAULT_ROLLUP_TIER_MIN)
+    held = held_item_ids(conn)
     for item in pending:
         verdict = verdicts.get(item["id"])
         if verdict is None:
@@ -372,6 +395,13 @@ def _run_pass(conn, settings, sources, post, run_model, emit, dry_run, stats):
                 record(conn, item["id"], None, "not_gold")
             stats["not_gold"] += 1
             continue
+        tier = verdict["tier"]
+        if tier is None:
+            # The model dropped the field. Fall through to today's behaviour —
+            # post it — because a visible over-post is self-correcting and a
+            # silently suppressed material story is not. Counted so the rate
+            # is observable rather than assumed.
+            stats["no_tier"] += 1
         target_id = verdict["dup_of"]
         row = known.get(target_id) if target_id else None
         if row is not None:
@@ -380,6 +410,26 @@ def _run_pass(conn, settings, sources, post, run_model, emit, dry_run, stats):
             else:
                 stats["errors"] += 1
             continue
+        if target_id and target_id in held:
+            # The story it repeats is queued for a rollup, so there is no
+            # message to edit. Publishing this copy as a new story would put
+            # the same narrative in the channel twice — once now, once as a
+            # rollup line.
+            if not dry_run:
+                record(conn, item["id"], None, "dup", tier=tier)
+            stats["dup"] += 1
+            continue
+        if tier is not None and tier < rollup_tier_min:
+            if not dry_run:
+                record(conn, item["id"], None, "skipped_low_tier", tier=tier)
+            stats["low_tier"] += 1
+            continue
+        if tier is not None and tier < post_tier_min:
+            if not dry_run:
+                record(conn, item["id"], None, "held", tier=tier)
+            held.add(item["id"])
+            stats["held"] += 1
+            continue
         if budget <= 0:
             if not dry_run:
                 record(conn, item["id"], None, "skipped_burst")
@@ -387,7 +437,7 @@ def _run_pass(conn, settings, sources, post, run_model, emit, dry_run, stats):
             continue
         flash_id = _publish(
             conn, item, cfg, display, chat, post, run_model, emit, dry_run,
-            extract_max,
+            extract_max, tier=tier,
         )
         if flash_id is UNREADABLE:
             # no message, so it never cost a slot in the per-tick budget
@@ -406,4 +456,115 @@ def _run_pass(conn, settings, sources, post, run_model, emit, dry_run, stats):
             # lookup and is treated as a new story, which is the safe
             # direction.
             known = {row["id"]: row for row in posted_flashes(conn)}
+    return stats
+
+
+DEFAULT_ROLLUP_MIN_ITEMS = 3
+
+
+def held_items(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    """Held items with the fields the rollup prompt needs, oldest first."""
+    return conn.execute(
+        "SELECT i.id, i.source, i.headline, i.lede, i.published_at, f.tier"
+        " FROM flash_items f JOIN items i ON i.id = f.item_id"
+        " WHERE f.state = 'held' ORDER BY i.published_at",
+    ).fetchall()
+
+
+def run_rollup(
+    conn: sqlite3.Connection,
+    settings: dict,
+    post: Callable | None = None,
+    run_model: Callable[[list[str], str], str] | None = None,
+    emit: Callable[[str], None] | None = None,
+    dry_run: bool = False,
+) -> dict[str, int]:
+    """Send one periodic roundup of held (middle-tier) stories.
+
+    Nothing is marked `rolled_up` unless Telegram accepted the message: on any
+    failure the items stay held and the next window retries them. Never raises
+    — the timer that drives this must not fail on a model hiccup.
+    """
+    stats = {"items": 0, "sent": 0, "below_floor": 0, "errors": 0}
+    try:
+        return _rollup_pass(conn, settings, post, run_model, emit, dry_run, stats)
+    except Exception as exc:
+        stats["errors"] += 1
+        try:
+            log_error(conn, exc)
+        except Exception:
+            pass
+        return stats
+
+
+def _rollup_pass(conn, settings, post, run_model, emit, dry_run, stats):
+    cfg = settings.get("flash") or {}
+    if not cfg.get("enabled"):
+        return stats
+    run_model = run_model or _run_model
+    rows = held_items(conn)
+    stats["items"] = len(rows)
+    if not rows:
+        return stats
+    floor = cfg.get("rollup_min_items", DEFAULT_ROLLUP_MIN_ITEMS)
+    if len(rows) < floor:
+        # Left held on purpose: they roll into the next window.
+        stats["below_floor"] = len(rows)
+        return stats
+    try:
+        chat = notify_mod.resolve_chat(settings, "news")
+    except RuntimeError as exc:
+        log_error(conn, exc)
+        stats["errors"] += 1
+        return stats
+    items = [
+        {"id": r["id"], "source": r["source"], "headline": r["headline"],
+         "lede": r["lede"]}
+        for r in rows
+    ]
+    try:
+        groups = flashtext.parse_rollup_response(
+            run_model(
+                cfg.get("rollup_cmd") or cfg["write_cmd"],
+                flashtext.build_rollup_prompt(items),
+            )
+        )
+        text = flashtext.render_rollup(groups)
+    except Exception as exc:
+        log_error(conn, exc)
+        stats["errors"] += 1
+        return stats
+    if dry_run:
+        if emit:
+            emit(text)
+        return stats
+    token, chat_id = chat
+    try:
+        message_id = notify_mod.send_telegram(text, token, chat_id, post=post)
+    except Exception as exc:
+        log_error(conn, exc)
+        stats["errors"] += 1
+        return stats
+    try:
+        # One transaction: a rollups row whose items stayed held would send the
+        # same lines again next window.
+        with conn:
+            cur = conn.execute(
+                "INSERT INTO rollups (created_at, text_fa, message_id, status)"
+                " VALUES (?, ?, ?, 'sent')",
+                (utcnow(), text, message_id),
+            )
+            rollup_id = cur.lastrowid
+            for r in rows:
+                # carry the tier forward: it is the data that makes the
+                # thresholds reviewable after a week of live scoring
+                record(
+                    conn, r["id"], None, "rolled_up", commit=False,
+                    tier=r["tier"], rollup_id=rollup_id,
+                )
+    except Exception as exc:
+        log_error(conn, exc)
+        stats["errors"] += 1
+        return stats
+    stats["sent"] = 1
     return stats

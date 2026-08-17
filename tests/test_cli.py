@@ -520,3 +520,25 @@ def test_run_cmd_empty_exits_zero(tmp_path, monkeypatch):
     conn = db.connect(dbp)
     rows = conn.execute("SELECT status FROM agent_runs").fetchall()
     assert [r["status"] for r in rows] == ["empty"]
+
+
+def test_flash_rollup_command_reports_and_dry_runs(tmp_path, monkeypatch):
+    from jamasp import flash as flash_mod
+
+    cfg = _write_configs(
+        tmp_path, "sources: []\n",
+        "flash:\n  enabled: true\n  max_age_hours: 6\n  max_posts_per_tick: 10\n"
+        "  classify_batch_max: 30\n  extract_chars: 4000\n"
+        '  decide_cmd: ["fake"]\n  write_cmd: ["fake"]\n'
+        "  rollup_min_items: 3\n",
+    )
+    monkeypatch.setattr(
+        flash_mod, "run_rollup",
+        lambda *a, **k: {"items": 5, "sent": 1, "below_floor": 0, "errors": 0},
+    )
+    out = CliRunner().invoke(
+        main,
+        ["flash-rollup", "--db", str(tmp_path / "j.db"), "--config-dir", str(cfg)],
+    )
+    assert out.exit_code == 0, out.output
+    assert "rollup: 5 items, 1 sent" in out.output
