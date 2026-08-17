@@ -161,7 +161,9 @@ def extract(url, fresh, db_path, config_dir):
 def _flash_line(stats: dict) -> str:
     """One-line flash summary, shared by `ingest` and `flash`."""
     return (
-        f"flash: {stats['posted']} posted, {stats['dup']} updated, "
+        f"flash: {stats['posted']} posted, {stats.get('held', 0)} held, "
+        f"{stats.get('low_tier', 0)} low tier, {stats.get('no_tier', 0)} no tier, "
+        f"{stats['dup']} updated, "
         f"{stats['not_gold']} not gold, {stats['unreadable']} unreadable, "
         f"{stats['burst']} over cap, {stats['stale']} stale, "
         f"{stats.get('born_old', 0)} born old, "
