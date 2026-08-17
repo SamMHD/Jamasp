@@ -164,6 +164,7 @@ def _flash_line(stats: dict) -> str:
         f"flash: {stats['posted']} posted, {stats['dup']} updated, "
         f"{stats['not_gold']} not gold, {stats['unreadable']} unreadable, "
         f"{stats['burst']} over cap, {stats['stale']} stale, "
+        f"{stats.get('born_old', 0)} born old, "
         f"{stats['errors']} errors"
     )
 
@@ -179,6 +180,26 @@ def flash(dry_run, db_path, config_dir):
         conn, settings, sources, emit=click.echo, dry_run=dry_run
     )
     click.echo(_flash_line(stats))
+
+
+@main.command("flash-rollup")
+@click.option("--dry-run", is_flag=True, help="render the rollup; send nothing")
+@db_opt
+@cfg_opt
+def flash_rollup(dry_run, db_path, config_dir):
+    """Send one roundup of held middle-tier stories to the news channel.
+
+    Driven by its own timer at fixed Dubai times, not by ingest: the flash pass
+    runs every 15 minutes and a rollup every few hours.
+    """
+    conn, _, settings = _common(db_path, config_dir)
+    stats = flash_mod.run_rollup(
+        conn, settings, emit=click.echo, dry_run=dry_run
+    )
+    click.echo(
+        f"rollup: {stats['items']} items, {stats['sent']} sent, "
+        f"{stats['below_floor']} below floor, {stats['errors']} errors"
+    )
 
 
 @main.command()

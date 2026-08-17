@@ -52,16 +52,18 @@ def test_candidates_honours_limit(tmp_path):
 def test_retire_stale_marks_only_old_unprocessed(tmp_path):
     conn = db.connect(tmp_path / "t.db")
     fresh, old = seed(conn, [("a", "Fresh", 1), ("b", "Old", 9)])
-    assert flash.retire_stale(conn, 6) == 1
+    assert flash.retire_stale(conn, 6) == {"stale": 0, "born_old": 1}
     row = conn.execute(
         "SELECT state FROM flash_items WHERE item_id = ?", (old,)
     ).fetchone()
-    assert row["state"] == "skipped_stale"
+    # seed() fetches everything now, so a 9h-old item was already past the
+    # window when first seen — born old, never postable, not starvation.
+    assert row["state"] == "skipped_born_old"
     assert conn.execute(
         "SELECT COUNT(*) c FROM flash_items WHERE item_id = ?", (fresh,)
     ).fetchone()["c"] == 0
     # idempotent: a second pass finds nothing new
-    assert flash.retire_stale(conn, 6) == 0
+    assert flash.retire_stale(conn, 6) == {"stale": 0, "born_old": 0}
 
 
 def test_posted_flashes_window_and_published_at(tmp_path):
@@ -502,6 +504,7 @@ def test_run_flash_disabled_by_settings(tmp_path, monkeypatch):
     stats = flash.run_flash(conn, settings, SOURCES, post=poster,
                             run_model=model({}))
     assert stats == {"posted": 0, "dup": 0, "not_gold": 0, "unreadable": 0, "stale": 0,
+                     "born_old": 0, "held": 0, "low_tier": 0, "no_tier": 0,
                      "burst": 0, "errors": 0}
     assert poster.calls == []
 
@@ -662,3 +665,274 @@ def test_run_flash_dry_run_does_not_retire_stale(tmp_path, monkeypatch):
     )
     assert stats["stale"] == 0
     assert conn.execute("SELECT COUNT(*) c FROM flash_items").fetchone()["c"] == 0
+
+
+def _set_fetched_at(conn, item_id, ts):
+    conn.execute("UPDATE items SET fetched_at = ? WHERE id = ?", (ts, item_id))
+    conn.commit()
+
+
+def test_retire_stale_separates_born_old_from_starved(tmp_path):
+    # 85% of the host's 4143 skipped_stale rows were >48h old at retirement:
+    # feed archive entries and the first-ingest backfill, correctly never
+    # flashed. Only ~70 were genuinely starved. One state for both made the
+    # number read as a pipeline defect thirty times bigger than it is.
+    conn = db.connect(tmp_path / "t.db")
+    born_old, starved = seed(conn, [("a", "Archive item", 30), ("b", "Was fresh", 8)])
+    # the archive item was already 30h old the moment we first saw it
+    _set_fetched_at(conn, born_old, ago(0.2))
+    # the other was 1h old when fetched — inside the window, then aged out
+    _set_fetched_at(conn, starved, ago(7))
+
+    assert flash.retire_stale(conn, 6) == {"stale": 1, "born_old": 1}
+    states = dict(
+        conn.execute(
+            "SELECT item_id, state FROM flash_items WHERE item_id IN (?, ?)",
+            (born_old, starved),
+        ).fetchall()
+    )
+    assert states[born_old] == "skipped_born_old"
+    assert states[starved] == "skipped_stale"
+
+
+def test_candidates_reserves_slots_for_the_oldest_at_risk(tmp_path):
+    # published_at DESC alone means a burst of fresh arrivals outranks items
+    # already close to the 6h cliff on every tick, so they age out
+    # unclassified. Reserve part of the batch for the closest to expiry.
+    conn = db.connect(tmp_path / "t.db")
+    specs = [("fresh", f"Fresh {i}", 0.1) for i in range(20)]
+    specs += [("aging", f"Aging {i}", 5.5) for i in range(5)]
+    ids = seed(conn, specs)
+    aging = set(ids[20:])
+
+    picked = {r["id"] for r in flash.candidates(conn, max_age_hours=6, limit=10)}
+    assert len(picked) == 10
+    # without a reserve every slot goes to the 20 fresh items and none of the
+    # aging ones ever get classified before retire_stale takes them
+    assert picked & aging, "no aging item made the batch"
+
+
+def test_run_pass_reports_stale_and_born_old_separately(tmp_path, monkeypatch):
+    # The `flash:` line is where a human or an agent reads this pipeline's
+    # health. One conflated "stale" count is what made a 70-item starvation
+    # look like 4143.
+    conn = db.connect(tmp_path / "t.db")
+    born_old, starved = seed(conn, [("a", "Archive", 30), ("b", "Was fresh", 8)])
+    _set_fetched_at(conn, born_old, ago(0.2))
+    _set_fetched_at(conn, starved, ago(7))
+    stats = flash.run_flash(
+        conn, SETTINGS, [], post=lambda *a, **k: None, run_model=lambda *a: "[]"
+    )
+    assert stats["stale"] == 1
+    assert stats["born_old"] == 1
+
+
+def _state_of(conn, item_id):
+    return conn.execute(
+        "SELECT state, tier FROM flash_items WHERE item_id = ?", (item_id,)
+    ).fetchone()
+
+
+def test_tier_5_and_4_post_immediately(tmp_path, monkeypatch):
+    no_extract(monkeypatch)
+    conn = db.connect(tmp_path / "t.db")
+    five, four = seed(conn, [("reuters", "FOMC cuts", 1), ("cnbc", "Fed speaker", 1)])
+    poster = FakePoster()
+    stats = flash.run_flash(
+        conn, SETTINGS, SOURCES, post=poster,
+        run_model=model({
+            five: {"gold": True, "dup_of": None, "tier": 5},
+            four: {"gold": True, "dup_of": None, "tier": 4},
+        }),
+    )
+    assert stats["posted"] == 2
+    assert [c[0] for c in poster.calls] == ["send", "send"]
+    assert _state_of(conn, five)["tier"] == 5
+
+
+def test_tier_3_is_held_for_the_rollup(tmp_path, monkeypatch):
+    no_extract(monkeypatch)
+    conn = db.connect(tmp_path / "t.db")
+    (three,) = seed(conn, [("reuters", "Routine print in line", 1)])
+    poster = FakePoster()
+    stats = flash.run_flash(
+        conn, SETTINGS, SOURCES, post=poster,
+        run_model=model({three: {"gold": True, "dup_of": None, "tier": 3}}),
+    )
+    assert stats["held"] == 1 and stats["posted"] == 0
+    assert poster.calls == []  # nothing reaches the channel yet
+    row = _state_of(conn, three)
+    assert row["state"] == "held" and row["tier"] == 3
+
+
+def test_tier_2_and_1_drop_from_the_channel(tmp_path, monkeypatch):
+    no_extract(monkeypatch)
+    conn = db.connect(tmp_path / "t.db")
+    two, one = seed(conn, [("reuters", "Oil slips", 1), ("cnbc", "EUR/USD Outlook", 1)])
+    poster = FakePoster()
+    stats = flash.run_flash(
+        conn, SETTINGS, SOURCES, post=poster,
+        run_model=model({
+            two: {"gold": True, "dup_of": None, "tier": 2},
+            one: {"gold": True, "dup_of": None, "tier": 1},
+        }),
+    )
+    assert stats["low_tier"] == 2 and poster.calls == []
+    assert _state_of(conn, two)["state"] == "skipped_low_tier"
+    # dropped from the channel, still in items for inbox/brief/scan
+    assert conn.execute(
+        "SELECT COUNT(*) c FROM items WHERE id IN (?, ?)", (two, one)
+    ).fetchone()["c"] == 2
+
+
+def test_missing_tier_posts_and_is_counted(tmp_path, monkeypatch):
+    # A model that omits the field must not cost the desk a material story;
+    # fail toward today's behaviour and make the rate visible.
+    no_extract(monkeypatch)
+    conn = db.connect(tmp_path / "t.db")
+    (one,) = seed(conn, [("reuters", "Gold hits record", 1)])
+    poster = FakePoster()
+    stats = flash.run_flash(
+        conn, SETTINGS, SOURCES, post=poster,
+        run_model=model({one: {"gold": True, "dup_of": None}}),
+    )
+    assert stats["posted"] == 1 and stats["no_tier"] == 1
+    assert [c[0] for c in poster.calls] == ["send"]
+
+
+def test_dup_of_a_held_item_records_dup_without_editing(tmp_path, monkeypatch):
+    # The held item has no Telegram message to edit. Publishing the newcomer
+    # as a fresh story instead would put the same narrative in the channel
+    # twice — once now, once as a rollup line.
+    no_extract(monkeypatch)
+    conn = db.connect(tmp_path / "t.db")
+    first, second = seed(
+        conn, [("reuters", "Routine print", 1), ("cnbc", "Routine print again", 2)]
+    )
+    poster = FakePoster()
+    stats = flash.run_flash(
+        conn, SETTINGS, SOURCES, post=poster,
+        run_model=model({
+            first: {"gold": True, "dup_of": None, "tier": 3},
+            second: {"gold": True, "dup_of": first, "tier": 3},
+        }),
+    )
+    assert poster.calls == [], "nothing should be sent or edited"
+    assert stats["dup"] == 1 and stats["held"] == 1
+    assert _state_of(conn, first)["state"] == "held"
+    assert _state_of(conn, second)["state"] == "dup"
+
+
+ROLLUP_JSON = json.dumps({"groups": [
+    {"theme": "rates_dollar", "lines": ["PPI مطابق انتظار", "دلار کم‌تغییر"]},
+    {"theme": "geopolitics", "lines": ["ترافیک کریدور کاهش یافت"]},
+]})
+
+
+def _hold(conn, ids, tier=3):
+    for i in ids:
+        flash.record(conn, i, None, "held", tier=tier)
+
+
+def rollup_model(response=ROLLUP_JSON):
+    def run(cmd, prompt):
+        return response
+    return run
+
+
+def test_run_rollup_sends_one_message_and_marks_items(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    ids = seed(conn, [("reuters", "PPI in line", 1), ("cnbc", "Dollar flat", 2),
+                      ("reuters", "Corridor transits down", 3)])
+    _hold(conn, ids)
+    poster = FakePoster()
+    stats = flash.run_rollup(conn, SETTINGS, post=poster, run_model=rollup_model())
+    assert stats["sent"] == 1 and stats["items"] == 3
+    assert [c[0] for c in poster.calls] == ["send"]
+    assert poster.calls[0][1]["chat_id"] == "-100news"
+    text = poster.calls[0][1]["text"]
+    assert "جمع‌بندی" in text and "PPI مطابق انتظار" in text
+
+    rollup = conn.execute("SELECT * FROM rollups").fetchone()
+    assert rollup["status"] == "sent" and rollup["message_id"] == 101
+    states = conn.execute(
+        "SELECT DISTINCT state, rollup_id FROM flash_items"
+    ).fetchall()
+    assert [(r["state"], r["rollup_id"]) for r in states] == [("rolled_up", rollup["id"])]
+
+
+def test_run_rollup_below_floor_holds_items(tmp_path):
+    # A near-empty rollup costs more attention than it returns, and the items
+    # must roll into the next window rather than being dropped.
+    conn = db.connect(tmp_path / "t.db")
+    ids = seed(conn, [("reuters", "One thing", 1), ("cnbc", "Another", 2)])
+    _hold(conn, ids)
+    poster = FakePoster()
+    stats = flash.run_rollup(conn, SETTINGS, post=poster, run_model=rollup_model())
+    assert stats["sent"] == 0 and stats["below_floor"] == 2
+    assert poster.calls == []
+    assert flash.held_item_ids(conn) == set(ids)
+
+
+def test_run_rollup_leaves_items_held_when_the_model_fails(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    ids = seed(conn, [("reuters", "A", 1), ("cnbc", "B", 2), ("reuters", "C", 3)])
+    _hold(conn, ids)
+    poster = FakePoster()
+
+    def boom(cmd, prompt):
+        raise RuntimeError("model unavailable")
+
+    stats = flash.run_rollup(conn, SETTINGS, post=poster, run_model=boom)
+    assert stats["errors"] == 1 and stats["sent"] == 0
+    assert poster.calls == []
+    assert flash.held_item_ids(conn) == set(ids), "must retry next window"
+    assert conn.execute("SELECT COUNT(*) c FROM rollups").fetchone()["c"] == 0
+
+
+def test_run_rollup_leaves_items_held_when_telegram_rejects(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    ids = seed(conn, [("reuters", "A", 1), ("cnbc", "B", 2), ("reuters", "C", 3)])
+    _hold(conn, ids)
+    poster = FakePoster(fail_on={"send"})
+    stats = flash.run_rollup(conn, SETTINGS, post=poster, run_model=rollup_model())
+    assert stats["errors"] == 1 and stats["sent"] == 0
+    assert flash.held_item_ids(conn) == set(ids)
+    assert conn.execute("SELECT COUNT(*) c FROM rollups").fetchone()["c"] == 0
+
+
+def test_run_rollup_dry_run_sends_nothing_and_holds(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    ids = seed(conn, [("reuters", "A", 1), ("cnbc", "B", 2), ("reuters", "C", 3)])
+    _hold(conn, ids)
+    poster = FakePoster()
+    emitted = []
+    stats = flash.run_rollup(
+        conn, SETTINGS, post=poster, run_model=rollup_model(),
+        emit=emitted.append, dry_run=True,
+    )
+    assert poster.calls == [] and stats["sent"] == 0
+    assert emitted and "جمع‌بندی" in emitted[0]
+    assert flash.held_item_ids(conn) == set(ids)
+
+
+def test_run_rollup_with_nothing_held_is_a_no_op(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    poster = FakePoster()
+    stats = flash.run_rollup(conn, SETTINGS, post=poster, run_model=rollup_model())
+    assert stats == {"items": 0, "sent": 0, "below_floor": 0, "errors": 0}
+    assert poster.calls == []
+
+
+def test_rollup_preserves_the_tier_it_was_scored_at(tmp_path):
+    # The tier per item is what makes "revisit the TA mills after a week of
+    # tier data" possible. INSERT OR REPLACE on the way to rolled_up must not
+    # blank it.
+    conn = db.connect(tmp_path / "t.db")
+    ids = seed(conn, [("reuters", "A", 1), ("cnbc", "B", 2), ("reuters", "C", 3)])
+    _hold(conn, ids)
+    flash.run_rollup(conn, SETTINGS, post=FakePoster(), run_model=rollup_model())
+    tiers = [
+        r["tier"] for r in conn.execute("SELECT tier FROM flash_items ORDER BY item_id")
+    ]
+    assert tiers == [3, 3, 3]

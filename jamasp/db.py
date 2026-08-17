@@ -95,7 +95,34 @@ CREATE TABLE IF NOT EXISTS flash_items (
     ts       TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_flash_items_flash ON flash_items(flash_id);
+CREATE TABLE IF NOT EXISTS rollups (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    created_at TEXT NOT NULL,
+    text_fa    TEXT NOT NULL,
+    message_id INTEGER,
+    status     TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_rollups_created ON rollups(created_at);
 """
+
+# Columns added to tables that already exist in deployed databases. The schema
+# above is all CREATE TABLE IF NOT EXISTS, so it never alters an existing table
+# — and the live database is months of history that cannot be recreated.
+# SQLite's ADD COLUMN doesn't rewrite the table, so this stays instant.
+ADDED_COLUMNS = (
+    ("flash_items", "tier", "INTEGER"),
+    ("flash_items", "rollup_id", "INTEGER"),
+)
+
+
+def _add_missing_columns(conn: sqlite3.Connection) -> None:
+    for table, column, decl in ADDED_COLUMNS:
+        existing = {r[1] for r in conn.execute(f"PRAGMA table_info({table})")}
+        if not existing:
+            continue  # table itself is absent; the schema script owns creating it
+        if column not in existing:
+            conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {decl}")
+    conn.commit()
 
 
 def connect(path: Path = Path("state/jamasp.db")) -> sqlite3.Connection:
@@ -104,6 +131,7 @@ def connect(path: Path = Path("state/jamasp.db")) -> sqlite3.Connection:
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA busy_timeout = 5000")
     conn.executescript(SCHEMA)
+    _add_missing_columns(conn)
     return conn
 
 

@@ -34,7 +34,8 @@ for the sage-advisor of the Shahnameh: measured, far-sighted, never breathless.
 | `uv run jamasp extract <url>` | clean article text for a headline worth deep reading |
 | `uv run jamasp notify [--dry-run] -` | send stdin text to the desk Telegram |
 | `uv run jamasp ingest` | refresh sources (only if inbox seems stale) |
-| `uv run jamasp flash [--dry-run]` | publish new gold items to the Telegram news channel (runs automatically inside `ingest`) |
+| `uv run jamasp flash [--dry-run]` | publish top-tier gold items to the Telegram news channel (runs automatically inside `ingest`) |
+| `uv run jamasp flash-rollup [--dry-run]` | send one Persian roundup of held middle-tier items (own timer, 4x/day) |
 | `uv run jamasp calendar` | upcoming economic events (UTC + Dubai), high/medium impact |
 | `uv run jamasp wakeup add "<ISO>" <type> "<task>"` | schedule a future run (usually deepdive) |
 | `uv run jamasp wakeup list` | pending wakeups (feed the brief's "watching" section) |
@@ -48,9 +49,10 @@ for the sage-advisor of the Shahnameh: measured, far-sighted, never breathless.
 
 ## Deployment
 
-Jamasp runs on an always-on Linux host: six systemd timers — 15-minute
+Jamasp runs on an always-on Linux host: seven systemd timers — 15-minute
 ingest, 5-minute dispatcher, daily brief + daily watchdog, 2-hourly scan,
-and weekly retro — drive `jamasp` CLI commands, with every agent run
+weekly retro, and the 4x-daily news-channel rollup — drive `jamasp` CLI
+commands, with every agent run
 (fixed timers and dispatched wakeups alike) wrapped by `jamasp run`, which
 enforces the daily run cap, retry-with-one-retry, and per-run-type
 timeouts. The full runbook — including the two things that will bite you
@@ -66,10 +68,13 @@ sidecar that fronts it). Every unit carries
 `OnFailure=jamasp-alert@%n.service`, so a failure reaches the desk chat
 rather than sitting silently in the journal.
 
-Between agent runs, the ingest timer also publishes each gold-touching item to
-a **separate Telegram news channel** (`JAMASP_TG_NEWS_CHAT`) as a Persian
-summary plus impact read, deduped against the last 24 hours and edited in place
-when a second source carries the same story. This is a deterministic pipeline
+Between agent runs, the ingest timer also publishes gold-touching items to a
+**separate Telegram news channel** (`JAMASP_TG_NEWS_CHAT`) as a Persian summary
+plus impact read, deduped against the last 24 hours and edited in place when a
+second source carries the same story. Items are **tiered** on the way through:
+the top tiers post immediately, the middle tier is held and goes out as one
+roundup four times a day (`jamasp flash-rollup`), and the bottom tiers never
+reach the channel while staying in the DB for `inbox`, the brief and the scan. This is a deterministic pipeline
 stage, not an agent run: it consumes no agent-run budget and needs no
 supervision. The desk chat stays reserved for briefs, scan alerts, and failure
 notices.

@@ -51,3 +51,26 @@ def test_calendar_render_window(tmp_path):
     cal.store_events(conn, cal.parse_ff_json(SRC, FF_JSON))
     out = calendarview.render(conn, days=1, now="2026-08-10T00:00:00Z")
     assert len([l for l in out.splitlines() if not l.startswith("#")]) == 0
+
+
+def test_render_header_states_actual_feed_coverage(tmp_path):
+    # The source is ff_calendar_thisweek.json, so the feed never reaches more
+    # than ~7 days out — but the header said "next 14d", which two retros read
+    # as a broken feed rather than a horizon. Say what is actually covered.
+    conn = db.connect(tmp_path / "j.db")
+    cal.store_events(conn, cal.parse_ff_json(SRC, FF_JSON))
+    header = calendarview.render(
+        conn, days=14, now="2026-08-10T00:00:00Z"
+    ).splitlines()[0]
+    # the Bank Holiday on the 15th is filtered out of the listing but still
+    # bounds what the feed knows about, so coverage runs to it, not to the CPI
+    assert "2026-08-15" in header, "header must name the last event the feed holds"
+    assert "state/calendar.yaml" in header, "and point past the horizon"
+
+
+def test_render_header_when_no_events_at_all(tmp_path):
+    conn = db.connect(tmp_path / "j.db")
+    header = calendarview.render(
+        conn, days=14, now="2026-08-10T00:00:00Z"
+    ).splitlines()[0]
+    assert "no events" in header.lower()
