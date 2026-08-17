@@ -5,6 +5,8 @@ never marks items read, and never consumes the daily agent-run cap.
 """
 from __future__ import annotations
 
+import contextlib
+import fcntl
 import sqlite3
 import subprocess
 from datetime import datetime, timedelta, timezone
@@ -32,6 +34,52 @@ REQUIRED_CFG_KEYS = (
     "decide_cmd",
     "write_cmd",
 )
+
+
+def lock_path(conn: sqlite3.Connection) -> str:
+    """Lock file guarding the passes that publish from this database.
+
+    Derived from the database file rather than fixed, so each database — the
+    live one, a tmp_path one in a test — has its own lock.
+    """
+    row = conn.execute("PRAGMA database_list").fetchone()
+    dbfile = (row["file"] if row else "") or ""
+    return f"{dbfile}.passlock" if dbfile else ""
+
+
+@contextlib.contextmanager
+def pass_lock(conn: sqlite3.Connection):
+    """Yield True if this process may publish, False if another pass holds it.
+
+    Two schedulers reach the flash pass: the 15-minute ingest timer and the
+    agent runs, which CLAUDE.md tells to call `jamasp ingest` when the inbox
+    looks stale. `candidates()` excludes items that already have a flash_items
+    row, but `_publish` writes that row only after the Telegram send — so two
+    concurrent passes both saw the same item unclaimed, both posted it, and the
+    loser died on the flashes primary key. That put a duplicate flash in the
+    channel and left the story unrecorded, daily, at 03:32.
+
+    Skipping rather than waiting is deliberate: the loser's work is redundant by
+    definition, and the next tick is at most 15 minutes away. An in-memory
+    database has no path to lock and never has a second writer, so it proceeds.
+    """
+    path = lock_path(conn)
+    if not path:
+        yield True
+        return
+    handle = open(path, "a")
+    try:
+        try:
+            fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError:
+            yield False
+            return
+        try:
+            yield True
+        finally:
+            fcntl.flock(handle, fcntl.LOCK_UN)
+    finally:
+        handle.close()
 
 
 def _since(hours: int) -> str:
@@ -328,10 +376,19 @@ def run_flash(
     """One flash pass. Never raises; every failure is counted and logged."""
     stats = {"posted": 0, "dup": 0, "not_gold": 0, "unreadable": 0, "stale": 0,
              "born_old": 0, "held": 0, "low_tier": 0, "no_tier": 0,
-             "burst": 0, "errors": 0}
+             "burst": 0, "skipped_locked": 0, "errors": 0}
     try:
-        return _run_pass(conn, settings, sources, post, run_model, emit, dry_run,
-                         stats)
+        # A dry run sends nothing and writes nothing, so a live pass must not
+        # block the operator from rendering one.
+        if dry_run:
+            return _run_pass(conn, settings, sources, post, run_model, emit,
+                             dry_run, stats)
+        with pass_lock(conn) as acquired:
+            if not acquired:
+                stats["skipped_locked"] = 1
+                return stats
+            return _run_pass(conn, settings, sources, post, run_model, emit,
+                             dry_run, stats)
     except Exception as exc:
         # Last line of defence: ingest finishes whatever happens in here. The
         # per-step handlers below cover the expected failures; this covers a
@@ -505,9 +562,20 @@ def run_rollup(
     failure the items stay held and the next window retries them. Never raises
     — the timer that drives this must not fail on a model hiccup.
     """
-    stats = {"items": 0, "sent": 0, "below_floor": 0, "carried": 0, "errors": 0}
+    stats = {"items": 0, "sent": 0, "below_floor": 0, "carried": 0,
+             "skipped_locked": 0, "errors": 0}
     try:
-        return _rollup_pass(conn, settings, post, run_model, emit, dry_run, stats)
+        # Same lock as the flash pass: both publish to the channel, and a rollup
+        # racing a flash could send lines for a story the flash is posting.
+        if dry_run:
+            return _rollup_pass(conn, settings, post, run_model, emit, dry_run,
+                                stats)
+        with pass_lock(conn) as acquired:
+            if not acquired:
+                stats["skipped_locked"] = 1
+                return stats
+            return _rollup_pass(conn, settings, post, run_model, emit, dry_run,
+                                stats)
     except Exception as exc:
         stats["errors"] += 1
         try:

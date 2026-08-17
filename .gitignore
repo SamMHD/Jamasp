@@ -4,4 +4,5 @@ __pycache__/
 dist/
 .pytest_cache/
 .worktrees/
+.claude/worktrees/
 .superpowers/

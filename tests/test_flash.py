@@ -505,7 +505,7 @@ def test_run_flash_disabled_by_settings(tmp_path, monkeypatch):
                             run_model=model({}))
     assert stats == {"posted": 0, "dup": 0, "not_gold": 0, "unreadable": 0, "stale": 0,
                      "born_old": 0, "held": 0, "low_tier": 0, "no_tier": 0,
-                     "burst": 0, "errors": 0}
+                     "burst": 0, "skipped_locked": 0, "errors": 0}
     assert poster.calls == []
 
 
@@ -921,7 +921,7 @@ def test_run_rollup_with_nothing_held_is_a_no_op(tmp_path):
     poster = FakePoster()
     stats = flash.run_rollup(conn, SETTINGS, post=poster, run_model=rollup_model())
     assert stats == {"items": 0, "sent": 0, "below_floor": 0, "carried": 0,
-                     "errors": 0}
+                     "skipped_locked": 0, "errors": 0}
     assert poster.calls == []
 
 
@@ -969,3 +969,100 @@ def test_rollup_preserves_the_tier_it_was_scored_at(tmp_path):
         r["tier"] for r in conn.execute("SELECT tier FROM flash_items ORDER BY item_id")
     ]
     assert tiers == [3, 3, 3]
+
+
+# --- concurrent-pass guard -------------------------------------------------
+#
+# Two schedulers invoke the flash pass: the 15-minute ingest timer, and the
+# brief agent, which CLAUDE.md tells to run `jamasp ingest` when the inbox
+# looks stale. They collided at 03:32 on 08-10, 08-15 and 08-17 — the brief
+# timer fires at 03:30:01 and the ingest tick at :30. `candidates()` filters on
+# a flash_items row that `_publish` writes only after the Telegram send, so
+# both passes saw the same item unclaimed, both posted, and the loser died on
+# the flashes PK — leaving a duplicate in the channel (message_id 505) and no
+# flash_items row.
+
+import fcntl
+
+
+def _grab_lock(conn):
+    """Hold the pass lock the way a concurrent process would."""
+    fh = open(flash.lock_path(conn), "a")
+    fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    return fh
+
+
+def test_run_flash_skips_while_another_pass_holds_the_lock(tmp_path, monkeypatch):
+    no_extract(monkeypatch)
+    conn = db.connect(tmp_path / "t.db")
+    (one,) = seed(conn, [("reuters", "Gold hits record", 1)])
+    held = _grab_lock(conn)
+    try:
+        poster = FakePoster()
+        stats = flash.run_flash(
+            conn, SETTINGS, SOURCES, post=poster,
+            run_model=model({one: {"gold": True, "dup_of": None, "tier": 5}}),
+        )
+    finally:
+        held.close()
+    assert stats["skipped_locked"] == 1
+    assert stats["posted"] == 0
+    assert poster.calls == [], "the second pass must not send a duplicate"
+    assert conn.execute("SELECT COUNT(*) c FROM flashes").fetchone()["c"] == 0
+    # nothing recorded either, so the next tick still gets its chance
+    assert conn.execute(
+        "SELECT COUNT(*) c FROM flash_items"
+    ).fetchone()["c"] == 0
+
+
+def test_run_flash_releases_the_lock_when_the_pass_ends(tmp_path, monkeypatch):
+    no_extract(monkeypatch)
+    conn = db.connect(tmp_path / "t.db")
+    one, two = seed(conn, [("reuters", "First story", 1), ("cnbc", "Second", 2)])
+    poster = FakePoster()
+    first = flash.run_flash(
+        conn, SETTINGS, SOURCES, post=poster,
+        run_model=model({one: {"gold": True, "dup_of": None, "tier": 5}}),
+    )
+    second = flash.run_flash(
+        conn, SETTINGS, SOURCES, post=poster,
+        run_model=model({two: {"gold": True, "dup_of": None, "tier": 5}}),
+    )
+    assert first["posted"] == 1 and second["posted"] == 1
+    assert first["skipped_locked"] == 0 and second["skipped_locked"] == 0
+
+
+def test_run_flash_dry_run_ignores_the_lock(tmp_path, monkeypatch):
+    """A dry run neither sends nor writes, so a live pass must not block it."""
+    no_extract(monkeypatch)
+    conn = db.connect(tmp_path / "t.db")
+    (one,) = seed(conn, [("reuters", "Gold hits record", 1)])
+    held = _grab_lock(conn)
+    try:
+        lines = []
+        stats = flash.run_flash(
+            conn, SETTINGS, SOURCES, post=FakePoster(), emit=lines.append,
+            run_model=model({one: {"gold": True, "dup_of": None, "tier": 5}}),
+            dry_run=True,
+        )
+    finally:
+        held.close()
+    assert stats["skipped_locked"] == 0
+    assert lines, "dry run should still render"
+
+
+def test_run_rollup_skips_while_another_pass_holds_the_lock(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    ids = seed(conn, [("reuters", "A", 1), ("cnbc", "B", 2), ("reuters", "C", 3)])
+    _hold(conn, ids)
+    held = _grab_lock(conn)
+    try:
+        poster = FakePoster()
+        stats = flash.run_rollup(
+            conn, SETTINGS, post=poster, run_model=rollup_model()
+        )
+    finally:
+        held.close()
+    assert stats["skipped_locked"] == 1 and stats["sent"] == 0
+    assert poster.calls == []
+    assert conn.execute("SELECT COUNT(*) c FROM rollups").fetchone()["c"] == 0
