@@ -1,3 +1,4 @@
+import itertools
 import os
 import sys
 import time
@@ -20,7 +21,18 @@ def settings_with(cmd_tail, cap=20, scan_timeout=300):
     }
 
 
-def test_ok_run_recorded(tmp_path):
+def _committing(monkeypatch):
+    """Simulate a run that does its job: HEAD moves while it runs.
+
+    Without this the fake agent commits nothing, so run_agent correctly
+    reports `empty` — see test_exit_zero_without_a_commit_is_empty.
+    """
+    counter = itertools.count()
+    monkeypatch.setattr(runner, "_git_head", lambda: f"head{next(counter)}")
+
+
+def test_ok_run_recorded(tmp_path, monkeypatch):
+    _committing(monkeypatch)
     conn = db.connect(tmp_path / "j.db")
     status = runner.run_agent(conn, settings_with(["ok"]), "scan")
     assert status == "ok"
@@ -30,7 +42,8 @@ def test_ok_run_recorded(tmp_path):
     assert rows[0]["exit_code"] == 0 and rows[0]["finished_at"] is not None
 
 
-def test_retry_recovers_flaky(tmp_path):
+def test_retry_recovers_flaky(tmp_path, monkeypatch):
+    _committing(monkeypatch)
     conn = db.connect(tmp_path / "j.db")
     marker = tmp_path / "marker"
     status = runner.run_agent(
@@ -58,6 +71,7 @@ def test_timeout_status(tmp_path, monkeypatch):
 
 
 def test_cap_defers_and_warns(tmp_path, monkeypatch):
+    _committing(monkeypatch)
     sent = []
     monkeypatch.setattr(runner, "_notify_safe", lambda c, s, t: sent.append(t))
     conn = db.connect(tmp_path / "j.db")
@@ -112,3 +126,73 @@ def test_dry_run_executes_and_records_nothing(tmp_path, monkeypatch):
     assert calls == []  # no subprocess was launched
     rows = conn.execute("SELECT * FROM agent_runs").fetchall()
     assert rows == []
+
+
+def test_exit_zero_without_a_commit_is_empty(tmp_path, monkeypatch):
+    # The 12 Aug CPI deepdive ran, found its inputs missing, exited 0 and
+    # committed nothing — recorded "ok", so nothing alerted and the desk
+    # got its read ~3h late. An exit-0 run that left HEAD untouched did
+    # not do its job.
+    sent = []
+    monkeypatch.setattr(runner, "_notify_safe", lambda c, s, t: sent.append(t))
+    monkeypatch.setattr(runner, "_git_head", lambda: "abc1234")
+    conn = db.connect(tmp_path / "j.db")
+    status = runner.run_agent(conn, settings_with(["ok"]), "deepdive", task="read CPI")
+    assert status == "empty"
+    row = conn.execute("SELECT * FROM agent_runs ORDER BY id DESC").fetchone()
+    assert row["status"] == "empty" and row["exit_code"] == 0
+    assert sent and "deepdive" in sent[0]
+    assert "read CPI" in sent[0]
+
+
+def test_exit_zero_with_a_commit_is_ok(tmp_path, monkeypatch):
+    heads = iter(["before01", "after002"])
+    sent = []
+    monkeypatch.setattr(runner, "_notify_safe", lambda c, s, t: sent.append(t))
+    monkeypatch.setattr(runner, "_git_head", lambda: next(heads))
+    conn = db.connect(tmp_path / "j.db")
+    assert runner.run_agent(conn, settings_with(["ok"]), "brief") == "ok"
+    assert sent == []
+
+
+def test_empty_run_is_not_retried(tmp_path, monkeypatch):
+    # A run that committed nothing may still have posted to Telegram; a blind
+    # re-run risks a double post. Record it, alert, don't repeat it.
+    monkeypatch.setattr(runner, "_notify_safe", lambda c, s, t: None)
+    monkeypatch.setattr(runner, "_git_head", lambda: "abc1234")
+    calls = []
+    real = runner._execute_once
+
+    def counting(cmd, timeout):
+        calls.append(cmd)
+        return real(cmd, timeout)
+
+    monkeypatch.setattr(runner, "_execute_once", counting)
+    conn = db.connect(tmp_path / "j.db")
+    assert runner.run_agent(conn, settings_with(["ok"]), "scan") == "empty"
+    assert len(calls) == 1
+
+
+def test_unknown_head_does_not_flag_empty(tmp_path, monkeypatch):
+    # Not a git checkout (or git unavailable): we can't tell whether the run
+    # committed, so don't cry wolf.
+    sent = []
+    monkeypatch.setattr(runner, "_notify_safe", lambda c, s, t: sent.append(t))
+    monkeypatch.setattr(runner, "_git_head", lambda: None)
+    conn = db.connect(tmp_path / "j.db")
+    assert runner.run_agent(conn, settings_with(["ok"]), "scan") == "ok"
+    assert sent == []
+
+
+def test_failed_run_keeps_failed_status(tmp_path, monkeypatch):
+    # An empty check must not mask a real failure: HEAD is unchanged after a
+    # failing run too, and "failed" is the more informative status.
+    monkeypatch.setattr(runner, "_notify_safe", lambda c, s, t: None)
+    monkeypatch.setattr(runner, "_git_head", lambda: "abc1234")
+    conn = db.connect(tmp_path / "j.db")
+    assert runner.run_agent(conn, settings_with(["fail"]), "scan") == "failed"
+
+
+def test_git_head_returns_none_outside_a_repo(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    assert runner._git_head() is None

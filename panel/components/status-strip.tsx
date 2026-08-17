@@ -9,6 +9,9 @@ const DOT: Record<string, string> = {
   failed: "bg-destructive",
   timeout: "bg-destructive",
   deferred: "bg-amber-400",
+  // exited 0 but committed nothing: burnt a cap slot and produced no work,
+  // so it needs attention like a failure — the tooltip separates the two.
+  empty: "bg-destructive",
 };
 
 export function StatusStrip({ lastIngest, runsToday, cap, sourceErrors, lastRuns, now }: {

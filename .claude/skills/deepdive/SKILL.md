@@ -19,6 +19,14 @@ do it, assess gold impact, deliver, exit. Don't re-scan the whole news delta.
   implied by the task. If extracted text runs past ~2 pages, dispatch a
   subagent (Haiku/Sonnet, low effort) to read it and return conclusions only
   — raw source text never enters this session.
+- Check the `fetched_at` header the command prints before trusting an extract,
+  especially for index and section pages, which are rewritten continuously;
+  `--fresh` forces a re-fetch. Date agency copy from its own dateline.
+- If the task's inputs aren't there yet (a print that hasn't landed, a
+  document not yet published), reschedule with
+  `uv run jamasp wakeup add "<ISO>" deepdive "<same task>"` and still commit
+  a note saying so. Exiting quietly now records the run as `empty` and
+  Telegrams the desk — say what was missing instead.
 - Compare findings to the relevant section of `stance.md`: confirm, refine,
   or contradict. Be explicit about which.
 

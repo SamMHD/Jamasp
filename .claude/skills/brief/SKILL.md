@@ -14,7 +14,12 @@ the report path: `reports/YYYY/MM/YYYY-MM-DD-brief.md`.
   and `state/calendar.yaml`.
 - Run `uv run jamasp ingest` (refresh), then `uv run jamasp price`,
   `uv run jamasp inbox`, `uv run jamasp calendar`, `uv run jamasp wakeup list`,
-  and `uv run jamasp predictions due`.
+  and `uv run jamasp predictions due --open`.
+- `--open` also lists still-running claims, each carrying `window_high` /
+  `window_low` over its own window. That is the status of a live level claim
+  — never restate one from an earlier run's narrative: on 13 Aug an
+  Asia-overnight tag printed while three consecutive runs called the level
+  untagged from memory.
 
 ## 1.5 Micro-retro (yesterday's calls)
 
@@ -34,7 +39,9 @@ the report path: `reports/YYYY/MM/YYYY-MM-DD-brief.md`.
   flows). Ignore noise; the inbox is pre-deduped but not pre-ranked.
 - For at most 2–3 items where the headline+lede is insufficient AND the impact
   is material, run `uv run jamasp extract <url>`; if the text is long,
-  summarize via a subagent.
+  summarize via a subagent. Read the `fetched_at` header the command prints
+  before trusting the text, and date agency copy from its own dateline —
+  `--fresh` forces a re-fetch when the age looks wrong for the story.
 - Divergence check: does price action confirm the news narrative? Bullish
   news + stalling price, or a move with no news behind it, is itself a
   finding — flag the divergence as a bullet rather than forcing the fit.
