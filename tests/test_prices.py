@@ -238,14 +238,18 @@ def test_parse_tradingview_scanner_json_skips_nulls():
 
 def test_configured_tv_url_requests_every_mapped_field():
     # The field list lives in the URL and the name mapping lives in code;
-    # nothing else stops them drifting apart, and a field absent from the URL
-    # is a series that silently never appears.
-    from urllib.parse import unquote
+    # nothing else stops them drifting apart. A raw substring check is NOT
+    # enough here: every base field name (e.g. "RSI") is itself a prefix of
+    # its own suffixed siblings ("RSI|1W", "RSI|240"), so a URL that dropped
+    # the bare "RSI" entirely while keeping the suffixed forms would still
+    # contain the substring "RSI" and pass a naive `in` check. Parse the
+    # actual `fields=` query value and compare as an exact set instead.
+    from urllib.parse import parse_qs, urlsplit
 
     from jamasp import config
 
     src = next(s for s in config.load_sources()
                if s.name == "tv_gc_technicals")
-    url = unquote(src.url)
-    for field in prices.TV_FIELD_SUFFIXES:
-        assert field in url, f"{field} is mapped but not requested"
+    query = parse_qs(urlsplit(src.url).query)
+    requested = set(query["fields"][0].split(","))
+    assert requested == set(prices.TV_FIELD_SUFFIXES)
