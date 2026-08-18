@@ -286,11 +286,14 @@ The fit needs history TradingView cannot serve, so history is **computed**:
   duplication from a risk into a check, and is the reason computing is acceptable at
   all.
 
-**Open empirical question:** how deep Yahoo serves intraday bars. If it is deep enough
-to resample 4h, the 4h signals ship fitted; if not, they start at 1.0 and warm up. The
-confidence treatment of §2 makes the design correct either way — **backfill whatever
-depth actually returns and let the tile show the truth.** Nothing needs re-deciding;
-probe it first in implementation.
+**Measured 2026-08-18:** Yahoo serves GC=F at `range=730d&interval=1h` →
+17,395 bars (first 2024-03-26, last 2026-08-18, i.e. the full ~2-year window
+at hourly granularity), resampling to ~4,349 4h bars — well past the ~750-bar
+threshold needed to fit. Shallower windows also came back live (`60d&1h` →
+1,429 bars, `1mo&1h` → 619 bars), so the endpoint is healthy at every depth
+tried; `730d` is simply the deepest `1h` range Yahoo accepts. The 4h signals
+therefore ship **fitted**, rendered **solid** per the confidence treatment of
+§2.
 
 Fundamental multipliers **cannot** be backfilled — there is no historical corpus of
 scored news — so they start at 1.0 and warm over months while the technical half ships
