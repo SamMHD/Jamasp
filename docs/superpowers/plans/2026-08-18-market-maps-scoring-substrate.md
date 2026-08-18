@@ -318,8 +318,15 @@ def test_decide_prompt_lists_the_configured_themes():
         ("alpha", "bravo", "other"))
     assert "alpha, bravo, other" in prompt
     # The taxonomy has one home; a hardcoded slot leaking into the prompt
-    # would drift from config the first time the retro edits it.
-    assert "rates_dollar" not in prompt
+    # would drift from config the first time the retro edits it. Checking
+    # every shipped slot, not just one — an earlier draft of this test
+    # checked only rates_dollar and passed while the prompt prose still
+    # named geopolitics and physical_cb in its guidance sentence.
+    # "other" is exempt: it is the fallback _theme() itself hardcodes, so
+    # it is a structural guarantee rather than a taxonomy choice.
+    for slot in ("rates_dollar", "geopolitics", "physical_cb",
+                 "etf_flows", "supply_mining"):
+        assert slot not in prompt, f"{slot} is hardcoded in the prompt"
 
 
 def test_parse_decide_response_reads_direction_conviction_and_theme():
@@ -412,10 +419,10 @@ In `jamasp/flashtext.py`, change `DECIDE_HEADER` from a plain string to a templa
    genuinely unresolved. A major story you cannot call is a high tier with
    low conviction, which is a useful answer, not a failure.
 6. "theme": exactly one of {themes}.
-   Pick the transmission channel, not the subject matter: a Middle East
-   story that matters because of shipping lanes is geopolitics, and one
-   that matters because a central bank is buying is physical_cb. Use
-   "other" only when none of the rest fit.
+   Pick by transmission channel, not by subject matter. The same Middle
+   East story belongs in a different slot depending on why it moves gold:
+   shipping-lane risk and central-bank buying are different channels, not
+   different topics. Use "other" only when none of the others fit.
 ```
 
 and replace the final paragraph with:
