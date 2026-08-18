@@ -364,6 +364,37 @@ def _apply_dup(conn, item, row, display, chat, post, emit, dry_run) -> bool:
     return True
 
 
+def record_scores(conn: sqlite3.Connection, verdicts: dict[str, dict]) -> int:
+    """Persist the triage verdict for every fully-scored gold item.
+
+    Deliberately independent of delivery. An item held for a rollup, folded
+    as a duplicate, or dropped as low tier is still news the market map has
+    to show, so this runs over the whole verdict batch before the delivery
+    loop makes any of those decisions.
+
+    Non-gold items are skipped: a gold desk's map has no box for them.
+    Partly-scored items are skipped too — writing a missing direction as 0
+    would render a fabricated confident-neutral tile.
+    """
+    rows = [
+        (item_id, v["tier"], v["direction"], v["conviction"], v["theme"],
+         utcnow())
+        for item_id, v in verdicts.items()
+        if v["gold"]
+        and v["tier"] is not None
+        and v["direction"] is not None
+        and v["conviction"] is not None
+    ]
+    conn.executemany(
+        "INSERT OR REPLACE INTO item_scores"
+        " (item_id, tier, direction, conviction, theme, scored_at)"
+        " VALUES (?, ?, ?, ?, ?, ?)",
+        rows,
+    )
+    conn.commit()
+    return len(rows)
+
+
 def run_flash(
     conn: sqlite3.Connection,
     settings: dict,
@@ -376,7 +407,7 @@ def run_flash(
     """One flash pass. Never raises; every failure is counted and logged."""
     stats = {"posted": 0, "dup": 0, "not_gold": 0, "unreadable": 0, "stale": 0,
              "born_old": 0, "held": 0, "low_tier": 0, "no_tier": 0,
-             "burst": 0, "skipped_locked": 0, "errors": 0}
+             "burst": 0, "skipped_locked": 0, "errors": 0, "scored": 0}
     try:
         # A dry run sends nothing and writes nothing, so a live pass must not
         # block the operator from rendering one.
@@ -438,6 +469,9 @@ def _run_pass(conn, settings, sources, post, run_model, emit, dry_run, stats):
         log_error(conn, exc)
         stats["errors"] += 1
         return stats
+
+    if not dry_run:
+        stats["scored"] = record_scores(conn, verdicts)
 
     display = config_mod.display_names(sources)
     extract_max = settings.get("extract_max_chars", DEFAULT_EXTRACT_MAX_CHARS)

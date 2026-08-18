@@ -505,7 +505,7 @@ def test_run_flash_disabled_by_settings(tmp_path, monkeypatch):
                             run_model=model({}))
     assert stats == {"posted": 0, "dup": 0, "not_gold": 0, "unreadable": 0, "stale": 0,
                      "born_old": 0, "held": 0, "low_tier": 0, "no_tier": 0,
-                     "burst": 0, "skipped_locked": 0, "errors": 0}
+                     "burst": 0, "skipped_locked": 0, "errors": 0, "scored": 0}
     assert poster.calls == []
 
 
@@ -1066,3 +1066,57 @@ def test_run_rollup_skips_while_another_pass_holds_the_lock(tmp_path):
     assert stats["skipped_locked"] == 1 and stats["sent"] == 0
     assert poster.calls == []
     assert conn.execute("SELECT COUNT(*) c FROM rollups").fetchone()["c"] == 0
+
+
+def _verdict(gold=True, tier=4, direction=1, conviction=0.6,
+             theme="rates_dollar"):
+    return {"gold": gold, "dup_of": None, "tier": tier,
+            "direction": direction, "conviction": conviction, "theme": theme}
+
+
+def test_record_scores_writes_one_row_per_gold_item(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    written = flash.record_scores(conn, {"a": _verdict(), "b": _verdict(tier=2)})
+    assert written == 2
+    rows = conn.execute(
+        "SELECT item_id, tier, direction, conviction, theme"
+        " FROM item_scores ORDER BY item_id").fetchall()
+    assert [r["item_id"] for r in rows] == ["a", "b"]
+    assert rows[0]["conviction"] == 0.6
+
+
+def test_record_scores_covers_items_the_channel_drops(tmp_path):
+    # The whole point of a separate table: a tier-2 item never reaches the
+    # channel, but it is still news the fundamental map must show. If this
+    # ever regresses, the map silently shows only what was published.
+    conn = db.connect(tmp_path / "t.db")
+    flash.record_scores(conn, {"low": _verdict(tier=1)})
+    assert conn.execute(
+        "SELECT COUNT(*) FROM item_scores").fetchone()[0] == 1
+
+
+def test_record_scores_skips_non_gold_items(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    written = flash.record_scores(conn, {"x": _verdict(gold=False)})
+    assert written == 0
+    assert conn.execute("SELECT COUNT(*) FROM item_scores").fetchone()[0] == 0
+
+
+def test_record_scores_skips_incomplete_verdicts(tmp_path):
+    # A model that dropped a field must not land a row with a fabricated
+    # zero — the map would render it as a confident neutral.
+    conn = db.connect(tmp_path / "t.db")
+    written = flash.record_scores(conn, {
+        "no_dir": _verdict(direction=None),
+        "no_conv": _verdict(conviction=None),
+        "no_tier": _verdict(tier=None),
+    })
+    assert written == 0
+
+
+def test_record_scores_replaces_a_prior_score(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    flash.record_scores(conn, {"a": _verdict(tier=3)})
+    flash.record_scores(conn, {"a": _verdict(tier=5)})
+    rows = conn.execute("SELECT tier FROM item_scores").fetchall()
+    assert [r["tier"] for r in rows] == [5]
