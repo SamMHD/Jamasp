@@ -373,6 +373,34 @@ events:
       Iran-Oman arrangement by 31 Aug, 0.8), cf62fcf6/cd49c313 (US
       economic-first / Bessent package, thru 21 Aug).
 
+  - date: 2026-08-20
+    time_dubai: "~05:15"
+    title: China LPR fix — surprise-cut watch
+    why: >
+      Analysts (18 Aug) say a surprise LPR cut "cannot be ruled out" this
+      week; PBOC set two consecutive deliberately weak fixes (6.7873 then
+      6.7905 vs 6.7452 est) and July data release was delayed. A cut feeds
+      the yuan-debasement limb (warsh-credibility theme) and the local
+      gold bid the authorities are already leaning against. Prediction
+      31c34147: both tenors unchanged (0.65).
+    action: >
+      no wakeup — the ~09:00 Dubai scan reads it; escalate only if a cut
+      lands (check SGE premium + fix reaction same scan).
+
+  - date: 2026-08-21
+    time_dubai: "21–23 Aug (speech slots TBD)"
+    title: Jackson Hole symposium — Warsh set piece
+    why: >
+      The credibility/debasement theme's scheduled event. investinglive
+      (17 Aug): market hype is outrunning Warsh's say-as-little-as-possible
+      playbook — a contentless speech is itself a repricing risk with the
+      30y at multi-decade highs and gold's book crowded. Watch for
+      anything on the hike bar, balance sheet, or Fed-independence pushback
+      (Cook-firing thread).
+    action: >
+      anchor a wakeup the moment the Warsh speech slot publishes (speech
+      +40min per rule 15); scans cover until then.
+
   - date: 2026-09-11
     time_dubai: "16:30"
     title: US CPI (Aug) — first print carrying the second oil shock
