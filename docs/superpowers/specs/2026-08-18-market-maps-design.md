@@ -22,7 +22,7 @@ Facts established by reading the repo, which the design builds on rather than re
 - **`flash_items.tier` is live.** `flashtext.py` already asks the batched triage call
   for a 1–5 materiality tier on every candidate, and `db.py:113` stores it. The
   importance axis exists in production today; only direction is missing.
-- **TradingView's scanner serves any field, keyless.** `sources.yaml:284` already
+- **TradingView's scanner serves any field, keyless.** `sources.yaml:329` already
   pulls six fields through `parse_tradingview_scanner_json`; the endpoint also serves
   `MACD.macd`, `Stoch.K/D`, `ADX`, `CCI20`, `BB.upper/lower`, `W.R`, `Mom`, `AO`,
   EMA/SMA at every length, and `Pivot.M.Fibonacci.S1…R3`, with `|1W` / `|240`
@@ -34,10 +34,22 @@ Facts established by reading the repo, which the design builds on rather than re
 - **Candidate starvation was already fixed** in #10. `_OLDEST_RESERVE` holds back part
   of each batch for items nearest ageing out, and the alarming `skipped_stale: 4139`
   was mostly `skipped_born_old`. Map coverage is not compromised by it.
+- **Feed dates could be silently centuries wrong until 2026-08-18.** `#16` fixed
+  `rss._published_at`: feeds carrying a raw Unix epoch in `<published>` had it read
+  as a year, so `1786971720` became `1786-08-01`. Items ingested **before** that fix
+  keep their corrupt dates. Both maps window on `published_at`, and Plan 2's training
+  rows are keyed to when a story was live — so a sanity floor on `published_at` is a
+  correctness requirement here, not hygiene.
+- **The same URL can appear as several items** (`docs/todo/002`). `rss.item_id()`
+  hashes `(source, url, headline)`, so a publisher rewriting a live article's headline
+  mints a new item for a URL already seen. One Investing.com URL produced six items in
+  six distinct clusters; 4% of all flashes to 2026-08-17 were repeats of an
+  already-posted URL.
+
 - **The panel has validated viz tokens** (`globals.css:40-51`) produced by the
   dataviz validator, and pure-derivation modules with tests (`lib/technicals.ts`,
   `lib/health.ts`). This design follows both patterns.
-- **`sources.yaml:279` deliberately excludes TradingView's aggregate `Recommend.All`**
+- **`sources.yaml:324` deliberately excludes TradingView's aggregate `Recommend.All`**
   — "technicals annotate the macro read, they must not originate calls." **This
   design does not reverse that decision**: neither map produces an aggregate verdict.
 
@@ -146,6 +158,21 @@ The map shows only items the triage classified: gold-relevant, and seen within
 `flash.max_age_hours: 6`. Items that arrived already older (`skipped_born_old`) carry
 no score and cannot appear. **The map footer states its coverage** — item count,
 window, and the number of unscored items in range — rather than implying completeness.
+
+Two guards apply wherever scores are **read** — by the map and by Plan 2's training
+rows alike. Both are read-time, not write-time: `item_scores` keeps one row per item,
+and collapsing on the way in would destroy information that cannot be recovered.
+
+1. **Collapse on URL, keeping the highest tier.** Per `docs/todo/002` one URL can
+   hold several item ids under rewritten headlines. On the channel that is a
+   credibility problem; on a treemap it is an *arithmetic* one — six tiles for one
+   story is six times the area in that theme, which then inflates that theme's
+   exposure in every training row it appears in and biases the fitted multiplier.
+   Collapsing on URL is mechanical and exact, unlike the narrative-dedup problem.
+2. **Reject implausible `published_at`.** Anything before `_MIN_SANE_YEAR` (2000) is
+   a pre-`#16` epoch-parsing artefact. Excluded from both windows and from the fit.
+   The count of rejected items belongs in the coverage footer, so a silent shortfall
+   reads as a number rather than an empty corner of the map.
 
 ## 2 · Technical: signal → tile
 
@@ -382,9 +409,15 @@ every day they run is a day of training data the fit will want.
 
 ## Out of scope
 
-- The narrative-dedup gap from the tiering brief (six "gold pulled back" stories as six
-  items). Tiering reduced the symptom; the map will show it as several mid-size tiles
-  in one theme, which is arguably an improvement — but the cause is untouched.
+- The **narrative**-dedup gap from the tiering brief (six "gold pulled back" stories
+  as six items). Tiering reduced the symptom; the map will show it as several mid-size
+  tiles in one theme, which is arguably an improvement — but the cause is untouched.
+  This is distinct from the **same-URL** repost of `docs/todo/002`, which the map does
+  handle, by the read-time collapse above: same-URL is exactly detectable, same-narrative
+  is not.
+- Repairing the corrupt pre-`#16` `published_at` values in the live database. The read
+  guard excludes them; backfilling correct dates is a separate job and needs the
+  original feed payloads, which are not retained.
 - Any aggregate buy/sell verdict, on either map.
 - Multi-horizon weight sets. One H, retro-tunable.
 - Agent overrides of a story's direction. The fitted-vs-pinned pattern exists for

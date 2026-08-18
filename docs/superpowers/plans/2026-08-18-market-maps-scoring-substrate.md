@@ -15,8 +15,9 @@
 - **No new runtime dependencies.** The project's deps are click, httpx[socks], feedparser, trafilatura, rapidfuzz, pyyaml, pyjwt[crypto]. numpy arrives in Plan 2 for the ridge fit, not here.
 - **`direction` is gold-relative, never sentiment.** A strong-dollar print is `-2` even though it is good news for the dollar. This must be stated in the prompt and asserted in a test.
 - **Never `ALTER` an existing table in `SCHEMA`.** The live database is months of history that cannot be recreated. `SCHEMA` is all `CREATE TABLE IF NOT EXISTS`; column additions to existing tables go through `db.ADDED_COLUMNS` (`jamasp/db.py:113`).
-- **`sources.yaml:279` stands:** TradingView's `Recommend.All` / `Recommend.MA` / `Recommend.Other` aggregate gauges are **not** to be added to the field list. Neither map produces an aggregate verdict.
+- **`sources.yaml:324` stands:** TradingView's `Recommend.All` / `Recommend.MA` / `Recommend.Other` aggregate gauges are **not** to be added to the field list. Neither map produces an aggregate verdict.
 - **The theme taxonomy has exactly one home:** `config/weights.yaml`. It must not be duplicated as a constant in `flashtext.py`, and the prompt text is built from the loaded list.
+- **Two read-time guards are deferred, not forgotten.** Per the spec's §1 "Coverage", reads of `item_scores` must collapse on URL (one URL can hold several item ids — `docs/todo/002`) and reject `published_at` before year 2000 (pre-`#16` epoch-parsing artefacts). Both belong to Plans 2 and 3, which read the table. This plan only writes it, one row per item, deliberately uncollapsed: collapsing on write destroys information that cannot be recovered.
 - **Tests run with:** `uv run pytest`
 
 ---
@@ -280,7 +281,7 @@ git commit -m "feat(config): theme taxonomy for the fundamental market map"
 ### Task 4: `direction`, `conviction` and `theme` in the triage call
 
 **Files:**
-- Modify: `jamasp/flashtext.py` (`DECIDE_HEADER` at line 18, `build_decide_prompt`, `parse_decide_response` at line 171)
+- Modify: `jamasp/flashtext.py` (`DECIDE_HEADER` at line 19, `build_decide_prompt`, `parse_decide_response` at line 171)
 - Test: `tests/test_flashtext.py`
 
 **Interfaces:**
@@ -290,7 +291,7 @@ git commit -m "feat(config): theme taxonomy for the fundamental market map"
   - `flashtext.parse_decide_response(text: str, themes: Sequence[str]) -> dict[str, dict]` — **`themes` is new and required**; each verdict dict gains `"direction": int | None`, `"conviction": float | None`, `"theme": str`
 - Task 5 consumes both.
 
-**Note on churn:** `parse_decide_response` has 6 call sites in `tests/test_flashtext.py` (lines 46, 53, 60, 223, 232, 237) and 1 in `jamasp/flash.py:373`; `build_decide_prompt` has call sites in the same two files. All must gain the `themes` argument. Making it required rather than defaulted is deliberate: a default would silently route every item to `"other"` if a caller forgot it, and the taxonomy has exactly one home.
+**Note on churn:** `parse_decide_response` has 6 call sites in `tests/test_flashtext.py` (lines 46, 53, 60, 223, 232, 237) and 1 in `jamasp/flash.py:430` (inside `_run_pass`); `build_decide_prompt` has call sites in the same two files. All must gain the `themes` argument. Making it required rather than defaulted is deliberate: a default would silently route every item to `"other"` if a caller forgot it, and the taxonomy has exactly one home.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -513,7 +514,7 @@ def parse_decide_response(text: str, themes: Sequence[str]) -> dict[str, dict]:
 
 - [ ] **Step 8: Update the production call site**
 
-In `jamasp/flash.py`, the decide call at line 373. Load the taxonomy and pass it to both functions:
+In `jamasp/flash.py`, the decide call now lives in `_run_pass` at **lines 429-433** — `#15` extracted the pass body out of `flash_pass`, which is now a thin advisory-lock wrapper. Load the taxonomy and pass it to both functions:
 
 ```python
     themes = config_mod.themes(config_mod.load_weights())
@@ -658,14 +659,18 @@ def record_scores(conn: sqlite3.Connection, verdicts: dict[str, dict]) -> int:
 
 - [ ] **Step 4: Call it from the flash pass**
 
-In `jamasp/flash.py`, immediately after the `try/except` block that assigns `verdicts` (ending at line 381, before `display = config_mod.display_names(sources)`):
+Both anchors moved in `#15`. The pass body is now `_run_pass`, and `flash_pass` is a thin wrapper that takes the advisory lock and hands `stats` in.
+
+In `_run_pass`, immediately after the `try/except` block that assigns `verdicts` (ending around line 438, directly before `display = config_mod.display_names(sources)`):
 
 ```python
     if not dry_run:
         stats["scored"] = record_scores(conn, verdicts)
 ```
 
-Add `"scored": 0` to the `stats` dict initialiser (the one at line 330 containing `"born_old": 0, "held": 0, ...`).
+Add `"scored": 0` to the `stats` dict initialiser, which is now in **`flash_pass` at lines 377-379** — the dict containing `"born_old": 0, "held": 0, "low_tier": 0, "no_tier": 0, "burst": 0, "skipped_locked": 0, "errors": 0`.
+
+This placement puts the score write **inside** the advisory lock, which is what we want: two concurrent passes must not both write scores. `flash_pass` early-returns for `dry_run` before ever taking the lock, so the `if not dry_run` guard is consistent with that path rather than redundant.
 
 - [ ] **Step 5: Run the full suite**
 
@@ -674,11 +679,14 @@ Expected: PASS
 
 - [ ] **Step 6: Report the count in the CLI summary**
 
-In `jamasp/cli.py:165`, the flash summary line already prints `low_tier` and `no_tier`. Add the scored count so the accumulation is observable rather than assumed:
+The summary is now the shared helper `_flash_line` in `jamasp/cli.py:161-172`, used by both `ingest` and `flash`. It already prints `low_tier`, `no_tier` and `skipped_locked`. Add the scored count after the `no_tier` clause (line 165) so the accumulation is observable rather than assumed:
 
 ```python
+        f"{stats.get('low_tier', 0)} low tier, {stats.get('no_tier', 0)} no tier, "
         f"{stats.get('scored', 0)} scored, "
 ```
+
+Because the helper is shared, this surfaces in the `ingest` summary too — which is the one that actually runs every 15 minutes, so that is the useful place for it.
 
 - [ ] **Step 7: Verify against a real pass**
 
@@ -698,7 +706,7 @@ git commit -m "feat(flash): persist triage scores for every gold item, not just 
 
 **Files:**
 - Modify: `jamasp/ingest/prices.py:107-114` (`TV_FIELD_SUFFIXES`)
-- Modify: `config/sources.yaml:282-288` (the `tv_gc_technicals` entry)
+- Modify: `config/sources.yaml:320-333` (the `tv_gc_technicals` comment block and entry)
 - Test: `tests/test_prices.py`
 
 **Interfaces:**
@@ -731,7 +739,7 @@ def test_tv_field_suffixes_keep_the_existing_series_names():
 
 
 def test_tv_field_suffixes_exclude_the_aggregate_gauges():
-    # config/sources.yaml:279 — technicals annotate the macro read, they must
+    # config/sources.yaml:324 — technicals annotate the macro read, they must
     # not originate calls. Neither market map produces an aggregate verdict.
     keys = set(prices.TV_FIELD_SUFFIXES)
     assert not any(k.startswith("Recommend") for k in keys)
@@ -784,7 +792,7 @@ Replace `jamasp/ingest/prices.py:107-114` with:
 # The base field set, at TradingView's default (daily) resolution. The
 # aggregate buy/sell gauges (Recommend.All / Recommend.MA / Recommend.Other)
 # are deliberately absent: technicals annotate the macro read, they must not
-# originate calls — see config/sources.yaml.
+# originate calls — see config/sources.yaml:324.
 #
 # The five original names (SMA50, SMA200, ATR14, PIV_S1, PIV_R1) and RSI14 are
 # preserved exactly. They hold months of history in the live database, and a
@@ -825,13 +833,13 @@ TV_FIELD_SUFFIXES = {
 
 - [ ] **Step 4: Update the source URL**
 
-In `config/sources.yaml`, replace the `url:` line of the `tv_gc_technicals` entry (line 284). The `|` characters must be percent-encoded as `%7C`:
+In `config/sources.yaml`, replace the `url:` line of the `tv_gc_technicals` entry (**line 329**). The `|` characters must be percent-encoded as `%7C`:
 
 ```yaml
     url: "https://scanner.tradingview.com/symbol?symbol=COMEX%3AGC1!&fields=close,RSI,Stoch.K,Stoch.D,W.R,MACD.macd,MACD.signal,ADX,SMA50,SMA200,BB.upper,BB.lower,ATR,Pivot.M.Fibonacci.S1,Pivot.M.Fibonacci.R1,Pivot.M.Classic.S1,Pivot.M.Classic.R1,close%7C1W,RSI%7C1W,Stoch.K%7C1W,Stoch.D%7C1W,W.R%7C1W,MACD.macd%7C1W,MACD.signal%7C1W,ADX%7C1W,SMA50%7C1W,SMA200%7C1W,BB.upper%7C1W,BB.lower%7C1W,ATR%7C1W,Pivot.M.Fibonacci.S1%7C1W,Pivot.M.Fibonacci.R1%7C1W,Pivot.M.Classic.S1%7C1W,Pivot.M.Classic.R1%7C1W,close%7C240,RSI%7C240,Stoch.K%7C240,Stoch.D%7C240,W.R%7C240,MACD.macd%7C240,MACD.signal%7C240,ADX%7C240,SMA50%7C240,SMA200%7C240,BB.upper%7C240,BB.lower%7C240,ATR%7C240,Pivot.M.Fibonacci.S1%7C240,Pivot.M.Fibonacci.R1%7C240,Pivot.M.Classic.S1%7C240,Pivot.M.Classic.R1%7C240&no_404=true"
 ```
 
-Also update the comment above the entry (lines 275-281) to say the set now spans daily, weekly and 4h, and to keep the existing sentence about `Recommend.All` being excluded.
+Also update the comment above the entry (**lines 320-326**) to say the set now spans daily, weekly and 4h, and to keep the existing sentence about `Recommend.All` being excluded.
 
 - [ ] **Step 5: Run the tests to verify they pass**
 
@@ -875,3 +883,4 @@ git commit -m "feat(prices): widen TradingView set to 17 fields across daily, we
   **Plan 2**, which is written once Task 1's measurement is known.
 - `lib/marketmap.ts`, `market-map.tsx`, page wiring — **Plan 3**.
 - `tier_weight`, horizon, ridge alpha and pins in `config/weights.yaml` — Plan 2 adds them. This plan puts only `themes` in the file, because that is all it needs.
+- The URL-collapse and `published_at` sanity guards — read-time concerns, so Plans 2 and 3. See Global Constraints.
