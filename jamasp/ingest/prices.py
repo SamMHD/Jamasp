@@ -100,17 +100,44 @@ def parse_sge_json(text: str) -> tuple[str, str, float]:
     raise ValueError("no non-null price in SGE benchmark json")
 
 
-# TradingView scanner fields -> series-name suffixes (daily timeframe;
-# pivots are TradingView's monthly Classic set). Recommend.All — the
-# aggregate buy/sell gauge — is deliberately absent: technicals annotate
-# the macro read, they must not originate calls.
-TV_FIELD_SUFFIXES = {
+# The base field set, at TradingView's default (daily) resolution. The
+# aggregate buy/sell gauges (Recommend.All / Recommend.MA / Recommend.Other)
+# are deliberately absent: technicals annotate the macro read, they must not
+# originate calls — see config/sources.yaml:324.
+#
+# The five original names (SMA50, SMA200, ATR14, PIV_S1, PIV_R1) and RSI14 are
+# preserved exactly. They hold months of history in the live database, and a
+# rename would orphan the old series and silently restart it.
+_TV_BASE = {
+    "close": "CLOSE",
     "RSI": "RSI14",
+    "Stoch.K": "STOCH_K",
+    "Stoch.D": "STOCH_D",
+    "W.R": "WILLR",
+    "MACD.macd": "MACD",
+    "MACD.signal": "MACD_SIG",
+    "ADX": "ADX",
     "SMA50": "SMA50",
     "SMA200": "SMA200",
+    "BB.upper": "BB_UPPER",
+    "BB.lower": "BB_LOWER",
     "ATR": "ATR14",
+    "Pivot.M.Fibonacci.S1": "FIB_S1",
+    "Pivot.M.Fibonacci.R1": "FIB_R1",
     "Pivot.M.Classic.S1": "PIV_S1",
     "Pivot.M.Classic.R1": "PIV_R1",
+}
+
+# TradingView selects a resolution with a "|<interval>" field suffix; no
+# suffix means daily. The three entries below are independent of each
+# other and of iteration order — each (field, tf) pair below generates a
+# distinct key, so nothing depends on "" coming first.
+_TV_TIMEFRAMES = {"": "", "|1W": "_1W", "|240": "_4H"}
+
+TV_FIELD_SUFFIXES = {
+    f"{field}{tf}": f"{name}{tf_name}"
+    for field, name in _TV_BASE.items()
+    for tf, tf_name in _TV_TIMEFRAMES.items()
 }
 
 

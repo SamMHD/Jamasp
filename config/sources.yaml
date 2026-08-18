@@ -317,16 +317,28 @@ sources:
     interval_minutes: 360
     topic: prices
     parser: sge_json
-  # tv_gc_technicals: added 2026-08-01 — daily technical context for GC
-  # pulled precomputed from TradingView's keyless scanner API (RSI14,
-  # SMA50/200, ATR14, monthly Classic pivot S1/R1) instead of computing
-  # locally. Context annotation only: the aggregate buy/sell gauge
-  # (Recommend.All) is deliberately not stored — technicals annotate the
-  # macro read, they must not originate calls. `symbol: GC` prefixes the
-  # stored series (GC_RSI14, …).
+  # tv_gc_technicals: added 2026-08-01, widened to three timeframes
+  # 2026-08-19 — technical context for GC pulled precomputed from
+  # TradingView's keyless scanner API (RSI14, Stoch, W%R, MACD, ADX,
+  # SMA50/200, Bollinger, ATR14, Fibonacci and Classic pivots S1/R1),
+  # across daily, weekly (|1W) and 4h (|240) resolutions, instead of
+  # computing locally. Context annotation only: the aggregate buy/sell
+  # gauges (Recommend.All / Recommend.MA / Recommend.Other) are
+  # deliberately not stored — technicals annotate the macro read, they
+  # must not originate calls. `symbol: GC` prefixes the stored series
+  # (GC_RSI14, GC_RSI14_1W, GC_RSI14_4H, …).
+  #
+  # Verified live 2026-08-19: the scanner responds with all 51 requested
+  # keys, but every `|1W` and `|240` field comes back JSON null for
+  # COMEX:GC1! on this endpoint — only the 17 daily-resolution series
+  # (RSI14, MACD, ADX, SMA50/200, Bollinger, ATR14, Fibonacci/Classic
+  # pivots, CLOSE) actually land in `prices`. parse_tradingview_scanner_json
+  # skips the nulls by design, so this is a silent partial feed, not an
+  # error — do not treat an empty `_1W`/`_4H` series as a bug without
+  # re-checking this endpoint's behavior for GC1! first.
   - name: tv_gc_technicals
     type: technicals_api
-    url: "https://scanner.tradingview.com/symbol?symbol=COMEX%3AGC1!&fields=RSI,SMA50,SMA200,ATR,Pivot.M.Classic.S1,Pivot.M.Classic.R1&no_404=true"
+    url: "https://scanner.tradingview.com/symbol?symbol=COMEX%3AGC1!&fields=close,RSI,Stoch.K,Stoch.D,W.R,MACD.macd,MACD.signal,ADX,SMA50,SMA200,BB.upper,BB.lower,ATR,Pivot.M.Fibonacci.S1,Pivot.M.Fibonacci.R1,Pivot.M.Classic.S1,Pivot.M.Classic.R1,close%7C1W,RSI%7C1W,Stoch.K%7C1W,Stoch.D%7C1W,W.R%7C1W,MACD.macd%7C1W,MACD.signal%7C1W,ADX%7C1W,SMA50%7C1W,SMA200%7C1W,BB.upper%7C1W,BB.lower%7C1W,ATR%7C1W,Pivot.M.Fibonacci.S1%7C1W,Pivot.M.Fibonacci.R1%7C1W,Pivot.M.Classic.S1%7C1W,Pivot.M.Classic.R1%7C1W,close%7C240,RSI%7C240,Stoch.K%7C240,Stoch.D%7C240,W.R%7C240,MACD.macd%7C240,MACD.signal%7C240,ADX%7C240,SMA50%7C240,SMA200%7C240,BB.upper%7C240,BB.lower%7C240,ATR%7C240,Pivot.M.Fibonacci.S1%7C240,Pivot.M.Fibonacci.R1%7C240,Pivot.M.Classic.S1%7C240,Pivot.M.Classic.R1%7C240&no_404=true"
     interval_minutes: 360
     topic: prices
     parser: tradingview_scanner_json
