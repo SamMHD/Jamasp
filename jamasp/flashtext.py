@@ -21,7 +21,7 @@ DECIDE_HEADER = """You are the news triage desk for a physical gold trading comp
 POSTED lists stories already published in the last 24 hours, as id<TAB>headline.
 NEW lists candidate items, as id<TAB>source<TAB>headline<TAB>lede.
 
-For every NEW id decide two things:
+For every NEW id decide the following:
 
 1. "gold": true if the item plausibly bears on the gold market at all — gold
    prices, mining, central-bank reserves or purchases, interest rates, the
@@ -53,9 +53,26 @@ For every NEW id decide two things:
      look-ahead teasers, history and opinion pieces.
    Judge the substance, not how dramatic the wording is: a routine print
    written excitedly is still a 3, and a plainly-worded rate signal is a 4.
+4. "direction": which way this pushes the GOLD PRICE, -2 to +2.
+   +2 strongly higher, +1 higher, 0 no clear push or genuinely two-sided,
+   -1 lower, -2 strongly lower.
+   Score gold, not sentiment. A strong dollar print is -2 even though it is
+   good news for the dollar. An equity selloff is +1, because haven demand
+   supports gold — not 0 because the news itself reads as bad. Ask only:
+   does this make gold more expensive or less expensive?
+5. "conviction": how sure you are of that direction, 0.0 to 1.0.
+   Use a low value when an item plainly matters but its direction is
+   genuinely unresolved. A major story you cannot call is a high tier with
+   low conviction, which is a useful answer, not a failure.
+6. "theme": exactly one of {themes}.
+   Pick by transmission channel, not by subject matter. The same Middle
+   East story belongs in a different slot depending on why it moves gold:
+   shipping-lane risk and central-bank buying are different channels, not
+   different topics. Use "other" only when none of the others fit.
 
 Respond with ONLY a JSON object mapping each NEW id to
-{"gold": bool, "dup_of": id or null, "tier": 1-5}. No other text.
+{{"gold": bool, "dup_of": id or null, "tier": 1-5, "direction": -2 to 2,
+"conviction": 0.0 to 1.0, "theme": string}}. No other text.
 
 """
 
@@ -141,8 +158,10 @@ def latin_digits(text: str) -> str:
 
 
 def build_decide_prompt(
-    posted: Sequence[Mapping], candidates: Sequence[Mapping]
+    posted: Sequence[Mapping], candidates: Sequence[Mapping],
+    themes: Sequence[str]
 ) -> str:
+    header = DECIDE_HEADER.format(themes=", ".join(themes))
     posted_block = (
         "\n".join(f"{p['id']}\t{_one_line(p['title_en'])}" for p in posted)
         or "(none)"
@@ -152,7 +171,7 @@ def build_decide_prompt(
         f"\t{_one_line(c['lede'])}"
         for c in candidates
     )
-    return f"{DECIDE_HEADER}POSTED:\n{posted_block}\n\nNEW:\n{new_block}\n"
+    return f"{header}POSTED:\n{posted_block}\n\nNEW:\n{new_block}\n"
 
 
 def _tier(raw: object) -> int | None:
@@ -168,7 +187,40 @@ def _tier(raw: object) -> int | None:
     return value if 1 <= value <= 5 else None
 
 
-def parse_decide_response(text: str) -> dict[str, dict]:
+def _direction(raw: object) -> int | None:
+    """A -2..+2 gold-relative direction, or None when unusable.
+
+    None rather than 0: 0 is a real verdict meaning "no clear push", and
+    defaulting a missing field to it would fabricate a neutral claim the
+    model never made. Same reasoning as _tier.
+    """
+    try:
+        value = int(raw)
+    except (TypeError, ValueError):
+        return None
+    return value if -2 <= value <= 2 else None
+
+
+def _conviction(raw: object) -> float | None:
+    """A 0.0-1.0 confidence in the direction, or None when unusable."""
+    try:
+        value = float(raw)
+    except (TypeError, ValueError):
+        return None
+    return value if 0.0 <= value <= 1.0 else None
+
+
+def _theme(raw: object, themes: Sequence[str]) -> str:
+    """A configured theme slot, falling back to "other".
+
+    Unlike the scores above this has no None: every scored item occupies a
+    box on the map, and an unplaceable one belongs in "other" rather than
+    vanishing. config/weights.yaml guarantees the slot exists.
+    """
+    return raw if isinstance(raw, str) and raw in themes else "other"
+
+
+def parse_decide_response(text: str, themes: Sequence[str]) -> dict[str, dict]:
     verdicts = {}
     for item_id, raw in _json_object(text).items():
         if not isinstance(raw, dict):
@@ -178,6 +230,9 @@ def parse_decide_response(text: str) -> dict[str, dict]:
             "gold": bool(raw.get("gold")),
             "dup_of": str(dup) if dup else None,
             "tier": _tier(raw.get("tier")),
+            "direction": _direction(raw.get("direction")),
+            "conviction": _conviction(raw.get("conviction")),
+            "theme": _theme(raw.get("theme"), themes),
         }
     return verdicts
 

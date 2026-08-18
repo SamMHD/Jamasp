@@ -426,11 +426,13 @@ def _run_pass(conn, settings, sources, post, run_model, emit, dry_run, stats):
         return stats
 
     known = {row["id"]: row for row in posted_flashes(conn)}
+    themes = config_mod.themes(config_mod.load_weights())
     try:
         verdicts = flashtext.parse_decide_response(
             run_model(cfg["decide_cmd"], flashtext.build_decide_prompt(
-                list(known.values()), pending
-            ))
+                list(known.values()), pending, themes
+            )),
+            themes,
         )
     except Exception as exc:
         log_error(conn, exc)
