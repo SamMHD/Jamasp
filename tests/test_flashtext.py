@@ -344,8 +344,15 @@ def test_decide_prompt_asks_for_gold_relative_direction():
     assert '"direction"' in prompt
     # The single most important instruction in the addition: without it the
     # model scores sentiment and a strong-dollar print comes back positive.
-    assert "dollar" in prompt.lower()
-    assert "-2" in prompt and "+2" in prompt
+    # "dollar" alone is not a guard: it already appears in the pre-existing
+    # "gold" bullet's prose ("interest rates, the dollar, inflation data"),
+    # so that word surviving proves nothing about the direction block
+    # specifically. Slice out the direction block and assert on text unique
+    # to the sentiment-vs-gold warning within it.
+    direction_block = prompt.split('4. "direction"')[1].split('5. "conviction"')[0]
+    assert "GOLD PRICE" in direction_block
+    assert "not sentiment" in direction_block.lower()
+    assert "strong dollar" in direction_block.lower() and "-2" in direction_block
 
 
 def test_decide_prompt_lists_the_configured_themes():
@@ -382,6 +389,18 @@ def test_parse_decide_response_absent_direction_is_none():
         '{"a": {"gold": true, "tier": 3}}', THEMES)
     assert out["a"]["direction"] is None
     assert out["a"]["conviction"] is None
+
+
+def test_parse_decide_response_keeps_a_genuine_zero():
+    # The mirror image of the test above: 0 is itself a real verdict ("no
+    # clear push" / zero confidence), not the absence of one. An
+    # implementation written as `if not value: return None` would swallow
+    # it and still pass every other test in this file.
+    out = flashtext.parse_decide_response(
+        '{"a": {"gold": true, "tier": 3, "direction": 0, "conviction": 0.0}}',
+        THEMES)
+    assert out["a"]["direction"] == 0 and out["a"]["direction"] is not None
+    assert out["a"]["conviction"] == 0.0 and out["a"]["conviction"] is not None
 
 
 def test_parse_decide_response_rejects_out_of_range_direction():
