@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from jamasp import config
 from jamasp.config import Source, load_settings, load_sources
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -71,3 +72,26 @@ def test_display_names_uses_display_then_falls_back():
         "cnbc_finance": "CNBC",
         "mining_com": "Mining Com",
     }
+
+
+def test_load_weights_reads_themes(tmp_path):
+    p = tmp_path / "w.yaml"
+    p.write_text("themes:\n  - rates_dollar\n  - geopolitics\n  - other\n")
+    assert config.themes(config.load_weights(p)) == (
+        "rates_dollar", "geopolitics", "other")
+
+
+def test_themes_order_is_preserved(tmp_path):
+    # The ridge fit in Plan 2 indexes feature columns by this order, so it is
+    # data, not presentation. Sorting it here would silently permute the
+    # fitted coefficients against their labels.
+    p = tmp_path / "w.yaml"
+    p.write_text("themes:\n  - zulu\n  - alpha\n  - other\n")
+    assert config.themes(config.load_weights(p)) == ("zulu", "alpha", "other")
+
+
+def test_shipped_weights_config_has_other_as_the_fallback_slot():
+    # Task 4 falls back to "other" for any theme the model invents, so the
+    # slot must exist in the shipped taxonomy or those items land nowhere.
+    weights = config.load_weights(Path("config/weights.yaml"))
+    assert "other" in config.themes(weights)

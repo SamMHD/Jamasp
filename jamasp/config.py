@@ -48,3 +48,17 @@ def display_names(sources: list[Source]) -> dict[str, str]:
     return {
         s.name: s.display or s.name.replace("_", " ").title() for s in sources
     }
+
+
+def load_weights(path: Path = Path("config/weights.yaml")) -> dict:
+    return yaml.safe_load(path.read_text())
+
+
+def themes(weights: dict) -> tuple[str, ...]:
+    """The fundamental map's theme slots, in configured order.
+
+    Order is data, not presentation: Plan 2's fit indexes its feature columns
+    by position, so sorting or de-duplicating here would permute fitted
+    coefficients against their labels.
+    """
+    return tuple(weights["themes"])
