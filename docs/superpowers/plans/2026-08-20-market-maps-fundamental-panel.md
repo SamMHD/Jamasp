@@ -518,7 +518,9 @@ const SINCE = "2026-08-19T00:00:00Z";
 describe("getScoredItems", () => {
   it("returns items inside the window, newest first", () => {
     const rows = db.getScoredItems(SINCE);
-    expect(rows.map(r => r.itemId)).toEqual(["w1", "dupC", "w2"]);
+    // dupB, not dupC: the collapse keeps the highest tier (dupB is tier 4),
+    // and dupB's 19:05 sits between w2's 18:00 and w1's 20:00.
+    expect(rows.map(r => r.itemId)).toEqual(["w1", "dupB", "w2"]);
   });
 
   it("excludes items published before the window", () => {
