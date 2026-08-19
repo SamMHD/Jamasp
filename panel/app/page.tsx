@@ -52,26 +52,6 @@ export function windowSinceIso(range: MapRange, now: Date): string {
   return iso(new Date(dubaiMidnightUtcMs));
 }
 
-/**
- * Count of items in the window with no item_scores row, collapsed by URL
- * the same way db.getScoredItems collapses its own rows — a story scored
- * under one of several URL-duplicate ids must not double-count as both
- * scored and unscored. Kept local to the page (raw query via db.getDb())
- * rather than added to lib/db.ts, per this task's file scope.
- */
-function unscoredCountSince(sinceIso: string): number {
-  const row = db.getDb().prepare(`
-    SELECT COUNT(DISTINCT i.url) c
-      FROM items i
-     WHERE i.published_at >= ?
-       AND NOT EXISTS (
-             SELECT 1 FROM item_scores s
-               JOIN items i2 ON i2.id = s.item_id
-              WHERE i2.url = i.url)
-  `).get(sinceIso) as { c: number };
-  return row.c;
-}
-
 export default async function Overview({
   searchParams,
 }: {
@@ -85,7 +65,7 @@ export default async function Overview({
   const range = resolveRange(sp.w);
   const mapSince = range === "week" ? weekAgo : windowSinceIso("today", now);
   const mapItems = db.getScoredItems(mapSince);
-  const mapUnscored = unscoredCountSince(mapSince);
+  const mapUnscored = db.unscoredCountSince(mapSince);
 
   // --- ops health (unchanged derivations, demoted presentation) ---
   const lastIngest = db.getMeta("last_ingest_at");

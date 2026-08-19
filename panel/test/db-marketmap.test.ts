@@ -39,7 +39,9 @@ beforeAll(async () => {
       ${item("dupC", "https://x.test/dup", "2026-08-19T19:10:00Z", "Gold RSI 77")},
       ${item("tieA", "https://x.test/tie", "2026-08-10T09:00:00Z", "Tie story A")},
       ${item("tieB", "https://x.test/tie", "2026-08-10T10:00:00Z", "Tie story B")},
-      ${item("bogus", "https://x.test/bogus", "1786-08-01T00:00:00Z", "Epoch artefact")};
+      ${item("bogus", "https://x.test/bogus", "1786-08-01T00:00:00Z", "Epoch artefact")},
+      ${item("unscoredIn", "https://x.test/unscored-in", "2026-08-19T21:30:00Z", "Filed but not yet scored")},
+      ${item("unscoredOut", "https://x.test/unscored-out", "2026-08-18T23:00:00Z", "Unscored, before the window")};
     INSERT INTO item_scores VALUES
       ${score("w1", 4, 2, 0.8, "rates_dollar")},
       ${score("w2", 3, -1, 0.6, "rates_dollar")},
@@ -118,5 +120,28 @@ describe("getScoredItems", () => {
   it("returns an empty array when the window holds nothing", () => {
     // The component renders an empty state; it must not receive undefined.
     expect(db.getScoredItems("2030-01-01T00:00:00Z")).toEqual([]);
+  });
+});
+
+describe("unscoredCountSince", () => {
+  it("counts unscored items in the window but not scored ones", () => {
+    // Inside SINCE: w1, w2, dupA/B/C are all scored (5 items, 3 distinct
+    // urls, 0 unscored) and unscoredIn carries no item_scores row at all.
+    // A query that ignored the NOT EXISTS join, or joined it backwards,
+    // would return 6 (every item) or 0 (every item, the other way) instead
+    // of exactly 1 — this discriminates both directions.
+    expect(db.unscoredCountSince(SINCE)).toBe(1);
+  });
+
+  it("excludes an unscored item published before the window", () => {
+    // unscoredOut sits at 2026-08-18T23:00Z, one hour before SINCE. A query
+    // with a wrong window bound (off-by-one, or no bound at all) would
+    // count it too and this would fail with 2 instead of 1.
+    expect(db.unscoredCountSince(SINCE)).toBe(1);
+    expect(db.unscoredCountSince("2026-08-18T00:00:00Z")).toBe(2);
+  });
+
+  it("returns 0 when the window holds nothing", () => {
+    expect(db.unscoredCountSince("2030-01-01T00:00:00Z")).toBe(0);
   });
 });

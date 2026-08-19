@@ -320,3 +320,23 @@ export function getScoredItems(sinceIso: string): ScoredItem[] {
      ORDER BY i.published_at DESC
   `).all(sinceIso) as ScoredItem[]);
 }
+
+/**
+ * Count of items in the window with no `item_scores` row, collapsed by URL
+ * the same way getScoredItems collapses its own rows — a story scored under
+ * one of several URL-duplicate ids must not double-count as both scored and
+ * unscored (see getScoredItems's guard-1 comment for why duplicate ids
+ * happen at all). This is the map's coverage footer: "N scored, M unscored
+ * not shown".
+ */
+export function unscoredCountSince(sinceIso: string): number {
+  return q(db => (db.prepare(`
+    SELECT COUNT(DISTINCT i.url) c
+      FROM items i
+     WHERE i.published_at >= ?
+       AND NOT EXISTS (
+             SELECT 1 FROM item_scores s
+               JOIN items i2 ON i2.id = s.item_id
+              WHERE i2.url = i.url)
+  `).get(sinceIso) as { c: number }).c);
+}
