@@ -1,0 +1,101 @@
+import { beforeAll, describe, expect, it } from "vitest";
+import { mkdtempSync, mkdirSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import Database from "better-sqlite3";
+
+/**
+ * Own fixture root, like db-news.test.ts: the map reader needs a URL-collision
+ * shape and an implausible date that no other fixture carries. vitest isolates
+ * files into separate workers, so each import of lib/db binds its own root.
+ */
+let db: typeof import("../lib/db");
+
+const item = (id: string, url: string, publishedAt: string, headline: string) =>
+  `('${id}','reuters','${publishedAt}','${headline}',NULL,'${url}','gold',NULL,` +
+  `'${publishedAt}',NULL)`;
+
+const score = (id: string, tier: number, dir: number, conv: number, theme: string) =>
+  `('${id}',${tier},${dir},${conv},'${theme}','2026-08-19T22:00:00Z')`;
+
+beforeAll(async () => {
+  const root = mkdtempSync(path.join(tmpdir(), "jamasp-db-marketmap-"));
+  mkdirSync(path.join(root, "state"), { recursive: true });
+  const d = new Database(path.join(root, "state", "jamasp.db"));
+  d.exec(`
+    CREATE TABLE items (id TEXT PRIMARY KEY, source TEXT NOT NULL,
+      published_at TEXT NOT NULL, headline TEXT NOT NULL, lede TEXT,
+      url TEXT NOT NULL, topic TEXT NOT NULL, cluster_id TEXT,
+      fetched_at TEXT NOT NULL, read_at TEXT);
+    CREATE TABLE item_scores (item_id TEXT PRIMARY KEY, tier INTEGER NOT NULL,
+      direction INTEGER NOT NULL, conviction REAL NOT NULL, theme TEXT NOT NULL,
+      scored_at TEXT NOT NULL);
+    INSERT INTO items VALUES
+      ${item("w1", "https://x.test/w1", "2026-08-19T20:00:00Z", "Late story")},
+      ${item("w2", "https://x.test/w2", "2026-08-19T18:00:00Z", "Earlier story")},
+      ${item("old", "https://x.test/old", "2026-08-01T12:00:00Z", "Outside window")},
+      ${item("dupA", "https://x.test/dup", "2026-08-19T19:00:00Z", "Gold at 4400")},
+      ${item("dupB", "https://x.test/dup", "2026-08-19T19:05:00Z", "Gold at 4450 now")},
+      ${item("dupC", "https://x.test/dup", "2026-08-19T19:10:00Z", "Gold RSI 77")},
+      ${item("bogus", "https://x.test/bogus", "1786-08-01T00:00:00Z", "Epoch artefact")};
+    INSERT INTO item_scores VALUES
+      ${score("w1", 4, 2, 0.8, "rates_dollar")},
+      ${score("w2", 3, -1, 0.6, "rates_dollar")},
+      ${score("old", 5, 2, 0.9, "geopolitics")},
+      ${score("dupA", 2, 1, 0.3, "other")},
+      ${score("dupB", 4, 1, 0.5, "other")},
+      ${score("dupC", 3, 0, 0.2, "other")},
+      ${score("bogus", 5, 2, 0.9, "geopolitics")};
+  `);
+  d.close();
+  process.env.JAMASP_ROOT = root;
+  db = await import("../lib/db");
+});
+
+const SINCE = "2026-08-19T00:00:00Z";
+
+describe("getScoredItems", () => {
+  it("returns items inside the window, newest first", () => {
+    const rows = db.getScoredItems(SINCE);
+    // dupB, not dupC: the collapse keeps the highest tier (dupB is tier 4),
+    // and dupB's 19:05 sits between w2's 18:00 and w1's 20:00.
+    expect(rows.map(r => r.itemId)).toEqual(["w1", "dupB", "w2"]);
+  });
+
+  it("excludes items published before the window", () => {
+    expect(db.getScoredItems(SINCE).some(r => r.itemId === "old")).toBe(false);
+  });
+
+  it("collapses three ids sharing one URL into a single highest-tier row", () => {
+    // docs/todo/002: a publisher rewriting a live headline mints a new item id
+    // for a URL already posted. Three tiles for one story is three times the
+    // area in its theme, which then biases the fit. dupB carries tier 4.
+    const rows = db.getScoredItems(SINCE);
+    const dup = rows.filter(r => r.url === "https://x.test/dup");
+    expect(dup).toHaveLength(1);
+    expect(dup[0].tier).toBe(4);
+  });
+
+  it("rejects an implausible published_at even when the window would admit it", () => {
+    // The year-2000 floor is defensive: with any realistic window start, a
+    // pre-2000 date is already excluded by the window filter itself, since
+    // ISO strings compare lexically. Passing an ancient window start is what
+    // makes this test able to fail if the floor is ever removed.
+    const rows = db.getScoredItems("1000-01-01T00:00:00Z");
+    expect(rows.some(r => r.itemId === "bogus")).toBe(false);
+    expect(rows.some(r => r.itemId === "old")).toBe(true);
+  });
+
+  it("carries the fields the map needs", () => {
+    const [first] = db.getScoredItems(SINCE);
+    expect(first).toMatchObject({
+      itemId: "w1", tier: 4, direction: 2, conviction: 0.8,
+      theme: "rates_dollar", source: "reuters", headline: "Late story",
+    });
+  });
+
+  it("returns an empty array when the window holds nothing", () => {
+    // The component renders an empty state; it must not receive undefined.
+    expect(db.getScoredItems("2030-01-01T00:00:00Z")).toEqual([]);
+  });
+});

@@ -1,5 +1,6 @@
 import Database from "better-sqlite3";
 import { DB_PATH } from "./paths";
+import type { ScoredItem } from "./marketmap";
 
 let _db: Database.Database | null = null;
 
@@ -282,4 +283,40 @@ export function priceDeltaReference(
     if (r === undefined || r.ts >= latestTs) return null;
     return r.value;
   });
+}
+
+/**
+ * Scored news for the fundamental map, with both coverage guards applied.
+ *
+ * Guard 1 — collapse on URL. rss.item_id() hashes (source, url, headline),
+ * so a publisher rewriting a live article's headline mints a new item for a
+ * URL already seen (docs/todo/002). On a treemap that is arithmetic, not
+ * cosmetics: six tiles for one story is six times the area in its theme.
+ * Highest tier wins, because the strongest read of a story is the one the
+ * desk should see.
+ *
+ * Guard 2 — reject implausible dates. Feeds carrying a raw Unix epoch had it
+ * parsed as a year before #16, so "1786971720" became 1786-08-01. Those rows
+ * would silently fall outside every window; excluding them explicitly means
+ * the coverage count can state how many were dropped.
+ *
+ * Collapsing happens on read, never on write: item_scores keeps one row per
+ * item, and folding on the way in would destroy information that cannot be
+ * recovered.
+ */
+export function getScoredItems(sinceIso: string): ScoredItem[] {
+  return q(db => db.prepare(`
+    SELECT s.item_id AS itemId, s.tier, s.direction, s.conviction, s.theme,
+           i.headline, i.source, i.url, i.published_at AS publishedAt
+      FROM item_scores s
+      JOIN items i ON i.id = s.item_id
+     WHERE i.published_at >= ?
+       AND i.published_at >= '2000-01-01T00:00:00Z'
+       AND s.tier = (
+             SELECT MAX(s2.tier) FROM item_scores s2
+               JOIN items i2 ON i2.id = s2.item_id
+              WHERE i2.url = i.url)
+     GROUP BY i.url
+     ORDER BY i.published_at DESC
+  `).all(sinceIso) as ScoredItem[]);
 }
