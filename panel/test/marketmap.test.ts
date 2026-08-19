@@ -55,11 +55,29 @@ function item(over: Partial<ScoredItem> = {}): ScoredItem {
   };
 }
 
+// Two rects overlap iff they overlap on both axes. EPS keeps shared edges
+// (expected and correct between adjacent tiles) from reading as overlaps.
+function overlaps(
+  a: { x: number; y: number; w: number; h: number },
+  b: { x: number; y: number; w: number; h: number },
+): boolean {
+  const EPS = 1e-9;
+  return a.x + a.w > b.x + EPS && b.x + b.w > a.x + EPS
+      && a.y + a.h > b.y + EPS && b.y + b.h > a.y + EPS;
+}
+
 describe("squarify", () => {
   it("fills the rectangle exactly and never overlaps", () => {
+    // Eight nodes of varied magnitude so row-breaking actually happens —
+    // that is exactly where an overlap bug (e.g. one region double-counted
+    // while another is shorted by the same area) would live. Area and
+    // in-bounds checks alone can't catch that: two rects can each individually
+    // satisfy both and still intersect each other. Hence the explicit
+    // pairwise overlap check below.
     const cells = squarify(
-      [4, 3, 2, 1].map((v, i) => ({ value: v, node: `n${i}` })), RECT);
-    expect(cells).toHaveLength(4);
+      [10, 8, 6, 5, 4, 3, 2, 1].map((v, i) => ({ value: v, node: `n${i}` })),
+      RECT);
+    expect(cells).toHaveLength(8);
     const area = cells.reduce((s, c) => s + c.w * c.h, 0);
     expect(area).toBeCloseTo(RECT.w * RECT.h, 4);
     for (const c of cells) {
@@ -67,6 +85,11 @@ describe("squarify", () => {
       expect(c.y).toBeGreaterThanOrEqual(RECT.y - 1e-6);
       expect(c.x + c.w).toBeLessThanOrEqual(RECT.x + RECT.w + 1e-6);
       expect(c.y + c.h).toBeLessThanOrEqual(RECT.y + RECT.h + 1e-6);
+    }
+    for (let i = 0; i < cells.length; i++) {
+      for (let j = i + 1; j < cells.length; j++) {
+        expect(overlaps(cells[i], cells[j])).toBe(false);
+      }
     }
   });
 
@@ -134,6 +157,11 @@ describe("layoutMap", () => {
       expect(c.y).toBeGreaterThanOrEqual(box.y + 14 - 1e-6);
       expect(c.y + c.h).toBeLessThanOrEqual(box.y + box.h + 1e-6);
     }
+    // >= alone would pass a doubled or inflated offset too, since squarify
+    // just fills whatever inner rect it's handed. Pin the top edge flush
+    // against the header strip, not merely clear of it.
+    const minY = Math.min(...box.items.map(c => c.y));
+    expect(minY).toBeCloseTo(box.y + 14, 6);
   });
 
   it("returns an empty layout for no items", () => {
