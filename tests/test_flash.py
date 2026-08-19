@@ -505,7 +505,7 @@ def test_run_flash_disabled_by_settings(tmp_path, monkeypatch):
                             run_model=model({}))
     assert stats == {"posted": 0, "dup": 0, "not_gold": 0, "unreadable": 0, "stale": 0,
                      "born_old": 0, "held": 0, "low_tier": 0, "no_tier": 0,
-                     "burst": 0, "skipped_locked": 0, "errors": 0}
+                     "burst": 0, "skipped_locked": 0, "errors": 0, "scored": 0}
     assert poster.calls == []
 
 
@@ -1066,3 +1066,144 @@ def test_run_rollup_skips_while_another_pass_holds_the_lock(tmp_path):
     assert stats["skipped_locked"] == 1 and stats["sent"] == 0
     assert poster.calls == []
     assert conn.execute("SELECT COUNT(*) c FROM rollups").fetchone()["c"] == 0
+
+
+def _verdict(gold=True, tier=4, direction=1, conviction=0.6,
+             theme="rates_dollar"):
+    return {"gold": gold, "dup_of": None, "tier": tier,
+            "direction": direction, "conviction": conviction, "theme": theme}
+
+
+def test_record_scores_writes_one_row_per_gold_item(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    written = flash.record_scores(
+        conn, {"a": _verdict(), "b": _verdict(tier=2)}, {"a", "b"}
+    )
+    assert written == 2
+    rows = conn.execute(
+        "SELECT item_id, tier, direction, conviction, theme"
+        " FROM item_scores ORDER BY item_id").fetchall()
+    assert [r["item_id"] for r in rows] == ["a", "b"]
+    assert rows[0]["conviction"] == 0.6
+
+
+def test_record_scores_covers_items_the_channel_drops(tmp_path):
+    # The whole point of a separate table: a tier-2 item never reaches the
+    # channel, but it is still news the fundamental map must show. If this
+    # ever regresses, the map silently shows only what was published.
+    conn = db.connect(tmp_path / "t.db")
+    flash.record_scores(conn, {"low": _verdict(tier=1)}, {"low"})
+    assert conn.execute(
+        "SELECT COUNT(*) FROM item_scores").fetchone()[0] == 1
+
+
+def test_record_scores_skips_non_gold_items(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    written = flash.record_scores(conn, {"x": _verdict(gold=False)}, {"x"})
+    assert written == 0
+    assert conn.execute("SELECT COUNT(*) FROM item_scores").fetchone()[0] == 0
+
+
+def test_record_scores_skips_incomplete_verdicts(tmp_path):
+    # A model that dropped a field must not land a row with a fabricated
+    # zero — the map would render it as a confident neutral.
+    conn = db.connect(tmp_path / "t.db")
+    written = flash.record_scores(conn, {
+        "no_dir": _verdict(direction=None),
+        "no_conv": _verdict(conviction=None),
+        "no_tier": _verdict(tier=None),
+    }, {"no_dir", "no_conv", "no_tier"})
+    assert written == 0
+
+
+def test_record_scores_replaces_a_prior_score(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    flash.record_scores(conn, {"a": _verdict(tier=3)}, {"a"})
+    flash.record_scores(conn, {"a": _verdict(tier=5)}, {"a"})
+    rows = conn.execute("SELECT tier FROM item_scores").fetchall()
+    assert [r["tier"] for r in rows] == [5]
+
+
+def test_record_scores_ignores_a_posted_id_the_model_echoed_as_top_level(tmp_path):
+    # The decide prompt shows POSTED ids in the same id<TAB>... shape as NEW
+    # ones and invites the model to name a POSTED id as a dup_of value. If
+    # the model also emits a top-level verdict keyed by that same POSTED id,
+    # an unscoped record_scores would silently overwrite the POSTED item's
+    # genuine headline+lede score with one derived from the POSTED block's
+    # title-only context. This is the actual point of Fix 1: scoping to the
+    # pass's own candidate ids must stop that overwrite.
+    conn = db.connect(tmp_path / "t.db")
+    posted_id = "posted-item-1"
+    # posted_id's genuine score, from the pass that originally classified it
+    # off the full headline + lede.
+    flash.record_scores(
+        conn, {posted_id: _verdict(tier=5, direction=2, conviction=0.9)},
+        {posted_id},
+    )
+    new_id = "new-item-1"
+    verdicts = {
+        new_id: _verdict(tier=3, direction=-1, conviction=0.4),
+        # The model echoed the POSTED id back as a top-level verdict, scored
+        # from title-only context — this must be dropped, not applied.
+        posted_id: _verdict(tier=1, direction=0, conviction=0.1),
+    }
+    written = flash.record_scores(conn, verdicts, {new_id})
+    assert written == 1
+    rows = {
+        r["item_id"]: r for r in conn.execute(
+            "SELECT item_id, tier, direction, conviction FROM item_scores"
+        ).fetchall()
+    }
+    assert set(rows) == {posted_id, new_id}
+    # the genuine score survives untouched
+    assert rows[posted_id]["tier"] == 5
+    assert rows[posted_id]["direction"] == 2
+    assert rows[posted_id]["conviction"] == 0.9
+    assert rows[new_id]["tier"] == 3
+
+
+def test_run_flash_scores_items_regardless_of_delivery_outcome(tmp_path, monkeypatch):
+    """The plan's central claim: scoring is independent of delivery.
+
+    One item posts, one dedupes into it within the same tick, one is dropped
+    as low tier, and one is held for a rollup — four different delivery
+    outcomes, none of them a published channel message except the first. All
+    four must still land in item_scores, because the map shows news, not
+    published messages. A refactor moving record_scores after the delivery
+    loop would pass every other test in this file and still be wrong.
+    """
+    no_extract(monkeypatch)
+    conn = db.connect(tmp_path / "t.db")
+    # newest first so `posted` is processed (and its flash recorded) before
+    # `dup` is reached — matching test_run_flash_dedupes_within_one_tick.
+    posted, dup, low, held_item = seed(conn, [
+        ("reuters", "Gold hits record", 1),
+        ("cnbc", "Bullion surges to all-time high", 2),
+        ("reuters", "Minor retail gold pricing note", 3),
+        ("cnbc", "Fed official hints at a pause", 4),
+    ])
+    poster = FakePoster()
+    stats = flash.run_flash(
+        conn, SETTINGS, SOURCES, post=poster,
+        run_model=model({
+            posted: {"gold": True, "dup_of": None, "tier": 5,
+                     "direction": 1, "conviction": 0.8, "theme": "rates_dollar"},
+            dup: {"gold": True, "dup_of": posted, "tier": 5,
+                  "direction": 1, "conviction": 0.6, "theme": "rates_dollar"},
+            low: {"gold": True, "dup_of": None, "tier": 2,
+                  "direction": 0, "conviction": 0.3, "theme": "rates_dollar"},
+            held_item: {"gold": True, "dup_of": None, "tier": 3,
+                        "direction": -1, "conviction": 0.5, "theme": "rates_dollar"},
+        }),
+    )
+    assert stats["posted"] == 1
+    assert stats["dup"] == 1
+    assert stats["low_tier"] == 1
+    assert stats["held"] == 1
+    # only the original story ever reached the channel: the dedupe edited
+    # that same message, and the other two never sent anything at all.
+    assert [c[0] for c in poster.calls] == ["send", "edit"]
+    scored_ids = {
+        r["item_id"] for r in conn.execute("SELECT item_id FROM item_scores")
+    }
+    assert scored_ids == {posted, dup, low, held_item}

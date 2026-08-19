@@ -391,7 +391,7 @@ sources:
     )
     assert result.exit_code == 0
     assert calls == [1]
-    assert "flash: 1 posted, 0 held, 0 low tier, 0 no tier, 2 updated" in result.output
+    assert "flash: 1 posted, 0 held, 0 low tier, 0 no tier, 0 scored, 2 updated" in result.output
 
 
 def test_wakeup_cancel_cli(tmp_path):
@@ -555,8 +555,9 @@ def test_flash_line_reports_tier_outcomes():
     line = _flash_line({
         "posted": 1, "dup": 1, "not_gold": 9, "unreadable": 0, "burst": 0,
         "stale": 0, "born_old": 82, "held": 12, "low_tier": 7, "no_tier": 2,
-        "errors": 0,
+        "errors": 0, "scored": 23,
     })
     assert "12 held" in line
     assert "7 low tier" in line
     assert "2 no tier" in line
+    assert "23 scored" in line

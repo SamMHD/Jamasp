@@ -1,0 +1,16 @@
+# Market-map weighting. Owned by the weekly retro (intent); the daily fit
+# writes its measurements to state/weights.json instead, so a diff of this
+# file is always a deliberate change.
+#
+# themes: the fundamental map's taxonomy. This is a FIXED list because the
+# ridge fit indexes its feature columns by position — adding, removing or
+# reordering a slot invalidates the fitted coefficients and must trigger a
+# refit from history. "other" is the fallback slot for anything the triage
+# model names that is not on this list; it must always be present.
+themes:
+  - rates_dollar
+  - geopolitics
+  - physical_cb
+  - etf_flows
+  - supply_mining
+  - other
