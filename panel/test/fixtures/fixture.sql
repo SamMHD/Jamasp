@@ -67,6 +67,14 @@ CREATE TABLE IF NOT EXISTS notify_log (
     text TEXT NOT NULL,
     ok   INTEGER NOT NULL
 );
+CREATE TABLE IF NOT EXISTS item_scores (
+    item_id    TEXT PRIMARY KEY,
+    tier       INTEGER NOT NULL,
+    direction  INTEGER NOT NULL,
+    conviction REAL NOT NULL,
+    theme      TEXT NOT NULL,
+    scored_at  TEXT NOT NULL
+);
 
 INSERT INTO items VALUES
  ('i1','cnbc_finance','2026-08-01T08:00:00Z','Gold steadies as dollar slips','Spot gold held near…','https://example.com/a1','gold','i1','2026-08-01T08:05:00Z',NULL),

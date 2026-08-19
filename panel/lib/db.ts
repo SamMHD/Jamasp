@@ -19,6 +19,20 @@ function q<T>(fn: (db: Database.Database) => T): T {
   }
 }
 
+/**
+ * A freshly deployed host has no `item_scores` table until the first CLI
+ * scoring run creates it — the panel must keep serving through that window
+ * rather than 500ing, so callers that read item_scores check for it first
+ * rather than relying on q() to paper over the error: q() only retries
+ * SQLITE_BUSY and deliberately rethrows everything else, including
+ * "no such table", which is a real bug everywhere else in this file.
+ */
+function hasTable(db: Database.Database, name: string): boolean {
+  return db.prepare(
+    "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?"
+  ).get(name) !== undefined;
+}
+
 // ---- types (exactly as in the Interfaces block above) ----
 export type ItemRow = { id: string; source: string; published_at: string; headline: string;
   lede: string | null; url: string; topic: string; cluster_id: string | null;
@@ -303,22 +317,31 @@ export function priceDeltaReference(
  * Collapsing happens on read, never on write: item_scores keeps one row per
  * item, and folding on the way in would destroy information that cannot be
  * recovered.
+ *
+ * Guard 3 — a freshly deployed host has no item_scores table until the
+ * first CLI scoring run creates it. Returns an empty array rather than
+ * throwing, so the panel keeps rendering (with its existing "no scored
+ * stories" empty state) through that window instead of taking the whole
+ * overview page down with it.
  */
 export function getScoredItems(sinceIso: string): ScoredItem[] {
-  return q(db => db.prepare(`
-    SELECT s.item_id AS itemId, s.tier, s.direction, s.conviction, s.theme,
-           i.headline, i.source, i.url, i.published_at AS publishedAt
-      FROM item_scores s
-      JOIN items i ON i.id = s.item_id
-     WHERE i.published_at >= ?
-       AND i.published_at >= '2000-01-01T00:00:00Z'
-       AND s.tier = (
-             SELECT MAX(s2.tier) FROM item_scores s2
-               JOIN items i2 ON i2.id = s2.item_id
-              WHERE i2.url = i.url)
-     GROUP BY i.url
-     ORDER BY i.published_at DESC
-  `).all(sinceIso) as ScoredItem[]);
+  return q(db => {
+    if (!hasTable(db, "item_scores")) return [];
+    return db.prepare(`
+      SELECT s.item_id AS itemId, s.tier, s.direction, s.conviction, s.theme,
+             i.headline, i.source, i.url, i.published_at AS publishedAt
+        FROM item_scores s
+        JOIN items i ON i.id = s.item_id
+       WHERE i.published_at >= ?
+         AND i.published_at >= '2000-01-01T00:00:00Z'
+         AND s.tier = (
+               SELECT MAX(s2.tier) FROM item_scores s2
+                 JOIN items i2 ON i2.id = s2.item_id
+                WHERE i2.url = i.url)
+       GROUP BY i.url
+       ORDER BY i.published_at DESC
+    `).all(sinceIso) as ScoredItem[];
+  });
 }
 
 /**
@@ -328,15 +351,21 @@ export function getScoredItems(sinceIso: string): ScoredItem[] {
  * unscored (see getScoredItems's guard-1 comment for why duplicate ids
  * happen at all). This is the map's coverage footer: "N scored, M unscored
  * not shown".
+ *
+ * Same missing-table guard as getScoredItems: 0 rather than a thrown error
+ * when item_scores does not exist yet.
  */
 export function unscoredCountSince(sinceIso: string): number {
-  return q(db => (db.prepare(`
-    SELECT COUNT(DISTINCT i.url) c
-      FROM items i
-     WHERE i.published_at >= ?
-       AND NOT EXISTS (
-             SELECT 1 FROM item_scores s
-               JOIN items i2 ON i2.id = s.item_id
-              WHERE i2.url = i.url)
-  `).get(sinceIso) as { c: number }).c);
+  return q(db => {
+    if (!hasTable(db, "item_scores")) return 0;
+    return (db.prepare(`
+      SELECT COUNT(DISTINCT i.url) c
+        FROM items i
+       WHERE i.published_at >= ?
+         AND NOT EXISTS (
+               SELECT 1 FROM item_scores s
+                 JOIN items i2 ON i2.id = s.item_id
+                WHERE i2.url = i.url)
+    `).get(sinceIso) as { c: number }).c;
+  });
 }

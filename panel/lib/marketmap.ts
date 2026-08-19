@@ -11,6 +11,8 @@
  * the desk should see that it matters and is unresolved.
  */
 
+export type MapRange = "today" | "week";
+
 export type ScoredItem = {
   itemId: string;
   tier: number;

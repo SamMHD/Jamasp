@@ -1,5 +1,5 @@
 import { fmtAge } from "@/lib/format";
-import { layoutMap, tone, type ScoredItem, type Tone } from "@/lib/marketmap";
+import { layoutMap, tone, type MapRange, type ScoredItem, type Tone } from "@/lib/marketmap";
 
 /**
  * Fundamental market map: a two-level treemap of scored news, drawn as
@@ -66,7 +66,7 @@ const TONE_INK: Record<Tone, string> = {
 
 const isBearish = (t: Tone): boolean => t === "bear" || t === "bear-mid";
 
-const WINDOW_LABEL: Record<"today" | "week", string> = {
+const WINDOW_LABEL: Record<MapRange, string> = {
   today: "today",
   week: "this week",
 };
@@ -147,14 +147,14 @@ export function MarketMap({ items, width, height, range, coverage }: {
   items: ScoredItem[];
   width: number;
   height: number;
-  range: "today" | "week";
+  range: MapRange;
   coverage: { scored: number; unscored: number };
 }) {
   const now = new Date();
 
   if (items.length === 0) {
     return (
-      <section aria-label="Fundamental market map" className="rounded border border-border p-4">
+      <section aria-label="Scored news treemap" className="rounded border border-border p-4">
         <p className="text-sm text-muted-foreground">
           No scored stories {WINDOW_LABEL[range]}
           {coverage.unscored > 0
@@ -168,9 +168,9 @@ export function MarketMap({ items, width, height, range, coverage }: {
   const boxes = layoutMap(items, { x: 0, y: 0, w: width, h: height }, THEME_HEADER_H);
 
   return (
-    <section aria-label="Fundamental market map" className="rounded border border-border p-4">
+    <section aria-label="Scored news treemap" className="rounded border border-border p-4">
       <svg viewBox={`0 0 ${width} ${height}`} className="w-full" role="img"
-        aria-label={`fundamental market map, ${items.length} scored stories ${WINDOW_LABEL[range]}`}>
+        aria-label={`scored news treemap, ${items.length} scored stories ${WINDOW_LABEL[range]}`}>
         <defs>
           <pattern id="map-hatch" patternUnits="userSpaceOnUse" width="6" height="6"
             patternTransform="rotate(45)">

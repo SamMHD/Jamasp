@@ -18,13 +18,12 @@ import { deriveHorizon } from "@/lib/horizon";
 import { deriveNewsPulse } from "@/lib/newsflow";
 import { parseStance } from "@/lib/stance";
 import { deriveTechnicals, TECHNICAL_SYMBOLS } from "@/lib/technicals";
+import type { MapRange } from "@/lib/marketmap";
 import { cls, fmtUtc } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
 const iso = (d: Date) => d.toISOString().replace(/\.\d{3}Z$/, "Z");
-
-export type MapRange = "today" | "week";
 
 /**
  * `?w=week` selects the trailing 7 days; anything else — including the
@@ -61,6 +60,7 @@ export default async function Overview({
   const dayAgo = iso(new Date(now.getTime() - 86400_000));
   const weekAgo = windowSinceIso("week", now);
 
+  // --- fundamental map ---
   const sp = await searchParams;
   const range = resolveRange(sp.w);
   const mapSince = range === "week" ? weekAgo : windowSinceIso("today", now);
@@ -153,9 +153,9 @@ export default async function Overview({
       <AutoRefresh />
       <PageHeader title="Overview" subtitle={`as of ${fmtUtc(iso(now))}`} />
 
-      <div className="mb-4">
+      <section aria-label="Market map" className="mb-4">
         <div className="mb-2 flex items-center justify-between">
-          <h2 className="text-sm font-medium text-muted-foreground">Fundamental map</h2>
+          <h2 className="text-sm font-medium text-muted-foreground">Market map</h2>
           <nav aria-label="Map window" className="flex gap-1 text-sm">
             <Link href="/?w=today" aria-current={range === "today" ? "page" : undefined}
               className={cls("rounded px-2 py-0.5",
@@ -173,7 +173,7 @@ export default async function Overview({
         </div>
         <MarketMap items={mapItems} width={1200} height={400} range={range}
           coverage={{ scored: mapItems.length, unscored: mapUnscored }} />
-      </div>
+      </section>
 
       <StatusStrip lastIngest={lastIngest} runsToday={runsToday} cap={cap}
         sourceErrors={sourceErrors.length} lastRuns={db.lastRunPerType()} now={now} />
