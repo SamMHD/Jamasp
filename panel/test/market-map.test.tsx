@@ -61,9 +61,24 @@ describe("MarketMap", () => {
     // pointer-events a url(#pattern) fill counts as painted across the
     // whole tile — so a <title> left on the base rect would be swallowed
     // by the hatch on every bearish tile. Pin the bearish case directly.
+    //
+    // The headline assertion alone does NOT discriminate: it passes
+    // against the pre-fix markup too, since renderToStaticMarkup never
+    // exercises pointer-events or hit order, and the pre-fix version also
+    // had a <title> with the headline — just nested one level deeper,
+    // inside the <rect>. The two structural assertions below are what
+    // actually pin the fix.
     const html = render([item({ direction: -2, conviction: 0.8 })]);
     expect(html).toContain("<title>");
     expect(html).toContain("Gold jumps as Treasury buyback");
+
+    // The hatch overlay must not be a hit target, or it swallows the
+    // tooltip on exactly the tiles the hatch exists to make readable.
+    expect(html).toContain('pointer-events="none"');
+
+    // <title> must be a child of the <g>, not of the base <rect>: a title
+    // on the group survives any overlay painted over the rect.
+    expect(html).not.toMatch(/<rect[^>]*>\s*<title>/);
   });
 
   it("renders the legend, including the hatch and neutral keys", () => {
