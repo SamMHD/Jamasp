@@ -95,3 +95,15 @@ def test_shipped_weights_config_has_other_as_the_fallback_slot():
     # slot must exist in the shipped taxonomy or those items land nowhere.
     weights = config.load_weights(Path("config/weights.yaml"))
     assert "other" in config.themes(weights)
+
+
+def test_themes_raises_when_other_slot_is_missing():
+    # A retro that drops or misspells the "other" slot must fail loudly here
+    # instead of letting _theme()'s fallback write a value outside the
+    # configured set — silent corruption of every score from that point on,
+    # and a break of Plan 2's positional column assumption with no error.
+    import pytest
+
+    weights = {"themes": ["rates_dollar", "geopolitics"]}
+    with pytest.raises(ValueError, match="other"):
+        config.themes(weights)
