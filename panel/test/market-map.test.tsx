@@ -25,12 +25,25 @@ describe("MarketMap", () => {
   });
 
   it("hatches bearish tiles and leaves bullish ones unhatched", () => {
-    // The hatch is what makes the dE 6.9 pair legal. If this regresses the
-    // palette becomes non-compliant, so the test is a compliance guard.
+    // All-pairs CVD measurement (not just the poles) found the worst
+    // failures at bear/bull-mid (dE 2.8 protan) and bear-mid/bull-mid
+    // (dE 3.1 deutan) — the hatch is what keeps every pair separable. If
+    // this regresses the palette becomes non-compliant, so the test is a
+    // compliance guard.
     const bear = render([item({ direction: -2, conviction: 0.8 })]);
     expect(bear).toContain("url(#map-hatch)");
     const bull = render([item({ direction: 2, conviction: 0.8 })]);
     expect(bull).not.toContain("url(#map-hatch)");
+  });
+
+  it("hatches the bear-mid step too, not just the pole", () => {
+    // bear-mid/bull-mid is the worst deuteranopia failure of all ten pairs
+    // (dE 3.1) — worse than the pole pair. Hatching only `bear` would leave
+    // this pair colour-only and non-compliant, so pin the mid step too.
+    const bearMid = render([item({ direction: -1, conviction: 0.6 })]); // s = -0.30
+    expect(bearMid).toContain("url(#map-hatch)");
+    const bullMid = render([item({ direction: 1, conviction: 0.6 })]); // s = +0.30
+    expect(bullMid).not.toContain("url(#map-hatch)");
   });
 
   it("gives every tile a title carrying the full headline and its scores", () => {

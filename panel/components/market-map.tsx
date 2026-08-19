@@ -11,11 +11,18 @@ import { layoutMap, tone, type ScoredItem, type Tone } from "@/lib/marketmap";
  * see `lib/marketmap.ts` for why those are two different channels. This
  * component only positions and paints what `layoutMap` already computed.
  *
- * The bull/bear pair sits at dE 6.9 under deuteranopia (see the palette
- * comment in globals.css) — inside the band where colour alone is not a
- * legal encoding. The diagonal hatch on bearish tiles is the required
- * second encoding, not decoration, and it must survive at any tile size,
- * which rules out a signed number label.
+ * A treemap is an all-pairs surface — any two tiles can end up adjacent — so
+ * every one of the ramp's ten step-pairs was measured (see the palette
+ * comment in globals.css), not just the poles. Two pairs fail outright:
+ * bear/bull-mid at dE 2.8 for protanopes (effectively the same colour) and
+ * bear-mid/bull-mid at dE 3.1 for deuteranopes; the pole pair bear/bull
+ * (dE 6.9) is only the third worst. Hatching BOTH bearish tones — `bear`
+ * and `bear-mid`, not just the pole — gives every failing pair exactly one
+ * hatched member, which is what makes them separable without colour. Do
+ * not "tidy" the hatch predicate down to the pole: that silently
+ * reintroduces the bear-mid/bull-mid and bear/bull-mid failures. The
+ * diagonal hatch is the required second encoding, not decoration, and it
+ * must survive at any tile size, which rules out a signed number label.
  */
 
 const THEME_HEADER_H = 20;
