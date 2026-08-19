@@ -364,13 +364,28 @@ def _apply_dup(conn, item, row, display, chat, post, emit, dry_run) -> bool:
     return True
 
 
-def record_scores(conn: sqlite3.Connection, verdicts: dict[str, dict]) -> int:
+def record_scores(
+    conn: sqlite3.Connection, verdicts: dict[str, dict], candidate_ids: set[str]
+) -> int:
     """Persist the triage verdict for every fully-scored gold item.
 
     Deliberately independent of delivery. An item held for a rollup, folded
     as a duplicate, or dropped as low tier is still news the market map has
     to show, so this runs over the whole verdict batch before the delivery
     loop makes any of those decisions.
+
+    `candidate_ids` is required, not defaulted, and every write is scoped to
+    it — mirroring the `verdicts.get(item["id"])` guard the delivery loop
+    already applies three lines later. Without it, `verdicts` is not safe to
+    trust wholesale: the decide prompt shows POSTED items in the same
+    `id<TAB>...` shape as NEW ones and invites the model to name a POSTED id
+    as a `dup_of` value, so nothing stops it from also emitting a top-level
+    verdict keyed by that same POSTED id. `posted_flashes()` joins against
+    `items`, so a POSTED id is a real `items.id` — and `INSERT OR REPLACE`
+    would silently overwrite that item's genuine score (built from headline
+    *and* lede) with one derived from the POSTED block's title-only context.
+    A default here would just restore that bug the first time a caller
+    forgot to pass this — same reasoning as `themes` earlier in this plan.
 
     Non-gold items are skipped: a gold desk's map has no box for them.
     Partly-scored items are skipped too — writing a missing direction as 0
@@ -380,7 +395,8 @@ def record_scores(conn: sqlite3.Connection, verdicts: dict[str, dict]) -> int:
         (item_id, v["tier"], v["direction"], v["conviction"], v["theme"],
          utcnow())
         for item_id, v in verdicts.items()
-        if v["gold"]
+        if item_id in candidate_ids
+        and v["gold"]
         and v["tier"] is not None
         and v["direction"] is not None
         and v["conviction"] is not None
@@ -471,7 +487,9 @@ def _run_pass(conn, settings, sources, post, run_model, emit, dry_run, stats):
         return stats
 
     if not dry_run:
-        stats["scored"] = record_scores(conn, verdicts)
+        stats["scored"] = record_scores(
+            conn, verdicts, {item["id"] for item in pending}
+        )
 
     display = config_mod.display_names(sources)
     extract_max = settings.get("extract_max_chars", DEFAULT_EXTRACT_MAX_CHARS)
