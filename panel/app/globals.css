@@ -49,6 +49,18 @@
   --viz-2: #eb6834;
   --viz-3: #1baf7a;
   --viz-spot: oklch(0.55 0.11 85);
+  /* Market-map diverging ramp. Two hues + a neutral GREY midpoint (never a
+     hue at the midpoint). Measured with the dataviz validator against this
+     panel's own surfaces: the pair separates by only dE 6.9 under
+     deuteranopia — inside the 6-8 floor band, which is legal ONLY with a
+     secondary encoding. The 45-degree hatch on bearish tiles is that
+     encoding, and it is required, not decoration: it works at any tile size,
+     which a signed number label does not. */
+  --map-bull: #1baf7a;
+  --map-bull-mid: #3e6d55;
+  --map-neutral: #3a3a38;
+  --map-bear-mid: #854741;
+  --map-bear: #e34948;
 }
 
 .dark {
