@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS items (
     read_at      TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_items_read ON items(read_at);
+CREATE INDEX IF NOT EXISTS idx_items_url ON items(url);
 CREATE TABLE IF NOT EXISTS prices (
     symbol TEXT NOT NULL,
     ts     TEXT NOT NULL,

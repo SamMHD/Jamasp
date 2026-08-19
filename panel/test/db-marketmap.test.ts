@@ -37,6 +37,8 @@ beforeAll(async () => {
       ${item("dupA", "https://x.test/dup", "2026-08-19T19:00:00Z", "Gold at 4400")},
       ${item("dupB", "https://x.test/dup", "2026-08-19T19:05:00Z", "Gold at 4450 now")},
       ${item("dupC", "https://x.test/dup", "2026-08-19T19:10:00Z", "Gold RSI 77")},
+      ${item("tieA", "https://x.test/tie", "2026-08-10T09:00:00Z", "Tie story A")},
+      ${item("tieB", "https://x.test/tie", "2026-08-10T10:00:00Z", "Tie story B")},
       ${item("bogus", "https://x.test/bogus", "1786-08-01T00:00:00Z", "Epoch artefact")};
     INSERT INTO item_scores VALUES
       ${score("w1", 4, 2, 0.8, "rates_dollar")},
@@ -45,6 +47,8 @@ beforeAll(async () => {
       ${score("dupA", 2, 1, 0.3, "other")},
       ${score("dupB", 4, 1, 0.5, "other")},
       ${score("dupC", 3, 0, 0.2, "other")},
+      ${score("tieA", 5, 1, 0.5, "supply_demand")},
+      ${score("tieB", 5, -1, 0.5, "supply_demand")},
       ${score("bogus", 5, 2, 0.9, "geopolitics")};
   `);
   d.close();
@@ -53,6 +57,10 @@ beforeAll(async () => {
 });
 
 const SINCE = "2026-08-19T00:00:00Z";
+// Isolated window for the tie fixture: starts after "old" (2026-08-01) and
+// before the w1/w2/dup group (2026-08-19), so it never perturbs the exact
+// ordering assertion above, which is pinned to SINCE.
+const TIE_SINCE = "2026-08-10T00:00:00Z";
 
 describe("getScoredItems", () => {
   it("returns items inside the window, newest first", () => {
@@ -74,6 +82,19 @@ describe("getScoredItems", () => {
     const dup = rows.filter(r => r.url === "https://x.test/dup");
     expect(dup).toHaveLength(1);
     expect(dup[0].tier).toBe(4);
+  });
+
+  it("collapses two ids sharing one URL at the SAME max tier into a single row", () => {
+    // dupA/B/C (above) carry distinct tiers, so the MAX(tier) subquery alone
+    // already narrows that URL to one row -- GROUP BY i.url does no work in
+    // that case and could be deleted without failing a single test. tieA and
+    // tieB are a genuine tie (both tier 5), so MAX(tier) admits both rows and
+    // only GROUP BY collapses them to one. See the discrimination check in
+    // the fix report: deleting GROUP BY i.url makes this assertion fail.
+    const rows = db.getScoredItems(TIE_SINCE);
+    const tie = rows.filter(r => r.url === "https://x.test/tie");
+    expect(tie).toHaveLength(1);
+    expect(tie[0].tier).toBe(5);
   });
 
   it("rejects an implausible published_at even when the window would admit it", () => {
