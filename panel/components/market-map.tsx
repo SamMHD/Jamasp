@@ -190,13 +190,18 @@ export function MarketMap({ items, width, height, range, coverage }: {
               const showLabel = cell.w >= MIN_LABEL_W && cell.h >= MIN_LABEL_H;
               return (
                 <g key={cell.node.itemId}>
+                  {/* <title> lives on the group, not the base rect: under
+                      default pointer-events, the hatch overlay below paints
+                      on top of the base rect and becomes the topmost hit
+                      target, which would otherwise swallow the tooltip on
+                      every bearish tile. A title on the group survives
+                      whichever child is actually hit. */}
+                  <title>{tileTitle(cell.node, now)}</title>
                   <rect x={cell.x} y={cell.y} width={cell.w} height={cell.h}
-                    fill={TONE_FILL[t]} stroke="var(--background)" strokeWidth="1">
-                    <title>{tileTitle(cell.node, now)}</title>
-                  </rect>
+                    fill={TONE_FILL[t]} stroke="var(--background)" strokeWidth="1" />
                   {bearish && (
                     <rect x={cell.x} y={cell.y} width={cell.w} height={cell.h}
-                      fill="url(#map-hatch)" />
+                      fill="url(#map-hatch)" pointerEvents="none" />
                   )}
                   {showLabel && (
                     <text x={cell.x + LABEL_PAD} y={cell.y + LABEL_PAD + LABEL_FONT * 0.8}
