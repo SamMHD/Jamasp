@@ -14,6 +14,13 @@ hit); Al-Mokha port closed, unmanned ship total-lossed off Al Mukha (UKMTO
 117-26). All inside baseline. Macro: 10y 4.71%, USDJPY 159.4, PBOC third
 straight weak fix, GVZ 23.98 crushed into a minutes night.
 
+**15:00Z scan update (ALERTED — do not re-alert this break):** Treasury
+announced increased buybacks → bond rout broke: 10y 4.65, DXY −0.6%, GC
+4534 (+2.9% from brief), ABOVE the 4510/200DMA gate intraday, GVZ 26.
+Event-pending framing held — no new directional call; weights unchanged.
+Settle (~17:30Z) decides `7e803666`; #32 (18:45Z) rules with minutes in
+hand and rewrites this stance.
+
 ## View
 
 **Weights 65/5/30 (base/event-bearish/kinetic) — unchanged; conviction
