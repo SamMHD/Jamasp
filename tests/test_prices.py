@@ -94,13 +94,21 @@ def test_parse_tradingview_scanner_json_maps_fields_and_drops_gauge():
             (FIXTURES / "tv_scanner_gc.json").read_text()
         )
     )
-    assert set(pairs) == {"RSI14", "SMA50", "SMA200", "ATR14", "PIV_S1", "PIV_R1"}
+    assert set(pairs) == {
+        "RSI14", "SMA50", "SMA200", "ATR14", "PIV_S1", "PIV_R1", "CLOSE",
+    }
     assert pairs["RSI14"] == pytest.approx(49.0847, abs=1e-3)
     assert pairs["PIV_R1"] == pytest.approx(4425.4, abs=1e-3)
-    # Recommend.All (buy/sell gauge) and close must never become series
+    # Recommend.All (buy/sell gauge) must never become a series
 
 
-def test_parse_tradingview_scanner_json_skips_nulls():
+def test_parse_tradingview_scanner_json_skips_nulls_and_raises_when_empty():
+    # Renamed from test_parse_tradingview_scanner_json_skips_nulls (Task 6):
+    # the brief adds a new test of that same name that covers the
+    # multi-timeframe null-skipping case, so this one — which additionally
+    # covers the list-of-tuples return shape and the all-fields-null
+    # ValueError — needed a distinct name to keep running instead of being
+    # silently shadowed.
     pairs = prices.parse_tradingview_scanner_json('{"RSI": null, "ATR": 5.0}')
     assert pairs == [("ATR14", 5.0)]
     with pytest.raises(ValueError):
@@ -120,7 +128,8 @@ def test_fetch_technicals_prefixes_symbols_and_stamps_fetch_time(monkeypatch):
     )
     rows = prices.fetch_technicals(src, client=None)
     assert {s for s, _, _ in rows} == {
-        "GC_RSI14", "GC_SMA50", "GC_SMA200", "GC_ATR14", "GC_PIV_S1", "GC_PIV_R1"
+        "GC_RSI14", "GC_SMA50", "GC_SMA200", "GC_ATR14", "GC_PIV_S1", "GC_PIV_R1",
+        "GC_CLOSE",
     }
     # one shared fetch-time stamp in the canonical format
     stamps = {ts for _, ts, _ in rows}
@@ -179,3 +188,68 @@ def test_window_extremes_empty_window(tmp_path):
     conn = db.connect(tmp_path / "j.db")
     ext = prices.window_extremes(conn, "GC", "2026-08-12T00:00:00Z", "2026-08-13T00:00:00Z")
     assert ext == {"high": None, "high_ts": None, "low": None, "low_ts": None}
+
+
+def test_tv_field_suffixes_cover_three_timeframes():
+    m = prices.TV_FIELD_SUFFIXES
+    assert m["RSI"] == "RSI14"
+    assert m["RSI|1W"] == "RSI14_1W"
+    assert m["RSI|240"] == "RSI14_4H"
+    assert m["MACD.macd"] == "MACD"
+    assert m["Pivot.M.Fibonacci.S1"] == "FIB_S1"
+
+
+def test_tv_field_suffixes_keep_the_existing_series_names():
+    # These four series already hold months of history in the live database.
+    # Renaming any of them would orphan it and silently restart the series.
+    m = prices.TV_FIELD_SUFFIXES
+    assert m["SMA50"] == "SMA50"
+    assert m["SMA200"] == "SMA200"
+    assert m["ATR"] == "ATR14"
+    assert m["Pivot.M.Classic.S1"] == "PIV_S1"
+    assert m["Pivot.M.Classic.R1"] == "PIV_R1"
+
+
+def test_tv_field_suffixes_exclude_the_aggregate_gauges():
+    # config/sources.yaml:324 — technicals annotate the macro read, they must
+    # not originate calls. Neither market map produces an aggregate verdict.
+    keys = set(prices.TV_FIELD_SUFFIXES)
+    assert not any(k.startswith("Recommend") for k in keys)
+
+
+def test_parse_tradingview_scanner_json_reads_multi_timeframe_fields():
+    payload = ('{"RSI": 41.2, "RSI|1W": 55.0, "RSI|240": 38.5,'
+               ' "MACD.macd": 1.5, "close": 4312.4}')
+    out = dict(prices.parse_tradingview_scanner_json(payload))
+    assert out["RSI14"] == 41.2
+    assert out["RSI14_1W"] == 55.0
+    assert out["RSI14_4H"] == 38.5
+    assert out["MACD"] == 1.5
+    assert out["CLOSE"] == 4312.4
+
+
+def test_parse_tradingview_scanner_json_skips_nulls():
+    # Fields come back null when a timeframe's bar has not closed; storing
+    # them as 0.0 would print a fake oversold RSI.
+    out = dict(prices.parse_tradingview_scanner_json(
+        '{"RSI": 41.2, "RSI|240": null}'))
+    assert out == {"RSI14": 41.2}
+
+
+def test_configured_tv_url_requests_every_mapped_field():
+    # The field list lives in the URL and the name mapping lives in code;
+    # nothing else stops them drifting apart. A raw substring check is NOT
+    # enough here: every base field name (e.g. "RSI") is itself a prefix of
+    # its own suffixed siblings ("RSI|1W", "RSI|240"), so a URL that dropped
+    # the bare "RSI" entirely while keeping the suffixed forms would still
+    # contain the substring "RSI" and pass a naive `in` check. Parse the
+    # actual `fields=` query value and compare as an exact set instead.
+    from urllib.parse import parse_qs, urlsplit
+
+    from jamasp import config
+
+    src = next(s for s in config.load_sources()
+               if s.name == "tv_gc_technicals")
+    query = parse_qs(urlsplit(src.url).query)
+    requested = set(query["fields"][0].split(","))
+    assert requested == set(prices.TV_FIELD_SUFFIXES)

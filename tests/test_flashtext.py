@@ -10,7 +10,7 @@ def test_build_decide_prompt_lists_posted_and_new():
          "lede": "Spot gold rose."},
         {"id": "ccc", "source": "wgc", "headline": "ETF inflows", "lede": None},
     ]
-    prompt = flashtext.build_decide_prompt(posted, candidates)
+    prompt = flashtext.build_decide_prompt(posted, candidates, THEMES)
     assert "aaa\tGold hits record" in prompt
     assert "bbb\tcnbc_finance\tBullion surges\tSpot gold rose." in prompt
     assert "ccc\twgc\tETF inflows\t" in prompt
@@ -19,7 +19,7 @@ def test_build_decide_prompt_lists_posted_and_new():
 
 def test_build_decide_prompt_handles_empty_posted():
     prompt = flashtext.build_decide_prompt(
-        [], [{"id": "bbb", "source": "s", "headline": "h", "lede": None}]
+        [], [{"id": "bbb", "source": "s", "headline": "h", "lede": None}], THEMES
     )
     assert "(none)" in prompt
 
@@ -31,6 +31,7 @@ def test_build_decide_prompt_flattens_control_characters():
         [{"id": "aaa", "title_en": "Posted\nheadline"}],
         [{"id": "bbb", "source": "cnbc\tfake", "headline": "Gold up\nccc\tzzz\tyyy",
           "lede": "Line one\nline two"}],
+        THEMES,
     )
     posted_block = prompt.split("POSTED:\n", 1)[1].split("\n\nNEW:", 1)[0]
     new_block = prompt.split("NEW:\n", 1)[1].strip()
@@ -43,21 +44,24 @@ def test_build_decide_prompt_flattens_control_characters():
 def test_parse_decide_response_normalizes():
     text = 'ok:\n```json\n{"bbb": {"gold": true, "dup_of": "aaa"},' \
            ' "ccc": {"gold": false, "dup_of": null}}\n```'
-    assert flashtext.parse_decide_response(text) == {
-        "bbb": {"gold": True, "dup_of": "aaa", "tier": None},
-        "ccc": {"gold": False, "dup_of": None, "tier": None},
+    assert flashtext.parse_decide_response(text, THEMES) == {
+        "bbb": {"gold": True, "dup_of": "aaa", "tier": None,
+                "direction": None, "conviction": None, "theme": "other"},
+        "ccc": {"gold": False, "dup_of": None, "tier": None,
+                "direction": None, "conviction": None, "theme": "other"},
     }
 
 
 def test_parse_decide_response_tolerates_missing_keys():
-    assert flashtext.parse_decide_response('{"bbb": {"gold": true}}') == {
-        "bbb": {"gold": True, "dup_of": None, "tier": None}
+    assert flashtext.parse_decide_response('{"bbb": {"gold": true}}', THEMES) == {
+        "bbb": {"gold": True, "dup_of": None, "tier": None,
+                "direction": None, "conviction": None, "theme": "other"}
     }
 
 
 def test_parse_decide_response_raises_without_json():
     with pytest.raises(ValueError, match="no JSON object"):
-        flashtext.parse_decide_response("I could not comply.")
+        flashtext.parse_decide_response("I could not comply.", THEMES)
 
 
 def test_build_write_prompt_includes_article_text():
@@ -209,7 +213,7 @@ def test_render_message_truncates():
 
 def test_decide_prompt_asks_for_a_tier_with_definitions():
     prompt = flashtext.build_decide_prompt(
-        [], [{"id": "a", "source": "s", "headline": "h", "lede": "l"}]
+        [], [{"id": "a", "source": "s", "headline": "h", "lede": "l"}], THEMES
     )
     assert '"tier"' in prompt
     # the five definitions have to travel with the request; a bare 1-5 scale
@@ -222,21 +226,25 @@ def test_decide_prompt_asks_for_a_tier_with_definitions():
 def test_parse_decide_response_reads_tier():
     out = flashtext.parse_decide_response(
         '{"a": {"gold": true, "dup_of": null, "tier": 5},'
-        ' "b": {"gold": true, "dup_of": null, "tier": "2"}}'
+        ' "b": {"gold": true, "dup_of": null, "tier": "2"}}',
+        THEMES
     )
     assert out["a"]["tier"] == 5
     assert out["b"]["tier"] == 2  # a stringified number is still a number
 
 
 def test_parse_decide_response_tier_absent_is_none():
-    out = flashtext.parse_decide_response('{"a": {"gold": true, "dup_of": null}}')
+    out = flashtext.parse_decide_response(
+        '{"a": {"gold": true, "dup_of": null}}', THEMES
+    )
     assert out["a"]["tier"] is None
 
 
 def test_parse_decide_response_rejects_out_of_range_tier():
     out = flashtext.parse_decide_response(
         '{"a": {"gold": true, "dup_of": null, "tier": 9},'
-        ' "b": {"gold": true, "dup_of": null, "tier": "high"}}'
+        ' "b": {"gold": true, "dup_of": null, "tier": "high"}}',
+        THEMES
     )
     assert out["a"]["tier"] is None
     assert out["b"]["tier"] is None
@@ -324,3 +332,99 @@ def test_render_rollup_emits_no_markdown():
     text = flashtext.render_rollup([("rates_dollar", ["یک خط"])])
     assert "**" not in text
     assert flashtext.ROLLUP_THEMES["rates_dollar"] in text
+
+
+THEMES = ("rates_dollar", "geopolitics", "physical_cb",
+          "etf_flows", "supply_mining", "other")
+
+
+def test_decide_prompt_asks_for_gold_relative_direction():
+    prompt = flashtext.build_decide_prompt(
+        [], [{"id": "a", "source": "s", "headline": "h", "lede": None}], THEMES)
+    assert '"direction"' in prompt
+    # The single most important instruction in the addition: without it the
+    # model scores sentiment and a strong-dollar print comes back positive.
+    # "dollar" alone is not a guard: it already appears in the pre-existing
+    # "gold" bullet's prose ("interest rates, the dollar, inflation data"),
+    # so that word surviving proves nothing about the direction block
+    # specifically. Slice out the direction block and assert on text unique
+    # to the sentiment-vs-gold warning within it.
+    direction_block = prompt.split('4. "direction"')[1].split('5. "conviction"')[0]
+    assert "GOLD PRICE" in direction_block
+    assert "not sentiment" in direction_block.lower()
+    assert "strong dollar" in direction_block.lower() and "-2" in direction_block
+
+
+def test_decide_prompt_lists_the_configured_themes():
+    prompt = flashtext.build_decide_prompt(
+        [], [{"id": "a", "source": "s", "headline": "h", "lede": None}],
+        ("alpha", "bravo", "other"))
+    assert "alpha, bravo, other" in prompt
+    # The taxonomy has one home; a hardcoded slot leaking into the prompt
+    # would drift from config the first time the retro edits it. Checking
+    # every shipped slot, not just one — an earlier draft of this test
+    # checked only rates_dollar and passed while the prompt prose still
+    # named geopolitics and physical_cb in its guidance sentence.
+    # "other" is exempt: it is the fallback _theme() itself hardcodes, so
+    # it is a structural guarantee rather than a taxonomy choice.
+    for slot in ("rates_dollar", "geopolitics", "physical_cb",
+                 "etf_flows", "supply_mining"):
+        assert slot not in prompt, f"{slot} is hardcoded in the prompt"
+
+
+def test_parse_decide_response_reads_direction_conviction_and_theme():
+    out = flashtext.parse_decide_response(
+        '{"a": {"gold": true, "dup_of": null, "tier": 5,'
+        ' "direction": -2, "conviction": 0.8, "theme": "rates_dollar"}}',
+        THEMES)
+    assert out["a"]["direction"] == -2
+    assert out["a"]["conviction"] == 0.8
+    assert out["a"]["theme"] == "rates_dollar"
+
+
+def test_parse_decide_response_absent_direction_is_none():
+    # None is a real answer, matching _tier: the caller decides what an
+    # unscored item does, and 0 would be a fabricated "neutral" claim.
+    out = flashtext.parse_decide_response(
+        '{"a": {"gold": true, "tier": 3}}', THEMES)
+    assert out["a"]["direction"] is None
+    assert out["a"]["conviction"] is None
+
+
+def test_parse_decide_response_keeps_a_genuine_zero():
+    # The mirror image of the test above: 0 is itself a real verdict ("no
+    # clear push" / zero confidence), not the absence of one. An
+    # implementation written as `if not value: return None` would swallow
+    # it and still pass every other test in this file.
+    out = flashtext.parse_decide_response(
+        '{"a": {"gold": true, "tier": 3, "direction": 0, "conviction": 0.0}}',
+        THEMES)
+    assert out["a"]["direction"] == 0 and out["a"]["direction"] is not None
+    assert out["a"]["conviction"] == 0.0 and out["a"]["conviction"] is not None
+
+
+def test_parse_decide_response_rejects_out_of_range_direction():
+    out = flashtext.parse_decide_response(
+        '{"a": {"gold": true, "tier": 3, "direction": 7, "conviction": 0.5}}',
+        THEMES)
+    assert out["a"]["direction"] is None
+
+
+def test_parse_decide_response_rejects_out_of_range_conviction():
+    out = flashtext.parse_decide_response(
+        '{"a": {"gold": true, "tier": 3, "direction": 1, "conviction": 4.2}}',
+        THEMES)
+    assert out["a"]["conviction"] is None
+
+
+def test_parse_decide_response_unknown_theme_falls_back_to_other():
+    out = flashtext.parse_decide_response(
+        '{"a": {"gold": true, "tier": 3, "direction": 1,'
+        ' "conviction": 0.5, "theme": "crypto_vibes"}}', THEMES)
+    assert out["a"]["theme"] == "other"
+
+
+def test_parse_decide_response_absent_theme_falls_back_to_other():
+    out = flashtext.parse_decide_response(
+        '{"a": {"gold": true, "tier": 3}}', THEMES)
+    assert out["a"]["theme"] == "other"

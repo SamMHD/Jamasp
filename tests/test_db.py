@@ -115,3 +115,35 @@ def test_connect_creates_rollups_table(tmp_path):
     conn = db.connect(tmp_path / "t.db")
     cols = {r["name"] for r in conn.execute("PRAGMA table_info(rollups)")}
     assert {"id", "created_at", "text_fa", "message_id", "status"} <= cols
+
+
+def test_connect_creates_item_scores(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    tables = {
+        r["name"]
+        for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
+    }
+    assert "item_scores" in tables
+
+
+def test_item_scores_columns(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    cols = {r[1] for r in conn.execute("PRAGMA table_info(item_scores)")}
+    assert cols == {"item_id", "tier", "direction", "conviction",
+                    "theme", "scored_at"}
+
+
+def test_item_scores_one_row_per_item(tmp_path):
+    # Re-scoring an item must replace its row, not accumulate rows: the map
+    # reads the current verdict, and a duplicate would double the tile's area.
+    conn = db.connect(tmp_path / "t.db")
+    for tier in (3, 5):
+        conn.execute(
+            "INSERT OR REPLACE INTO item_scores"
+            " (item_id, tier, direction, conviction, theme, scored_at)"
+            " VALUES ('a', ?, 1, 0.5, 'rates_dollar', '2026-08-18T00:00:00Z')",
+            (tier,),
+        )
+    conn.commit()
+    rows = conn.execute("SELECT tier FROM item_scores").fetchall()
+    assert [r["tier"] for r in rows] == [5]

@@ -163,6 +163,7 @@ def _flash_line(stats: dict) -> str:
     return (
         f"flash: {stats['posted']} posted, {stats.get('held', 0)} held, "
         f"{stats.get('low_tier', 0)} low tier, {stats.get('no_tier', 0)} no tier, "
+        f"{stats.get('scored', 0)} scored, "
         f"{stats['dup']} updated, "
         f"{stats['not_gold']} not gold, {stats['unreadable']} unreadable, "
         f"{stats['burst']} over cap, {stats['stale']} stale, "

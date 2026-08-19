@@ -48,3 +48,25 @@ def display_names(sources: list[Source]) -> dict[str, str]:
     return {
         s.name: s.display or s.name.replace("_", " ").title() for s in sources
     }
+
+
+def load_weights(path: Path = Path("config/weights.yaml")) -> dict:
+    return yaml.safe_load(path.read_text())
+
+
+def themes(weights: dict) -> tuple[str, ...]:
+    """The fundamental map's theme slots, in configured order.
+
+    Order is data, not presentation: Plan 2's fit indexes its feature columns
+    by position, so sorting or de-duplicating here would permute fitted
+    coefficients against their labels.
+    """
+    slots = tuple(weights["themes"])
+    # jamasp/flashtext.py's _theme() falls back to the literal "other" for any
+    # theme the model doesn't name, and Plan 2 indexes theme columns
+    # positionally — so a retro that drops or misspells this slot must fail
+    # loudly here, not let the fallback silently write a value outside the
+    # configured set and corrupt every score from that point on.
+    if "other" not in slots:
+        raise ValueError(f'config/weights.yaml themes must include "other", got {slots!r}')
+    return slots

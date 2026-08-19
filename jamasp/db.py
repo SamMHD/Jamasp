@@ -103,6 +103,15 @@ CREATE TABLE IF NOT EXISTS rollups (
     status     TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_rollups_created ON rollups(created_at);
+CREATE TABLE IF NOT EXISTS item_scores (
+    item_id    TEXT PRIMARY KEY REFERENCES items(id),
+    tier       INTEGER NOT NULL,
+    direction  INTEGER NOT NULL,
+    conviction REAL    NOT NULL,
+    theme      TEXT    NOT NULL,
+    scored_at  TEXT    NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_item_scores_theme ON item_scores(theme);
 """
 
 # Columns added to tables that already exist in deployed databases. The schema
