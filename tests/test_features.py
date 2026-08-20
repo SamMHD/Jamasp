@@ -53,6 +53,16 @@ def test_as_of_of_an_empty_history_is_none():
     assert features.as_of([], "2026-01-05T00:00:00Z") is None
 
 
+def test_as_of_boundary_is_inclusive_at_t_and_excludes_t_plus_one_second():
+    # The no-lookahead guarantee's exact edge, pinned so an O(m) -> O(log m)
+    # rewrite of as_of cannot quietly shift it: a state stamped AT t is
+    # visible at t (the bar closed exactly then), but a state stamped one
+    # second later must not leak backward into this row.
+    hist = [("2026-01-06T00:00:00Z", 1.0), ("2026-01-06T00:00:01Z", 2.0)]
+    assert features.as_of(hist, "2026-01-06T00:00:00Z") == 1.0
+    assert features.as_of(hist, "2026-01-05T23:59:59Z") is None
+
+
 # ---- target -----------------------------------------------------------------
 
 def test_target_is_the_forward_return_divided_by_atr(tmp_path):
@@ -226,3 +236,29 @@ def test_theme_matrix_is_empty_with_no_scored_items(tmp_path):
     _seed_bars(conn)
     data = features.build_theme(conn, load_weights(), "GC")
     assert data.X == [] and data.y == []
+
+
+def test_theme_matrix_counts_observations_per_hour_not_per_story(tmp_path):
+    # "Missing is neutral, and counted" applies to the theme columns too:
+    # theme_obs counts HOURS with exposure, not stories. Two stories landing
+    # in the same hour are one row of evidence, not two -- counting items
+    # instead of distinct hours would inflate this and let a thin column
+    # pass Task 7's min_observations threshold it shouldn't. A theme with no
+    # scored stories anywhere must report zero, and the merged dict must
+    # still carry both the theme columns and the signal columns Task 7
+    # reads for its fitted-flag decision on both maps.
+    conn = db.connect(tmp_path / "j.db")
+    _seed_bars(conn)
+    _score(conn, "a", "2026-02-02T02:10:00Z", 5, "rates_dollar")
+    _score(conn, "b", "2026-02-02T02:50:00Z", 5, "rates_dollar")  # same hour as a
+    _score(conn, "c", "2026-02-02T05:05:00Z", 3, "rates_dollar")  # a distinct hour
+    _score(conn, "d", "2026-02-02T09:20:00Z", 3, "rates_dollar")  # a third hour
+    weights = load_weights()
+    data = features.build_theme(conn, weights, "GC")
+    # 4 stories land in 3 distinct hours; counting stories would give 4.
+    assert data.observations["rates_dollar"] == 3
+    assert data.observations["geopolitics"] == 0
+    assert data.observations["other"] == 0
+    for col in themes(weights) + signal_columns(weights):
+        assert col in data.observations
+    assert data.observations["rsi14@1d"] > 0  # the merge didn't drop signal columns

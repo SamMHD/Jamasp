@@ -53,8 +53,16 @@ def as_of(history: list[tuple[str, float]], ts: str) -> float | None:
     This is the no-lookahead guarantee in one function: an instant earlier
     than anything observed has no value and must not borrow the first future
     one. History must be ascending by timestamp.
+
+    O(log m) via bisect's `key`, not O(m): `_feature_block` calls this once
+    per row per column, so rebuilding a fresh m-length timestamp list on
+    every call (as an earlier version of this function did) turned a
+    38-column, thousands-of-rows matrix build into O(rows * sum(m)) element
+    operations -- minutes against a systemd unit's timeout. `key` lets
+    bisect compare `ts` against each element's own timestamp in place,
+    without ever materialising that list.
     """
-    i = bisect.bisect_right([h[0] for h in history], ts)
+    i = bisect.bisect_right(history, ts, key=lambda h: h[0])
     return history[i - 1][1] if i else None
 
 
