@@ -103,3 +103,79 @@ def resample_weekly(bars: list[Bar]) -> list[Bar]:
             hour=0, minute=0, second=0, microsecond=0)
         groups.setdefault(monday.strftime(TS_FMT), []).append(b)
     return [_fold(groups[k], k) for k in sorted(groups)]
+
+
+SYMBOL = "GC"
+
+# The same host and endpoint gold_spot already polls (config/sources.yaml:224),
+# at the two depths Yahoo actually serves: interval=1h is capped at range=730d,
+# interval=1d reaches five years. Measured 2026-08-18: 17,395 hourly bars.
+HOURLY_URL = (
+    "https://query1.finance.yahoo.com/v8/finance/chart/GC=F"
+    "?range=730d&interval=1h"
+)
+DAILY_URL = (
+    "https://query1.finance.yahoo.com/v8/finance/chart/GC=F"
+    "?range=5y&interval=1d"
+)
+
+
+def store_bars(
+    conn: sqlite3.Connection, symbol: str, timeframe: str, bars: list[Bar]
+) -> int:
+    """Upsert bars. Returns the number of rows written.
+
+    INSERT OR REPLACE rather than OR IGNORE: Yahoo revises the most recent
+    bar while it is still forming, and a stored copy frozen at the first
+    value seen would quietly disagree with every later fetch.
+    """
+    conn.executemany(
+        "INSERT OR REPLACE INTO bars"
+        " (symbol, timeframe, ts, open, high, low, close)"
+        " VALUES (?, ?, ?, ?, ?, ?, ?)",
+        [(symbol, timeframe, b.ts, b.open, b.high, b.low, b.close) for b in bars],
+    )
+    conn.commit()
+    return len(bars)
+
+
+def read_bars(conn: sqlite3.Connection, symbol: str, timeframe: str) -> list[Bar]:
+    return [
+        Bar(r["ts"], r["open"], r["high"], r["low"], r["close"])
+        for r in conn.execute(
+            "SELECT ts, open, high, low, close FROM bars"
+            " WHERE symbol = ? AND timeframe = ? ORDER BY ts",
+            (symbol, timeframe),
+        )
+    ]
+
+
+def _default_fetch(url: str) -> str:
+    from jamasp.net import get_with_fallback
+
+    return get_with_fallback(url).text
+
+
+def backfill(conn: sqlite3.Connection, symbol: str = SYMBOL, fetch=None) -> dict[str, int]:
+    """Fetch and store every timeframe. Returns timeframe -> rows written.
+
+    Idempotent on the primary key, which makes one command serve as both the
+    initial backfill AND the daily refresh: the two calls re-walk overlapping
+    history and upsert, so no separate incremental path exists to drift out
+    of agreement with this one.
+
+    Each timeframe is committed as it is derived, before the next fetch. A
+    daily-endpoint failure must not cost the 730-day hourly pull that already
+    succeeded.
+    """
+    fetch = fetch or _default_fetch
+    written: dict[str, int] = {}
+
+    hourly = parse_yahoo_bars(fetch(HOURLY_URL))
+    written["1h"] = store_bars(conn, symbol, "1h", hourly)
+    written["4h"] = store_bars(conn, symbol, "4h", resample(hourly, 4 * 3600))
+
+    daily = parse_yahoo_bars(fetch(DAILY_URL))
+    written["1d"] = store_bars(conn, symbol, "1d", daily)
+    written["1w"] = store_bars(conn, symbol, "1w", resample_weekly(daily))
+    return written

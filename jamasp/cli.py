@@ -25,6 +25,7 @@ from jamasp import runner as runner_mod
 from jamasp import wakeup as wakeup_mod
 from jamasp import watchdog as watchdog_mod
 from jamasp.config import load_settings, load_sources
+from jamasp.ingest import bars as bars_mod
 from jamasp.ingest import calendar as calendar_mod
 from jamasp.ingest import prices as prices_mod
 from jamasp.ingest import rss as rss_mod
@@ -313,6 +314,24 @@ def wakeup_cancel(wakeup_id, db_path, config_dir):
     except ValueError as exc:
         raise click.ClickException(str(exc))
     click.echo(f"cancelled wakeup #{wakeup_id}")
+
+
+@main.group("bars")
+def bars_group():
+    """OHLC bars: the substrate for indicators and the ridge fit."""
+
+
+@bars_group.command("backfill")
+@click.option("--symbol", default=bars_mod.SYMBOL, show_default=True)
+@db_opt
+@cfg_opt
+def bars_backfill(symbol, db_path, config_dir):
+    """Fetch and store 1h/4h/1d/1w bars. Idempotent — also the daily refresh."""
+    conn, _, _ = _common(db_path, config_dir)
+    written = bars_mod.backfill(conn, symbol)
+    click.echo(
+        f"bars {symbol}: " + " ".join(f"{tf}={n}" for tf, n in written.items())
+    )
 
 
 @main.command()

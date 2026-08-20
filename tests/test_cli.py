@@ -561,3 +561,19 @@ def test_flash_line_reports_tier_outcomes():
     assert "7 low tier" in line
     assert "2 no tier" in line
     assert "23 scored" in line
+
+
+def test_bars_backfill_reports_rows_per_timeframe(tmp_path, monkeypatch):
+    from jamasp.ingest import bars as bars_mod
+
+    cfg = _write_configs(tmp_path, "sources: []\n")
+    dbp = tmp_path / "j.db"
+
+    def fake_backfill(conn, symbol="GC", fetch=None):
+        return {"1h": 17395, "4h": 4349, "1d": 1258, "1w": 261}
+
+    monkeypatch.setattr(bars_mod, "backfill", fake_backfill)
+    res = CliRunner().invoke(
+        main, ["bars", "backfill", "--db", str(dbp), "--config-dir", str(cfg)])
+    assert res.exit_code == 0, res.output
+    assert "1h=17395" in res.output and "1w=261" in res.output

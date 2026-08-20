@@ -104,3 +104,102 @@ def test_resample_weekly_stamps_the_monday_even_when_monday_is_missing():
 def test_resample_of_empty_is_empty():
     assert resample([], 4 * 3600) == []
     assert resample_weekly([]) == []
+
+
+from jamasp import db
+from jamasp.ingest.bars import backfill, read_bars, store_bars
+
+
+def test_store_and_read_bars_round_trip(tmp_path):
+    conn = db.connect(tmp_path / "j.db")
+    bars = [Bar("2026-01-02T00:00:00Z", 2, 3, 1, 2.5),
+            Bar("2026-01-01T00:00:00Z", 1, 2, 0.5, 1.5)]
+    assert store_bars(conn, "GC", "1d", bars) == 2
+    assert read_bars(conn, "GC", "1d") == sorted(bars, key=lambda b: b.ts)
+
+
+def test_store_bars_is_idempotent(tmp_path):
+    # A re-run must fill gaps, not duplicate — a partial fetch has to be safe
+    # to retry, and the daily timer re-runs this over overlapping history
+    # every day for the rest of the deployment's life.
+    conn = db.connect(tmp_path / "j.db")
+    bars = [Bar("2026-01-01T00:00:00Z", 1, 2, 0.5, 1.5)]
+    store_bars(conn, "GC", "1d", bars)
+    store_bars(conn, "GC", "1d", bars)
+    assert len(read_bars(conn, "GC", "1d")) == 1
+
+
+def test_store_bars_overwrites_a_revised_bar(tmp_path):
+    # Yahoo revises the most recent bar as it forms. The stored copy must
+    # follow it rather than freeze at the first value seen.
+    conn = db.connect(tmp_path / "j.db")
+    store_bars(conn, "GC", "1d", [Bar("2026-01-01T00:00:00Z", 1, 2, 0.5, 1.5)])
+    store_bars(conn, "GC", "1d", [Bar("2026-01-01T00:00:00Z", 1, 9, 0.5, 8.0)])
+    assert read_bars(conn, "GC", "1d") == [Bar("2026-01-01T00:00:00Z", 1, 9, 0.5, 8.0)]
+
+
+def test_store_bars_keeps_timeframes_separate(tmp_path):
+    conn = db.connect(tmp_path / "j.db")
+    b = Bar("2026-01-01T00:00:00Z", 1, 2, 0.5, 1.5)
+    store_bars(conn, "GC", "1h", [b])
+    store_bars(conn, "GC", "1d", [b])
+    assert len(read_bars(conn, "GC", "1h")) == 1
+    assert len(read_bars(conn, "GC", "1d")) == 1
+
+
+def _fake_fetch(hourly_text, daily_text):
+    def fetch(url):
+        return hourly_text if "interval=1h" in url else daily_text
+    return fetch
+
+
+def test_backfill_writes_all_four_timeframes(tmp_path):
+    conn = db.connect(tmp_path / "j.db")
+    # 8 hourly bars starting 2026-01-05T00:00Z (a Monday) -> 2 four-hour bars.
+    base = 1767571200  # 2026-01-05T00:00:00Z
+    hourly = _payload([base + i * 3600 for i in range(8)],
+                      [10.0 + i for i in range(8)], [20.0] * 8,
+                      [1.0] * 8, [11.0 + i for i in range(8)])
+    daily = _payload([base, base + 86400], [10.0, 20.0], [30.0, 40.0],
+                     [1.0, 2.0], [15.0, 25.0])
+    written = backfill(conn, "GC", fetch=_fake_fetch(hourly, daily))
+    assert written == {"1h": 8, "4h": 2, "1d": 2, "1w": 1}
+    assert len(read_bars(conn, "GC", "1h")) == 8
+    assert len(read_bars(conn, "GC", "4h")) == 2
+    assert len(read_bars(conn, "GC", "1d")) == 2
+    assert read_bars(conn, "GC", "1w") == [
+        Bar("2026-01-05T00:00:00Z", 10.0, 40.0, 1.0, 25.0)]
+
+
+def test_backfill_is_idempotent(tmp_path):
+    conn = db.connect(tmp_path / "j.db")
+    base = 1767571200
+    hourly = _payload([base + i * 3600 for i in range(8)],
+                      [10.0 + i for i in range(8)], [20.0] * 8,
+                      [1.0] * 8, [11.0 + i for i in range(8)])
+    daily = _payload([base, base + 86400], [10.0, 20.0], [30.0, 40.0],
+                     [1.0, 2.0], [15.0, 25.0])
+    fetch = _fake_fetch(hourly, daily)
+    backfill(conn, "GC", fetch=fetch)
+    backfill(conn, "GC", fetch=fetch)
+    counts = {tf: len(read_bars(conn, "GC", tf)) for tf in ("1h", "4h", "1d", "1w")}
+    assert counts == {"1h": 8, "4h": 2, "1d": 2, "1w": 1}
+
+
+def test_backfill_keeps_the_hourly_set_when_the_daily_fetch_fails(tmp_path):
+    # A partial fetch must leave what it already got. Losing the 730-day
+    # hourly pull because the daily call 404'd would make every retry pay for
+    # it again.
+    conn = db.connect(tmp_path / "j.db")
+    base = 1767571200
+    hourly = _payload([base + i * 3600 for i in range(4)],
+                      [10.0] * 4, [20.0] * 4, [1.0] * 4, [11.0] * 4)
+
+    def fetch(url):
+        if "interval=1h" in url:
+            return hourly
+        raise RuntimeError("daily endpoint down")
+
+    with pytest.raises(RuntimeError):
+        backfill(conn, "GC", fetch=fetch)
+    assert len(read_bars(conn, "GC", "1h")) == 4
