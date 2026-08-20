@@ -45,7 +45,9 @@ beforeAll(async () => {
       ${item("leakWinIn", "https://x.test/leak-window", "2026-07-15T12:00:00Z", "In window, lower tier")},
       ${item("leakWinOut", "https://x.test/leak-window", "2026-07-10T09:00:00Z", "Outside window, higher tier")},
       ${item("leakDateGood", "https://x.test/leak-date", "2026-07-15T13:00:00Z", "In window, legitimate date")},
-      ${item("leakDateBogus", "https://x.test/leak-date", "1786-08-01T00:00:00Z", "Pre-2000 epoch artefact, higher tier")};
+      ${item("leakDateBogus", "https://x.test/leak-date", "1786-08-01T00:00:00Z", "Pre-2000 epoch artefact, higher tier")},
+      ${item("unscoredLeakIn", "https://x.test/unscored-leak", "2026-07-12T00:00:00Z", "In window, not yet scored")},
+      ${item("unscoredLeakOut", "https://x.test/unscored-leak", "1786-08-01T00:00:00Z", "Same story, scored, but a pre-2000 corrupted-date duplicate")};
     INSERT INTO item_scores VALUES
       ${score("w1", 4, 2, 0.8, "rates_dollar")},
       ${score("w2", 3, -1, 0.6, "rates_dollar")},
@@ -59,7 +61,8 @@ beforeAll(async () => {
       ${score("leakWinIn", 3, 1, 0.4, "other")},
       ${score("leakWinOut", 5, 2, 0.9, "other")},
       ${score("leakDateGood", 3, 1, 0.4, "other")},
-      ${score("leakDateBogus", 5, 2, 0.9, "other")};
+      ${score("leakDateBogus", 5, 2, 0.9, "other")},
+      ${score("unscoredLeakOut", 5, 2, 0.9, "other")};
   `);
   d.close();
   process.env.JAMASP_ROOT = root;
@@ -76,6 +79,19 @@ const TIE_SINCE = "2026-08-10T00:00:00Z";
 // leakWinIn/leakDateGood — the higher-tier siblings that must NOT be allowed
 // to win the collapse from outside the window (or from behind the date floor).
 const LEAK_SINCE = "2026-07-14T00:00:00Z";
+// Isolated window for the unscored-leak fixture, sandwiched in the same gap
+// as the leak-window pair: after leakWinOut (2026-07-10) so that row is
+// excluded, and before leakWinIn/leakDateGood (2026-07-15) so this window's
+// aggregate count can be computed by hand. unscoredLeakOut carries a
+// pre-2000 date, so unlike leakWinOut it is *never* in-window for any
+// realistic cutoff — it can only cancel unscoredLeakIn out via an unscoped
+// (buggy) NOT EXISTS, never via the fixed, scoped one. Every other item that
+// falls inside this window (everything from leakWinIn onward, since the
+// window has no upper bound) is scored, except unscoredIn and unscoredOut,
+// which carry unique URLs with no duplicate at all — so the fixed count here
+// is exactly 3 (unscoredLeakIn + unscoredIn + unscoredOut), and the buggy,
+// unscoped form undercounts by exactly 1 (unscoredLeakIn silently hidden).
+const ULEAK_SINCE = "2026-07-11T00:00:00Z";
 
 describe("getScoredItems", () => {
   it("returns items inside the window, newest first", () => {
@@ -185,5 +201,20 @@ describe("unscoredCountSince", () => {
 
   it("returns 0 when the window holds nothing", () => {
     expect(db.unscoredCountSince("2030-01-01T00:00:00Z")).toBe(0);
+  });
+
+  it("does not let a pre-2000 URL-duplicate score hide an in-window unscored item", () => {
+    // unscoredLeakOut carries a score but a corrupted pre-2000 published_at;
+    // unscoredLeakIn shares its URL, sits inside ULEAK_SINCE's window, and
+    // carries no score of its own. An unscoped NOT EXISTS (`WHERE i2.url =
+    // i.url` with no window or date-floor predicate on i2) finds
+    // unscoredLeakOut's score regardless of when it was published, so
+    // unscoredLeakIn's NOT EXISTS fails and it vanishes from the unscored
+    // count too — undercounting by exactly 1 for a window that genuinely
+    // holds three unscored candidates (see ULEAK_SINCE's comment for the
+    // full accounting). The fix scopes i2 to the same sinceIso and 2000
+    // floor getScoredItems's windowed CTE uses, so "has this URL been
+    // scored" means "scored within this window", not "scored ever".
+    expect(db.unscoredCountSince(ULEAK_SINCE)).toBe(3);
   });
 });

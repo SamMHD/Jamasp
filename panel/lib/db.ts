@@ -374,6 +374,20 @@ export function getScoredItems(sinceIso: string): ScoredItem[] {
  * happen at all). This is the map's coverage footer: "N scored, M unscored
  * not shown".
  *
+ * The NOT EXISTS subquery's join to i2 MUST carry the same window (sinceIso)
+ * and date-floor (>= '2000-01-01T00:00:00Z') predicates that getScoredItems's
+ * `windowed` CTE applies — "has this URL been scored" has to mean "scored
+ * *within this window*", not "scored anywhere in the table, ever". An
+ * earlier version left i2 unscoped: a genuinely in-window, unscored row
+ * could share a URL with a scored duplicate that lives outside the window,
+ * or behind the pre-2000 date floor (an epoch-as-year parsing artifact, see
+ * #16). That out-of-window/out-of-era score satisfied `i2.url = i.url`
+ * regardless of when it was published, so the in-window row's NOT EXISTS
+ * failed and it silently vanished from the unscored count too — the same
+ * "vanishes from both buckets, coverage no longer sums" failure mode
+ * getScoredItems's guard 1 was fixed for. See test/db-marketmap.test.ts for
+ * a fixture that reproduces it and fails against the unscoped form.
+ *
  * Same missing-table guard as getScoredItems: 0 rather than a thrown error
  * when item_scores does not exist yet.
  */
@@ -387,7 +401,9 @@ export function unscoredCountSince(sinceIso: string): number {
          AND NOT EXISTS (
                SELECT 1 FROM item_scores s
                  JOIN items i2 ON i2.id = s.item_id
-                WHERE i2.url = i.url)
-    `).get(sinceIso) as { c: number }).c;
+                WHERE i2.url = i.url
+                  AND i2.published_at >= ?
+                  AND i2.published_at >= '2000-01-01T00:00:00Z')
+    `).get(sinceIso, sinceIso) as { c: number }).c;
   });
 }
