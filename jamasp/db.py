@@ -19,6 +19,17 @@ CREATE TABLE IF NOT EXISTS items (
     read_at      TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_items_read ON items(read_at);
+-- Backs the panel's unscoredCountSince (panel/lib/db.ts): its NOT EXISTS
+-- subquery does a per-row `i2.url = i.url` lookup to test whether a URL has
+-- been scored, and this index lets SQLite satisfy that with an indexed
+-- search (SEARCH i2 USING INDEX idx_items_url (url=?)) instead of a full
+-- table scan per outer row. Confirmed with EXPLAIN QUERY PLAN against the
+-- real schema. getScoredItems's URL collapse does NOT use this index — its
+-- plan is identical with and without it (USE TEMP B-TREE FOR ORDER BY in
+-- both cases) because the CTE materialises the item_scores/items join
+-- before the window function ever runs, so there is no per-row url lookup
+-- for an index to drive.
+CREATE INDEX IF NOT EXISTS idx_items_url ON items(url);
 CREATE TABLE IF NOT EXISTS prices (
     symbol TEXT NOT NULL,
     ts     TEXT NOT NULL,

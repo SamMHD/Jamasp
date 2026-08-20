@@ -1,5 +1,6 @@
 import Database from "better-sqlite3";
 import { DB_PATH } from "./paths";
+import type { ScoredItem } from "./marketmap";
 
 let _db: Database.Database | null = null;
 
@@ -16,6 +17,20 @@ function q<T>(fn: (db: Database.Database) => T): T {
     if ((e as { code?: string }).code?.startsWith("SQLITE_BUSY")) return fn(getDb());
     throw e;
   }
+}
+
+/**
+ * A freshly deployed host has no `item_scores` table until the first CLI
+ * scoring run creates it — the panel must keep serving through that window
+ * rather than 500ing, so callers that read item_scores check for it first
+ * rather than relying on q() to paper over the error: q() only retries
+ * SQLITE_BUSY and deliberately rethrows everything else, including
+ * "no such table", which is a real bug everywhere else in this file.
+ */
+function hasTable(db: Database.Database, name: string): boolean {
+  return db.prepare(
+    "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?"
+  ).get(name) !== undefined;
 }
 
 // ---- types (exactly as in the Interfaces block above) ----
@@ -281,5 +296,114 @@ export function priceDeltaReference(
     ).get(symbol, ts) as { ts: string; value: number } | undefined;
     if (r === undefined || r.ts >= latestTs) return null;
     return r.value;
+  });
+}
+
+/**
+ * Scored news for the fundamental map, with both coverage guards applied.
+ *
+ * Guard 1 — collapse on URL. rss.item_id() hashes (source, url, headline),
+ * so a publisher rewriting a live article's headline mints a new item for a
+ * URL already seen (docs/todo/002). On a treemap that is arithmetic, not
+ * cosmetics: six tiles for one story is six times the area in its theme.
+ * Highest tier wins, because the strongest read of a story is the one the
+ * desk should see. Among rows tied on tier, newest `published_at` wins, and
+ * `itemId` breaks any remaining tie — an explicit, stable rule rather than
+ * whatever order SQLite happens to visit rows in.
+ *
+ * The collapse MUST be computed over the same filtered set the outer query
+ * returns (window + date floor), not over the whole table. An earlier
+ * version picked the winner with a correlated subquery —
+ * `s.tier = (SELECT MAX(s2.tier) ... WHERE i2.url = i.url)` — with no window
+ * or date-floor clause of its own. That subquery could pick a winning tier
+ * that lives *outside* the window (or behind the date floor): the in-window
+ * row then fails `s.tier = <that max>` and gets dropped, while the
+ * out-of-window sibling is dropped by the outer WHERE — net result, zero
+ * rows for a story that plainly has a legitimate in-window score. It fails
+ * silently: the item is neither returned nor counted as unscored, so the
+ * coverage footer's scored/unscored no longer sum to the true candidate
+ * count. Do not reintroduce that shape. Instead: filter first (the
+ * `windowed` CTE), THEN rank and collapse only within that already-filtered
+ * set (the `ROW_NUMBER() ... PARTITION BY url` below). See
+ * test/db-marketmap.test.ts for fixtures that straddle exactly this
+ * boundary and fail against the correlated-subquery form.
+ *
+ * Guard 2 — reject implausible dates. Feeds carrying a raw Unix epoch had it
+ * parsed as a year before #16, so "1786971720" became 1786-08-01. Those rows
+ * would silently fall outside every window; excluding them explicitly means
+ * the coverage count can state how many were dropped. This filter lives
+ * inside the `windowed` CTE for the same reason guard 1 must — the collapse
+ * has to rank over rows that have already been date-floored, not the raw
+ * table.
+ *
+ * Collapsing happens on read, never on write: item_scores keeps one row per
+ * item, and folding on the way in would destroy information that cannot be
+ * recovered.
+ *
+ * Guard 3 — a freshly deployed host has no item_scores table until the
+ * first CLI scoring run creates it. Returns an empty array rather than
+ * throwing, so the panel keeps rendering (with its existing "no scored
+ * stories" empty state) through that window instead of taking the whole
+ * overview page down with it.
+ */
+export function getScoredItems(sinceIso: string): ScoredItem[] {
+  return q(db => {
+    if (!hasTable(db, "item_scores")) return [];
+    return db.prepare(`
+      WITH windowed AS (
+        SELECT s.item_id AS itemId, s.tier, s.direction, s.conviction, s.theme,
+               i.headline, i.source, i.url, i.published_at AS publishedAt
+          FROM item_scores s JOIN items i ON i.id = s.item_id
+         WHERE i.published_at >= ? AND i.published_at >= '2000-01-01T00:00:00Z'
+      )
+      SELECT itemId, tier, direction, conviction, theme, headline, source, url, publishedAt
+        FROM (SELECT *, ROW_NUMBER() OVER (
+                PARTITION BY url ORDER BY tier DESC, publishedAt DESC, itemId
+              ) AS rn FROM windowed)
+       WHERE rn = 1
+       ORDER BY publishedAt DESC
+    `).all(sinceIso) as ScoredItem[];
+  });
+}
+
+/**
+ * Count of items in the window with no `item_scores` row, collapsed by URL
+ * the same way getScoredItems collapses its own rows — a story scored under
+ * one of several URL-duplicate ids must not double-count as both scored and
+ * unscored (see getScoredItems's guard-1 comment for why duplicate ids
+ * happen at all). This is the map's coverage footer: "N scored, M unscored
+ * not shown".
+ *
+ * The NOT EXISTS subquery's join to i2 MUST carry the same window (sinceIso)
+ * and date-floor (>= '2000-01-01T00:00:00Z') predicates that getScoredItems's
+ * `windowed` CTE applies — "has this URL been scored" has to mean "scored
+ * *within this window*", not "scored anywhere in the table, ever". An
+ * earlier version left i2 unscoped: a genuinely in-window, unscored row
+ * could share a URL with a scored duplicate that lives outside the window,
+ * or behind the pre-2000 date floor (an epoch-as-year parsing artifact, see
+ * #16). That out-of-window/out-of-era score satisfied `i2.url = i.url`
+ * regardless of when it was published, so the in-window row's NOT EXISTS
+ * failed and it silently vanished from the unscored count too — the same
+ * "vanishes from both buckets, coverage no longer sums" failure mode
+ * getScoredItems's guard 1 was fixed for. See test/db-marketmap.test.ts for
+ * a fixture that reproduces it and fails against the unscoped form.
+ *
+ * Same missing-table guard as getScoredItems: 0 rather than a thrown error
+ * when item_scores does not exist yet.
+ */
+export function unscoredCountSince(sinceIso: string): number {
+  return q(db => {
+    if (!hasTable(db, "item_scores")) return 0;
+    return (db.prepare(`
+      SELECT COUNT(DISTINCT i.url) c
+        FROM items i
+       WHERE i.published_at >= ?
+         AND NOT EXISTS (
+               SELECT 1 FROM item_scores s
+                 JOIN items i2 ON i2.id = s.item_id
+                WHERE i2.url = i.url
+                  AND i2.published_at >= ?
+                  AND i2.published_at >= '2000-01-01T00:00:00Z')
+    `).get(sinceIso, sinceIso) as { c: number }).c;
   });
 }

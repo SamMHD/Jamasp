@@ -13,11 +13,17 @@ beforeAll(async () => {
 
 describe("db layer", () => {
   it("counts unread cluster representatives", () => {
-    expect(db.getUnreadCount()).toBe(2); // i1, i2 unread; i3 read + clustered under i1
+    // i1, i2 unread; i3 read + clustered under i1; map1/map2 (the
+    // fundamental-map fixture rows build-fixture.mjs adds with real-time-
+    // relative dates — see its own comment) are each their own cluster
+    // head and unread too.
+    expect(db.getUnreadCount()).toBe(4);
   });
   it("filters items by source and read state", () => {
     expect(db.getItems({ source: "cnbc_finance" }).map(r => r.id)).toEqual(["i1", "i3"]);
-    expect(db.getItems({ unreadOnly: true }).map(r => r.id)).toEqual(["i1", "i2"]);
+    // Newest first: map1/map2 are dated relative to build time (minutes/days
+    // ago), always newer than the fixture's fixed 2026-08-01 items.
+    expect(db.getItems({ unreadOnly: true }).map(r => r.id)).toEqual(["map1", "map2", "i1", "i2"]);
   });
   it("searches headline and lede case-insensitively", () => {
     expect(db.getItems({ search: "dollar" }).map(r => r.id)).toEqual(["i1", "i3"]);
@@ -26,9 +32,12 @@ describe("db layer", () => {
     expect(db.getItems({ search: "_old" })).toEqual([]);
   });
   it("paginates with limit and offset", () => {
-    expect(db.getItems({ limit: 2 }).map(r => r.id)).toEqual(["i1", "i2"]);
-    expect(db.getItems({ limit: 2, offset: 2 }).map(r => r.id)).toEqual(["i3"]);
-    expect(db.getItems({ offset: 3 })).toEqual([]);
+    // Full published_at-desc order is now [map1, map2, i1, i2, i3] — map1/
+    // map2 are always newer than the fixture's fixed 2026-08-01 items (see
+    // build-fixture.mjs).
+    expect(db.getItems({ limit: 2 }).map(r => r.id)).toEqual(["map1", "map2"]);
+    expect(db.getItems({ limit: 2, offset: 2 }).map(r => r.id)).toEqual(["i1", "i2"]);
+    expect(db.getItems({ offset: 5 })).toEqual([]);
   });
   it("computes price snapshots with deltas", () => {
     const gc = db.getPriceSnapshots(new Date("2026-08-01T09:00:00Z")).find(s => s.symbol === "GC")!;

@@ -378,10 +378,36 @@ Measured with the dataviz validator against the panel's real surfaces
 | bearish mid | `#854741` |
 | bearish pole | `#e34948` |
 
-Worst adjacent CVD separation **ΔE 6.9 (deuteranopia)** — inside the 6–8 floor band,
-which is legal **only** with secondary encoding. The 45° hatch on bearish tiles is
-that encoding, and it is required, not optional: it works at any tile size, which the
-signed score label does not.
+A treemap is an all-pairs surface — any two tiles can sit adjacent — so all ten
+pairs of the five steps were measured, not just the poles. Machado–Oliveira–Fernandes
+2009 at severity 1.0, Euclidean distance in OKLab ×100:
+
+| pair | normal | deutan | protan | verdict |
+|---|---|---|---|---|
+| bear / bull-mid | 27.4 | 16.4 | **2.8** | FAIL |
+| bear-mid / bull-mid | 14.1 | **3.1** | 7.9 | FAIL |
+| bear / bull | 31.3 | 6.9 | 18.2 | FLOOR BAND |
+| bear-mid / neutral | 15.1 | 13.7 | 8.9 | PASS |
+| bear / bear-mid | 18.4 | 16.7 | 9.7 | PASS |
+| neutral / bull-mid | 15.9 | 14.6 | 16.6 | PASS |
+| bull-mid / bull | 19.1 | 17.6 | 19.9 | PASS |
+| bear / neutral | 33.4 | 30.4 | 18.6 | PASS |
+| bear-mid / bull | 28.9 | 19.0 | 27.7 | PASS |
+| neutral / bull | 35.0 | 32.2 | 36.5 | PASS |
+
+An earlier pass of this spec validated only the pole pair (bear/bull, ΔE 6.9) and
+built the hatch argument on that number alone. It undersold the problem: bear/bull is
+the *third* worst of three failing or floor-band pairs. Bear beside a mildly bullish
+tile (bear/bull-mid) is effectively the same colour to a protanope at ΔE **2.8**, and
+the two mid steps (bear-mid/bull-mid) are barely separable to a deuteranope at ΔE
+**3.1** — both worse than the pole pair, and both invisible if only the poles are
+checked.
+
+**Conclusion: hatch the whole bearish half of the ramp (`bear` and `bear-mid`), not
+just the pole.** With both bearish steps hatched, every one of the three failing/floor
+pairs above has exactly one hatched member, so colour is never the sole encoding for
+any adjacency the treemap can produce. The hatch is required, not optional: it works
+at any tile size, which the signed score label does not.
 
 ## Testing
 
