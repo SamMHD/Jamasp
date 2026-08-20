@@ -29,9 +29,9 @@ from pathlib import Path
 
 import numpy as np
 
-from jamasp.config import active_pins, fit_config
+from jamasp.config import active_pins, fit_config, themes
 from jamasp.db import utcnow
-from jamasp.features import TrainingData, build_technical
+from jamasp.features import TrainingData, build_technical, build_theme
 
 
 @dataclass(frozen=True)
@@ -200,13 +200,31 @@ def fit_all(conn: sqlite3.Connection, weights: dict, symbol: str = "GC",
             today: str | None = None) -> list[FitResult]:
     """Every fit this deployment can currently support.
 
+    Two fits, not one. Technical signals backfill five years while scored news
+    starts 2026-08-19, so a single joint fit over all history would have every
+    theme column zero for ~99.9% of rows: theme coefficients estimated from
+    tens of rows while the reported n said thousands, making the confidence
+    treatment overstate certainty exactly where it is least deserved.
+
+    Fit B carries the signal states as CONTROLS and reports only the themes.
+    The control coefficients are discarded — they exist so a news effect is
+    not credited with a move the tape was already making, not to become a
+    second, contradictory set of technical weights alongside Fit A's.
+
     A full refit from history each time, not an incremental nudge:
     idempotent, reproducible, no drift.
     """
     cfg = fit_config(weights)
     pins = active_pins(weights, (today or utcnow())[:10])
     results: list[FitResult] = []
+
     a = run_fit("technical", build_technical(conn, weights, symbol), cfg, pins)
     if a is not None:
         results.append(a)
+
+    theme_data = build_theme(conn, weights, symbol)
+    b = run_fit("theme", theme_data, cfg, pins, report_columns=themes(weights))
+    if b is not None:
+        results.append(b)
+
     return results

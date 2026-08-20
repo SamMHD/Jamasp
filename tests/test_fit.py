@@ -259,3 +259,81 @@ def test_write_results_is_atomic(tmp_path):
     fit.write_results(conn, out, [res], "2026-08-20T04:17:00Z")
     assert json.loads(out.read_text())["fits"]["technical"]["n"] == 400
     assert not list(tmp_path.glob("*.tmp"))
+
+
+# ---- Fit B: theme weights with technical controls ---------------------------
+
+def _tape_driven(n, seed=7):
+    """News that arrives when the tape is already strong, and a target that
+    is entirely explained by the tape.
+
+    The exposure is CORRELATED with the technical state, not determined by
+    it. A deterministic `exposure = 100 if s > 0` makes the two columns
+    perfectly collinear, and ridge splits an effect across collinear
+    predictors rather than assigning it — so the controlled coefficient
+    would stay large and the test would fail for a reason that has nothing
+    to do with whether the controls work.
+    """
+    rng = random.Random(seed)
+    X_theme, X_ctrl, y = [], [], []
+    for _ in range(n):
+        s = rng.uniform(-1.0, 1.0)                 # the technical state
+        # Stories land more often on a strong tape, but not always.
+        X_theme.append(100.0 if s + rng.gauss(0, 0.6) > 0 else 0.0)
+        X_ctrl.append(s)
+        y.append(2.0 * s)                          # the move is ALL tape
+    return X_theme, X_ctrl, y
+
+
+def test_controls_strip_a_theme_effect_the_tape_already_explains():
+    # This is the whole point of Fit B. If it does not discriminate, the
+    # controls are decorative and news is credited with moves the tape was
+    # already making.
+    theme, ctrl, y = _tape_driven(600)
+
+    naive = fit.run_fit(
+        "theme", _data(["rates_dollar"], [[t] for t in theme], y),
+        CFG, {}, report_columns=("rates_dollar",))
+    controlled = fit.run_fit(
+        "theme", _data(["rates_dollar", "sma50@1d"],
+                       [[t, c] for t, c in zip(theme, ctrl)], y),
+        CFG, {}, report_columns=("rates_dollar",))
+
+    naive_beta = abs(naive.coefficients[0].beta)
+    controlled_beta = abs(controlled.coefficients[0].beta)
+    assert naive_beta > 0.1, "the uncontrolled fit should see a large theme effect"
+    assert controlled_beta < 0.25 * naive_beta, (naive_beta, controlled_beta)
+
+
+def test_fit_all_runs_both_fits_when_both_have_rows(tmp_path, monkeypatch):
+    conn = db.connect(tmp_path / "j.db")
+    X, y = _synthetic(400, [3.0, 1.0])
+    # Patch the names bound INSIDE jamasp.fit. fit.py does
+    # `from jamasp.features import build_technical`, so patching
+    # jamasp.features.build_technical would rebind a name fit.py no longer
+    # reads — a patch that silently does nothing.
+    monkeypatch.setattr(fit, "build_technical",
+                        lambda *a, **k: _data(["rsi14@1d", "sma50@1d"], X, y))
+    monkeypatch.setattr(fit, "build_theme",
+                        lambda *a, **k: _data(["rates_dollar", "rsi14@1d"], X, y))
+
+    results = fit.fit_all(conn, load_weights(), "GC", today="2026-08-20")
+    assert [r.name for r in results] == ["technical", "theme"]
+
+
+def test_fit_b_reports_themes_only_never_its_controls(tmp_path, monkeypatch):
+    conn = db.connect(tmp_path / "j.db")
+    X, y = _synthetic(400, [3.0, 1.0])
+    monkeypatch.setattr(fit, "build_technical", lambda *a, **k: _data([], [], []))
+    monkeypatch.setattr(
+        fit, "build_theme",
+        lambda *a, **k: _data(["rates_dollar", "rsi14@1d"], X, y))
+
+    results = fit.fit_all(conn, load_weights(), "GC", today="2026-08-20")
+    theme_fit = next(r for r in results if r.name == "theme")
+    keys = [c.key for c in theme_fit.coefficients]
+    assert "rates_dollar" in keys
+    # The control coefficients absorb the tape; publishing them here would
+    # give the fundamental map a second, contradictory set of technical
+    # weights alongside Fit A's.
+    assert "rsi14@1d" not in keys

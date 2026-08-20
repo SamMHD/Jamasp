@@ -97,8 +97,8 @@ flash pass disables itself and logs to `source_errors`; ingestion, briefs, and
 scans are unaffected.
 
 ### 5. systemd units
-All 14 unit files (7 services + 7 timers: ingest, brief, scan, dispatch,
-retro, watchdog, flash-rollup) live in `ops/systemd/` in this repo — copy them onto the
+All 16 unit files (8 services + 8 timers: ingest, brief, scan, dispatch,
+retro, watchdog, flash-rollup, weights) live in `ops/systemd/` in this repo — copy them onto the
 host rather than hand-writing units. Use **system** units
 (`/etc/systemd/system/`, `User=jamasp`) when you have root; use **user**
 units (`~/.config/systemd/user/`, plus `loginctl enable-linger jamasp` and
@@ -129,13 +129,13 @@ dispatch services rely on `claude` being on the `PATH=` set in each unit.
 Timer OnCalendar values (systemd ≥252 honors the `Asia/Dubai` suffix; the
 box clock stays UTC): ingest `*:0/15`, dispatch `*:0/5`, watchdog daily
 `09:00`, brief daily `07:30`, scan `09,11,13,15,17,19,21,23:00` (all Dubai
-time), retro `Sun 20:00` Dubai.
+time), retro `Sun 20:00` Dubai, weights `03:30` Dubai.
 
 Enable in two stages — the deterministic infra first, the agentic runs
 after the human handoff:
 ```bash
 # (drop --user for system units)
-systemctl --user enable --now jamasp-ingest.timer jamasp-dispatch.timer jamasp-watchdog.timer jamasp-flash-rollup.timer
+systemctl --user enable --now jamasp-ingest.timer jamasp-dispatch.timer jamasp-watchdog.timer jamasp-flash-rollup.timer jamasp-weights.timer
 # jamasp-brief.timer, jamasp-scan.timer, jamasp-retro.timer stay DISABLED
 # until the human steps below are done
 ```
