@@ -22,9 +22,10 @@ from jamasp import notify as notify_mod
 from jamasp import predictions as predictions_mod
 from jamasp import pricesummary as pricesummary_mod
 from jamasp import runner as runner_mod
+from jamasp import signals as signals_mod
 from jamasp import wakeup as wakeup_mod
 from jamasp import watchdog as watchdog_mod
-from jamasp.config import load_settings, load_sources
+from jamasp.config import load_settings, load_sources, load_weights
 from jamasp.ingest import bars as bars_mod
 from jamasp.ingest import calendar as calendar_mod
 from jamasp.ingest import prices as prices_mod
@@ -332,6 +333,23 @@ def bars_backfill(symbol, db_path, config_dir):
     click.echo(
         f"bars {symbol}: " + " ".join(f"{tf}={n}" for tf, n in written.items())
     )
+
+
+@main.group("signals")
+def signals_group():
+    """Technical signal states in [-1, +1], positive = bullish for gold."""
+
+
+@signals_group.command("refresh")
+@click.option("--symbol", default="GC", show_default=True)
+@db_opt
+@cfg_opt
+def signals_refresh(symbol, db_path, config_dir):
+    """Recompute the latest state for every configured signal column."""
+    conn, _, _ = _common(db_path, config_dir)
+    weights = load_weights(Path(config_dir) / "weights.yaml")
+    n = signals_mod.refresh(conn, weights, symbol)
+    click.echo(f"{n} signal states written")
 
 
 @main.command()

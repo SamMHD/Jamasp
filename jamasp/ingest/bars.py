@@ -179,3 +179,17 @@ def backfill(conn: sqlite3.Connection, symbol: str = SYMBOL, fetch=None) -> dict
     written["1d"] = store_bars(conn, symbol, "1d", daily)
     written["1w"] = store_bars(conn, symbol, "1w", resample_weekly(daily))
     return written
+
+
+TIMEFRAME_SECONDS = {"1h": 3600, "4h": 4 * 3600, "1d": 86400, "1w": 7 * 86400}
+
+
+def close_ts(ts: str, timeframe: str) -> str:
+    """The moment a bar opening at `ts` finished forming.
+
+    The separation between a bar's open and its close is the whole
+    no-lookahead guarantee: a state derived from a daily bar is not knowable
+    until that day ends, so anything reading states as of some instant `t`
+    must compare against this, never against the stored `ts`.
+    """
+    return _fmt(_epoch(ts) + TIMEFRAME_SECONDS[timeframe])

@@ -169,3 +169,9 @@ def test_bars_primary_key_is_symbol_timeframe_ts(tmp_path):
     conn.commit()
     rows = conn.execute("SELECT close FROM bars").fetchall()
     assert len(rows) == 1 and rows[0]["close"] == 9.0
+
+
+def test_signal_states_table_exists(tmp_path):
+    conn = db.connect(tmp_path / "j.db")
+    cols = {r[1] for r in conn.execute("PRAGMA table_info(signal_states)")}
+    assert cols == {"key", "ts", "value"}

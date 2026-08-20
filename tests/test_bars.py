@@ -203,3 +203,17 @@ def test_backfill_keeps_the_hourly_set_when_the_daily_fetch_fails(tmp_path):
     with pytest.raises(RuntimeError):
         backfill(conn, "GC", fetch=fetch)
     assert len(read_bars(conn, "GC", "1h")) == 4
+
+
+from jamasp.ingest.bars import TIMEFRAME_SECONDS, close_ts
+
+
+def test_close_ts_is_open_plus_one_period():
+    assert close_ts("2026-01-05T00:00:00Z", "1h") == "2026-01-05T01:00:00Z"
+    assert close_ts("2026-01-05T00:00:00Z", "4h") == "2026-01-05T04:00:00Z"
+    assert close_ts("2026-01-05T00:00:00Z", "1d") == "2026-01-06T00:00:00Z"
+    assert close_ts("2026-01-05T00:00:00Z", "1w") == "2026-01-12T00:00:00Z"
+
+
+def test_timeframe_seconds_covers_every_stored_timeframe():
+    assert set(TIMEFRAME_SECONDS) == {"1h", "4h", "1d", "1w"}

@@ -146,6 +146,24 @@ CREATE TABLE IF NOT EXISTS item_scores (
     scored_at  TEXT    NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_item_scores_theme ON item_scores(theme);
+-- Current technical states for the technical map, in [-1, +1] where positive
+-- is bullish for gold. Written by `jamasp signals refresh`; read by the panel.
+--
+-- ts is the CLOSE time of the bar the state was computed from, not that
+-- bar's open: a state derived from a daily bar is not knowable until that day
+-- ends. Storing the open time would let the panel show a state hours before
+-- it existed, and would let the fit train on it.
+--
+-- The fit does NOT read this table. It recomputes every historical state from
+-- bars, so a refit is reproducible from bars alone and cannot inherit a state
+-- written by an older version of a classifier.
+CREATE TABLE IF NOT EXISTS signal_states (
+    key   TEXT NOT NULL,   -- "<signal>@<timeframe>", e.g. "rsi14@1d"
+    ts    TEXT NOT NULL,   -- bar CLOSE time, UTC
+    value REAL NOT NULL,   -- [-1, +1], positive = bullish for gold
+    PRIMARY KEY (key, ts)
+);
+CREATE INDEX IF NOT EXISTS idx_signal_states_key_ts ON signal_states(key, ts DESC);
 """
 
 # Columns added to tables that already exist in deployed databases. The schema
