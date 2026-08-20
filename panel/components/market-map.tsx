@@ -1,5 +1,6 @@
 import { fmtAge } from "@/lib/format";
 import { layoutMap, tone, type MapRange, type ScoredItem, type Tone } from "@/lib/marketmap";
+import { FullscreenButton } from "@/components/fullscreen-button";
 
 /**
  * Fundamental market map: a two-level treemap of scored news, drawn as
@@ -26,6 +27,9 @@ import { layoutMap, tone, type MapRange, type ScoredItem, type Tone } from "@/li
  */
 
 const THEME_HEADER_H = 20;
+
+/** Shared between the section and the button that fullscreens it. */
+export const MAP_ELEMENT_ID = "market-map";
 
 const THEME_LABELS: Record<string, string> = {
   rates_dollar: "Rates & dollar",
@@ -101,6 +105,78 @@ function truncateForWidth(text: string, w: number, fontSize: number): string {
   return `${text.slice(0, Math.max(1, maxChars - 1))}…`;
 }
 
+/**
+ * Line advance for wrapped tile text. 1.25x the font is the usual compromise
+ * between legibility and fitting lines into a small tile; it is coupled to
+ * LABEL_FONT, so changing one means rechecking the other against MIN_LABEL_H.
+ */
+const LINE_H = LABEL_FONT * 1.25;
+
+/**
+ * Wrap a headline to fill its tile, rather than showing only its first line.
+ *
+ * SVG has no text wrapping, so this measures in the same estimated units the
+ * label threshold already uses: AVG_CHAR_W is an average over a proportional
+ * font, so a line of narrow characters underfills slightly and a line of wide
+ * ones can overhang a pixel or two. Exact fitting needs real text metrics,
+ * which means measuring in a browser — not worth a client component for a
+ * label.
+ *
+ * The last line ellipsises rather than the text simply stopping, so a
+ * truncated headline is visibly truncated: on a map whose whole job is
+ * showing what is there, a silently clipped headline reads as the whole
+ * headline.
+ */
+export function wrapForTile(text: string, w: number, h: number): string[] {
+  const maxChars = Math.floor((w - LABEL_PAD * 2) / (LABEL_FONT * AVG_CHAR_W));
+  // The first line costs only its font height; each line after it costs a
+  // full line-advance. Dividing the whole box by LINE_H instead would yield
+  // zero lines at exactly MIN_LABEL_H (10px of text in an 18px tile) and
+  // silently drop labels this component has always shown.
+  const maxLines = 1 + Math.floor((h - LABEL_PAD * 2 - LABEL_FONT) / LINE_H);
+  if (maxChars <= 0 || maxLines <= 0) return [];
+
+  // Split on any whitespace run, so repeated spaces in a feed headline cannot
+  // produce an empty line — a blank <tspan> still advances the baseline and
+  // would punch a visible gap through the middle of the text.
+  const words = text.split(/\s+/).filter(Boolean);
+  const lines: string[] = [];
+  let line = "";
+
+  for (const word of words) {
+    if (!line && word.length > maxChars) {
+      // No word boundary to wrap on. Breaking is the only alternative to
+      // overflowing the tile, which is what the budget exists to prevent.
+      let rest = word;
+      while (rest.length > maxChars && lines.length < maxLines) {
+        lines.push(rest.slice(0, maxChars));
+        rest = rest.slice(maxChars);
+      }
+      line = rest;
+      continue;
+    }
+    const candidate = line ? `${line} ${word}` : word;
+    if (candidate.length <= maxChars) {
+      line = candidate;
+    } else {
+      lines.push(line);
+      if (lines.length >= maxLines) { line = ""; break; }
+      line = word;
+    }
+  }
+  if (line && lines.length < maxLines) lines.push(line);
+
+  const usedAll = lines.join(" ").replace(/\s+/g, " ") ===
+    words.join(" ");
+  if (!usedAll && lines.length) {
+    const last = lines[lines.length - 1];
+    lines[lines.length - 1] = last.length >= maxChars
+      ? `${last.slice(0, Math.max(1, maxChars - 1))}…`
+      : `${last}…`;
+  }
+  return lines.slice(0, maxLines);
+}
+
 function tileTitle(item: ScoredItem, now: Date): string {
   const dirWord = item.direction > 0 ? "bullish" : item.direction < 0 ? "bearish" : "neutral";
   const sign = item.direction > 0 ? "+" : "";
@@ -168,7 +244,16 @@ export function MarketMap({ items, width, height, range, coverage }: {
   const boxes = layoutMap(items, { x: 0, y: 0, w: width, h: height }, THEME_HEADER_H);
 
   return (
-    <section aria-label="Scored news treemap" className="rounded border border-border p-4">
+    // id is the fullscreen target: FullscreenButton is a client component and
+    // resolves it with getElementById, because a server component cannot hold
+    // or hand over a ref. bg-background is load-bearing rather than cosmetic —
+    // a fullscreened element inherits no background, so the browser paints
+    // behind it black and the map would float on it.
+    <section id={MAP_ELEMENT_ID} aria-label="Scored news treemap"
+      className="rounded border border-border p-4 bg-background">
+      <div className="mb-2 flex items-center justify-end">
+        <FullscreenButton targetId={MAP_ELEMENT_ID} />
+      </div>
       <svg viewBox={`0 0 ${width} ${height}`} className="w-full" role="img"
         aria-label={`scored news treemap, ${items.length} scored stories ${WINDOW_LABEL[range]}`}>
         <defs>
@@ -188,6 +273,9 @@ export function MarketMap({ items, width, height, range, coverage }: {
               const t = tone(cell.node.direction, cell.node.conviction);
               const bearish = isBearish(t);
               const showLabel = cell.w >= MIN_LABEL_W && cell.h >= MIN_LABEL_H;
+              const lines = showLabel
+                ? wrapForTile(cell.node.headline, cell.w, cell.h)
+                : [];
               return (
                 <g key={cell.node.itemId}>
                   {/* <title> lives on the group, not the base rect: under
@@ -203,10 +291,16 @@ export function MarketMap({ items, width, height, range, coverage }: {
                     <rect x={cell.x} y={cell.y} width={cell.w} height={cell.h}
                       fill="url(#map-hatch)" pointerEvents="none" />
                   )}
-                  {showLabel && (
+                  {lines.length > 0 && (
                     <text x={cell.x + LABEL_PAD} y={cell.y + LABEL_PAD + LABEL_FONT * 0.8}
                       fontSize={LABEL_FONT} fill={TONE_INK[t]}>
-                      {truncateForWidth(cell.node.headline, cell.w, LABEL_FONT)}
+                      {lines.map((line, i) => (
+                        // Each tspan repeats x so the line returns to the tile's
+                        // left edge; dy advances all but the first.
+                        <tspan key={i} x={cell.x + LABEL_PAD} dy={i === 0 ? 0 : LINE_H}>
+                          {line}
+                        </tspan>
+                      ))}
                     </text>
                   )}
                 </g>
