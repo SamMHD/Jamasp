@@ -36,6 +36,29 @@ CREATE TABLE IF NOT EXISTS prices (
     value  REAL NOT NULL,
     PRIMARY KEY (symbol, ts)
 );
+-- OHLC bars, for the indicators and the ridge fit. `prices` is scalar and
+-- cannot hold a high or a low; ATR needs both, and ATR is both a signal and
+-- the divisor that normalises the fit's target.
+--
+-- ts is the bar's OPEN time. Stated here because a close-stamped bar shifts
+-- every indicator by one period, and that error stays invisible until
+-- someone compares a computed SMA against a chart.
+--
+-- '1h' is stored as well as the spec's '1d'/'4h'/'1w': the fit's target is a
+-- forward return at hourly resolution, so it needs an hourly close to
+-- measure from. Yahoo returns the hourly series in the same call we make for
+-- the 4h resample, so storing it is free. Yahoo caps interval=1h at
+-- range=730d, which is what bounds the hourly history — not this table.
+CREATE TABLE IF NOT EXISTS bars (
+    symbol    TEXT NOT NULL,
+    timeframe TEXT NOT NULL,   -- '1h' | '4h' | '1d' | '1w'
+    ts        TEXT NOT NULL,   -- bar OPEN time, UTC
+    open      REAL NOT NULL,
+    high      REAL NOT NULL,
+    low       REAL NOT NULL,
+    close     REAL NOT NULL,
+    PRIMARY KEY (symbol, timeframe, ts)
+);
 CREATE TABLE IF NOT EXISTS extract_cache (
     url        TEXT PRIMARY KEY,
     fetched_at TEXT NOT NULL,
