@@ -27,6 +27,16 @@ test("overview renders the market instrument panels", async ({ page }) => {
   page.on("pageerror", e => errors.push(String(e)));
   await page.goto("/");
 
+  // Fundamental map: the hero, above everything else on the page. The
+  // default (no ?w=) window is "today", which only the fixture's ~10-
+  // minutes-ago item (map1, rates_dollar, bullish) falls inside — the
+  // second window is checked in its own test below, where both fixture
+  // items and the hatch path are in play.
+  const map = page.getByRole("region", { name: "Market map" });
+  await expect(page.getByRole("heading", { name: "Market map" })).toBeVisible();
+  await expect(map.locator('svg[aria-label^="scored news treemap"]')).toBeVisible();
+  await expect(map.getByText(/1 scored stor/)).toBeVisible();
+
   // Fundamental: heading, the weight bar's text legend, the falsifier rows
   // (condition split from consequence at the analyst's arrow — the
   // condition ends its own element), the watchlist chip, and the stance-age
@@ -112,5 +122,29 @@ test("overview renders the market instrument panels", async ({ page }) => {
 
   // Ops survives, demoted.
   await expect(page.getByText("runs")).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test("fundamental map's week window covers both fixture items and hatches the bearish one", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", e => errors.push(String(e)));
+
+  // ?w=week widens the window enough to admit map2 (3 days old) alongside
+  // map1 (today) — two themes, and map2's direction=-2/conviction=0.8 is
+  // the treemap's bearish pole, which must render hatched (market-map.tsx's
+  // own tests pin why: colour alone is not compliant for two of the ramp's
+  // ten step-pairs).
+  await page.goto("/?w=week");
+  const map = page.getByRole("region", { name: "Market map" });
+  await expect(map.getByText(/2 scored stor/)).toBeVisible();
+  await expect(map.getByText("Rates & dollar")).toBeVisible();
+  await expect(map.getByText("Geopolitics")).toBeVisible();
+  await expect(map.locator('svg[aria-label^="scored news treemap"] rect[fill="url(#map-hatch)"]'))
+    .toHaveCount(1);
+
+  // The window link itself is a plain, server-rendered <a>, not a client
+  // toggle — confirms the page never needed "use client" for this.
+  await expect(page.getByRole("link", { name: "This week" })).toHaveAttribute("aria-current", "page");
+
   expect(errors).toEqual([]);
 });

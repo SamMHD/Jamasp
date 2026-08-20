@@ -1,8 +1,10 @@
+import Link from "next/link";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { PageHeader } from "@/components/page-header";
 import { DriverPanel } from "@/components/driver-panel";
 import { FundamentalPanel } from "@/components/fundamental-panel";
 import { HorizonStrip } from "@/components/horizon-strip";
+import { MarketMap } from "@/components/market-map";
 import { NewsFlow } from "@/components/news-flow";
 import { PredictionPanel } from "@/components/prediction-panel";
 import { TechnicalPanel } from "@/components/technical-panel";
@@ -16,15 +18,54 @@ import { deriveHorizon } from "@/lib/horizon";
 import { deriveNewsPulse } from "@/lib/newsflow";
 import { parseStance } from "@/lib/stance";
 import { deriveTechnicals, TECHNICAL_SYMBOLS } from "@/lib/technicals";
-import { fmtUtc } from "@/lib/format";
+import type { MapRange } from "@/lib/marketmap";
+import { cls, fmtUtc } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
 const iso = (d: Date) => d.toISOString().replace(/\.\d{3}Z$/, "Z");
 
-export default function Overview() {
+/**
+ * `?w=week` selects the trailing 7 days; anything else — including the
+ * param being absent, an array (repeated `?w=`), or a garbage value —
+ * is "today". A view param must never throw on unexpected input.
+ */
+export function resolveRange(param: string | string[] | undefined): MapRange {
+  const v = Array.isArray(param) ? param[0] : param;
+  return v === "week" ? "week" : "today";
+}
+
+const DUBAI_OFFSET_MS = 4 * 3600_000; // UTC+4, no DST — same as jamasp/flashtext.py
+
+/**
+ * Window start for the map: Dubai-midnight for "today" (computed the same
+ * way jamasp/flashtext.py and db.runsTodayDubai do — shift into Dubai local
+ * time, truncate to the day, shift back), trailing 7 days for "week".
+ */
+export function windowSinceIso(range: MapRange, now: Date): string {
+  if (range === "week") return iso(new Date(now.getTime() - 7 * 86400_000));
+  const dubaiNow = new Date(now.getTime() + DUBAI_OFFSET_MS);
+  const dubaiMidnightUtcMs = Date.UTC(
+    dubaiNow.getUTCFullYear(), dubaiNow.getUTCMonth(), dubaiNow.getUTCDate(),
+  ) - DUBAI_OFFSET_MS;
+  return iso(new Date(dubaiMidnightUtcMs));
+}
+
+export default async function Overview({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const now = new Date();
   const dayAgo = iso(new Date(now.getTime() - 86400_000));
+  const weekAgo = windowSinceIso("week", now);
+
+  // --- fundamental map ---
+  const sp = await searchParams;
+  const range = resolveRange(sp.w);
+  const mapSince = range === "week" ? weekAgo : windowSinceIso("today", now);
+  const mapItems = db.getScoredItems(mapSince);
+  const mapUnscored = db.unscoredCountSince(mapSince);
 
   // --- ops health (unchanged derivations, demoted presentation) ---
   const lastIngest = db.getMeta("last_ingest_at");
@@ -97,7 +138,6 @@ export default function Overview() {
     db.getPriceSeries("GC_NET_SPEC", iso(new Date(now.getTime() - 35 * 86400_000))));
 
   // --- drivers (cross-asset) ---
-  const weekAgo = iso(new Date(now.getTime() - 7 * 86400_000));
   const driverQuotes = db.latestPrices(DRIVER_SPECS.map(s => s.symbol));
   const drivers = DRIVER_SPECS.map(spec => {
     const quote = driverQuotes[spec.symbol] ?? null;
@@ -112,6 +152,28 @@ export default function Overview() {
     <div>
       <AutoRefresh />
       <PageHeader title="Overview" subtitle={`as of ${fmtUtc(iso(now))}`} />
+
+      <section aria-label="Market map" className="mb-4">
+        <div className="mb-2 flex items-center justify-between">
+          <h2 className="text-sm font-medium text-muted-foreground">Market map</h2>
+          <nav aria-label="Map window" className="flex gap-1 text-sm">
+            <Link href="/?w=today" aria-current={range === "today" ? "page" : undefined}
+              className={cls("rounded px-2 py-0.5",
+                range === "today" ? "bg-foreground text-background"
+                  : "text-muted-foreground hover:text-foreground")}>
+              Today
+            </Link>
+            <Link href="/?w=week" aria-current={range === "week" ? "page" : undefined}
+              className={cls("rounded px-2 py-0.5",
+                range === "week" ? "bg-foreground text-background"
+                  : "text-muted-foreground hover:text-foreground")}>
+              This week
+            </Link>
+          </nav>
+        </div>
+        <MarketMap items={mapItems} width={1200} height={400} range={range}
+          coverage={{ scored: mapItems.length, unscored: mapUnscored }} />
+      </section>
 
       <StatusStrip lastIngest={lastIngest} runsToday={runsToday} cap={cap}
         sourceErrors={sourceErrors.length} lastRuns={db.lastRunPerType()} now={now} />
