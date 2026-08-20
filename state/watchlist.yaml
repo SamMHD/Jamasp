@@ -20,7 +20,11 @@ watchlist:
       Wed 19 Aug 18:00Z (repaired feed; wakeup #30→#32); Goldman frames
       the debate inflation-dominant, labour "not that interesting" — a
       ~35%-priced market is exposed if July's minutes keep June's
-      "low bar to hiking".
+      "low bar to hiking". 20 Aug: minutes wash — actionforex "more hawks
+      than the 9–3 suggested, but July already stale"; no odds repricing
+      overnight (540428e8 definitive Thu 20:00Z). NEW risk channel: the
+      Bessent buyback eases financial conditions — DB floats a Fed hike;
+      hawk-ammunition watch into Jackson Hole (Warsh Fri).
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -62,6 +66,12 @@ watchlist:
       (0deccd97 safe, USDJPY 159.4). Kospi −5% sidecar halt on Wall St
       spillover — if equity stress spreads while TLT keeps failing as
       refuge, gold is the residual haven (flow channel, GVZ 24 unpriced).
+      20 Aug: LPR HELD (31c34147 HIT) but FOURTH straight weak fix at the
+      WIDEST gap (6.7808 vs 6.7196 est) — debasement without a cut;
+      breadth confirmed: BTC ~$70k +8%, ETH +20%, US debt $40tn headline;
+      senators question Warsh's calendar gaps (independence thread) into
+      his Jackson Hole slot; CNBC flags China bonds defying the global
+      yield surge — a competing diversification sink.
     since: 2026-07-31
 
   - theme: middle-east-risk-premium
@@ -219,6 +229,29 @@ watchlist:
       trajectory into Thu). Structural-negative family extends: d9e50362
       (no co-confirmed US-Iran text by 31 Aug), f73172f8 (Al-Mokha still
       closed at 31 Aug).
+      19-20 Aug adds: AXIOS DISCLOSURE — US has run a stealth
+      southern-channel corridor for WEEKS: nightly convoys of 15-20
+      tankers, ~10 mb/d (~half pre-war; 15-20M bbl some nights), Fort
+      Bragg task force scheduling, Iran radar/surveillance degraded by a
+      prior 2-week CENTCOM campaign (fires drones blind), USAF
+      intercepting (8 drones + 2 cruise missiles in one incident) — the
+      AIS-based traffic counts massively undercounted actual flow; the
+      oil premium is TAIL-priced, not disruption-priced; corridor
+      disruption (convoy suspension / escort loss) is a new named
+      trigger. Iran enforcement formalizing: the UAE-linked seizure is
+      NAMED — Amara, 47,931 dwt, Liberia flag, ballast for Jebel Ali,
+      held near Larak Island; Iran explicitly cites unpaid "service
+      fees" (first time this cycle); Windward: first confirmed seizure
+      since 22 Jun (d2ea5d99 strict falsifier unmet — no operator/flag/
+      UAE-official confirmation). IRGC turned back a Chinese tanker with
+      a WARNING (vs attacking UAE hulls); 3 HK-flagged VLCCs anchored
+      rather than transit (Sea V, Hestia, Erecter); Kpler transits −17%
+      d/d 18 Aug; CENTCOM 65 redirected. Trump: "draconian sanctions
+      ready", "crushing new economic operation", secondary threats on
+      "any country" helping Iran, blockade "100% successful", no talks
+      (to Axios) — economic-first confirmed (cf62fcf6). Mehr claims 56
+      Saudi ships targeted/blocked in Bab al-Mandab (Houthi tally,
+      unverified — a64b23c1 scoring is #31's).
     since: 2026-07-31
 
   - theme: energy-pce-passthrough
@@ -238,7 +271,10 @@ watchlist:
       hit). EIA US build +17.4M vs IEA global draw -2.2 mb/d Jul =
       US-local surplus, global deficit. PPI 13 Aug is the pipeline read
       (new prediction: headline >= +0.3%); then Aug ISM ~1 Sep, Aug CPI
-      11 Sep carries the second oil shock.
+      11 Sep carries the second oil shock. 20 Aug: Axios corridor read
+      caps the passthrough tail — ~10 mb/d actually moving (~half
+      pre-war) vs the AIS undercount; Brent ~$91-92 four-week high, WTI
+      ~84.4; 6f8b0433 records no Brent settle >=$95 thru 31 Aug (0.6).
     since: 2026-07-31
 
   - theme: india-gold-formalisation
@@ -265,7 +301,28 @@ watchlist:
       the bid now extends up the supply chain, not just bar hoarding.
       Adjacent: net spec +9.5% w/w and UBS $5,000 target (near-term risk
       flagged 9 Aug) — the crowding is in futures, not perps, for now.
+      20 Aug: the leveraged debasement money is MOVING — BTC ~$70k +8%,
+      ETH +20% on the buyback tape while gold's move stays
+      futures/spot-led (net spec stale @11 Aug). Watch rotation: perps
+      money entering gold would be the amplification thesis finally
+      firing.
     since: 2026-07-31
+
+  - theme: us-fiscal-dominance
+    why: >
+      Treasury's expanded long-dated buybacks (19 Aug) broke the bond rout
+      and flipped gold into a trend regime — de facto yield-curve control,
+      read by the market as debasement (forexlive: gold's "oversized
+      reaction"; BTC/ETH confirm breadth). US debt passed $40tn the same
+      week. The channel cuts both ways: DB counts four dollar-negative
+      reasons and floats a Fed hike — buybacks ease financial conditions
+      and hand hawks ammunition; MarketWatch names the September
+      corporate-issuance wall as where the Treasury calm breaks (20y
+      already tailed at 5.204%). Predictions: b0c2bfeb (no DXY close
+      >=100 thru 28 Aug, 0.6), 3f03ae58 (GC holds 4510 thru Fri, 0.6).
+      Watch: buyback schedule/results, long-end auctions, 30y (5.32% =
+      mid-2007 high), TLT.
+    since: 2026-08-20
 # REMOVED 4 Aug: gold-basis-lbma-comex — resolved. 3 Aug PM fix pair printed
 # $56 (fix 4028.15 vs GC 4084.3, ±5 min), inside the $50-90 Dec-26 fair-carry
 # band; 31 Jul $75 was contract-roll carry, not a London dislocation
