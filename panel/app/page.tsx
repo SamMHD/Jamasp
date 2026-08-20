@@ -171,7 +171,11 @@ export default async function Overview({
             </Link>
           </nav>
         </div>
-        <MarketMap items={mapItems} width={1200} height={400} range={range}
+        {/* 2:1 rather than 3:1. The SVG preserves its aspect ratio — stretching
+            would distort tile areas, and area is the encoding — so the viewBox
+            ratio decides how much of a screen fullscreen actually fills. 2:1
+            also buys tiles the height that wrapped headlines need. */}
+        <MarketMap items={mapItems} width={1200} height={600} range={range}
           coverage={{ scored: mapItems.length, unscored: mapUnscored }} />
       </section>
 
