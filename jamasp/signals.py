@@ -148,7 +148,18 @@ def bar_states(name: str, bars: list[Bar], timeframe: str) -> list[tuple[str, fl
     """
     rows = ind.compute_all(bars)
     atrs = [r["atr14"] for r in rows]
-    atr_avg = ind.sma([a if a is not None else 0.0 for a in atrs], AVG_WINDOW)
+    # ATR's own warm-up leaves a None prefix. Padding those with 0.0 before
+    # averaging would treat "not yet measured" as "measured at zero
+    # volatility" and drag the rolling average down for the next 49 bars,
+    # fabricating a volatility-expansion read where none occurred. Average
+    # over the real values only and re-offset, exactly as indicators.macd
+    # and indicators.stochastic do for their own post-warm-up derivatives.
+    live_atrs = [a for a in atrs if a is not None]
+    avg_live = ind.sma(live_atrs, AVG_WINDOW)
+    atr_avg: list[float | None] = [None] * len(atrs)
+    offset = len(atrs) - len(live_atrs)
+    for i, v in enumerate(avg_live):
+        atr_avg[offset + i] = v
     out: list[tuple[str, float]] = []
     for i, ctx in enumerate(rows):
         state = classify(name, {**ctx, "atr14_avg": atr_avg[i]})

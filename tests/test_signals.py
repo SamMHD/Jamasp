@@ -4,7 +4,7 @@ import pytest
 
 from jamasp import signals
 from jamasp.config import load_weights, signal_specs
-from jamasp.ingest.bars import TS_FMT, Bar
+from jamasp.ingest.bars import TS_FMT, Bar, close_ts
 
 
 def test_clamp_bounds_to_the_unit_interval():
@@ -180,8 +180,49 @@ def test_bar_states_of_a_rising_series_is_bearish_for_rsi():
     assert out[-1][1] == pytest.approx(-1.0)
 
 
+def _flat_tr(n):
+    """`n` bars with a constant true range of 2.0 and a flat close.
+
+    high=close+1, low=close-1, close never moves: high-low=2.0 every bar,
+    and since the close is unchanged the high/low-vs-prior-close legs of the
+    true range (1.0 each) never exceed it, so TR is exactly 2.0 throughout
+    -- including bar 0, whose TR is just high-low with no prior close to
+    compare against.
+    """
+    return [Bar(_day(i), 100.0, 101.0, 99.0, 100.0) for i in range(n)]
+
+
+def test_bar_states_atr_avg_ignores_the_pre_warm_up_none_prefix():
+    # ATR's own 14-bar warm-up leaves atr14 as None for bars 0..12; it is
+    # real (and, on this constant-TR series, exactly 2.0) from bar 13 on.
+    # atr14_avg is a 50-bar rolling average OF atr14 -- padding those 13
+    # leading Nones with 0.0 before averaging would treat "not yet
+    # measured" as "measured at zero volatility" and drag the average down
+    # for the next 49 bars, well past where atr14 itself is genuinely real.
+    #
+    # Averaging over the real atr14 values only (offset re-mapped, as
+    # indicators.macd/stochastic already do for their own derivatives)
+    # means atr14_avg has no real reading until 50 real atr14 values exist:
+    # offset 13 + a 50-wide window = bar index 62. Bar 49 sits inside that
+    # gap -- real enough for atr14 itself, too early for its honest average
+    # -- and is exactly where the zero-padded version fabricates a ~+0.70
+    # "volatility expansion" read on a series whose volatility never moved.
+    bars = _flat_tr(70)
+    out = dict(signals.bar_states("atr14", bars, "1d"))
+
+    ts_49 = close_ts(bars[49].ts, "1d")
+    assert ts_49 not in out, (
+        "atr14_avg is not yet a real 50-bar average of real atr14 values at "
+        f"bar 49; got a state of {out.get(ts_49)} instead of no reading"
+    )
+
+    # Once the average window is genuinely full of real atr14 values (bar
+    # 62 on), a constant-TR series must read as no expansion at all.
+    ts_65 = close_ts(bars[65].ts, "1d")
+    assert out[ts_65] == pytest.approx(0.0)
+
+
 from jamasp import db
-from jamasp.config import load_weights
 from jamasp.ingest.bars import store_bars
 
 
