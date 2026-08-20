@@ -63,6 +63,12 @@ beforeAll(async () => {
       ${score("leakDateGood", 3, 1, 0.4, "other")},
       ${score("leakDateBogus", 5, 2, 0.9, "other")},
       ${score("unscoredLeakOut", 5, 2, 0.9, "other")};
+    CREATE TABLE signal_states (key TEXT NOT NULL, ts TEXT NOT NULL,
+      value REAL NOT NULL, PRIMARY KEY (key, ts));
+    INSERT INTO signal_states VALUES
+      ('rsi14@1d', '2026-08-19T00:00:00Z', -0.5),
+      ('rsi14@1d', '2026-08-20T00:00:00Z',  0.5),
+      ('sma50@1d', '2026-08-20T00:00:00Z', -1.0);
   `);
   d.close();
   process.env.JAMASP_ROOT = root;
@@ -216,5 +222,16 @@ describe("unscoredCountSince", () => {
     // floor getScoredItems's windowed CTE uses, so "has this URL been
     // scored" means "scored within this window", not "scored ever".
     expect(db.unscoredCountSince(ULEAK_SINCE)).toBe(3);
+  });
+});
+
+describe("latestSignalStates", () => {
+  it("returns the newest row per key", () => {
+    const rows = db.latestSignalStates();
+    expect(rows).toHaveLength(2);
+    const byKey = Object.fromEntries(rows.map(r => [r.key, r.value]));
+    // rsi14@1d has two rows a day apart; the older -0.5 must not win.
+    expect(byKey["rsi14@1d"]).toBe(0.5);
+    expect(byKey["sma50@1d"]).toBe(-1.0);
   });
 });

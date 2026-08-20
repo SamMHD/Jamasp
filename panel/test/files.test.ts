@@ -1,4 +1,6 @@
-import { beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
 
 let files: typeof import("../lib/files");
@@ -7,6 +9,36 @@ beforeAll(async () => {
   process.env.JAMASP_ROOT = path.resolve(__dirname, "fixtures/root");
   files = await import("../lib/files");
 });
+
+/**
+ * Run `fn` against a throwaway JAMASP_ROOT containing exactly `contents`.
+ *
+ * lib/paths.ts resolves JAMASP_ROOT at module load, so the module has to be
+ * re-imported after the env var changes — hence resetModules. A separate root
+ * matters here specifically: this file's shared fixture root also receives a
+ * state/weights.json from `npm run fixture`, which would make the
+ * file-is-absent assertion below depend on whether e2e had been built.
+ */
+async function withRoot(
+  contents: Record<string, string>,
+  fn: (m: typeof import("../lib/files")) => void,
+) {
+  const root = mkdtempSync(path.join(tmpdir(), "jamasp-weights-"));
+  mkdirSync(path.join(root, "state"), { recursive: true });
+  for (const [rel, body] of Object.entries(contents)) {
+    writeFileSync(path.join(root, rel), body);
+  }
+  const prev = process.env.JAMASP_ROOT;
+  process.env.JAMASP_ROOT = root;
+  vi.resetModules();
+  try {
+    fn(await import("../lib/files"));
+  } finally {
+    process.env.JAMASP_ROOT = prev;
+    vi.resetModules();
+    rmSync(root, { recursive: true, force: true });
+  }
+}
 
 describe("files layer", () => {
   it("reads stance and playbook, null when missing", () => {
@@ -37,5 +69,40 @@ describe("files layer", () => {
     ]);
     expect(files.readReport("2026/07/2026-07-31-brief")).toContain("Morning Brief");
     expect(files.readReport("../../../etc/passwd")).toBeNull();
+  });
+});
+
+describe("readFittedWeights", () => {
+  const doc = JSON.stringify({
+    fitted_at: "2026-08-20T04:17:00Z",
+    fits: { technical: { n: 16880, horizon_hours: 24, flags: [],
+      coefficients: { "rsi14@1d": { beta: 0.03, se: 0.008, multiplier: 1.4,
+                                    observations: 900, fitted: true } } } },
+  });
+
+  it("parses state/weights.json into camelCase", async () => {
+    await withRoot({ "state/weights.json": doc }, m => {
+      const w = m.readFittedWeights()!;
+      expect(w.fittedAt).toBe("2026-08-20T04:17:00Z");
+      expect(w.fits.technical.n).toBe(16880);
+      expect(w.fits.technical.horizonHours).toBe(24);
+      expect(w.fits.technical.coefficients["rsi14@1d"].multiplier).toBe(1.4);
+    });
+  });
+
+  it("returns null when the file does not exist", async () => {
+    // It will not, until the first `jamasp weights fit` runs. Every tile
+    // renders neutral and dashed in that window rather than the page failing.
+    await withRoot({}, m => expect(m.readFittedWeights()).toBeNull());
+  });
+
+  it("returns null on malformed JSON rather than throwing", async () => {
+    // A fit interrupted mid-write would surface as a JSON parse error on a
+    // live page. write_results renames into place for that reason; this is
+    // the belt to that braces.
+    await withRoot({ "state/weights.json": "{ truncated" }, m => {
+      expect(() => m.readFittedWeights()).not.toThrow();
+      expect(m.readFittedWeights()).toBeNull();
+    });
   });
 });

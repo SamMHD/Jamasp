@@ -1,6 +1,9 @@
 import Database from "better-sqlite3";
 import { DB_PATH } from "./paths";
 import type { ScoredItem } from "./marketmap";
+import type { SignalState } from "@/lib/technicalmap";
+
+export type { SignalState };
 
 let _db: Database.Database | null = null;
 
@@ -405,5 +408,26 @@ export function unscoredCountSince(sinceIso: string): number {
                   AND i2.published_at >= ?
                   AND i2.published_at >= '2000-01-01T00:00:00Z')
     `).get(sinceIso, sinceIso) as { c: number }).c;
+  });
+}
+
+/**
+ * The newest state per signal column.
+ *
+ * Same missing-table guard as getScoredItems: a host that has not run
+ * `jamasp signals refresh` yet has no signal_states, and the overview page
+ * must keep serving through that window rather than 500ing on one panel.
+ */
+export function latestSignalStates(): SignalState[] {
+  return q(db => {
+    if (!hasTable(db, "signal_states")) return [];
+    return db.prepare(`
+      SELECT key, ts, value FROM (
+        SELECT key, ts, value,
+               ROW_NUMBER() OVER (PARTITION BY key ORDER BY ts DESC) AS rn
+          FROM signal_states)
+       WHERE rn = 1
+       ORDER BY key
+    `).all() as SignalState[];
   });
 }

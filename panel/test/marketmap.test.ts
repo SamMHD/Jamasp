@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { layoutMap, squarify, tierWeight, tone, type ScoredItem } from "../lib/marketmap";
+import { layoutGroups, layoutMap, squarify, tierWeight, tone,
+         toneFromIntensity, type ScoredItem } from "../lib/marketmap";
 
 describe("tierWeight", () => {
   it("maps the configured tier scale", () => {
@@ -166,5 +167,57 @@ describe("layoutMap", () => {
 
   it("returns an empty layout for no items", () => {
     expect(layoutMap([], RECT, 14)).toEqual([]);
+  });
+});
+
+describe("toneFromIntensity", () => {
+  it("bands a signed intensity onto the five-step ramp", () => {
+    expect(toneFromIntensity(0)).toBe("neutral");
+    expect(toneFromIntensity(0.1)).toBe("neutral");
+    expect(toneFromIntensity(0.3)).toBe("bull-mid");
+    expect(toneFromIntensity(0.9)).toBe("bull");
+    expect(toneFromIntensity(-0.3)).toBe("bear-mid");
+    expect(toneFromIntensity(-0.9)).toBe("bear");
+  });
+
+  it("agrees with tone() on the same intensity", () => {
+    // tone() computes s = (direction/2) * conviction and bands it, so the two
+    // must never band the same s differently — the thresholds live in one
+    // place precisely so a future edit cannot desynchronise the two maps.
+    expect(tone(2, 0.9)).toBe(toneFromIntensity(0.9));
+    expect(tone(-1, 0.6)).toBe(toneFromIntensity(-0.3));
+  });
+});
+
+describe("layoutGroups", () => {
+  const rect = { x: 0, y: 0, w: 400, h: 300 };
+
+  it("lays out groups then their children below a header strip", () => {
+    const boxes = layoutGroups([
+      { group: "a", value: 3, node: "a1" },
+      { group: "a", value: 1, node: "a2" },
+      { group: "b", value: 2, node: "b1" },
+    ], rect, 20);
+    expect(boxes.map(b => b.group).sort()).toEqual(["a", "b"]);
+    const a = boxes.find(b => b.group === "a")!;
+    expect(a.total).toBe(4);
+    expect(a.items).toHaveLength(2);
+    for (const cell of a.items) expect(cell.y).toBeGreaterThanOrEqual(a.y + 20);
+  });
+
+  it("omits a group whose children all have zero value", () => {
+    const boxes = layoutGroups([{ group: "a", value: 0, node: "a1" }], rect, 20);
+    expect(boxes).toEqual([]);
+  });
+
+  it("keeps layoutMap's existing shape", () => {
+    // layoutMap is the adapter; its consumers read .theme and must not churn.
+    const items = [
+      { itemId: "1", tier: 5, direction: 2, conviction: 0.8, theme: "rates_dollar",
+        headline: "h", source: "s", url: "u", publishedAt: "2026-08-20T00:00:00Z" },
+    ];
+    const boxes = layoutMap(items, rect, 20);
+    expect(boxes[0].theme).toBe("rates_dollar");
+    expect(boxes[0].items[0].node.itemId).toBe("1");
   });
 });
