@@ -1,6 +1,7 @@
 import json
 import random
 
+import numpy as np
 import pytest
 
 from jamasp import db, fit
@@ -71,6 +72,51 @@ def test_ridge_standard_errors_shrink_with_more_rows():
     _, se_small = fit.ridge(Xs, ys, alpha=1.0)
     _, se_large = fit.ridge(Xl, yl, alpha=1.0)
     assert se_large[0] < se_small[0]
+
+
+def test_ridge_standard_errors_use_the_ridge_covariance_not_the_ols_form():
+    # The two SE tests above use alpha=1.0, same as every other ridge test in
+    # this file -- and at alpha=1.0 the ridge covariance
+    # sigma^2 * A^-1 (Z'Z) A^-1 and the plain OLS form sigma^2 * A^-1 (where
+    # A = Z'Z + alpha*I) are numerically indistinguishable for this fixture
+    # (ratio ~0.999), so neither test can tell which formula shipped. The two
+    # forms only separate once alpha is large relative to n: with
+    # standardised columns Z'Z ~= n*I, so se_ridge/se_ols ~= sqrt(n/(n+alpha)).
+    # n=400 and alpha=400 predicts a ratio of sqrt(0.5) ~= 0.707 -- a
+    # decisive ~30% gap, not noise.
+    n = 400
+    alpha = 400.0
+    X, y = _synthetic(n, [3.0, 1.0, 0.0], noise=0.5)
+    betas, ses = fit.ridge(X, y, alpha)
+
+    # Reproduce the same standardised regression independently -- same
+    # centering, same solve, same residuals and sigma^2 -- so the only thing
+    # that can differ between our replica and the shipped SEs is which
+    # matrix sandwiches sigma^2.
+    A = np.asarray(X, dtype=float)
+    b = np.asarray(y, dtype=float)
+    sd = A.std(axis=0)
+    Z = (A - A.mean(axis=0)) / sd
+    yc = b - b.mean()
+    gram = Z.T @ Z
+    reg = gram + alpha * np.eye(Z.shape[1])
+    beta_live = np.linalg.solve(reg, Z.T @ yc)
+    resid = yc - Z @ beta_live
+    sigma2 = float(resid @ resid) / (n - Z.shape[1])
+    inv = np.linalg.inv(reg)
+
+    ridge_se = np.sqrt(np.diag(sigma2 * inv @ gram @ inv))
+    ols_se = np.sqrt(np.diag(sigma2 * inv))
+
+    # The shipped SEs track the ridge form...
+    assert ses[:3] == pytest.approx(ridge_se.tolist(), rel=1e-6)
+    # ...and sit materially below what the OLS form would give for the same
+    # fit -- exactly the property that would be lost if `cov = sigma2 * inv`
+    # were substituted for `cov = sigma2 * inv @ gram @ inv`.
+    predicted_ratio = (n / (n + alpha)) ** 0.5
+    observed_ratio = np.array(ses[:3]) / ols_se
+    assert observed_ratio == pytest.approx(predicted_ratio, rel=0.1)
+    assert all(se < 0.85 * o for se, o in zip(ses[:3], ols_se))
 
 
 # ---- multipliers ------------------------------------------------------------
