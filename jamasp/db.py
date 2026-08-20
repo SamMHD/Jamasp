@@ -164,6 +164,21 @@ CREATE TABLE IF NOT EXISTS signal_states (
     PRIMARY KEY (key, ts)
 );
 CREATE INDEX IF NOT EXISTS idx_signal_states_key_ts ON signal_states(key, ts DESC);
+-- Every fitted coefficient from every run, so a multiplier's drift over time
+-- is inspectable. state/weights.json holds only the current fit; this is the
+-- trajectory, and it is the difference between "rates_dollar is 1.8" and
+-- "rates_dollar has climbed from 1.1 to 1.8 over six weeks".
+CREATE TABLE IF NOT EXISTS weight_fits (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    fitted_at  TEXT NOT NULL,
+    fit        TEXT NOT NULL,   -- 'technical' | 'theme'
+    key        TEXT NOT NULL,
+    beta       REAL NOT NULL,
+    se         REAL NOT NULL,
+    multiplier REAL NOT NULL,
+    n          INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_weight_fits_key ON weight_fits(fit, key, fitted_at);
 """
 
 # Columns added to tables that already exist in deployed databases. The schema

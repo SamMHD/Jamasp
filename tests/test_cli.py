@@ -602,3 +602,15 @@ def test_signals_refresh_reports_a_count(tmp_path):
         main, ["signals", "refresh", "--db", str(dbp), "--config-dir", str(cfg)])
     assert res.exit_code == 0, res.output
     assert "signal states" in res.output
+
+
+def test_weights_fit_reports_when_there_is_not_enough_history(tmp_path):
+    cfg = _write_configs(tmp_path, "sources: []\n")
+    res = CliRunner().invoke(main, [
+        "weights", "fit", "--db", str(tmp_path / "j.db"),
+        "--config-dir", str(cfg), "--out", str(tmp_path / "w.json")])
+    assert res.exit_code == 0, res.output
+    assert "not enough rows" in res.output
+    # No file, rather than an empty one: a weights.json full of nothing is
+    # indistinguishable to the panel from a fit that produced neutral weights.
+    assert not (tmp_path / "w.json").exists()

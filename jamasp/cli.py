@@ -16,6 +16,7 @@ from jamasp import db as db_mod
 from jamasp import digest as digest_mod
 from jamasp import dispatch as dispatch_mod
 from jamasp import extract as extract_mod
+from jamasp import fit as fit_mod
 from jamasp import flash as flash_mod
 from jamasp import inbox as inbox_mod
 from jamasp import notify as notify_mod
@@ -350,6 +351,32 @@ def signals_refresh(symbol, db_path, config_dir):
     weights = load_weights(Path(config_dir) / "weights.yaml")
     n = signals_mod.refresh(conn, weights, symbol)
     click.echo(f"{n} signal states written")
+
+
+@main.group("weights")
+def weights_group():
+    """Learned map multipliers: the daily ridge fit."""
+
+
+@weights_group.command("fit")
+@click.option("--symbol", default="GC", show_default=True)
+@click.option("--out", default="state/weights.json", show_default=True)
+@db_opt
+@cfg_opt
+def weights_fit(symbol, out, db_path, config_dir):
+    """Refit every multiplier from history. Deterministic; no agent run."""
+    conn, _, _ = _common(db_path, config_dir)
+    weights = load_weights(Path(config_dir) / "weights.yaml")
+    results = fit_mod.fit_all(conn, weights, symbol)
+    if not results:
+        click.echo("weights fit: not enough rows for any fit yet")
+        return
+    fit_mod.write_results(conn, Path(out), results, db_mod.utcnow())
+    for r in results:
+        unfitted = sum(1 for c in r.coefficients if not c.fitted)
+        click.echo(
+            f"{r.name}: n={r.n} {len(r.coefficients)} columns"
+            f" ({unfitted} unfitted) flags={len(r.flags)}")
 
 
 @main.command()

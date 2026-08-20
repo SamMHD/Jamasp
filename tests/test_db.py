@@ -175,3 +175,9 @@ def test_signal_states_table_exists(tmp_path):
     conn = db.connect(tmp_path / "j.db")
     cols = {r[1] for r in conn.execute("PRAGMA table_info(signal_states)")}
     assert cols == {"key", "ts", "value"}
+
+
+def test_weight_fits_table_exists(tmp_path):
+    conn = db.connect(tmp_path / "j.db")
+    cols = {r[1] for r in conn.execute("PRAGMA table_info(weight_fits)")}
+    assert cols == {"id", "fitted_at", "fit", "key", "beta", "se", "multiplier", "n"}
