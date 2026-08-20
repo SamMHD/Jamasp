@@ -41,7 +41,11 @@ beforeAll(async () => {
       ${item("tieB", "https://x.test/tie", "2026-08-10T10:00:00Z", "Tie story B")},
       ${item("bogus", "https://x.test/bogus", "1786-08-01T00:00:00Z", "Epoch artefact")},
       ${item("unscoredIn", "https://x.test/unscored-in", "2026-08-19T21:30:00Z", "Filed but not yet scored")},
-      ${item("unscoredOut", "https://x.test/unscored-out", "2026-08-18T23:00:00Z", "Unscored, before the window")};
+      ${item("unscoredOut", "https://x.test/unscored-out", "2026-08-18T23:00:00Z", "Unscored, before the window")},
+      ${item("leakWinIn", "https://x.test/leak-window", "2026-07-15T12:00:00Z", "In window, lower tier")},
+      ${item("leakWinOut", "https://x.test/leak-window", "2026-07-10T09:00:00Z", "Outside window, higher tier")},
+      ${item("leakDateGood", "https://x.test/leak-date", "2026-07-15T13:00:00Z", "In window, legitimate date")},
+      ${item("leakDateBogus", "https://x.test/leak-date", "1786-08-01T00:00:00Z", "Pre-2000 epoch artefact, higher tier")};
     INSERT INTO item_scores VALUES
       ${score("w1", 4, 2, 0.8, "rates_dollar")},
       ${score("w2", 3, -1, 0.6, "rates_dollar")},
@@ -49,9 +53,13 @@ beforeAll(async () => {
       ${score("dupA", 2, 1, 0.3, "other")},
       ${score("dupB", 4, 1, 0.5, "other")},
       ${score("dupC", 3, 0, 0.2, "other")},
-      ${score("tieA", 5, 1, 0.5, "supply_demand")},
-      ${score("tieB", 5, -1, 0.5, "supply_demand")},
-      ${score("bogus", 5, 2, 0.9, "geopolitics")};
+      ${score("tieA", 5, 1, 0.5, "supply_mining")},
+      ${score("tieB", 5, -1, 0.5, "supply_mining")},
+      ${score("bogus", 5, 2, 0.9, "geopolitics")},
+      ${score("leakWinIn", 3, 1, 0.4, "other")},
+      ${score("leakWinOut", 5, 2, 0.9, "other")},
+      ${score("leakDateGood", 3, 1, 0.4, "other")},
+      ${score("leakDateBogus", 5, 2, 0.9, "other")};
   `);
   d.close();
   process.env.JAMASP_ROOT = root;
@@ -63,6 +71,11 @@ const SINCE = "2026-08-19T00:00:00Z";
 // before the w1/w2/dup group (2026-08-19), so it never perturbs the exact
 // ordering assertion above, which is pinned to SINCE.
 const TIE_SINCE = "2026-08-10T00:00:00Z";
+// Isolated window for the leak fixtures: starts after leakWinOut/leakDateBogus
+// (2026-07-10) and before every other group above, so it only ever admits
+// leakWinIn/leakDateGood — the higher-tier siblings that must NOT be allowed
+// to win the collapse from outside the window (or from behind the date floor).
+const LEAK_SINCE = "2026-07-14T00:00:00Z";
 
 describe("getScoredItems", () => {
   it("returns items inside the window, newest first", () => {
@@ -86,17 +99,46 @@ describe("getScoredItems", () => {
     expect(dup[0].tier).toBe(4);
   });
 
-  it("collapses two ids sharing one URL at the SAME max tier into a single row", () => {
-    // dupA/B/C (above) carry distinct tiers, so the MAX(tier) subquery alone
-    // already narrows that URL to one row -- GROUP BY i.url does no work in
-    // that case and could be deleted without failing a single test. tieA and
-    // tieB are a genuine tie (both tier 5), so MAX(tier) admits both rows and
-    // only GROUP BY collapses them to one. See the discrimination check in
-    // the fix report: deleting GROUP BY i.url makes this assertion fail.
+  it("collapses two ids sharing one URL at the SAME max tier into a single row, by the explicit tie-break rule", () => {
+    // dupA/B/C (above) carry distinct tiers, so tier alone already narrows
+    // that URL to one row. tieA and tieB are a genuine tie (both tier 5), so
+    // the collapse falls through to the next ORDER BY key: publishedAt DESC.
+    // tieB (10:00) is newer than tieA (09:00), so tieB must win — not
+    // "whichever row SQLite happens to visit first", which is what a bare
+    // GROUP BY or an unordered window function would leave undefined. See
+    // the discrimination check in the fix report: reverting to the old
+    // correlated-subquery form makes this assertion fail.
     const rows = db.getScoredItems(TIE_SINCE);
     const tie = rows.filter(r => r.url === "https://x.test/tie");
     expect(tie).toHaveLength(1);
+    expect(tie[0].itemId).toBe("tieB");
     expect(tie[0].tier).toBe(5);
+  });
+
+  it("does not let a higher tier OUTSIDE the window win the collapse", () => {
+    // leakWinOut carries tier 5 but sits a week before LEAK_SINCE. The old
+    // correlated-subquery form picked its MAX(tier) across the whole table,
+    // unscoped by the window: leakWinIn (tier 3, in window) would then fail
+    // `s.tier = 5` and leakWinOut would fail the outer window filter, so the
+    // story vanished entirely. The collapse must rank only over rows that
+    // already passed the window filter.
+    const rows = db.getScoredItems(LEAK_SINCE);
+    const leak = rows.filter(r => r.url === "https://x.test/leak-window");
+    expect(leak).toHaveLength(1);
+    expect(leak[0].itemId).toBe("leakWinIn");
+    expect(leak[0].tier).toBe(3);
+  });
+
+  it("does not let a higher tier behind the pre-2000 date floor win the collapse", () => {
+    // Same failure mode as above, triggered by the date-sanity guard instead
+    // of the window: leakDateBogus (tier 5) carries a corrupted 1786 date, so
+    // it fails the date floor. leakDateGood (tier 3) is the only legitimate
+    // in-window row and must survive the collapse.
+    const rows = db.getScoredItems(LEAK_SINCE);
+    const leak = rows.filter(r => r.url === "https://x.test/leak-date");
+    expect(leak).toHaveLength(1);
+    expect(leak[0].itemId).toBe("leakDateGood");
+    expect(leak[0].tier).toBe(3);
   });
 
   it("rejects an implausible published_at even when the window would admit it", () => {

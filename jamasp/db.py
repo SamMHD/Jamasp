@@ -19,6 +19,10 @@ CREATE TABLE IF NOT EXISTS items (
     read_at      TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_items_read ON items(read_at);
+-- Backs the panel's getScoredItems (panel/lib/db.ts): it collapses rows that
+-- share a URL with a window function partitioned and sorted by url, and this
+-- index lets SQLite satisfy that PARTITION BY/ORDER BY with a sorted scan
+-- instead of an in-memory sort over every candidate row.
 CREATE INDEX IF NOT EXISTS idx_items_url ON items(url);
 CREATE TABLE IF NOT EXISTS prices (
     symbol TEXT NOT NULL,

@@ -307,12 +307,34 @@ export function priceDeltaReference(
  * URL already seen (docs/todo/002). On a treemap that is arithmetic, not
  * cosmetics: six tiles for one story is six times the area in its theme.
  * Highest tier wins, because the strongest read of a story is the one the
- * desk should see.
+ * desk should see. Among rows tied on tier, newest `published_at` wins, and
+ * `itemId` breaks any remaining tie — an explicit, stable rule rather than
+ * whatever order SQLite happens to visit rows in.
+ *
+ * The collapse MUST be computed over the same filtered set the outer query
+ * returns (window + date floor), not over the whole table. An earlier
+ * version picked the winner with a correlated subquery —
+ * `s.tier = (SELECT MAX(s2.tier) ... WHERE i2.url = i.url)` — with no window
+ * or date-floor clause of its own. That subquery could pick a winning tier
+ * that lives *outside* the window (or behind the date floor): the in-window
+ * row then fails `s.tier = <that max>` and gets dropped, while the
+ * out-of-window sibling is dropped by the outer WHERE — net result, zero
+ * rows for a story that plainly has a legitimate in-window score. It fails
+ * silently: the item is neither returned nor counted as unscored, so the
+ * coverage footer's scored/unscored no longer sum to the true candidate
+ * count. Do not reintroduce that shape. Instead: filter first (the
+ * `windowed` CTE), THEN rank and collapse only within that already-filtered
+ * set (the `ROW_NUMBER() ... PARTITION BY url` below). See
+ * test/db-marketmap.test.ts for fixtures that straddle exactly this
+ * boundary and fail against the correlated-subquery form.
  *
  * Guard 2 — reject implausible dates. Feeds carrying a raw Unix epoch had it
  * parsed as a year before #16, so "1786971720" became 1786-08-01. Those rows
  * would silently fall outside every window; excluding them explicitly means
- * the coverage count can state how many were dropped.
+ * the coverage count can state how many were dropped. This filter lives
+ * inside the `windowed` CTE for the same reason guard 1 must — the collapse
+ * has to rank over rows that have already been date-floored, not the raw
+ * table.
  *
  * Collapsing happens on read, never on write: item_scores keeps one row per
  * item, and folding on the way in would destroy information that cannot be
@@ -328,18 +350,18 @@ export function getScoredItems(sinceIso: string): ScoredItem[] {
   return q(db => {
     if (!hasTable(db, "item_scores")) return [];
     return db.prepare(`
-      SELECT s.item_id AS itemId, s.tier, s.direction, s.conviction, s.theme,
-             i.headline, i.source, i.url, i.published_at AS publishedAt
-        FROM item_scores s
-        JOIN items i ON i.id = s.item_id
-       WHERE i.published_at >= ?
-         AND i.published_at >= '2000-01-01T00:00:00Z'
-         AND s.tier = (
-               SELECT MAX(s2.tier) FROM item_scores s2
-                 JOIN items i2 ON i2.id = s2.item_id
-                WHERE i2.url = i.url)
-       GROUP BY i.url
-       ORDER BY i.published_at DESC
+      WITH windowed AS (
+        SELECT s.item_id AS itemId, s.tier, s.direction, s.conviction, s.theme,
+               i.headline, i.source, i.url, i.published_at AS publishedAt
+          FROM item_scores s JOIN items i ON i.id = s.item_id
+         WHERE i.published_at >= ? AND i.published_at >= '2000-01-01T00:00:00Z'
+      )
+      SELECT itemId, tier, direction, conviction, theme, headline, source, url, publishedAt
+        FROM (SELECT *, ROW_NUMBER() OVER (
+                PARTITION BY url ORDER BY tier DESC, publishedAt DESC, itemId
+              ) AS rn FROM windowed)
+       WHERE rn = 1
+       ORDER BY publishedAt DESC
     `).all(sinceIso) as ScoredItem[];
   });
 }

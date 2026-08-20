@@ -16,9 +16,25 @@ db.exec(readFileSync(path.resolve(import.meta.dirname, "../test/fixtures/fixture
 // through windows anchored to the newest item instead. A hardcoded date
 // can never satisfy "published today" as real time moves on, so these
 // few rows are dated relative to build time, not baked into fixture.sql.
+//
+// todayAt must be computed from the actual Dubai-midnight boundary, not
+// offset backward from `now` — the "today" window is wall-clock Dubai
+// midnight (UTC 20:00:00 daily, see windowSinceIso in app/page.tsx), and a
+// fixed offset from `now` (e.g. "10 minutes ago") lands *before* that
+// boundary whenever the fixture happens to build within the first few
+// minutes after UTC 20:00:00, silently dropping map1 out of the
+// default-window e2e assertion. Mirrors windowSinceIso's own arithmetic:
+// shift into Dubai local time, truncate to the day, shift back.
 const iso = ms => new Date(ms).toISOString().replace(/\.\d{3}Z$/, "Z");
 const now = Date.now();
-const todayAt = iso(now - 10 * 60_000);     // 10 minutes ago — always "today"
+const DUBAI_OFFSET_MS = 4 * 3600_000; // UTC+4, no DST — same as app/page.tsx
+const dubaiNow = now + DUBAI_OFFSET_MS;
+const dubaiMidnightUtcMs = Date.UTC(
+  new Date(dubaiNow).getUTCFullYear(),
+  new Date(dubaiNow).getUTCMonth(),
+  new Date(dubaiNow).getUTCDate(),
+) - DUBAI_OFFSET_MS;
+const todayAt = iso(dubaiMidnightUtcMs + 5 * 60_000); // 5 min after Dubai midnight — always "today"
 const weekAt = iso(now - 3 * 86_400_000);   // 3 days ago — "week" but not "today"
 
 const insertItem = db.prepare(`
