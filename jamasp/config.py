@@ -70,3 +70,83 @@ def themes(weights: dict) -> tuple[str, ...]:
     if "other" not in slots:
         raise ValueError(f'config/weights.yaml themes must include "other", got {slots!r}')
     return slots
+
+
+VALID_SIGNAL_SOURCES = ("bars", "price_series")
+
+
+@dataclass(frozen=True)
+class SignalSpec:
+    name: str
+    family: str
+    timeframes: tuple[str, ...]
+    source: str
+    symbol: str | None = None
+
+
+def tier_weights(weights: dict) -> dict[int, float]:
+    """Materiality tier -> area weight, mirroring panel/lib/marketmap.ts."""
+    return {int(k): float(v) for k, v in weights["tier_weight"].items()}
+
+
+def signal_specs(weights: dict) -> tuple[SignalSpec, ...]:
+    """The technical taxonomy, in declared order.
+
+    Order is data, exactly as it is for `themes`: the fit indexes its feature
+    columns by position, so sorting here would permute fitted coefficients
+    against their labels. Duplicates and unknown sources raise rather than
+    silently collapsing two columns into one or reaching for a reader that
+    does not exist.
+    """
+    specs: list[SignalSpec] = []
+    seen: set[str] = set()
+    for e in weights.get("signals") or []:
+        name = e["name"]
+        if name in seen:
+            raise ValueError(f"duplicate signal name in config/weights.yaml: {name!r}")
+        seen.add(name)
+        source = e.get("source", "bars")
+        if source not in VALID_SIGNAL_SOURCES:
+            raise ValueError(
+                f"signal {name!r} has source {source!r};"
+                f" expected one of {VALID_SIGNAL_SOURCES}"
+            )
+        if source == "price_series" and not e.get("symbol"):
+            raise ValueError(f"signal {name!r} reads a price series but names no symbol")
+        specs.append(SignalSpec(
+            name=name, family=e["family"],
+            timeframes=tuple(e["timeframes"]), source=source,
+            symbol=e.get("symbol"),
+        ))
+    return tuple(specs)
+
+
+def signal_columns(weights: dict) -> tuple[str, ...]:
+    """Ordered feature-column keys, "<signal>@<timeframe>"."""
+    return tuple(
+        f"{s.name}@{tf}" for s in signal_specs(weights) for tf in s.timeframes
+    )
+
+
+def fit_config(weights: dict) -> dict:
+    return weights["fit"]
+
+
+def active_pins(weights: dict, today: str) -> dict[str, float]:
+    """Retro overrides still in force on `today` (an ISO date, YYYY-MM-DD).
+
+    Every pin must carry a reason and an expiry. An un-expiring pin is how a
+    fit quietly stops mattering — the number keeps looking measured while
+    nothing ever revisits the judgement that froze it — so this refuses one
+    rather than honouring it.
+    """
+    out: dict[str, float] = {}
+    for p in weights.get("pins") or []:
+        key = p.get("key")
+        if not p.get("reason"):
+            raise ValueError(f"pin {key!r} has no reason")
+        if not p.get("expires"):
+            raise ValueError(f"pin {key!r} has no expires date")
+        if str(p["expires"]) > today:
+            out[key] = float(p["value"])
+    return out
