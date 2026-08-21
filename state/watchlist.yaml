@@ -24,7 +24,11 @@ watchlist:
       than the 9–3 suggested, but July already stale"; no odds repricing
       overnight (540428e8 definitive Thu 20:00Z). NEW risk channel: the
       Bessent buyback eases financial conditions — DB floats a Fed hike;
-      hawk-ammunition watch into Jackson Hole (Warsh Fri).
+      hawk-ammunition watch into Jackson Hole (Warsh Fri). 21 Aug: the
+      ammunition materialized — buyback calm broke in ONE day, rout
+      restarted; Daly/Musalem jointly flag credibility concerns while
+      splitting on policy. Warsh keynote today (provisional 14:00Z,
+      wakeup #36) is the read.
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -34,7 +38,10 @@ watchlist:
       buyer classes converging. Flow-side twin: China's Treasury holdings
       fell to $633.4bn in June, lowest since Sep 2008, −13% y/y (TIC via
       ING) — reserve diversification out of USTs is the same trade as CB
-      gold accumulation. Watch next TIC (mid-Sep) + WGC monthly.
+      gold accumulation. Watch next TIC (mid-Sep) + WGC monthly. 21 Aug
+      COUNTER-SIGNAL: Russia's CB — once the top buyer — is now a steady
+      SELLER (investinglive); first named crack in the floor narrative.
+      Net effect check at next WGC monthly before trimming theme weight.
     since: 2026-07-31
 
   - theme: warsh-credibility
@@ -71,7 +78,13 @@ watchlist:
       breadth confirmed: BTC ~$70k +8%, ETH +20%, US debt $40tn headline;
       senators question Warsh's calendar gaps (independence thread) into
       his Jackson Hole slot; CNBC flags China bonds defying the global
-      yield surge — a competing diversification sink.
+      yield surge — a competing diversification sink. 21 Aug: Japan CPI
+      core 1.8% in line / core-core 1.9% BROADENING + flash PMI strongest
+      since Feb → BoJ seen at 1.25% in Sept — yet USDJPY ROSE to 158.96
+      (0deccd97 safe); yen pillar holds, BoJ 17–18 Sep the erosion risk.
+      PBOC FIFTH straight weak fix (6.7817 vs 6.7262 est). Jackson Hole
+      OPEN — Warsh keynote provisional 14:00Z today, wakeup #36 reads it;
+      stance event-pending on it.
     since: 2026-07-31
 
   - theme: middle-east-risk-premium
@@ -252,6 +265,20 @@ watchlist:
       (to Axios) — economic-first confirmed (cf62fcf6). Mehr claims 56
       Saudi ships targeted/blocked in Bab al-Mandab (Houthi tally,
       unverified — a64b23c1 scoring is #31's).
+      20-21 Aug adds: PRE-MIDTERM OIL CAMPAIGN disclosed (senior Iranian
+      official, extracted) — declared targets: Yanbu + Fujairah bypass
+      terminals (~5.5 mb/d) + shadow-fleet support network (~5 mb/d -> 0);
+      stated chain crude -> pump (2-4wk lag) -> CPI -> midterm votes;
+      Ghalibaf adviser Shakeri ON RECORD ("raise the tension level,
+      focused on oil, before the midterms"; "preemptive defense";
+      neither-war-nor-peace long game). Signaling until ordnance moves,
+      but FIRST explicit naming of UAE energy infra (Fujairah) this cycle
+      (d8fda2a3 desk-local tripwire); converges with Saree's Yanbu claims
+      + the ~31 Aug-7 Sep ultimatum window. US side: Hezbollah cash-
+      network sanctions (10 individuals), "toughest pressure", China
+      support demanded — Monday presser detail (#35). Maritime Executive:
+      WH Hormuz traffic claims DIVERGE from independent counts (spin now
+      flagged both directions; Axios undercount vs WH overcount).
     since: 2026-07-31
 
   - theme: energy-pce-passthrough
@@ -275,6 +302,10 @@ watchlist:
       caps the passthrough tail — ~10 mb/d actually moving (~half
       pre-war) vs the AIS undercount; Brent ~$91-92 four-week high, WTI
       ~84.4; 6f8b0433 records no Brent settle >=$95 thru 31 Aug (0.6).
+      21 Aug: Brent flirted $94 intraday (RSI 70.8), second weekly gain —
+      6f8b0433 under immediate stress; Iran's stated pre-midterm plan
+      (Yanbu/Fujairah/shadow-fleet, see middle-east theme) is the named
+      supply-shock path that would blow through $95.
     since: 2026-07-31
 
   - theme: india-gold-formalisation
@@ -321,7 +352,14 @@ watchlist:
       already tailed at 5.204%). Predictions: b0c2bfeb (no DXY close
       >=100 thru 28 Aug, 0.6), 3f03ae58 (GC holds 4510 thru Fri, 0.6).
       Watch: buyback schedule/results, long-end auctions, 30y (5.32% =
-      mid-2007 high), TLT.
+      mid-2007 high), TLT. 21 Aug: the rout RESTARTED one day after the
+      beefed-up buyback (MarketWatch: "short-circuited"; $40tn debt +
+      oil); Daly/Musalem credibility concerns; USD slammed in Asia while
+      gold/BTC/FX surged — gold rallying WITH yields confirms the
+      fiscal-credibility-hedge regime (Currie debasement read; Citi
+      "debasement trade needs new outlet -> gold"). Failure of the tool
+      STRENGTHENS the theme; the bearish variant is Warsh reading
+      buybacks as easing -> hike ammunition (today's keynote, #36).
     since: 2026-08-20
 # REMOVED 4 Aug: gold-basis-lbma-comex — resolved. 3 Aug PM fix pair printed
 # $56 (fix 4028.15 vs GC 4084.3, ±5 min), inside the $50-90 Dec-26 fair-carry

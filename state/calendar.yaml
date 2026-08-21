@@ -360,6 +360,12 @@ events:
       no wakeup — Friday's brief (~07:30 Dubai) reads it natively;
       escalate to a deepdive only if the print moves USDJPY >1% or BoJ
       commentary turns explicit on September.
+    outcome: >
+      RESOLVED 21 Aug (brief) — core 1.8% y/y in line, core-core 1.9%
+      broadening; flash PMI strongest since Feb; BoJ seen hiking to
+      1.25% in Sept — yet USDJPY ROSE to 158.96, no escalation needed
+      (0deccd97 safe into tonight's close). Yen debasement pillar holds;
+      the BoJ 17-18 Sep meeting is the named erosion risk.
 
   - date: 2026-08-31
     time_dubai: "window ~31 Aug – 7 Sep (undated by Tehran)"
@@ -408,6 +414,10 @@ events:
     action: >
       anchor a wakeup the moment the Warsh speech slot publishes (speech
       +40min per rule 15); scans cover until then.
+      UPDATE 21 Aug: slot never published — wakeup #36 anchored
+      PROVISIONALLY at 14:40Z (traditional Fri 10:00 ET chair slot
+      +40min), self-reschedules per rule 15 if the speech hasn't
+      happened. Stance is event-pending on this speech.
 
   - date: 2026-09-11
     time_dubai: "16:30"
@@ -439,3 +449,27 @@ events:
     action: wakeup #35 added 2026-08-24T16:00:00Z deepdive (reschedules
       itself if the presser hasn't landed; 2-hourly scans cover an
       earlier drop)
+
+  - date: 2026-11-03
+    time_dubai: "window: now -> US midterms (3 Nov); action likely front-loaded ~Sep-Oct"
+    title: Iran pre-midterm oil campaign — declared Yanbu/Fujairah/shadow-fleet targets
+    why: >
+      Senior Iranian official (investinglive, extracted 21 Aug): systematic
+      economic-warfare plan to raise US pump prices before the midterms —
+      strike the two Hormuz bypass routes (Saudi Yanbu + UAE Fujairah,
+      ~5.5 mb/d) and cut the US-backed shadow fleet's ~5 mb/d to zero.
+      Stated transmission: crude -> pump prices (2-4 week lag) -> CPI ->
+      votes, which implies action starts by early-mid Oct to bite. Shakeri
+      (Ghalibaf adviser) on record framing it "preemptive defense" inside
+      a neither-war-nor-peace long game. One-side-sourced SIGNALING until
+      ordnance moves — but it is the first explicit naming of UAE energy
+      infrastructure this cycle and converges with Saree's Yanbu claims
+      and the ~31 Aug-7 Sep ultimatum window. Any strike/credible attempt
+      on Yanbu or Fujairah arms the kinetic tail same run (Fujairah also
+      fires d8fda2a3 while its window runs).
+    action: >
+      2-hourly scans carry the tripwire (Yanbu/Fujairah/convoy-network
+      keywords); no dedicated wakeup — event is unscheduled by nature.
+      Escalation markers that WOULD anchor one: Iranian official naming a
+      date, US pre-emptive strike on launch infrastructure, or insurance/
+      charter market pulling out of Fujairah calls.
