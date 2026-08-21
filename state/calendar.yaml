@@ -401,23 +401,28 @@ events:
       no wakeup — the ~09:00 Dubai scan reads it; escalate only if a cut
       lands (check SGE premium + fix reaction same scan).
 
-  - date: 2026-08-21
-    time_dubai: "21–23 Aug (speech slots TBD)"
-    title: Jackson Hole symposium — Warsh set piece
+  - date: 2026-08-28
+    time_dubai: "27–29 Aug; Warsh keynote Fri 28 Aug ~18:00 Dubai (provisional 14:00Z)"
+    title: Jackson Hole symposium — Warsh set piece — DATE CORRECTED 21 Aug
     why: >
       The credibility/debasement theme's scheduled event. investinglive
       (17 Aug): market hype is outrunning Warsh's say-as-little-as-possible
       playbook — a contentless speech is itself a repricing risk with the
       30y at multi-decade highs and gold's book crowded. Watch for
       anything on the hike bar, balance sheet, or Fed-independence pushback
-      (Cook-firing thread).
+      (Cook-firing thread). Theme: "Financial Innovation: Implications for
+      Payments and Policy" (stablecoin plumbing angle). NB collides with
+      the core-PCE gate — PCE prints 12:30Z, keynote ~14:00Z same Friday.
     action: >
-      anchor a wakeup the moment the Warsh speech slot publishes (speech
-      +40min per rule 15); scans cover until then.
-      UPDATE 21 Aug: slot never published — wakeup #36 anchored
-      PROVISIONALLY at 14:40Z (traditional Fri 10:00 ET chair slot
-      +40min), self-reschedules per rule 15 if the speech hasn't
-      happened. Stance is event-pending on this speech.
+      DATE CORRECTED 21 Aug (deepdive #36): the 21-Aug provisional slot
+      was wrong-week — Saxo (21 Aug dateline) confirms symposium runs
+      27–29 Aug, first Warsh keynote Fri 28 Aug; Fed press feed, calendar
+      feed and fed.gov all silent on 21 Aug, corroborating. Wakeup #37
+      anchored 28 Aug 14:45Z (traditional Fri 10:00 ET chair slot +45min),
+      self-reschedules per rule 15. Verify slot when KC Fed publishes the
+      official agenda (~evening 27 Aug MT, i.e. 28 Aug 00–02Z); wakeup #29
+      (PCE, 13:15Z) runs first that day. Re-enter event-pending cap from
+      the 27 Aug eve; the 21-Aug cap is lifted.
 
   - date: 2026-09-11
     time_dubai: "16:30"
