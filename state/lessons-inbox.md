@@ -54,3 +54,25 @@ by the weekly /retro. One bullet per lesson: date, observation, suggested rule.
   verification from the host first, as in the 31 Jul source research.
   Suggested rule: once they land, #4's manual half and #9's workaround
   scoping both narrow — revisit their wording then.
+
+- **2026-08-21 — a trajectory note asserted from memory inverted same-day at
+  scoring.** The 20 Aug stance carried `a64b23c1` (new Houthi attack claim,
+  0.8) as "MISS trajectory" while the scoring event — Saree's 19 Aug
+  statement (*Wafa*, eighth tanker, nine ops incl Jizan) — was already in the
+  DB as the Mehr item published 19 Aug 20:14Z, and on gcaptain's front page.
+  The close-out scored it HIT ~22h later. Heuristic #14 names this failure
+  for level-claims (status from the DB, not narrative memory); event-claims
+  have the same fix. Suggested rule: extend #14 — an on-track/miss-track note
+  on an event-prediction requires one keyword query over `items` since claim
+  creation, or omit the note.
+
+- **2026-08-21 — rule #16 worked end-to-end; the residual gap is feed
+  coverage, not process.** Fresh-forced index fetches plus dating the Saree
+  statement from a second outlet's own dateline (Mehr publish 19 Aug 20:14Z,
+  "on Wednesday") pinned the event date without any gcaptain dateline — no
+  stale-cache or pattern-match trap fired this time. But the gcaptain article
+  itself never entered ingest on a day the feed captured 13 other gcaptain
+  items (filed as docs/todo/005), so the `?s=` search sweep was the only net
+  that caught it. Suggested rule: while 005 is open, a corridor-focused run
+  asserting what the maritime press does or doesn't carry sweeps gcaptain
+  search, not just ingested items — an extension of #4's spirit.

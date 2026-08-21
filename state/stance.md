@@ -1,88 +1,90 @@
-# Stance — 2026-08-20 (brief, ~07:30 Dubai)
+# Stance — 2026-08-21 (deepdive corridor close-out, ~05:10 Dubai)
 
-**Trend regime confirmed; the buyback is both the driver and the risk.**
-GC settled 4578.3 on 19 Aug — first settle above the 200DMA (4515.3) — and
-holds 4550.8 after a 4580.7 high. The move is being read explicitly as a
-debasement trade (forexlive), with breadth to prove it: BTC ~$70k (+8%),
-ETH +20%, US debt $40tn, DXY 98.86, 10y 4.653. Counter-risk named by DB and
-forexlive: the buyback eases financial conditions = hawk ammunition; Sept
-corporate-issuance wall is where the Treasury calm breaks. Axios corridor
-disclosure re-rates Hormuz supply: ~10 mb/d moving via US nightly convoys
-(~half pre-war) — oil premium is tail-priced, not disruption-priced;
-passthrough risk into Aug CPI trims. Iran enforcement formalizing inside
-baseline: *Amara* seizure now fee-explicit and press-named (no operator/
-flag/UAE confirmation yet), Chinese tankers self-deterring, CENTCOM 65.
+**Trend regime holding; debasement leg sets price, corridor tail hot-not-armed.**
+GC 4571.9 after a second settle above the 200DMA (4576.8 on 20 Aug; 200DMA
+4518.1); DXY 98.795, 10y 4.70. Close-out scored the 20 Aug cohort 4/4 HIT
+and sharpened the tail: ceasefire **expired Mon 17 Aug**; Bessent answered
+Thu with "toughest sanctions in history" / "greatest co-ordinated economic
+isolation," detail at a **Mon 24 Aug presser**; Saree's 19 Aug statement
+claims the 8th Saudi tanker (*Wafa*, off Yanbu) + nine ops vs Jizan/Yanbu/
+Najran/Abha/Eastern Province and declares northern-Red-Sea escalation — all
+hollow on the Saudi side (no confirmations). Iran CB governor: zero oil
+exports — so the response channel is maritime enforcement, not supply.
+Carrier rotation: George Washington in, Lincoln home.
 
 ## View
 
-**Weights 65/5/30 (base/bearish/kinetic) — unchanged; conviction capped
-into Jackson Hole (opens Fri, Warsh slot unpublished).**
+**Weights 65/5/30 (base/bearish/kinetic) — unchanged; conviction capped into
+Jackson Hole (opens today, Warsh slot unpublished).**
 
-- **Base (~65%):** no Sept hike (`ec71ce01` 0.8); core PCE 28 Aug the real
-  gate. Trend regime: defend 4510/4515, then 4450/4380; room to upper BB
-  ~4658. Overbought (RSI 69.8, stoch 88/90) — a 4510 retest is normal, a
-  settle below kills the regime (`3f03ae58` 0.6 thru Fri). Debasement
-  floor: ETF inflows, 289t CB demand, 4th straight weak PBOC fix (6.7808
-  vs 6.7196 est, widest) with LPR held (`31c34147` HIT). Dollar leg:
+- **Base (~65%):** no Sept hike (`ec71ce01` 0.8); core PCE 28 Aug the gate.
+  Defend 4510/4515 then 4450/4380; room to upper BB ~4686. Overbought (RSI
+  69.7, stoch 91/95) — a 4510 retest is normal, a settle below kills the
+  regime (`3f03ae58` 0.6 thru Fri). Debasement floor intact; dollar leg
   `b0c2bfeb` no DXY close ≥100 thru 28 Aug (0.6).
-- **Bearish (~5%):** buyback read flips inflationary at Jackson Hole →
-  hike bets revive; issuance wall + hot core PCE → under 4510 → 4300,
-  then 4227.3/50DMA 4192.9. Corridor story adds a soft-bearish oil leg
-  (`6f8b0433` no Brent settle ≥$95 thru 31 Aug, 0.6).
-- **Kinetic tail (~30%):** hot, NOT armed. Triggers untouched — Amara/fee
-  regime/tanker turn-backs are baseline enforcement. Live clock: "few
-  weeks" ultimatum window ~31 Aug–7 Sep. Corridor disclosure shrinks the
-  tail *payload* (supply already flowing), not the trigger set.
-- **Residual-haven channel:** confirmed as liquidity-led, not fear-led
-  (VIX 2026 lows, equities firm). If equity stress returns while TLT
-  fails as refuge, 4658 comes on flow.
+- **Bearish (~5%):** buyback read flips inflationary at Jackson Hole → hike
+  bets revive; issuance wall + hot core PCE → under 4510 → 4300, then
+  4227.3/50DMA 4201.6. Corridor soft-bearish oil leg (`6f8b0433` no Brent
+  settle ≥$95 thru 31 Aug, 0.6).
+- **Kinetic tail (~30%):** hot, NOT armed. Economic-first is explicit
+  kinetic-deferral (Bessent: "likely there will not be a large-scale restart
+  … for now"). Watches: Iranian response to the package (`8babc60f` 0.6) —
+  mechanism live (*Amara* fee-and-detain, Chinese-tanker turn-backs 19 Aug,
+  claimed tanker cyberattack 20 Aug, shadow-fleet hijack 20 Aug attribution
+  open); Houthi claim cadence (`bb86ccc9` 0.8); Jizan tripwire = `b6794dbb`
+  MISS. "Few weeks" ultimatum window ~31 Aug–7 Sep. China-banks sanction at
+  Monday's presser = the economic step-change marker (against it: Xi visit
+  next month, rare-earths).
+- **Residual-haven:** liquidity-led, not fear-led; if equity stress returns
+  while TLT fails as refuge, 4686 comes on flow.
 
 ## What flips me
 
-- Settle <4510 Thu/Fri → breakout failed, `3f03ae58` MISS, revert to chop
+- Settle <4510 Thu/Fri → breakout failed, `3f03ae58` MISS, revert to chop.
+- Saudi/Aramco confirms infrastructure damage (`b6794dbb` MISS) → tail arms
   same run.
-- Sept odds >50% by Thu 20:00Z → `540428e8` MISS, `ec71ce01` threatened,
-  stress 4300/4227.3 same run.
-- Hawkish or contentless Warsh Fri → rates leg re-inverts; wakeup when his
-  slot publishes.
-- Operator/flag-state/UAE confirmation of *Amara* (`d2ea5d99`, closes
-  tonight) → 2019 tanker-war template, reassess same run.
 - Corridor disruption (convoy suspension, US escort loss) → supply re-rate
-  reverses + kinetic trigger likely fires same event.
+  reverses + trigger likely fires same event.
+- Iranian response goes kinetic (ordnance on UAE land `d8fda2a3` / US
+  assets) → arm tail same run.
+- Major Chinese banks sanctioned Monday → oil/CNY leg reprices, reassess
+  base/bearish split same run.
+- Hawkish or contentless Warsh → rates leg re-inverts; wakeup when his slot
+  publishes.
 - Hot core PCE 28 Aug → hike case revives into a crowded book (#29 rules).
-- US kinetic on Iran (`cf62fcf6` MISS) / Iranian ordnance on UAE land
-  (`d8fda2a3` MISS) / UAE kinetic → arm tail same run.
 
-## Open predictions (23)
+## Open predictions (21)
 
-Scored today: `31c34147` **HIT** (LPR held, at the print). Tonight 23:59Z
-cohort → #31 scores: `4cf94ab6` (HIT track), `d2ea5d99` (strict falsifier
-unmet; press-named — adjudicate on window), `213a5792` (HIT track),
-`a64b23c1` (MISS trajectory), `da6f26d5` (HIT track). Thu 20:00Z:
-`540428e8` (HIT track). Fri: `9557c060` (safe, Brent ~$91), `cf62fcf6`
-(HIT track), `cd49c313` (needs formal Treasury announcement — Trump vows
-don't score), `0deccd97` (safe, 158.4), `599d9586`, `3f03ae58`. Later:
-`b6794dbb` (23 Aug), `d8fda2a3` (25 Aug), `b0c2bfeb` NEW DXY <100 (28
-Aug), `73281b56`/`ac586003`/`adc2a252`/`d9e50362`/`f73172f8`/`6f8b0433`
-NEW Brent <$95 (31 Aug), `951d8286` (~1 Sep), `ec71ce01` (Sept FOMC).
+Scored this run, all HIT: `a64b23c1` 0.8 (Saree 19 Aug — stance had carried
+it MISS-trajectory; lesson filed), `da6f26d5`, `4cf94ab6`, `213a5792`.
+`d2ea5d99` window closed 20 Aug but unmatured in ledger — adjudicate Sat
+(strict falsifier unmet). Sat-brief cohort, trajectory unasserted per new
+lesson: `540428e8`, `9557c060`, `cf62fcf6`, `0deccd97` (158.9 now; verify
+closes), `599d9586`, `3f03ae58`, `cd49c313` (this run verified: formal
+landing deferred to Monday presser → likely MISS on strict reading). NEW:
+`bb86ccc9` Houthi continuation 0.8 (28 Aug), `8babc60f` Iran sanctions-
+response framing 0.6 (28 Aug). Later: `b6794dbb` (23 Aug), `d8fda2a3` (25
+Aug), `b0c2bfeb` (28 Aug), `73281b56`/`ac586003`/`adc2a252`/`d9e50362`/
+`f73172f8`/`6f8b0433` (31 Aug), `951d8286` (~1 Sep), `ec71ce01` (Sept FOMC).
 
 ## Wakeups
 
-#31 Fri 01:00Z corridor close-out (scores tonight's cohort). #29 28 Aug
-13:15Z core-PCE gate. #26 11 Sep 13:15Z Aug-CPI. Jackson Hole 21–23 Aug:
-anchor a wakeup when Warsh's slot publishes.
+#35 Mon 24 Aug 16:00Z Bessent presser deepdive (China-banks marker;
+`8babc60f` catalyst). #29 28 Aug 13:15Z core-PCE gate. #26 11 Sep 13:15Z
+Aug-CPI. Jackson Hole 21–23 Aug: anchor a wakeup when Warsh's slot publishes.
 
 ## Desk-local
 
 UAE-Iran total suspension = frozen ground for Iran-linked counterparties
-(`adc2a252`). *Amara* precedent: Iran now charges "service fees" and
-enforces on non-payment — a named cost regime for any Dubai-linked hull.
-Fri pile-up: Japan CPI, Jackson Hole, Bessent deadline, UKMTO weekly, four
-prediction windows. FOMC 15–16 Sep → BoJ 17–18 Sep.
+(`adc2a252`). *Amara* fee-and-detain = named cost regime for Dubai-linked
+hulls; Saree's declared northern-Red-Sea escalation makes Red Sea routing
+risk explicit for Saudi-linked cargo. Mehr will spin Lincoln's homebound leg
+as damage-forced — `213a5792` scored HIT says rotation. Today: Japan CPI,
+Jackson Hole opens, UKMTO weekly relay, Fri prediction windows.
 
 ## Sourcing health
 
-`gold_spot` inbox warning = todo-003 false positive (price rows landing).
-Calendar feed live but thin past Friday: Japan CPI missing from feed,
-carried by hand-built calendar. Extract worked on maritime-executive.com
-(new source, clean).
+gcaptain feed missed the 19 Aug *Wafa* article on an otherwise-healthy feed
+day (todo-005); flash/digest `claude -p` subprocess: 24 silent failures
+14–20 Aug (todo-006); `gold_spot` inbox warning = todo-003 false positive.
+Calendar feed live; Bessent presser added by hand.

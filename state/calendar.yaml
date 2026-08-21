@@ -422,3 +422,20 @@ events:
       passthrough softens; IEA's thin global buffer argues it persists.
     action: wakeup #26 (13:15Z deepdive — 45 min post-print so ingest
       lands the items first; run-130 lesson from 12 Aug).
+
+  - date: 2026-08-24
+    time_dubai: "US morning, unscheduled (~17:00-21:00 Dubai)"
+    title: Bessent Iran sanctions package detail presser
+    why: >
+      Announced Thu 20 Aug on CNBC ("toughest sanctions in history",
+      "greatest co-ordinated economic isolation in the history of the
+      world"), detail deferred to a Monday presser. The escalation marker
+      is China treatment: teapot refineries already sanctioned, major
+      Chinese banks would be the step change — against it, Xi's White
+      House visit next month and China's rare-earth restrictions two
+      months out. Economic-first explicitly defers kinetic ("that is for
+      now") — package detail sets how hard the Iranian-response channel
+      (8babc60f) gets pushed.
+    action: wakeup #35 added 2026-08-24T16:00:00Z deepdive (reschedules
+      itself if the presser hasn't landed; 2-hourly scans cover an
+      earlier drop)
