@@ -72,10 +72,74 @@ the fixture once captured.
 (not `SKIPPED`) — or this is closed `abandoned` with a recorded reason if
 the oracle cross-check is judged not worth chasing further.
 
+## Amendment 2026-08-22 — the fixture, once captured, will only cover 5 of the 17 computed fields
+
+Filed while fixing Finding 4 of the market-maps-learning-loop Important-
+findings wave
+(`.superpowers/sdd/2026-08-20-market-maps-learning-loop/final-fix-report.md`),
+which added a golden-vector test for `macd()` and a population-vs-sample-
+stdev test for `bollinger()` specifically because this oracle cannot cover
+either indicator even once the 429 above is resolved.
+
+`scripts/capture-tv-oracle.py`'s TradingView leg (see Evidence above)
+requests exactly five fields: `close,RSI,SMA50,SMA200,ATR`. Once captured,
+`tests/test_indicators_oracle.py` cross-checks four indicator columns —
+`rsi14`, `sma50`, `sma200`, `atr14` — plus the raw `close` price, against
+`jamasp/indicators.py`'s `INDICATOR_KEYS`, which names 17 columns total:
+
+```
+close, sma50, sma200, rsi14, atr14, macd, macd_signal, adx, stoch_k,
+stoch_d, willr, bb_upper, bb_lower, fib618, fib50, pivot_r1, pivot_s1
+```
+
+Twelve columns — `macd`, `macd_signal`, `adx`, `stoch_k`, `stoch_d`, `willr`,
+`bb_upper`, `bb_lower`, `fib618`, `fib50`, `pivot_r1`, `pivot_s1` — have
+never been cross-checked against TradingView's own numbers by this oracle,
+capture script fixed or not. The exact failure mode this oracle exists to
+catch — `jamasp/indicators.py`'s module docstring names conflating `ema`
+with `_wilder` ("produces curves that look entirely plausible and disagree
+with every chart") — sits inside `macd`, one of the twelve uncovered
+columns, which is why Finding 4 added a hand-derived golden-vector test
+for `macd()` independent of this oracle rather than waiting on it, and did
+the same for `bollinger`'s population-vs-sample-stdev choice (also
+uncovered here, since `close`/`RSI`/`SMA50`/`SMA200`/`ATR` say nothing about
+Bollinger's band width).
+
+TradingView's scanner endpoint is understood to serve `MACD.macd`,
+`MACD.signal`, `ADX`, `Stoch.K`, `Stoch.D`, `W.R`, `BB.upper`, `BB.lower`,
+and `Pivot.M.Classic.R1`/`S1` as standard field names — **not verified live
+in this sitting**, only recalled from TradingView's published field
+reference, so treat it as a starting point to check rather than a confirmed
+fact. Fibonacci retracement (`fib618`/`fib50`) may have no scanner
+equivalent at all, since it depends on a lookback window the scanner has no
+concept of; that needs checking too, and may mean those two columns stay
+permanently outside this oracle's reach regardless of the 429.
+
+### Fix, widened
+
+When re-running the capture script (see Fix above), also widen `fields=` to
+request the twelve currently-missing indicators, confirm which ones
+TradingView's scanner actually serves for `COMEX:GC1!`, and extend
+`tests/test_indicators_oracle.py` with one assertion per newly-covered
+field. Whatever the scanner genuinely cannot serve (Fibonacci retracement is
+the likely candidate) should be recorded here as a permanent gap with the
+reason, not left as an unexplained hole in the assertion count.
+
+### Done when, widened
+
+In addition to the original Done when above: `tests/test_indicators_oracle.py`
+asserts against as many of the 17 `INDICATOR_KEYS` as TradingView's scanner
+can actually serve, and any field it cannot serve is named here with why.
+
 ## Related
 
 - `.superpowers/sdd/2026-08-20-market-maps-learning-loop/task-4-brief.md` —
   Steps 5-8 (capture script, oracle test, tolerance judgement).
+- `.superpowers/sdd/2026-08-20-market-maps-learning-loop/final-fix-report.md`
+  — Finding 4, which added `tests/test_indicators.py`'s
+  `test_macd_matches_hand_derived_ema12_ema26_ema9` and
+  `test_bollinger_uses_population_not_sample_stdev` specifically to cover
+  what this oracle, even fixed, still would not have.
 - `scripts/capture-tv-oracle.py`, `tests/test_indicators_oracle.py`.
 - `jamasp/ingest/bars.py` — `DAILY_URL`, shared with the daily `bars`
   backfill, so this same 429 would also affect that path if it recurs.
