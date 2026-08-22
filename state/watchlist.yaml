@@ -27,8 +27,13 @@ watchlist:
       hawk-ammunition watch into Jackson Hole (Warsh Fri). 21 Aug: the
       ammunition materialized — buyback calm broke in ONE day, rout
       restarted; Daly/Musalem jointly flag credibility concerns while
-      splitting on policy. Warsh keynote today (provisional 14:00Z,
-      wakeup #36) is the read.
+      splitting on policy. 22 Aug CALENDAR FIX: core PCE is WEDNESDAY
+      26 Aug 12:30Z (cons core +0.2%/3.3% — benign would seal ec71ce01),
+      NOT Friday; Warsh keynote Fri 28 Aug (wakeup #39) now pairs with
+      the BLS payroll benchmark revision (~-100K expected, upside risk)
+      instead of PCE. WF preview: framework speech, no reaction function
+      (1a08ec53). Minutes cohort closed: 540428e8 HIT, odds never neared
+      50%.
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -279,6 +284,17 @@ watchlist:
       support demanded — Monday presser detail (#35). Maritime Executive:
       WH Hormuz traffic claims DIVERGE from independent counts (spin now
       flagged both directions; Axios undercount vs WH overcount).
+      21-22 Aug adds: pre-presser rhetoric peak — Trump: Hormuz "American
+      territory", nuclear-weapons warning, Iran "not ready to make the
+      right deal"; Iran vows "devastating" response to economic-lifeline
+      cutoff (gcaptain). Monday package detail (#35) the catalyst;
+      f230eca0 records no major-Chinese-bank designation by Thu (0.7).
+      US-response cohort scored: cf62fcf6 HIT (economic-first held),
+      cd49c313 MISS (formal landing slipped to Monday — lessons-inbox).
+      Weekend windows: b6794dbb (Saudi damage) Sun, 599d9586 (UKMTO
+      weekly relay) unclear tonight if no figure prints. Secondary axis:
+      Ukraine says Russia hit 52 civilian ships in six weeks, Black Sea
+      escalating (insurance channel, no direct gold read yet).
     since: 2026-07-31
 
   - theme: energy-pce-passthrough
@@ -359,7 +375,13 @@ watchlist:
       fiscal-credibility-hedge regime (Currie debasement read; Citi
       "debasement trade needs new outlet -> gold"). Failure of the tool
       STRENGTHENS the theme; the bearish variant is Warsh reading
-      buybacks as easing -> hike ammunition (today's keynote, #36).
+      buybacks as easing -> hike ammunition (keynote Fri 28 Aug, #39).
+      22 Aug: the conflict went MAINSTREAM — MarketWatch (extracted):
+      Bessent's twist "undercuts the credibility of Warsh to make
+      interest-rate policy", experts call it Treasury taking control of
+      market pricing; explicit de facto YCC framing in a mainstream
+      masthead. Week closed gold +5.2% WITH 10y up — regime signature
+      printed. Warsh now speaks Friday as the publicly undercut chair.
     since: 2026-08-20
 # REMOVED 4 Aug: gold-basis-lbma-comex — resolved. 3 Aug PM fix pair printed
 # $56 (fix 4028.15 vs GC 4084.3, ±5 min), inside the $50-90 Dec-26 fair-carry

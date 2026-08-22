@@ -281,8 +281,8 @@ events:
       into it — add a dedicated wakeup only if the FOMC/BOJ week opens
       with the hike case revived (core PCE ~28 Aug the gate).
 
-  - date: 2026-08-28
-    time_dubai: "16:30 (12:30Z)"
+  - date: 2026-08-26
+    time_dubai: "16:30 (12:30Z) — DATE CORRECTED 22 Aug (was 28 Aug; WF week-ahead + actionforex table both say Wednesday; same slot: Q2 GDP prelim + durable goods)"
     title: US core PCE (Jul) — the hike-case gate
     why: >
       With CPI benign and PPI flat, the September hike case (Logan/
@@ -295,8 +295,11 @@ events:
       momentum limbs carry the base case into the FOMC-BOJ convergence
       window. Also scores the new 4450-cap prediction recorded today.
     action: >
-      wakeup added 2026-08-28 13:15Z (deepdive on the print — 45 min
-      post-print per the run-130 lesson so ingest lands the items first).
+      wakeup #38 (2026-08-26 13:15Z; replaces cancelled #29 which sat two
+      days late on the hand-built 28 Aug date — third date error in ten
+      days, lessons-inbox 22 Aug). 45 min post-print per the run-130
+      lesson. Consensus: core +0.2% m/m / 3.3% y/y, headline +0.1% / 3.7%.
+      Event-pending cap enters from the Tue 25 Aug eve brief.
 
   - date: 2026-08-19
     time_dubai: "22:00 (18:00Z) — DATE CORRECTED 17 Aug (was 20 Aug; repaired feed)"
@@ -417,12 +420,17 @@ events:
       DATE CORRECTED 21 Aug (deepdive #36): the 21-Aug provisional slot
       was wrong-week — Saxo (21 Aug dateline) confirms symposium runs
       27–29 Aug, first Warsh keynote Fri 28 Aug; Fed press feed, calendar
-      feed and fed.gov all silent on 21 Aug, corroborating. Wakeup #37
-      anchored 28 Aug 14:45Z (traditional Fri 10:00 ET chair slot +45min),
-      self-reschedules per rule 15. Verify slot when KC Fed publishes the
-      official agenda (~evening 27 Aug MT, i.e. 28 Aug 00–02Z); wakeup #29
-      (PCE, 13:15Z) runs first that day. Re-enter event-pending cap from
-      the 27 Aug eve; the 21-Aug cap is lifted.
+      feed and fed.gov all silent on 21 Aug, corroborating. UPDATE 22 Aug:
+      NO PCE collision — PCE prints Wed 26 Aug (entry above); Friday's
+      companion event is the BLS preliminary NFP benchmark revision
+      (~14:00Z, WF expects ~-100K vs -911K last year, upside risk — a
+      small revision removes a hawk labour alibi). Wakeup #39 (28 Aug
+      14:45Z; replaces #37, whose text carried the wrong PCE date) reads
+      keynote + revision together, self-reschedules per rule 15. Verify
+      slot when KC Fed publishes the official agenda (~28 Aug 00–02Z).
+      WF base case: framework/task-force speech, no reaction function
+      (prediction 1a08ec53, no explicit Sept leaning, 0.65). Event-pending
+      runs Tue eve (PCE) through the keynote.
 
   - date: 2026-09-11
     time_dubai: "16:30"

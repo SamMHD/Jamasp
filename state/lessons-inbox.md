@@ -76,3 +76,28 @@ by the weekly /retro. One bullet per lesson: date, observation, suggested rule.
   that caught it. Suggested rule: while 005 is open, a corridor-focused run
   asserting what the maritime press does or doesn't carry sweeps gcaptain
   search, not just ingested items — an extension of #4's spirit.
+- **2026-08-22 — the rule-8 carve-out for actor-controlled announcements
+  failed its live test.** `cd49c313` (Bessent package formally announced by
+  Fri 21 Aug, 0.6) MISSED — detail slipped to a Monday presser. Rule 8 caps
+  one-side-sourced diplomatic deadlines at ≤0.5 but explicitly scoped
+  actor-controlled unilateral announcements OUTSIDE the cap, with this claim
+  named as the live test. The test came back negative: even a single-actor,
+  self-scheduled announcement slipped past its stated day. Suggested rule:
+  extend the ≤0.5 cap to ALL announcement-timing claims unless the
+  announcement has a published, scheduled event anchor (a presser on the
+  books, a statutory deadline); "official says it lands next week" never
+  clears 0.5 regardless of who controls the calendar.
+
+- **2026-08-22 — third hand-built date error in ten days; Saturday briefs
+  now re-verify the week's data map by extract.** Core PCE was carried as
+  Friday 28 Aug in stance/calendar/wakeup #29 — two fresh extracts (WF
+  week-ahead, actionforex table) both put it WEDNESDAY 26 Aug 12:30Z;
+  wakeup would have fired two days late and the "compound PCE/Warsh Friday"
+  framing was fiction. Pattern: FOMC minutes (19th vs 20th, caught 17 Aug),
+  Warsh keynote (21st vs 28th, caught 21 Aug), PCE (26th vs 28th, caught
+  today) — all hand-built dates that hardened from "~date" chatter into
+  anchored wakeups without primary verification, all while the calendar
+  feed's horizon ends at the current week (todo-001). Suggested rule: any
+  wakeup anchored to a scheduled data/event date must cite a
+  primary-calendar verification (feed row or fresh extract) from within 7
+  days of firing; the Saturday brief owns the weekly re-verification sweep.

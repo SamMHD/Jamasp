@@ -96,6 +96,20 @@ correct automatically.
 than 7 days ahead, **or** this file is closed as `abandoned` with option 4
 recorded and `state/calendar.yaml`'s role documented in CLAUDE.md.
 
+## Update 2026-08-22 — near-miss raises priority
+
+The horizon gap nearly cost a market-moving print: core PCE was carried as
+Fri 28 Aug in stance/calendar.yaml/wakeup #29, but prints **Wed 26 Aug
+12:30Z** — caught only because the Saturday brief extracted two week-ahead
+sources (Wells Fargo via actionforex + the actionforex calendar table).
+The wakeup would have fired two days late. Third hand-built date error in
+ten days (FOMC minutes 19th-vs-20th, Warsh keynote 21st-vs-28th, PCE
+26th-vs-28th) — all "~date" chatter hardening into anchored wakeups with
+no feed to verify against once the current week ends. Interim mitigation
+now in lessons-inbox: Saturday briefs re-verify the coming week's data map
+by extract; wakeup dates need a primary-calendar citation within 7 days of
+firing. A real second source (options 1–3) remains the fix.
+
 ## Related
 
 - `0091e22` — honest-horizon header, and the `docs/future-sources.md` addendum
