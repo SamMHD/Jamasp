@@ -94,6 +94,14 @@ export function MarketMap({ items, width, height, range, coverage,
 
   const boxes = layoutMap(
     items, { x: 0, y: 0, w: width, h: height }, THEME_HEADER_H, themeMultipliers);
+  // The footer's claim must not rest on fittedAt alone: weights.json's
+  // fitted_at is one top-level timestamp shared by every fit type, so a
+  // caller could pass a truthy fittedAt from a technical-only fit run
+  // alongside empty themeMultipliers. Deriving "weighted" from both inputs
+  // here — rather than trusting a caller to keep them in sync — is what
+  // keeps a second call site, or a future edit to either this file or the
+  // page, from silently reintroducing that exact false claim.
+  const hasMultipliers = Object.keys(themeMultipliers ?? {}).length > 0;
 
   return (
     // id is the fullscreen target: FullscreenButton is a client component and
@@ -135,7 +143,7 @@ export function MarketMap({ items, width, height, range, coverage,
       <p className="mt-2 text-xs text-muted-foreground">
         {coverage.scored} scored {coverage.scored === 1 ? "story" : "stories"} {WINDOW_LABEL[range]}
         {" "}· {coverage.unscored} unscored not shown
-        {fittedAt
+        {fittedAt && hasMultipliers
           ? ` · areas weighted by the ${fmtAge(fittedAt, now)} fit`
           : " · weights not yet fitted"}
       </p>

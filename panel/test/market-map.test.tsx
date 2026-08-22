@@ -157,4 +157,17 @@ describe("MarketMap", () => {
   it("defaults to the provisional footer when no weights are passed at all", () => {
     expect(render([item()])).toContain("weights not yet fitted");
   });
+
+  it("never claims the areas are weighted when the multiplier map is empty, even with a fittedAt", () => {
+    // The bug this guards: weights.json's fitted_at is one top-level
+    // timestamp shared by every fit type. A caller could pass a truthy
+    // fittedAt from a technical-only fit run alongside empty
+    // themeMultipliers (exactly page.tsx's state during a deployment's
+    // first ~2 weeks, before the theme fit reaches min_rows) and, if the
+    // component trusted fittedAt alone, the footer would falsely announce
+    // a rescale that never happened. The component must derive the claim
+    // from both inputs so no caller can produce that mismatch.
+    expect(render([item()], { themeMultipliers: {}, fittedAt: "2026-08-20T04:17:00Z" }))
+      .toContain("weights not yet fitted");
+  });
 });
