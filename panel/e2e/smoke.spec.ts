@@ -76,8 +76,15 @@ test("overview renders the market instrument panels", async ({ page }) => {
 
   // Technical: heading, the server-rendered spot chart, ladder rows, regime
   // line, and the RSI gauge with the fixture's exact reading in its name.
-  const technical = page.getByRole("region", { name: "Technical" });
-  await expect(page.getByRole("heading", { name: "Technical" })).toBeVisible();
+  //
+  // exact: true on the region name — the technical map's own two sections
+  // ("Technical map", "Technical signal treemap") both contain "Technical"
+  // as a substring and would otherwise match too. The heading lookup is
+  // scoped inside the exact-matched region for the same reason: unscoped,
+  // "Technical" also matches this panel's own "Technical→ prices" heading
+  // and the technical map's "Technical map" heading.
+  const technical = page.getByRole("region", { name: "Technical", exact: true });
+  await expect(technical.getByRole("heading")).toBeVisible();
   await expect(technical.locator('svg[aria-label^="gold futures"]')).toBeVisible();
   // Exact match: the stance prose itself contains "200DMA" as a substring
   // (in the View and What-flips-me bullets), which collides with a plain
@@ -147,4 +154,16 @@ test("fundamental map's week window covers both fixture items and hatches the be
   await expect(page.getByRole("link", { name: "This week" })).toHaveAttribute("aria-current", "page");
 
   expect(errors).toEqual([]);
+});
+
+test("overview renders the technical map", async ({ page }) => {
+  await page.goto("/");
+  const map = page.getByRole("img", { name: /technical signal treemap/ });
+  await expect(map).toBeVisible();
+  // The fixture holds one bearish signal, so exactly one tile must carry the
+  // hatch — the assertion that would fail if the extraction into
+  // map-tiles.tsx dropped the hatch on the way past.
+  await expect(map.locator('rect[fill="url(#map-hatch)"]')).toHaveCount(1);
+  // macd@1d has no fitted coefficient, so its tile must be dashed.
+  await expect(map.locator("rect[stroke-dasharray]")).toHaveCount(1);
 });

@@ -7,6 +7,7 @@ import { HorizonStrip } from "@/components/horizon-strip";
 import { MarketMap } from "@/components/market-map";
 import { NewsFlow } from "@/components/news-flow";
 import { PredictionPanel } from "@/components/prediction-panel";
+import { TechnicalMap } from "@/components/technical-map";
 import { TechnicalPanel } from "@/components/technical-panel";
 import { FooterStrip, StatusStrip } from "@/components/status-strip";
 import * as db from "@/lib/db";
@@ -17,6 +18,7 @@ import { deriveSourceHealth, deriveWarnings } from "@/lib/health";
 import { deriveHorizon } from "@/lib/horizon";
 import { deriveNewsPulse } from "@/lib/newsflow";
 import { parseStance } from "@/lib/stance";
+import { buildSignalTiles } from "@/lib/technicalmap";
 import { deriveTechnicals, TECHNICAL_SYMBOLS } from "@/lib/technicals";
 import type { MapRange } from "@/lib/marketmap";
 import { cls, fmtUtc } from "@/lib/format";
@@ -66,6 +68,12 @@ export default async function Overview({
   const mapSince = range === "week" ? weekAgo : windowSinceIso("today", now);
   const mapItems = db.getScoredItems(mapSince);
   const mapUnscored = db.unscoredCountSince(mapSince);
+
+  // --- technical map ---
+  const signalStates = db.latestSignalStates();
+  const fittedWeights = files.readFittedWeights();
+  const signalTiles = buildSignalTiles(
+    signalStates, files.loadWeightsConfig().signals, fittedWeights);
 
   // --- ops health (unchanged derivations, demoted presentation) ---
   const lastIngest = db.getMeta("last_ingest_at");
@@ -177,6 +185,15 @@ export default async function Overview({
             also buys tiles the height that wrapped headlines need. */}
         <MarketMap items={mapItems} width={1200} height={600} range={range}
           coverage={{ scored: mapItems.length, unscored: mapUnscored }} />
+      </section>
+
+      <section aria-label="Technical map" className="mb-4">
+        <h2 className="mb-2 text-sm font-medium text-muted-foreground">Technical map</h2>
+        {/* Same 2:1 viewBox as the fundamental map. The SVG preserves its
+            aspect ratio on purpose — stretching would distort tile areas, and
+            area is the encoding on a treemap. */}
+        <TechnicalMap tiles={signalTiles} width={1200} height={600}
+          fittedAt={fittedWeights?.fittedAt ?? null} />
       </section>
 
       <StatusStrip lastIngest={lastIngest} runsToday={runsToday} cap={cap}

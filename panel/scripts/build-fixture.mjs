@@ -1,5 +1,5 @@
 import Database from "better-sqlite3";
-import { mkdirSync, readFileSync, rmSync } from "node:fs";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
 const root = path.resolve(import.meta.dirname, "../test/fixtures/root");
@@ -57,6 +57,36 @@ insertScore.run("map1", 5, 2, 0.7, "rates_dollar", todayAt);
 insertItem.run("map2", "ft", weekAt,
   "Miners warn of softer than expected output", "https://example.com/map2", "map2", weekAt);
 insertScore.run("map2", 4, -2, 0.8, "geopolitics", weekAt);
+
+// Technical map fixture. signal_states is created here rather than in
+// fixture.sql because the panel's own missing-table guard is exercised by
+// test/db-marketmap-no-table.test.ts; this file's job is the populated path.
+db.exec(`CREATE TABLE IF NOT EXISTS signal_states (
+  key TEXT NOT NULL, ts TEXT NOT NULL, value REAL NOT NULL,
+  PRIMARY KEY (key, ts))`);
+const insertState = db.prepare(
+  "INSERT INTO signal_states (key, ts, value) VALUES (?, ?, ?)");
+// One bullish, one bearish (exercising the hatch path) and one unfitted
+// (exercising the dashed path), across two families so the map has two boxes.
+insertState.run("rsi14@1d", todayAt, -0.9);
+insertState.run("sma50@1d", todayAt, 0.8);
+insertState.run("macd@1d", todayAt, 0.4);
+
+writeFileSync(path.join(root, "state", "weights.json"), JSON.stringify({
+  fitted_at: todayAt,
+  fits: {
+    technical: {
+      n: 16880, horizon_hours: 24, flags: [],
+      coefficients: {
+        "rsi14@1d": { beta: 0.03, se: 0.008, multiplier: 2.0,
+                      observations: 900, fitted: true },
+        "sma50@1d": { beta: 0.02, se: 0.009, multiplier: 1.2,
+                      observations: 900, fitted: true },
+        // macd@1d is deliberately absent: it must render dashed.
+      },
+    },
+  },
+}, null, 1));
 
 db.close();
 console.log(`fixture db written: ${dbPath}`);

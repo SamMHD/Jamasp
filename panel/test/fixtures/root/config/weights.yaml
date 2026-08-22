@@ -1,0 +1,4 @@
+signals:
+  - {name: rsi14, family: momentum, timeframes: ["1d"]}
+  - {name: sma50, family: trend, timeframes: ["1d"]}
+  - {name: macd, family: trend, timeframes: ["1d"]}
