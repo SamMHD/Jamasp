@@ -222,5 +222,45 @@ def build_theme(
             head.append(v)
         X.append(head + controls[i])
 
+    if not any(theme_obs.values()):
+        # `exposure` (and therefore `first_scored`) comes straight from
+        # item_scores: reaching this line already means at least one story
+        # was scored. If, after joining every one of those hours against
+        # every hourly training row, not a single theme column picked up
+        # one non-zero observation, the join matched nothing — the keys on
+        # the two sides never lined up. That is a different failure from
+        # "no news yet" (which `first_scored is None` above already
+        # handles), and it is silent: every theme column reports `n=<rows>`
+        # with 0 observations, `fitted: False` on all six, and the panel
+        # footer reads "weights not yet fitted" — indistinguishable from
+        # the honest early-deployment state unless someone diffs the two.
+        #
+        # The concrete way this happens: _theme_exposure keys exposure at
+        # the UTC HOUR an item published (`ts[:13] + ":00:00Z"`), and this
+        # loop looks it up with the hourly bar's own stored `ts`. Every test
+        # fixture builds bars on the hour, so that match has never been
+        # checked against real Yahoo data (429 on every attempt so far —
+        # see docs/todo/006). If GC=F's hourly bars are not stamped on the
+        # hour, EVERY lookup above misses, forever.
+        #
+        # Raise rather than return a flag: this command (`jamasp weights
+        # fit`) runs off its own daily systemd timer, not an agent run, and
+        # every jamasp-* unit already carries OnFailure=jamasp-alert@%n —
+        # a raised exception reaches the desk chat through infrastructure
+        # that already exists and is already trusted, where a flag would
+        # need a NEW reader (the CLI, then a human reading its stdout in
+        # the journal) to not go unnoticed exactly the way this bug did.
+        raise RuntimeError(
+            "build_theme: item_scores has scored stories (first at "
+            f"{first_scored}) and the training matrix has {len(rows)} "
+            "hourly rows, but every theme column shows zero observations "
+            "across all of them. This is not \"not enough news yet\" — it "
+            "is the hour-key join between _theme_exposure's keys and the "
+            "hourly bars' own timestamps matching nothing. Check whether "
+            "GC=F hourly bars are stamped on the UTC hour: "
+            "`SELECT ts FROM bars WHERE symbol = 'GC' AND timeframe = "
+            "'1h' LIMIT 5` should show ':00:00Z', not e.g. ':30:00Z'."
+        )
+
     return TrainingData(
         columns, tuple(rows), X, [v for _, v in target], {**theme_obs, **observations})

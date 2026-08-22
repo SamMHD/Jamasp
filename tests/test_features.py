@@ -238,6 +238,32 @@ def test_theme_matrix_is_empty_with_no_scored_items(tmp_path):
     assert data.X == [] and data.y == []
 
 
+def test_build_theme_raises_when_hourly_bars_are_stamped_off_the_hour(tmp_path):
+    # This is the documentation of the assumption `_theme_exposure` and
+    # `build_theme` rest on, unverified against live Yahoo data (429 on
+    # every attempt so far, per Finding 5). `_theme_exposure` keys exposure
+    # at the UTC HOUR an item published ("...T02:10:00Z" -> "...T02:00:00Z"),
+    # and this reads it back with the hourly bar's OWN stored ts. Every
+    # other test in this file seeds bars on the hour, so the join has only
+    # ever been checked against itself. Stamp bars at :30 past the hour
+    # instead -- every lookup misses, every theme column is zero for every
+    # row, and that must fail loudly rather than render as "not enough news
+    # yet".
+    conn = db.connect(tmp_path / "j.db")
+    off_hour_start = "2026-02-01T00:30:00Z"
+    store_bars(conn, "GC", "1h", _hourly(200, start=off_hour_start))
+    store_bars(conn, "GC", "4h", _hourly(200, start=off_hour_start))
+    store_bars(conn, "GC", "1d", _daily(60))
+    store_bars(conn, "GC", "1w", _daily(60))
+    # Published well inside the seeded bar range, on the hour as every real
+    # item's published_at is -- it is the BAR that is off, not the story.
+    _score(conn, "a", "2026-02-02T02:10:00Z", 5, "rates_dollar")
+    _score(conn, "b", "2026-02-02T05:40:00Z", 4, "geopolitics")
+
+    with pytest.raises(RuntimeError, match="join"):
+        features.build_theme(conn, load_weights(), "GC")
+
+
 def test_theme_matrix_counts_observations_per_hour_not_per_story(tmp_path):
     # "Missing is neutral, and counted" applies to the theme columns too:
     # theme_obs counts HOURS with exposure, not stories. Two stories landing
