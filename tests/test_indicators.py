@@ -125,6 +125,64 @@ def test_macd_is_positive_in_an_uptrend():
     assert line[-1] > 0 and line[-1] > sig[-1]
 
 
+def _reference_ema(values, n):
+    """A from-scratch EMA, written independently of jamasp.indicators.ema.
+
+    Not a call into the module under test: it exists so the golden-vector
+    test below pins the DEFINITION (alpha = 2/(n+1), seeded on the simple
+    average of the first n values) rather than whatever ind.ema currently
+    happens to compute. If macd() were ever changed to call `_wilder`
+    (alpha = 1/n) instead of `ema` internally -- the module docstring's
+    named failure mode -- this reference still uses the correct alpha, so
+    the comparison catches it.
+    """
+    alpha = 2.0 / (n + 1)
+    out = [None] * len(values)
+    prev = sum(values[:n]) / n
+    out[n - 1] = prev
+    for i in range(n, len(values)):
+        prev = alpha * values[i] + (1 - alpha) * prev
+        out[i] = prev
+    return out
+
+
+def test_macd_matches_hand_derived_ema12_ema26_ema9():
+    # Golden vector, not a sign/ordering check: a reviewer swapped `ema` for
+    # `_wilder` inside macd() and test_macd_is_positive_in_an_uptrend (above)
+    # still passed -- a swapped smoothing constant "produces curves that
+    # look entirely plausible and disagree with every chart" (module
+    # docstring), which is exactly what a sign check cannot see and an exact
+    # value check can.
+    #
+    # 34 closes: the minimum length for the DEFAULT fast=12/slow=26/signal=9
+    # to produce a signal-line value at all (EMA26 first exists at index 25;
+    # the signal EMA9 then needs 9 more MACD-line values, first existing at
+    # index 33). A deterministic oscillation-plus-drift, not a straight
+    # ramp: test_macd_is_positive_in_an_uptrend documents that a pure linear
+    # ramp hits its EMA steady-state identically for both the fast and slow
+    # EMA, which would make this test pass by an identity rather than by
+    # actually exercising the recurrence.
+    closes = [100.0 + 5.0 * ((i % 7) - 3) + 0.6 * i for i in range(34)]
+    bars = _bars(closes)
+
+    ema12 = _reference_ema(closes, 12)
+    ema26 = _reference_ema(closes, 26)
+    ref_line = [None if ema12[i] is None or ema26[i] is None
+                else ema12[i] - ema26[i] for i in range(len(closes))]
+    live = [v for v in ref_line if v is not None]
+    ref_signal = _reference_ema(live, 9)
+
+    line, sig = ind.macd(bars)
+    assert line[-1] == pytest.approx(ref_line[-1])
+    assert sig[-1] == pytest.approx(ref_signal[-1])
+    # Sanity: the reference and the two smoothing conventions actually
+    # disagree by a wide margin on this series, so this is a genuine pin,
+    # not an accidental near-tie between ema and _wilder.
+    from jamasp.indicators import _wilder
+    wilder_line_last = _wilder(closes, 12)[-1] - _wilder(closes, 26)[-1]
+    assert abs(wilder_line_last - ref_line[-1]) > 1.0
+
+
 # ---- Stochastic and Williams %R --------------------------------------------
 
 def test_stoch_k_is_one_hundred_at_the_window_high():
@@ -162,6 +220,28 @@ def test_bollinger_bands_are_symmetric_about_the_mean():
     upper, lower = ind.bollinger(_bars(closes), n=20, k=2.0)
     mid = ind.sma(closes, 20)[-1]
     assert (upper[-1] + lower[-1]) / 2 == pytest.approx(mid)
+
+
+def test_bollinger_uses_population_not_sample_stdev():
+    # The module imports `pstdev` specifically because it "matches
+    # TradingView" (module docstring). The two tests above both pass under
+    # EITHER convention: a constant series collapses both to zero, and
+    # "symmetric about the mean" holds no matter which stdev formula scaled
+    # the band -- so neither pins the choice. This one does: population
+    # variance divides by n, sample variance by n-1, and a 5-point window
+    # is small enough for the two to disagree by a checkable amount.
+    #
+    # closes = 10, 12, 14, 16, 18 -> mean 14, deviations -4,-2,0,2,4,
+    # squared deviations 16,4,0,4,16, sum 40.
+    # population variance = 40/5 = 8  -> sd = sqrt(8)  ~= 2.8284271
+    # sample variance     = 40/4 = 10 -> sd = sqrt(10) ~= 3.1622777
+    closes = [10.0, 12.0, 14.0, 16.0, 18.0]
+    upper, lower = ind.bollinger(_bars(closes), n=5, k=1.0)
+    assert upper[-1] == pytest.approx(14.0 + 8.0 ** 0.5)
+    assert lower[-1] == pytest.approx(14.0 - 8.0 ** 0.5)
+    # And explicitly not the sample-stdev answer, so a regression to
+    # `statistics.stdev` fails loudly rather than by a rounding coincidence.
+    assert upper[-1] != pytest.approx(14.0 + 10.0 ** 0.5)
 
 
 # ---- ADX -------------------------------------------------------------------
