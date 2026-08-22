@@ -138,6 +138,29 @@ def test_store_bars_overwrites_a_revised_bar(tmp_path):
     assert read_bars(conn, "GC", "1d") == [Bar("2026-01-01T00:00:00Z", 1, 9, 0.5, 8.0)]
 
 
+def test_store_bars_of_identical_rows_does_not_change_max_rowid(tmp_path):
+    # `bars` is a rowid table and is git-tracked (state/jamasp.db, committed
+    # every run per CLAUDE.md). INSERT OR REPLACE is delete+insert under the
+    # hood: even byte-identical rows get fresh rowids, which rewrites every
+    # touched b-tree page and turns a daily re-walk of unchanged history into
+    # megabytes of new git objects for zero information. An upsert-in-place
+    # (INSERT ... ON CONFLICT DO UPDATE) leaves rowids — and therefore pages
+    # — untouched when nothing actually changed. This is the one observable
+    # difference between the two forms, so it is what this test pins.
+    conn = db.connect(tmp_path / "j.db")
+    bars = [Bar("2026-01-01T00:00:00Z", 1, 2, 0.5, 1.5),
+            Bar("2026-01-02T00:00:00Z", 2, 3, 1.0, 2.5),
+            Bar("2026-01-03T00:00:00Z", 3, 4, 1.5, 3.5)]
+    store_bars(conn, "GC", "1d", bars)
+    before = conn.execute("SELECT max(rowid) AS m FROM bars").fetchone()["m"]
+
+    store_bars(conn, "GC", "1d", bars)  # re-store byte-identical rows
+    after = conn.execute("SELECT max(rowid) AS m FROM bars").fetchone()["m"]
+
+    assert after == before
+    assert read_bars(conn, "GC", "1d") == sorted(bars, key=lambda b: b.ts)
+
+
 def test_store_bars_keeps_timeframes_separate(tmp_path):
     conn = db.connect(tmp_path / "j.db")
     b = Bar("2026-01-01T00:00:00Z", 1, 2, 0.5, 1.5)

@@ -125,14 +125,34 @@ def store_bars(
 ) -> int:
     """Upsert bars. Returns the number of rows written.
 
-    INSERT OR REPLACE rather than OR IGNORE: Yahoo revises the most recent
-    bar while it is still forming, and a stored copy frozen at the first
-    value seen would quietly disagree with every later fetch.
+    ON CONFLICT DO UPDATE rather than INSERT OR REPLACE: `bars` is a rowid
+    table, and REPLACE is a delete+insert under the hood — even a
+    byte-identical row gets a fresh rowid, which rewrites every b-tree page
+    it touches for zero information. `backfill` re-walks all history on
+    every run by design (it is both the initial backfill and the daily
+    refresh), and `state/jamasp.db` is git-tracked and committed at the end
+    of every run (CLAUDE.md hard rule 4) — so a delete+insert here means
+    megabytes of new, immutable git objects every day forever for rows that
+    did not change. Updating in place touches no row, and so no page, unless
+    a value actually differs.
+
+    An UPDATE still runs on every conflict, unconditionally, rather than
+    only when a value differs: Yahoo revises the most recent bar while it is
+    still forming, and a stored copy frozen at the first value seen would
+    quietly disagree with every later fetch. What changes is that the update
+    happens IN PLACE at the row's existing rowid, rather than deleting and
+    reinserting it — so when the incoming values equal the stored ones (the
+    common case on every backfill after the first), the row's page comes out
+    byte-identical to what was already committed, and git sees no diff.
+    REPLACE cannot do that: a new rowid every time means a rewritten page
+    every time, whether or not anything actually changed.
     """
     conn.executemany(
-        "INSERT OR REPLACE INTO bars"
-        " (symbol, timeframe, ts, open, high, low, close)"
-        " VALUES (?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO bars (symbol, timeframe, ts, open, high, low, close)"
+        " VALUES (?, ?, ?, ?, ?, ?, ?)"
+        " ON CONFLICT(symbol, timeframe, ts) DO UPDATE SET"
+        " open = excluded.open, high = excluded.high,"
+        " low = excluded.low, close = excluded.close",
         [(symbol, timeframe, b.ts, b.open, b.high, b.low, b.close) for b in bars],
     )
     conn.commit()
