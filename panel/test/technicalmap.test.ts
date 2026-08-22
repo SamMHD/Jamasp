@@ -13,9 +13,9 @@ const WEIGHTS = {
       n: 16880, horizonHours: 24, flags: [],
       coefficients: {
         "rsi14@1d": { beta: 0.03, se: 0.008, multiplier: 2.0,
-                      observations: 900, fitted: true },
+                      observations: 900, fitted: true, pinned: false },
         "rsi14@4h": { beta: 0.001, se: 0.02, multiplier: 1.0,
-                      observations: 3, fitted: false },
+                      observations: 3, fitted: false, pinned: false },
       },
     },
   },
@@ -52,6 +52,34 @@ describe("buildSignalTiles", () => {
   it("treats an under-observed column as unfitted even though it has a coefficient", () => {
     const tiles = buildSignalTiles(STATES, SPECS, WEIGHTS);
     expect(tiles.find(t => t.key === "rsi14@4h")!.fitted).toBe(false);
+  });
+
+  it("honours a pin on a column the fit never measured", () => {
+    // The exact scenario Finding 2a names: a retro pins rsi14@4h (3
+    // observations, unfitted) and jamasp/fit.py's run_fit already applies
+    // pins[col] to `multiplier` regardless of `fitted` -- but the OLD
+    // buildSignalTiles ignored that and fell back to NEUTRAL_MULTIPLIER
+    // because it only ever checked `fitted`. The pin must reach the tile.
+    const weights = {
+      ...WEIGHTS,
+      fits: { technical: { ...WEIGHTS.fits.technical, coefficients: {
+        ...WEIGHTS.fits.technical.coefficients,
+        "rsi14@4h": { beta: 0.001, se: 0.02, multiplier: 2.75,
+                      observations: 3, fitted: false, pinned: true },
+      } } },
+    };
+    const tiles = buildSignalTiles(STATES, SPECS, weights);
+    const pinned = tiles.find(t => t.key === "rsi14@4h")!;
+    expect(pinned.fitted).toBe(false);
+    expect(pinned.pinned).toBe(true);
+    expect(pinned.multiplier).toBe(2.75);
+  });
+
+  it("still weighs neutral a column that is neither fitted nor pinned", () => {
+    const tiles = buildSignalTiles(STATES, SPECS, WEIGHTS);
+    const sma = tiles.find(t => t.key === "sma50@1d")!;
+    expect(sma.pinned).toBe(false);
+    expect(sma.multiplier).toBe(1);
   });
 
   it("renders everything neutral and unfitted with no weights file at all", () => {

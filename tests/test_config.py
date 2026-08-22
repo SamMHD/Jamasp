@@ -220,3 +220,68 @@ def test_active_pins_rejects_a_pin_with_no_reason(tmp_path):
     )
     with pytest.raises(ValueError, match="reason"):
         active_pins(load_weights(p), "2026-08-20")
+
+
+def test_active_pins_lapses_exactly_on_its_expiry_date(tmp_path):
+    # "Expired pins lapse automatically at fit time" (design spec) means a
+    # pin is in force strictly BEFORE its expiry date, not through it: the
+    # fit that runs on the expiry date itself must already see the fitted
+    # value, not one more day of the pin. This boundary was previously
+    # unpinned by any test — the drops/keeps test above only exercises an
+    # expiry date in the past, never today's date exactly.
+    p = tmp_path / "w.yaml"
+    p.write_text(
+        "themes: [other]\nsignals: []\n"
+        "pins:\n"
+        "  - {key: rates_dollar, value: 1.5, reason: 'cut cycle', expires: '2026-08-20'}\n"
+    )
+    assert active_pins(load_weights(p), "2026-08-20") == {}
+    # The day before expiry it is still live.
+    assert active_pins(load_weights(p), "2026-08-19") == {"rates_dollar": 1.5}
+
+
+def test_active_pins_rejects_a_pin_above_the_configured_multiplier_band(tmp_path):
+    # A pin is honoured verbatim wherever it applies (jamasp/fit.py no longer
+    # re-clamps it), so a value outside [multiplier_min, multiplier_max]
+    # would otherwise bypass the clamp every fitted coefficient obeys and
+    # let a theme or signal tile grow without bound. This must fail loudly
+    # at config-load time, not silently render an unbounded tile.
+    p = tmp_path / "w.yaml"
+    p.write_text(
+        "themes: [other]\nsignals: []\n"
+        "fit: {multiplier_min: 0.25, multiplier_max: 3.0}\n"
+        "pins:\n"
+        "  - {key: rates_dollar, value: 5.0, reason: 'cut cycle', expires: '2026-09-01'}\n"
+    )
+    with pytest.raises(ValueError, match=r"outside the configured"):
+        active_pins(load_weights(p), "2026-08-20")
+
+
+def test_active_pins_rejects_a_pin_of_zero_meant_to_switch_a_column_off(tmp_path):
+    # The concrete scenario the finding names: a retro writes value: 0 to
+    # mean "stop weighting this column". 0 is below multiplier_min and must
+    # be refused, not silently taken as "the floor" or "off".
+    p = tmp_path / "w.yaml"
+    p.write_text(
+        "themes: [other]\nsignals: []\n"
+        "fit: {multiplier_min: 0.25, multiplier_max: 3.0}\n"
+        "pins:\n"
+        "  - {key: etf_flows, value: 0, reason: 'no stories yet', expires: '2026-09-01'}\n"
+    )
+    with pytest.raises(ValueError, match=r"outside the configured"):
+        active_pins(load_weights(p), "2026-08-20")
+
+
+def test_active_pins_default_band_matches_the_shipped_config_when_fit_is_absent(tmp_path):
+    # Test fixtures throughout this file omit the `fit:` block entirely; the
+    # default band must match config/weights.yaml's shipped multiplier_min/
+    # multiplier_max (0.25/3.0) so those fixtures keep meaning what they
+    # already assert.
+    p = tmp_path / "w.yaml"
+    p.write_text(
+        "themes: [other]\nsignals: []\n"
+        "pins:\n"
+        "  - {key: rates_dollar, value: 0.1, reason: 'cut cycle', expires: '2026-09-01'}\n"
+    )
+    with pytest.raises(ValueError, match=r"outside the configured"):
+        active_pins(load_weights(p), "2026-08-20")

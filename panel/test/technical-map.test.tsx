@@ -5,7 +5,8 @@ import type { SignalTile } from "@/lib/technicalmap";
 
 const tile = (over: Partial<SignalTile> = {}): SignalTile => ({
   key: "rsi14@1d", signal: "rsi14", timeframe: "1d", family: "momentum",
-  state: 0.8, ts: "2026-08-20T00:00:00Z", multiplier: 2, fitted: true, ...over,
+  state: 0.8, ts: "2026-08-20T00:00:00Z", multiplier: 2, fitted: true,
+  pinned: false, ...over,
 });
 
 const render = (tiles: SignalTile[]) =>
@@ -52,6 +53,27 @@ describe("TechnicalMap", () => {
 
   it("draws a fitted tile solid", () => {
     expect(render([tile({ fitted: true })])).not.toContain("stroke-dasharray");
+  });
+
+  it("draws a pinned-but-unfitted tile solid, not dashed", () => {
+    // Dashed means "1.0 for want of a sample" -- a pin is not that. It is a
+    // human's deliberate number, exactly as real as a fitted one, so it
+    // must render solid even though `fitted` is false. A retro reaches for
+    // a pin precisely for the columns short of min_observations, so this
+    // is the exact case the pin exists to fix.
+    const html = render([tile({ fitted: false, pinned: true, multiplier: 2.5 })]);
+    expect(html).not.toContain("stroke-dasharray");
+  });
+
+  it("still dashes a tile that is neither fitted nor pinned", () => {
+    const html = render([tile({ fitted: false, pinned: false, multiplier: 1 })]);
+    expect(html).toContain("stroke-dasharray");
+  });
+
+  it("marks a pinned tile's weight as pinned in its hover title", () => {
+    const html = render([tile({ fitted: false, pinned: true, multiplier: 2.5 })]);
+    expect(html).toContain("pinned");
+    expect(html).toContain("2.50");
   });
 
   it("states each signal's read and multiplier in its hover title", () => {

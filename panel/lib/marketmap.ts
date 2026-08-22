@@ -222,3 +222,33 @@ export function layoutMap(
     theme: b.group, items: b.items, total: b.total,
   }));
 }
+
+export type ThemeCoefficient = {
+  multiplier: number; fitted: boolean; pinned: boolean;
+};
+
+/**
+ * Theme -> the multiplier `layoutMap` should use, from the theme fit's raw
+ * coefficients (state/weights.json's `fits.theme.coefficients`, already
+ * camelCased by lib/files.ts).
+ *
+ * A coefficient counts if EITHER it was fitted (the regression measured it)
+ * OR it is pinned (a retro overrode it via config/weights.yaml's `pins:`
+ * block) — mirrors lib/technicalmap.ts#buildSignalTiles's identical
+ * defence, and for the identical reason: jamasp/fit.py's run_fit applies a
+ * pin's value to `multiplier` whether or not that column was ever fitted
+ * (a retro reaches for a pin exactly for the themes short of min_rows, or
+ * with no stories yet), so requiring `fitted === true` here would discard
+ * the pin for precisely the cases it exists to fix. `c?.fitted === true` /
+ * `c?.pinned === true` (not the bare properties) is deliberate: a malformed
+ * coefficient entry that parsed as JSON but arrived as `null` must degrade
+ * to "not counted" rather than throw — this reader never 500s on bad state.
+ */
+export function buildThemeMultipliers(
+  coefficients: Record<string, ThemeCoefficient | null | undefined> | undefined,
+): Record<string, number> {
+  return Object.fromEntries(
+    Object.entries(coefficients ?? {})
+      .filter(([, c]) => c?.fitted === true || c?.pinned === true)
+      .map(([key, c]) => [key, c!.multiplier]));
+}

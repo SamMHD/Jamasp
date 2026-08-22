@@ -230,7 +230,7 @@ def test_write_results_produces_readable_json_and_db_rows(tmp_path):
     assert doc["fitted_at"] == "2026-08-20T04:17:00Z"
     assert doc["fits"]["technical"]["n"] == 400
     entry = doc["fits"]["technical"]["coefficients"]["a"]
-    assert set(entry) == {"beta", "se", "multiplier", "observations", "fitted"}
+    assert set(entry) == {"beta", "se", "multiplier", "observations", "fitted", "pinned"}
 
     rows = conn.execute("SELECT fit, key, multiplier FROM weight_fits").fetchall()
     assert {r["key"] for r in rows} == {"a", "b"}

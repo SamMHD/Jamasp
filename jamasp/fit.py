@@ -42,6 +42,7 @@ class Coefficient:
     multiplier: float
     observations: int
     fitted: bool
+    pinned: bool
 
 
 @dataclass(frozen=True)
@@ -149,11 +150,20 @@ def run_fit(name: str, data: TrainingData, cfg: dict, pins: dict[str, float],
         # An under-observed column renders neutral and dashed rather than
         # publishing a coefficient estimated from a handful of rows.
         m = multipliers[j] if fitted else 1.0
-        if col in pins:
+        pinned = col in pins
+        if pinned:
+            # Effective weight = active pin if present, else fitted, then
+            # clamped (the spec's rule). The pin wins regardless of whether
+            # this column was fitted at all — a retro pins exactly the
+            # columns short of min_observations, or with no stories yet, so
+            # gating the pin on `fitted` would discard it for precisely the
+            # cases it exists to fix. active_pins() has already rejected any
+            # pin outside [multiplier_min, multiplier_max] at config-load
+            # time, so the value handed back here needs no further clamping.
             m = pins[col]
         coefficients.append(Coefficient(
             key=col, beta=betas[j], se=ses[j], multiplier=m,
-            observations=obs, fitted=fitted))
+            observations=obs, fitted=fitted, pinned=pinned))
 
     return FitResult(name=name, n=len(data.y), horizon_hours=cfg["horizon_hours"],
                      ridge_alpha=cfg["ridge_alpha"], coefficients=coefficients,
@@ -177,7 +187,8 @@ def write_results(conn: sqlite3.Connection, path: Path,
             "flags": r.flags,
             "coefficients": {
                 c.key: {"beta": c.beta, "se": c.se, "multiplier": c.multiplier,
-                        "observations": c.observations, "fitted": c.fitted}
+                        "observations": c.observations, "fitted": c.fitted,
+                        "pinned": c.pinned}
                 for c in r.coefficients
             },
         }

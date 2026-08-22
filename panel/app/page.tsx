@@ -20,7 +20,7 @@ import { deriveNewsPulse } from "@/lib/newsflow";
 import { parseStance } from "@/lib/stance";
 import { buildSignalTiles } from "@/lib/technicalmap";
 import { deriveTechnicals, TECHNICAL_SYMBOLS } from "@/lib/technicals";
-import type { MapRange } from "@/lib/marketmap";
+import { buildThemeMultipliers, type MapRange } from "@/lib/marketmap";
 import { cls, fmtUtc } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -75,15 +75,9 @@ export default async function Overview({
   const signalTiles = buildSignalTiles(
     signalStates, files.loadWeightsConfig().signals, fittedWeights);
 
-  // Unfitted theme coefficients must not resize a tile, for the same reason
-  // an unfitted signal weighs neutral on the technical map. c?.fitted ===
-  // true (not a bare c.fitted) matches lib/technicalmap.ts's defence: a
-  // malformed coefficient entry that parsed as JSON but arrived as `null`
-  // must degrade rather than throw — the panel never 500s on bad state.
-  const themeMultipliers = Object.fromEntries(
-    Object.entries(fittedWeights?.fits?.theme?.coefficients ?? {})
-      .filter(([, c]) => c?.fitted === true)
-      .map(([key, c]) => [key, c.multiplier]));
+  // See lib/marketmap.ts#buildThemeMultipliers for why a pinned-but-unfitted
+  // coefficient must still reach the map.
+  const themeMultipliers = buildThemeMultipliers(fittedWeights?.fits?.theme?.coefficients);
 
   // --- ops health (unchanged derivations, demoted presentation) ---
   const lastIngest = db.getMeta("last_ingest_at");

@@ -20,6 +20,17 @@
  * Before the first fit every multiplier is 1.0, so the map reads as a uniform
  * grid. Honest, but it looks odd — which is why unfitted tiles are drawn with
  * a dashed outline rather than silently rendering as a measurement.
+ *
+ * `fitted` and `pinned` are two different claims and must stay that way.
+ * `fitted` means the regression measured this column — it comes straight off
+ * jamasp/fit.py's under-observed check and never changes because of a pin.
+ * `pinned` means a human overrode it via config/weights.yaml's `pins:` block.
+ * A pin applies whether or not its column was ever fitted — a retro reaches
+ * for a pin exactly for the columns short of min_observations, or with no
+ * stories yet, so gating it on `fitted` would discard it for precisely the
+ * cases it exists to fix. A tile is solid (not dashed) when EITHER is true:
+ * fitted means "measured", pinned means "a human's deliberate number", and
+ * dashed is reserved for the third case — 1.0 for want of either.
  */
 import {
   layoutGroups, type GroupBox, type Rect,
@@ -38,7 +49,7 @@ export type WeightsConfig = {
 
 export type FittedCoefficient = {
   beta: number; se: number; multiplier: number;
-  observations: number; fitted: boolean;
+  observations: number; fitted: boolean; pinned: boolean;
 };
 
 export type FittedWeights = {
@@ -51,7 +62,7 @@ export type FittedWeights = {
 
 export type SignalTile = {
   key: string; signal: string; timeframe: string; family: string;
-  state: number; ts: string; multiplier: number; fitted: boolean;
+  state: number; ts: string; multiplier: number; fitted: boolean; pinned: boolean;
 };
 
 /** What every tile weighs before anything has been learned. */
@@ -77,14 +88,19 @@ export function buildSignalTiles(
     const [signal, timeframe] = st.key.split("@");
     const c = coefficients[st.key];
     const fitted = c?.fitted === true;
+    const pinned = c?.pinned === true;
     out.push({
       key: st.key, signal, timeframe, family: fam,
       state: st.value, ts: st.ts,
-      // An unfitted column weighs neutral whatever number happens to sit in
-      // the file: a coefficient from three observations is not a measurement,
-      // and sizing a tile by it would render confidence nobody earned.
-      multiplier: fitted ? c.multiplier : NEUTRAL_MULTIPLIER,
+      // An unfitted, unpinned column weighs neutral whatever number happens
+      // to sit in the file: a coefficient from three observations is not a
+      // measurement, and sizing a tile by it would render confidence nobody
+      // earned. A pin is not a measurement either, but it IS a deliberate
+      // number a human chose — honouring it is the entire point of a pin,
+      // so it must survive even when `fitted` is false.
+      multiplier: fitted || pinned ? c!.multiplier : NEUTRAL_MULTIPLIER,
       fitted,
+      pinned,
     });
   }
   return out;

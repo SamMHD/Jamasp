@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { layoutGroups, layoutMap, squarify, tierWeight, tone,
-         toneFromIntensity, type ScoredItem } from "../lib/marketmap";
+import { buildThemeMultipliers, layoutGroups, layoutMap, squarify, tierWeight,
+         tone, toneFromIntensity, type ScoredItem } from "../lib/marketmap";
 
 describe("tierWeight", () => {
   it("maps the configured tier scale", () => {
@@ -260,5 +260,42 @@ describe("layoutMap with learned theme multipliers", () => {
     const total = boxes.reduce((s, b) => s + b.w * b.h, 0);
     // Ratio, not absolute area — see the technical map's equivalent test.
     expect(total / (400 * 300)).toBeCloseTo(1, 6);
+  });
+});
+
+describe("buildThemeMultipliers", () => {
+  it("counts a fitted coefficient", () => {
+    const out = buildThemeMultipliers({
+      rates_dollar: { multiplier: 1.6, fitted: true, pinned: false },
+    });
+    expect(out).toEqual({ rates_dollar: 1.6 });
+  });
+
+  it("counts a pin on a column the fit never measured", () => {
+    // Finding 2a's exact scenario: a retro pins etf_flows (no stories yet,
+    // so the fit never touches it) or any theme short of min_rows. Both
+    // panel readers must honour the pin anyway — jamasp/fit.py's run_fit
+    // already writes the pin's value into `multiplier` regardless of
+    // `fitted`, so the old `.filter(([, c]) => c?.fitted === true)` threw
+    // that value away for exactly the columns a pin exists to fix.
+    const out = buildThemeMultipliers({
+      etf_flows: { multiplier: 1.8, fitted: false, pinned: true },
+    });
+    expect(out).toEqual({ etf_flows: 1.8 });
+  });
+
+  it("drops a coefficient that is neither fitted nor pinned", () => {
+    const out = buildThemeMultipliers({
+      supply_mining: { multiplier: 1.0, fitted: false, pinned: false },
+    });
+    expect(out).toEqual({});
+  });
+
+  it("degrades a malformed entry rather than throwing", () => {
+    // A coefficient that parsed as JSON but arrived as `null` (or the whole
+    // map is undefined, e.g. no theme fit has run yet) must not crash the
+    // page.
+    expect(buildThemeMultipliers(undefined)).toEqual({});
+    expect(buildThemeMultipliers({ geopolitics: null })).toEqual({});
   });
 });
