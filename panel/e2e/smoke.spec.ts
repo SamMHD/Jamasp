@@ -36,6 +36,13 @@ test("overview renders the market instrument panels", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Market map" })).toBeVisible();
   await expect(map.locator('svg[aria-label^="scored news treemap"]')).toBeVisible();
   await expect(map.getByText(/1 scored stor/)).toBeVisible();
+  // The fixture's weights.json carries a technical-only fit — fitted_at is
+  // set, but fits.theme does not exist at all. The footer must read this as
+  // "not yet fitted" rather than announcing a rescale that never happened:
+  // gating on the top-level timestamp alone (rather than on whether any
+  // theme multiplier actually applied) would say "areas weighted" while
+  // every theme is still at its neutral 1.0.
+  await expect(map.getByText("weights not yet fitted")).toBeVisible();
 
   // Fundamental: heading, the weight bar's text legend, the falsifier rows
   // (condition split from consequence at the analyst's arrow — the

@@ -75,6 +75,22 @@ export default async function Overview({
   const signalTiles = buildSignalTiles(
     signalStates, files.loadWeightsConfig().signals, fittedWeights);
 
+  // Unfitted theme coefficients must not resize a tile, for the same reason
+  // an unfitted signal weighs neutral on the technical map.
+  const themeMultipliers = Object.fromEntries(
+    Object.entries(fittedWeights?.fits?.theme?.coefficients ?? {})
+      .filter(([, c]) => c.fitted)
+      .map(([key, c]) => [key, c.multiplier]));
+  // The footer's "weighted" vs "not yet fitted" wording must track whether
+  // the map actually scaled anything, not just whether weights.json has a
+  // top-level fitted_at. Before Fit B reaches min_rows the file carries a
+  // fitted_at from a technical-only run with no `fits.theme` key at all, so
+  // gating on that timestamp alone would announce "areas weighted by the
+  // fit" while every theme multiplier is still the neutral 1.0 — false
+  // confidence in the opposite direction from the one the footer exists to
+  // prevent.
+  const themeFitted = Object.keys(themeMultipliers).length > 0;
+
   // --- ops health (unchanged derivations, demoted presentation) ---
   const lastIngest = db.getMeta("last_ingest_at");
   const sources = files.loadSources();
@@ -184,7 +200,9 @@ export default async function Overview({
             ratio decides how much of a screen fullscreen actually fills. 2:1
             also buys tiles the height that wrapped headlines need. */}
         <MarketMap items={mapItems} width={1200} height={600} range={range}
-          coverage={{ scored: mapItems.length, unscored: mapUnscored }} />
+          coverage={{ scored: mapItems.length, unscored: mapUnscored }}
+          themeMultipliers={themeMultipliers}
+          fittedAt={themeFitted ? (fittedWeights?.fittedAt ?? null) : null} />
       </section>
 
       <section aria-label="Technical map" className="mb-4">

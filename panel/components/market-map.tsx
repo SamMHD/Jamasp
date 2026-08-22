@@ -67,12 +67,15 @@ function tileTitle(item: ScoredItem, now: Date): string {
     + `(conviction ${item.conviction.toFixed(2)}), ${item.source}, ${fmtAge(item.publishedAt, now)}`;
 }
 
-export function MarketMap({ items, width, height, range, coverage }: {
+export function MarketMap({ items, width, height, range, coverage,
+  themeMultipliers, fittedAt }: {
   items: ScoredItem[];
   width: number;
   height: number;
   range: MapRange;
   coverage: { scored: number; unscored: number };
+  themeMultipliers?: Record<string, number>;
+  fittedAt?: string | null;
 }) {
   const now = new Date();
 
@@ -89,7 +92,8 @@ export function MarketMap({ items, width, height, range, coverage }: {
     );
   }
 
-  const boxes = layoutMap(items, { x: 0, y: 0, w: width, h: height }, THEME_HEADER_H);
+  const boxes = layoutMap(
+    items, { x: 0, y: 0, w: width, h: height }, THEME_HEADER_H, themeMultipliers);
 
   return (
     // id is the fullscreen target: FullscreenButton is a client component and
@@ -131,6 +135,9 @@ export function MarketMap({ items, width, height, range, coverage }: {
       <p className="mt-2 text-xs text-muted-foreground">
         {coverage.scored} scored {coverage.scored === 1 ? "story" : "stories"} {WINDOW_LABEL[range]}
         {" "}· {coverage.unscored} unscored not shown
+        {fittedAt
+          ? ` · areas weighted by the ${fmtAge(fittedAt, now)} fit`
+          : " · weights not yet fitted"}
       </p>
     </section>
   );

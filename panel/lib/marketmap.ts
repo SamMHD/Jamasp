@@ -197,16 +197,25 @@ export function layoutGroups<T>(
 }
 
 /**
- * The fundamental map's layout: stories grouped by theme, sized by tier.
+ * The fundamental map's layout: stories grouped by theme, sized by tier and
+ * by the theme's learned multiplier.
  *
- * A thin adapter over layoutGroups, keeping `.theme` on the returned boxes
- * because this component and its tests have always read that name.
+ * `multipliers` comes from Fit B via state/weights.json. An absent entry is
+ * 1.0, so a deployment whose theme fit has not reached min_rows renders
+ * exactly as it did before this existed — a map that quietly rescaled itself
+ * on the day a fit first succeeded, with nothing on the page saying so, would
+ * be a worse outcome than one that says "provisional" for three weeks.
  */
 export function layoutMap(
   items: ScoredItem[], rect: Rect, headerHeight: number,
+  multipliers: Record<string, number> = {},
 ): ThemeBox[] {
   const boxes = layoutGroups(
-    items.map(it => ({ group: it.theme, value: tierWeight(it.tier), node: it })),
+    items.map(it => ({
+      group: it.theme,
+      value: tierWeight(it.tier) * (multipliers[it.theme] ?? 1),
+      node: it,
+    })),
     rect, headerHeight);
   return boxes.map(b => ({
     x: b.x, y: b.y, w: b.w, h: b.h,

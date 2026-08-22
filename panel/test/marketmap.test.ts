@@ -221,3 +221,44 @@ describe("layoutGroups", () => {
     expect(boxes[0].items[0].node.itemId).toBe("1");
   });
 });
+
+describe("layoutMap with learned theme multipliers", () => {
+  const rect = { x: 0, y: 0, w: 400, h: 300 };
+  const item = (id: string, theme: string) => ({
+    itemId: id, tier: 5, direction: 2, conviction: 0.8, theme,
+    headline: "h", source: "s", url: `u${id}`,
+    publishedAt: "2026-08-20T00:00:00Z",
+  });
+
+  it("scales a theme's area by its multiplier", () => {
+    const items = [item("1", "rates_dollar"), item("2", "geopolitics")];
+    const boxes = layoutMap(items, rect, 0, { rates_dollar: 3, geopolitics: 1 });
+    const rates = boxes.find(b => b.theme === "rates_dollar")!;
+    const geo = boxes.find(b => b.theme === "geopolitics")!;
+    // Same tier, so the multiplier is the only thing separating them.
+    expect((rates.w * rates.h) / (geo.w * geo.h)).toBeCloseTo(3, 2);
+  });
+
+  it("treats an absent multiplier as neutral", () => {
+    // Before Fit B has enough rows there are no theme multipliers at all, and
+    // the map must render exactly as it did before this feature existed.
+    const items = [item("1", "rates_dollar"), item("2", "geopolitics")];
+    const withNone = layoutMap(items, rect, 0);
+    const withEmpty = layoutMap(items, rect, 0, {});
+    expect(withEmpty).toEqual(withNone);
+  });
+
+  it("ignores a multiplier for a theme with no stories", () => {
+    const boxes = layoutMap([item("1", "rates_dollar")], rect, 0,
+      { rates_dollar: 2, etf_flows: 3 });
+    expect(boxes.map(b => b.theme)).toEqual(["rates_dollar"]);
+  });
+
+  it("still fills the whole canvas", () => {
+    const items = [item("1", "rates_dollar"), item("2", "geopolitics")];
+    const boxes = layoutMap(items, rect, 0, { rates_dollar: 3, geopolitics: 1 });
+    const total = boxes.reduce((s, b) => s + b.w * b.h, 0);
+    // Ratio, not absolute area — see the technical map's equivalent test.
+    expect(total / (400 * 300)).toBeCloseTo(1, 6);
+  });
+});

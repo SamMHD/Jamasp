@@ -12,9 +12,13 @@ function item(over: Partial<ScoredItem> = {}): ScoredItem {
   };
 }
 
-const render = (items: ScoredItem[]) => renderToStaticMarkup(
+const render = (
+  items: ScoredItem[],
+  extra: { themeMultipliers?: Record<string, number>;
+           fittedAt?: string | null } = {},
+) => renderToStaticMarkup(
   <MarketMap items={items} width={800} height={500} range="today"
-    coverage={{ scored: items.length, unscored: 0 }} />);
+    coverage={{ scored: items.length, unscored: 0 }} {...extra} />);
 
 describe("MarketMap", () => {
   it("renders one rect per item and names the theme", () => {
@@ -135,5 +139,22 @@ describe("MarketMap", () => {
     const html = render([]);
     expect(html.match(/<rect/g) ?? []).toHaveLength(0);
     expect(html.toLowerCase()).toContain("no scored");
+  });
+
+  it("states in the footer whether the areas are learned or provisional", () => {
+    // A map that quietly rescaled itself the day a fit first succeeded, with
+    // nothing on the page saying so, would be worse than one that reads
+    // "provisional" for three weeks.
+    expect(render([item()], { themeMultipliers: {}, fittedAt: null }))
+      .toContain("weights not yet fitted");
+
+    expect(render([item()], {
+      themeMultipliers: { rates_dollar: 1.6 },
+      fittedAt: "2026-08-20T04:17:00Z",
+    })).not.toContain("weights not yet fitted");
+  });
+
+  it("defaults to the provisional footer when no weights are passed at all", () => {
+    expect(render([item()])).toContain("weights not yet fitted");
   });
 });
