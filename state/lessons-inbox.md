@@ -101,3 +101,19 @@ by the weekly /retro. One bullet per lesson: date, observation, suggested rule.
   wakeup anchored to a scheduled data/event date must cite a
   primary-calendar verification (feed row or fresh extract) from within 7
   days of firing; the Saturday brief owns the weekly re-verification sweep.
+
+- **2026-08-23 — falsifier anchored on a third-party publication that never
+  printed; underlying metric also structurally broken.** 599d9586 (Hormuz
+  traffic ≥10% of pre-war at next UKMTO weekly read) scored UNCLEAR by its
+  own terms: no weekly figure was relayed by press through Sat 23:59Z. Two
+  distinct failures: (1) the falsifier depended on a periodic third-party
+  publication whose cadence nobody controls — heuristic 9 covers dark
+  feeds, but a feed that publishes *irregularly* is a different hazard;
+  (2) the metric itself (traffic share from tracking data) was made
+  meaningless mid-window when 80% of transits went deliberately AIS-dark
+  (Kpler, 23 Aug) — DoE puts real flow at 8–9 mb/d, ~2x AIS-based counts.
+  Suggested rule: a claim's falsifier must be scoreable from
+  observable-at-will state or a data release with a committed schedule;
+  and any metric built on AIS/tracking data needs a
+  is-the-instrument-still-valid check when actors have incentives to go
+  dark.

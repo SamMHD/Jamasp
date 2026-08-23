@@ -295,6 +295,25 @@ watchlist:
       weekly relay) unclear tonight if no figure prints. Secondary axis:
       Ukraine says Russia hit 52 civilian ships in six weeks, Black Sea
       escalating (insurance channel, no direct gold read yet).
+      22-23 Aug adds: DARK CORRIDOR MAINSTREAMED with numbers (Gulf
+      News/CNN/NYT/DoE): 80% of Hormuz traffic AIS-dark past 2 wks
+      (Kpler), DoE actual throughput 8-9 mb/d ~2x AIS-based counts, 5
+      mb/d on US-protected routes in July, 1,000+ escorted transits;
+      AIS-share traffic metrics structurally broken (599d9586 UNCLEAR,
+      metric retired — use DoE/Kpler throughput). Corridor ENDURANCE
+      named as the weak point: Bahrain naval base effectively destroyed,
+      resupply via Diego Garcia 5+ days each way, ~20 warships,
+      sustainment "increasingly difficult", 15 southern-route ships hit
+      since 1 Jun — slow-burn disruption trigger, fe35b77d (no escort
+      suspension/reduction thru 6 Sep, 0.7). Inventories depleted up to
+      1.9bn bbl (convex tail, no cushion). Doctrine-change reached SNSC
+      top: Rezaei state-TV interview Sat — "reforms must be made in
+      Iran's diplomatic behavior" post-"betrayal", "definitely a change
+      in the method of war", "new capabilities" (formalizes Javani
+      offensive-form thread into Monday presser). Iran: sanctions-joiners
+      = "enemies" (response surface widened to Gulf/allies). Hezbollah
+      warns of "proper response" to "new Israel occupation" framing
+      (Mehr, headline-only — watch Iran linkage).
     since: 2026-07-31
 
   - theme: energy-pce-passthrough
@@ -321,7 +340,13 @@ watchlist:
       21 Aug: Brent flirted $94 intraday (RSI 70.8), second weekly gain —
       6f8b0433 under immediate stress; Iran's stated pre-midterm plan
       (Yanbu/Fujairah/shadow-fleet, see middle-east theme) is the named
-      supply-shock path that would blow through $95.
+      supply-shock path that would blow through $95. 23 Aug: supply-side
+      resilience quantified — DoE 8-9 mb/d actually transiting Hormuz
+      (~2x AIS counts, 80% dark), Saudi East-West to Yanbu ~5 mb/d,
+      ~2 mb/d rerouted, +1 mb/d Brazil/Guyana/Venezuela — passthrough
+      spike-risk down; BUT inventories drawn up to 1.9bn bbl, so any
+      REAL supply hit (Yanbu/Fujairah/corridor break) transmits with no
+      buffer. 6f8b0433 supported at current supply, convex if it breaks.
     since: 2026-07-31
 
   - theme: india-gold-formalisation
