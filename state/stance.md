@@ -75,6 +75,9 @@ tonight's `b6794dbb` window. Monday reopens into the presser.
 
 ## Sourcing health
 
-Calendar feed dead past 21 Aug (todo-001); week map stands on the 22 Aug
-two-extract verification. AIS-based traffic metrics UNRELIABLE at 80%
-dark — use DoE/Kpler throughput estimates, not transit counts.
+Calendar feed LIVE again (verified 23 Aug retro, covers to 29 Aug —
+thisweek-only horizon rolled over; todo-001 stands): PCE Wed 12:30Z and
+Warsh Fri confirmed by feed row. NB feed has Bessent Mon 18:00Z vs wakeup
+#35 at 16:00Z — Monday runs verify the slot, don't trust either. AIS-based
+traffic metrics UNRELIABLE at 80% dark — use DoE/Kpler throughput
+estimates, not transit counts.
