@@ -459,9 +459,16 @@ events:
       months out. Economic-first explicitly defers kinetic ("that is for
       now") — package detail sets how hard the Iranian-response channel
       (8babc60f) gets pushed.
-    action: wakeup #35 added 2026-08-24T16:00:00Z deepdive (reschedules
-      itself if the presser hasn't landed; 2-hourly scans cover an
-      earlier drop)
+    action: >
+      SLOT CONFIRMED 24 Aug (investinglive extract + calendar feed row
+      agree): presser Mon 24 Aug 2pm EDT = 18:00Z = 22:00 Dubai. Wakeup
+      #35 (16:00Z, 2h early) cancelled -> #40 at 19:00Z reads the landed
+      package. Pre-committed Iranian counter already on record (Rezaei
+      whole-Gulf halt threat + act-of-war framing, 23 Aug): predictions
+      92a5bbb8 (no implemented total halt), 30bad8a0 (no nuclear
+      formalization), f230eca0 (no major-Chinese-bank designation, Thu),
+      8babc60f (response channel, Fri). 2-hourly scans cover an earlier
+      drop or overnight Iranian response.
 
   - date: 2026-11-03
     time_dubai: "window: now -> US midterms (3 Nov); action likely front-loaded ~Sep-Oct"

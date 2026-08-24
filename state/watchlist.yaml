@@ -90,6 +90,10 @@ watchlist:
       PBOC FIFTH straight weak fix (6.7817 vs 6.7262 est). Jackson Hole
       OPEN — Warsh keynote provisional 14:00Z today, wakeup #36 reads it;
       stance event-pending on it.
+      24 Aug: PBOC SIXTH straight deliberately weak fix (6.7841 vs 6.7248
+      est, ~590 pips); Goldman flags China stimulus risk as growth slips
+      further below target — debasement periphery broadening while Warsh
+      (keynote Fri 28, wakeup #39) inherits the undercut-chair frame.
     since: 2026-07-31
 
   - theme: middle-east-risk-premium
@@ -314,6 +318,24 @@ watchlist:
       = "enemies" (response surface widened to Gulf/allies). Hezbollah
       warns of "proper response" to "new Israel occupation" framing
       (Mehr, headline-only — watch Iran linkage).
+      23-24 Aug adds: ECONOMIC D-DAY presser slot confirmed Mon 18:00Z
+      (extract; wakeup #40 19:00Z reads it) — Bessent FT op-ed: goal =
+      COLLAPSE the regime, allies binary ("full might" vs non-compliers),
+      Venezuela/Cuba blockade template; secondary-sanctions dragnet on
+      shipping/insurance/finance. Iran pre-committed the counter: Rezaei —
+      sanctions participation = "act of war"; total-halt threat extended
+      beyond Hormuz to the WHOLE Gulf ("not a single drop"; 92a5bbb8 says
+      bluff 0.7 — rial at record 2M/USD makes a halt self-immolating,
+      China the punished lifeline buyer); NUCLEAR ambiguity from SNSC top
+      (Rezaei IRIB: US created "nuclear insecurity", world's bomb-desire
+      raised; he floated NPT exit in May — leverage-read, 30bad8a0 no
+      formalization 0.7; markers: IAEA access, enrichment, official NPT
+      exit); Marandi threatens panic in energy AND US bond market
+      (Iran-fiscal crossover, first named). IRGC tone dismissive
+      ("admission of defeat"). Oil EASED ~1% into the announcement
+      (supply-resilience read holds); weekend Kpler AIS-on <20 vessels
+      (retired-instrument caveat). b6794dbb HIT (Saudi window quiet;
+      structural-negative family 14-for-14).
     since: 2026-07-31
 
   - theme: energy-pce-passthrough
@@ -356,7 +378,11 @@ watchlist:
       provenance premium. First counter-move logged: NSE launched Electronic
       Gold Receipts (31 Jul) to formalise the domestic market. Ambiguous for the
       desk — less smuggled volume, but a larger documented market, and
-      documentation is Dubai's edge. Watch EGR volumes.
+      documentation is Dubai's edge. Watch EGR volumes. 24 Aug: July
+      imports DOUBLED (WGC flags demand recovery) — the physical leg
+      firmed despite record prices; formalisation not yet visible in the
+      flow data, grey-market share the open question for Dubai provenance
+      premium.
     since: 2026-07-31
 
   - theme: metals-financialization
@@ -407,7 +433,31 @@ watchlist:
       market pricing; explicit de facto YCC framing in a mainstream
       masthead. Week closed gold +5.2% WITH 10y up — regime signature
       printed. Warsh now speaks Friday as the publicly undercut chair.
+      24 Aug: buyback failure COMPLETE — 30y back toward the 2007-era
+      high within a week of the doubled purchases; Trump, asked about
+      further intervention, called the military "the ultimate
+      intervention" for the bond market (tarmac Fri; no mechanism,
+      universal confusion — the tell is conventional tools visibly
+      struggling; commentary flags Japan/UK as top foreign holders, an
+      adversarial-creditor framing risk). Kashkari counters "bond market
+      functioning well" — reassurance-vs-tape gap widens into Warsh Fri.
+      ING attributes gold >$4,600 to fiscal-credibility fears; Goldman:
+      options demand could beat their $4,900 forecast; Marandi (Iran)
+      explicitly threatens US bond-market panic — a geopolitical actor
+      now naming the fiscal channel as a target.
     since: 2026-08-20
+
+  - theme: us-canada-trade-war
+    why: >
+      Talks COLLAPSED 23 Aug: US 50% tariffs took effect, Carney "we're
+      going to hit back", equity futures slipped, CAD weaker on the
+      Monday open. Second protectionism front alongside the Iran siege
+      economy — feeds the debasement/de-globalization mix that is
+      already gold's price-setter. Watch: retaliation scope (energy and
+      USMCA carve-outs?), US inflation passthrough chatter, whether
+      safe-haven flow shows in gold vs USD. Low conviction on magnitude;
+      entered as a tripwire theme.
+    since: 2026-08-24
 # REMOVED 4 Aug: gold-basis-lbma-comex — resolved. 3 Aug PM fix pair printed
 # $56 (fix 4028.15 vs GC 4084.3, ±5 min), inside the $50-90 Dec-26 fair-carry
 # band; 31 Jul $75 was contract-roll carry, not a London dislocation
