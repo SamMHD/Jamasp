@@ -493,3 +493,20 @@ events:
       Escalation markers that WOULD anchor one: Iranian official naming a
       date, US pre-emptive strike on launch infrastructure, or insurance/
       charter market pulling out of Fujairah calls.
+
+  - date: 2026-09-09
+    time_dubai: "~18:00-19:30 (operation intraday US morning; slot unverified)"
+    title: First Treasury buyback operation (Bessent on record 24 Aug)
+    why: >
+      The base case's price-setter is the fiscal-credibility hedge and its
+      named flow mechanism is the buyback program — which, per Bessent at
+      the 24 Aug presser (investinglive extract), has bought ZERO bonds so
+      far; the first operation is 9 Sep. Execution (sizes, tail, coverage)
+      is the first hard evidence the mechanism is real; a weak or delayed
+      operation undercuts the b0c2bfeb-family dollar leg and the
+      debasement-rotation bid in one print. Slot needs verification when
+      Treasury publishes the operation schedule (rule 17 — Saturday brief
+      re-verifies; wakeup set 15:15Z provisional).
+    action: wakeup added 2026-09-09 15:15Z deepdive (read the operation
+      result + gold/dollar/long-end reaction; reschedule per rule 15 if
+      results not yet published)
