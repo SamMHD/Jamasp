@@ -36,6 +36,13 @@ test("overview renders the market instrument panels", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Market map" })).toBeVisible();
   await expect(map.locator('svg[aria-label^="scored news treemap"]')).toBeVisible();
   await expect(map.getByText(/1 scored stor/)).toBeVisible();
+  // The fixture's weights.json carries a technical-only fit — fitted_at is
+  // set, but fits.theme does not exist at all. The footer must read this as
+  // "not yet fitted" rather than announcing a rescale that never happened:
+  // gating on the top-level timestamp alone (rather than on whether any
+  // theme multiplier actually applied) would say "areas weighted" while
+  // every theme is still at its neutral 1.0.
+  await expect(map.getByText("weights not yet fitted")).toBeVisible();
 
   // Fundamental: heading, the weight bar's text legend, the falsifier rows
   // (condition split from consequence at the analyst's arrow — the
@@ -76,8 +83,15 @@ test("overview renders the market instrument panels", async ({ page }) => {
 
   // Technical: heading, the server-rendered spot chart, ladder rows, regime
   // line, and the RSI gauge with the fixture's exact reading in its name.
-  const technical = page.getByRole("region", { name: "Technical" });
-  await expect(page.getByRole("heading", { name: "Technical" })).toBeVisible();
+  //
+  // exact: true on the region name — the technical map's own two sections
+  // ("Technical map", "Technical signal treemap") both contain "Technical"
+  // as a substring and would otherwise match too. The heading lookup is
+  // scoped inside the exact-matched region for the same reason: unscoped,
+  // "Technical" also matches this panel's own "Technical→ prices" heading
+  // and the technical map's "Technical map" heading.
+  const technical = page.getByRole("region", { name: "Technical", exact: true });
+  await expect(technical.getByRole("heading")).toBeVisible();
   await expect(technical.locator('svg[aria-label^="gold futures"]')).toBeVisible();
   // Exact match: the stance prose itself contains "200DMA" as a substring
   // (in the View and What-flips-me bullets), which collides with a plain
@@ -147,4 +161,16 @@ test("fundamental map's week window covers both fixture items and hatches the be
   await expect(page.getByRole("link", { name: "This week" })).toHaveAttribute("aria-current", "page");
 
   expect(errors).toEqual([]);
+});
+
+test("overview renders the technical map", async ({ page }) => {
+  await page.goto("/");
+  const map = page.getByRole("img", { name: /technical signal treemap/ });
+  await expect(map).toBeVisible();
+  // The fixture holds one bearish signal, so exactly one tile must carry the
+  // hatch — the assertion that would fail if the extraction into
+  // map-tiles.tsx dropped the hatch on the way past.
+  await expect(map.locator('rect[fill="url(#map-hatch)"]')).toHaveCount(1);
+  // macd@1d has no fitted coefficient, so its tile must be dashed.
+  await expect(map.locator("rect[stroke-dasharray]")).toHaveCount(1);
 });

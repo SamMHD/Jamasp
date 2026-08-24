@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { layoutMap, squarify, tierWeight, tone, type ScoredItem } from "../lib/marketmap";
+import { buildThemeMultipliers, layoutGroups, layoutMap, squarify, tierWeight,
+         tone, toneFromIntensity, type ScoredItem } from "../lib/marketmap";
 
 describe("tierWeight", () => {
   it("maps the configured tier scale", () => {
@@ -166,5 +167,135 @@ describe("layoutMap", () => {
 
   it("returns an empty layout for no items", () => {
     expect(layoutMap([], RECT, 14)).toEqual([]);
+  });
+});
+
+describe("toneFromIntensity", () => {
+  it("bands a signed intensity onto the five-step ramp", () => {
+    expect(toneFromIntensity(0)).toBe("neutral");
+    expect(toneFromIntensity(0.1)).toBe("neutral");
+    expect(toneFromIntensity(0.3)).toBe("bull-mid");
+    expect(toneFromIntensity(0.9)).toBe("bull");
+    expect(toneFromIntensity(-0.3)).toBe("bear-mid");
+    expect(toneFromIntensity(-0.9)).toBe("bear");
+  });
+
+  it("agrees with tone() on the same intensity", () => {
+    // tone() computes s = (direction/2) * conviction and bands it, so the two
+    // must never band the same s differently — the thresholds live in one
+    // place precisely so a future edit cannot desynchronise the two maps.
+    expect(tone(2, 0.9)).toBe(toneFromIntensity(0.9));
+    expect(tone(-1, 0.6)).toBe(toneFromIntensity(-0.3));
+  });
+});
+
+describe("layoutGroups", () => {
+  const rect = { x: 0, y: 0, w: 400, h: 300 };
+
+  it("lays out groups then their children below a header strip", () => {
+    const boxes = layoutGroups([
+      { group: "a", value: 3, node: "a1" },
+      { group: "a", value: 1, node: "a2" },
+      { group: "b", value: 2, node: "b1" },
+    ], rect, 20);
+    expect(boxes.map(b => b.group).sort()).toEqual(["a", "b"]);
+    const a = boxes.find(b => b.group === "a")!;
+    expect(a.total).toBe(4);
+    expect(a.items).toHaveLength(2);
+    for (const cell of a.items) expect(cell.y).toBeGreaterThanOrEqual(a.y + 20);
+  });
+
+  it("omits a group whose children all have zero value", () => {
+    const boxes = layoutGroups([{ group: "a", value: 0, node: "a1" }], rect, 20);
+    expect(boxes).toEqual([]);
+  });
+
+  it("keeps layoutMap's existing shape", () => {
+    // layoutMap is the adapter; its consumers read .theme and must not churn.
+    const items = [
+      { itemId: "1", tier: 5, direction: 2, conviction: 0.8, theme: "rates_dollar",
+        headline: "h", source: "s", url: "u", publishedAt: "2026-08-20T00:00:00Z" },
+    ];
+    const boxes = layoutMap(items, rect, 20);
+    expect(boxes[0].theme).toBe("rates_dollar");
+    expect(boxes[0].items[0].node.itemId).toBe("1");
+  });
+});
+
+describe("layoutMap with learned theme multipliers", () => {
+  const rect = { x: 0, y: 0, w: 400, h: 300 };
+  const item = (id: string, theme: string) => ({
+    itemId: id, tier: 5, direction: 2, conviction: 0.8, theme,
+    headline: "h", source: "s", url: `u${id}`,
+    publishedAt: "2026-08-20T00:00:00Z",
+  });
+
+  it("scales a theme's area by its multiplier", () => {
+    const items = [item("1", "rates_dollar"), item("2", "geopolitics")];
+    const boxes = layoutMap(items, rect, 0, { rates_dollar: 3, geopolitics: 1 });
+    const rates = boxes.find(b => b.theme === "rates_dollar")!;
+    const geo = boxes.find(b => b.theme === "geopolitics")!;
+    // Same tier, so the multiplier is the only thing separating them.
+    expect((rates.w * rates.h) / (geo.w * geo.h)).toBeCloseTo(3, 2);
+  });
+
+  it("treats an absent multiplier as neutral", () => {
+    // Before Fit B has enough rows there are no theme multipliers at all, and
+    // the map must render exactly as it did before this feature existed.
+    const items = [item("1", "rates_dollar"), item("2", "geopolitics")];
+    const withNone = layoutMap(items, rect, 0);
+    const withEmpty = layoutMap(items, rect, 0, {});
+    expect(withEmpty).toEqual(withNone);
+  });
+
+  it("ignores a multiplier for a theme with no stories", () => {
+    const boxes = layoutMap([item("1", "rates_dollar")], rect, 0,
+      { rates_dollar: 2, etf_flows: 3 });
+    expect(boxes.map(b => b.theme)).toEqual(["rates_dollar"]);
+  });
+
+  it("still fills the whole canvas", () => {
+    const items = [item("1", "rates_dollar"), item("2", "geopolitics")];
+    const boxes = layoutMap(items, rect, 0, { rates_dollar: 3, geopolitics: 1 });
+    const total = boxes.reduce((s, b) => s + b.w * b.h, 0);
+    // Ratio, not absolute area — see the technical map's equivalent test.
+    expect(total / (400 * 300)).toBeCloseTo(1, 6);
+  });
+});
+
+describe("buildThemeMultipliers", () => {
+  it("counts a fitted coefficient", () => {
+    const out = buildThemeMultipliers({
+      rates_dollar: { multiplier: 1.6, fitted: true, pinned: false },
+    });
+    expect(out).toEqual({ rates_dollar: 1.6 });
+  });
+
+  it("counts a pin on a column the fit never measured", () => {
+    // Finding 2a's exact scenario: a retro pins etf_flows (no stories yet,
+    // so the fit never touches it) or any theme short of min_rows. Both
+    // panel readers must honour the pin anyway — jamasp/fit.py's run_fit
+    // already writes the pin's value into `multiplier` regardless of
+    // `fitted`, so the old `.filter(([, c]) => c?.fitted === true)` threw
+    // that value away for exactly the columns a pin exists to fix.
+    const out = buildThemeMultipliers({
+      etf_flows: { multiplier: 1.8, fitted: false, pinned: true },
+    });
+    expect(out).toEqual({ etf_flows: 1.8 });
+  });
+
+  it("drops a coefficient that is neither fitted nor pinned", () => {
+    const out = buildThemeMultipliers({
+      supply_mining: { multiplier: 1.0, fitted: false, pinned: false },
+    });
+    expect(out).toEqual({});
+  });
+
+  it("degrades a malformed entry rather than throwing", () => {
+    // A coefficient that parsed as JSON but arrived as `null` (or the whole
+    // map is undefined, e.g. no theme fit has run yet) must not crash the
+    // page.
+    expect(buildThemeMultipliers(undefined)).toEqual({});
+    expect(buildThemeMultipliers({ geopolitics: null })).toEqual({});
   });
 });

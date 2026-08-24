@@ -44,5 +44,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# generated test fixture db (fixture.sql is the source of truth)
+# generated test fixture db and weights (build-fixture.mjs is the source of truth)
 /test/fixtures/root/state/jamasp.db
+/test/fixtures/root/state/weights.json

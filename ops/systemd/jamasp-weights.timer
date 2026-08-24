@@ -1,0 +1,12 @@
+[Unit]
+Description=Refit the Jamasp map multipliers daily at 03:30 Dubai
+
+[Timer]
+# Before the 07:30 brief, so the desk's first read of the day is on
+# multipliers fitted through yesterday's close.
+OnCalendar=*-*-* 03:30:00 Asia/Dubai
+Persistent=true
+RandomizedDelaySec=600
+
+[Install]
+WantedBy=timers.target

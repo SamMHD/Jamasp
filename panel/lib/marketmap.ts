@@ -47,6 +47,22 @@ const NEUTRAL_BAND = 0.15;
 const POLE_BAND = 0.55;
 
 /**
+ * Band a signed intensity in [-1, +1] onto the five-step diverging ramp.
+ *
+ * This is the band logic on its own, because both maps need it from
+ * different inputs: the fundamental map derives an intensity from direction
+ * and conviction, while a technical signal's state IS an intensity already.
+ * The thresholds live here once so a future edit cannot make the two maps
+ * disagree about where "neutral" ends.
+ */
+export function toneFromIntensity(s: number): Tone {
+  const a = Math.abs(s);
+  if (a < NEUTRAL_BAND) return "neutral";
+  if (a < POLE_BAND) return s < 0 ? "bear-mid" : "bull-mid";
+  return s < 0 ? "bear" : "bull";
+}
+
+/**
  * Signed intensity s = (direction / 2) * conviction, in [-1, +1], mapped onto
  * the five-step diverging ramp.
  *
@@ -55,11 +71,7 @@ const POLE_BAND = 0.55;
  * hesitant +2 can legitimately land on the same step.
  */
 export function tone(direction: number, conviction: number): Tone {
-  const s = (direction / 2) * conviction;
-  const a = Math.abs(s);
-  if (a < NEUTRAL_BAND) return "neutral";
-  if (a < POLE_BAND) return s < 0 ? "bear-mid" : "bull-mid";
-  return s < 0 ? "bear" : "bull";
+  return toneFromIntensity((direction / 2) * conviction);
 }
 
 export type Rect = { x: number; y: number; w: number; h: number };
@@ -136,31 +148,38 @@ export type ThemeBox = Rect & {
   total: number;
 };
 
+export type GroupNode<T> = { group: string; value: number; node: T };
+export type GroupBox<T> = Rect & { group: string; items: Cell<T>[]; total: number };
+
 /**
- * Two-level layout: themes fill the canvas, each theme's stories fill its
+ * Two-level layout: groups fill the canvas, each group's children fill its
  * box below a reserved header strip.
  *
- * Themes with no items are absent rather than empty. An empty box would
- * claim area and read as "nothing happened in this channel" when what it
- * means is "nothing was filed here" — a different claim, and one the
- * coverage footer is the honest place for.
+ * Generic over the node type because both maps are this same layout over
+ * different nodes — stories grouped by theme, signals grouped by family.
+ * Duplicating it per map would leave two squarify wrappers to keep in step.
+ *
+ * Groups with no positive-value children are absent rather than empty. An
+ * empty box would claim area and read as "nothing happened in this channel"
+ * when what it means is "nothing was filed here" — a different claim, and
+ * one the coverage footer is the honest place for.
  */
-export function layoutMap(
-  items: ScoredItem[], rect: Rect, headerHeight: number,
-): ThemeBox[] {
-  const grouped = new Map<string, ScoredItem[]>();
-  for (const it of items) {
-    const bucket = grouped.get(it.theme);
-    if (bucket) bucket.push(it);
-    else grouped.set(it.theme, [it]);
+export function layoutGroups<T>(
+  nodes: GroupNode<T>[], rect: Rect, headerHeight: number,
+): GroupBox<T>[] {
+  const grouped = new Map<string, GroupNode<T>[]>();
+  for (const n of nodes) {
+    const bucket = grouped.get(n.group);
+    if (bucket) bucket.push(n);
+    else grouped.set(n.group, [n]);
   }
 
-  const themes = [...grouped.entries()].map(([theme, kids]) => ({
-    value: kids.reduce((s, k) => s + tierWeight(k.tier), 0),
-    node: { theme, kids },
+  const groups = [...grouped.entries()].map(([group, kids]) => ({
+    value: kids.reduce((s, k) => s + k.value, 0),
+    node: { group, kids },
   }));
 
-  return squarify(themes, rect).map(cell => {
+  return squarify(groups, rect).map(cell => {
     const inner: Rect = {
       x: cell.x,
       y: cell.y + headerHeight,
@@ -169,11 +188,67 @@ export function layoutMap(
     };
     return {
       x: cell.x, y: cell.y, w: cell.w, h: cell.h,
-      theme: cell.node.theme,
-      total: cell.node.kids.reduce((s, k) => s + tierWeight(k.tier), 0),
+      group: cell.node.group,
+      total: cell.node.kids.reduce((s, k) => s + k.value, 0),
       items: squarify(
-        cell.node.kids.map(k => ({ value: tierWeight(k.tier), node: k })),
-        inner),
+        cell.node.kids.map(k => ({ value: k.value, node: k.node })), inner),
     };
   });
+}
+
+/**
+ * The fundamental map's layout: stories grouped by theme, sized by tier and
+ * by the theme's learned multiplier.
+ *
+ * `multipliers` comes from Fit B via state/weights.json. An absent entry is
+ * 1.0, so a deployment whose theme fit has not reached min_rows renders
+ * exactly as it did before this existed — a map that quietly rescaled itself
+ * on the day a fit first succeeded, with nothing on the page saying so, would
+ * be a worse outcome than one that says "provisional" for three weeks.
+ */
+export function layoutMap(
+  items: ScoredItem[], rect: Rect, headerHeight: number,
+  multipliers: Record<string, number> = {},
+): ThemeBox[] {
+  const boxes = layoutGroups(
+    items.map(it => ({
+      group: it.theme,
+      value: tierWeight(it.tier) * (multipliers[it.theme] ?? 1),
+      node: it,
+    })),
+    rect, headerHeight);
+  return boxes.map(b => ({
+    x: b.x, y: b.y, w: b.w, h: b.h,
+    theme: b.group, items: b.items, total: b.total,
+  }));
+}
+
+export type ThemeCoefficient = {
+  multiplier: number; fitted: boolean; pinned: boolean;
+};
+
+/**
+ * Theme -> the multiplier `layoutMap` should use, from the theme fit's raw
+ * coefficients (state/weights.json's `fits.theme.coefficients`, already
+ * camelCased by lib/files.ts).
+ *
+ * A coefficient counts if EITHER it was fitted (the regression measured it)
+ * OR it is pinned (a retro overrode it via config/weights.yaml's `pins:`
+ * block) — mirrors lib/technicalmap.ts#buildSignalTiles's identical
+ * defence, and for the identical reason: jamasp/fit.py's run_fit applies a
+ * pin's value to `multiplier` whether or not that column was ever fitted
+ * (a retro reaches for a pin exactly for the themes short of min_rows, or
+ * with no stories yet), so requiring `fitted === true` here would discard
+ * the pin for precisely the cases it exists to fix. `c?.fitted === true` /
+ * `c?.pinned === true` (not the bare properties) is deliberate: a malformed
+ * coefficient entry that parsed as JSON but arrived as `null` must degrade
+ * to "not counted" rather than throw — this reader never 500s on bad state.
+ */
+export function buildThemeMultipliers(
+  coefficients: Record<string, ThemeCoefficient | null | undefined> | undefined,
+): Record<string, number> {
+  return Object.fromEntries(
+    Object.entries(coefficients ?? {})
+      .filter(([, c]) => c?.fitted === true || c?.pinned === true)
+      .map(([key, c]) => [key, c!.multiplier]));
 }
