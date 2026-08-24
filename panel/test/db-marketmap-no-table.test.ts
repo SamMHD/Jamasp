@@ -46,3 +46,12 @@ describe("unscoredCountSince against a database with no item_scores table", () =
     expect(db.unscoredCountSince(SINCE)).toBe(0);
   });
 });
+
+describe("latestSignalStates against a database with no signal_states table", () => {
+  it("returns an empty array rather than throwing", () => {
+    // A host that has not run `jamasp signals refresh` yet must still serve
+    // the overview page — the same guard getScoredItems carries.
+    expect(() => db.latestSignalStates()).not.toThrow();
+    expect(db.latestSignalStates()).toEqual([]);
+  });
+});

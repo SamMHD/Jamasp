@@ -36,6 +36,29 @@ CREATE TABLE IF NOT EXISTS prices (
     value  REAL NOT NULL,
     PRIMARY KEY (symbol, ts)
 );
+-- OHLC bars, for the indicators and the ridge fit. `prices` is scalar and
+-- cannot hold a high or a low; ATR needs both, and ATR is both a signal and
+-- the divisor that normalises the fit's target.
+--
+-- ts is the bar's OPEN time. Stated here because a close-stamped bar shifts
+-- every indicator by one period, and that error stays invisible until
+-- someone compares a computed SMA against a chart.
+--
+-- '1h' is stored as well as the spec's '1d'/'4h'/'1w': the fit's target is a
+-- forward return at hourly resolution, so it needs an hourly close to
+-- measure from. Yahoo returns the hourly series in the same call we make for
+-- the 4h resample, so storing it is free. Yahoo caps interval=1h at
+-- range=730d, which is what bounds the hourly history — not this table.
+CREATE TABLE IF NOT EXISTS bars (
+    symbol    TEXT NOT NULL,
+    timeframe TEXT NOT NULL,   -- '1h' | '4h' | '1d' | '1w'
+    ts        TEXT NOT NULL,   -- bar OPEN time, UTC
+    open      REAL NOT NULL,
+    high      REAL NOT NULL,
+    low       REAL NOT NULL,
+    close     REAL NOT NULL,
+    PRIMARY KEY (symbol, timeframe, ts)
+);
 CREATE TABLE IF NOT EXISTS extract_cache (
     url        TEXT PRIMARY KEY,
     fetched_at TEXT NOT NULL,
@@ -123,6 +146,39 @@ CREATE TABLE IF NOT EXISTS item_scores (
     scored_at  TEXT    NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_item_scores_theme ON item_scores(theme);
+-- Current technical states for the technical map, in [-1, +1] where positive
+-- is bullish for gold. Written by `jamasp signals refresh`; read by the panel.
+--
+-- ts is the CLOSE time of the bar the state was computed from, not that
+-- bar's open: a state derived from a daily bar is not knowable until that day
+-- ends. Storing the open time would let the panel show a state hours before
+-- it existed, and would let the fit train on it.
+--
+-- The fit does NOT read this table. It recomputes every historical state from
+-- bars, so a refit is reproducible from bars alone and cannot inherit a state
+-- written by an older version of a classifier.
+CREATE TABLE IF NOT EXISTS signal_states (
+    key   TEXT NOT NULL,   -- "<signal>@<timeframe>", e.g. "rsi14@1d"
+    ts    TEXT NOT NULL,   -- bar CLOSE time, UTC
+    value REAL NOT NULL,   -- [-1, +1], positive = bullish for gold
+    PRIMARY KEY (key, ts)
+);
+CREATE INDEX IF NOT EXISTS idx_signal_states_key_ts ON signal_states(key, ts DESC);
+-- Every fitted coefficient from every run, so a multiplier's drift over time
+-- is inspectable. state/weights.json holds only the current fit; this is the
+-- trajectory, and it is the difference between "rates_dollar is 1.8" and
+-- "rates_dollar has climbed from 1.1 to 1.8 over six weeks".
+CREATE TABLE IF NOT EXISTS weight_fits (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    fitted_at  TEXT NOT NULL,
+    fit        TEXT NOT NULL,   -- 'technical' | 'theme'
+    key        TEXT NOT NULL,
+    beta       REAL NOT NULL,
+    se         REAL NOT NULL,
+    multiplier REAL NOT NULL,
+    n          INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_weight_fits_key ON weight_fits(fit, key, fitted_at);
 """
 
 # Columns added to tables that already exist in deployed databases. The schema

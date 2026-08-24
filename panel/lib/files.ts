@@ -2,6 +2,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import YAML from "yaml";
 import { CONFIG_DIR, REPORTS_DIR, STATE_DIR } from "./paths";
+import type { FittedCoefficient, FittedWeights, WeightsConfig } from "@/lib/technicalmap";
 
 export type WatchlistEntry = { theme: string; why: string; since: string };
 export type Prediction = { id: string; date: string; claim: string; direction: string;
@@ -108,4 +109,42 @@ export function readReport(slug: string): string | null {
   const p = path.resolve(REPORTS_DIR, `${slug}.md`);
   if (!p.startsWith(path.resolve(REPORTS_DIR) + path.sep)) return null; // traversal guard
   return readText(p);
+}
+
+/**
+ * The daily fit's measurements. Null until the first `jamasp weights fit`
+ * runs, and null again if the file is unreadable — the maps render every
+ * tile neutral and dashed in that window rather than taking the page down.
+ *
+ * snake_case in, camelCase out: the file is written by Python and read by
+ * TypeScript, and letting Python's naming leak into the panel's types is how
+ * `fitted_at` ends up half-renamed across a dozen call sites later.
+ */
+export function readFittedWeights(): FittedWeights | null {
+  const raw = readText(path.join(STATE_DIR, "weights.json"));
+  if (!raw) return null;
+  try {
+    const doc = JSON.parse(raw) as Record<string, never>;
+    const fits: FittedWeights["fits"] = {};
+    for (const [name, f] of Object.entries(
+      (doc.fits ?? {}) as Record<string, Record<string, never>>)) {
+      fits[name] = {
+        n: Number(f.n ?? 0),
+        horizonHours: Number(f.horizon_hours ?? 0),
+        flags: (f.flags ?? []) as unknown as string[],
+        coefficients: (f.coefficients ?? {}) as unknown as
+          Record<string, FittedCoefficient>,
+      };
+    }
+    return { fittedAt: String(doc.fitted_at ?? ""), fits };
+  } catch {
+    return null;
+  }
+}
+
+export function loadWeightsConfig(): WeightsConfig {
+  const raw = readText(path.join(CONFIG_DIR, "weights.yaml"));
+  if (!raw) return { themes: [], signals: [] };
+  const doc = YAML.parse(raw) as WeightsConfig | null;
+  return { themes: doc?.themes ?? [], signals: doc?.signals ?? [] };
 }

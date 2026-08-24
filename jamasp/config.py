@@ -70,3 +70,108 @@ def themes(weights: dict) -> tuple[str, ...]:
     if "other" not in slots:
         raise ValueError(f'config/weights.yaml themes must include "other", got {slots!r}')
     return slots
+
+
+VALID_SIGNAL_SOURCES = ("bars", "price_series")
+
+
+@dataclass(frozen=True)
+class SignalSpec:
+    name: str
+    family: str
+    timeframes: tuple[str, ...]
+    source: str
+    symbol: str | None = None
+
+
+def tier_weights(weights: dict) -> dict[int, float]:
+    """Materiality tier -> area weight, mirroring panel/lib/marketmap.ts."""
+    return {int(k): float(v) for k, v in weights["tier_weight"].items()}
+
+
+def signal_specs(weights: dict) -> tuple[SignalSpec, ...]:
+    """The technical taxonomy, in declared order.
+
+    Order is data, exactly as it is for `themes`: the fit indexes its feature
+    columns by position, so sorting here would permute fitted coefficients
+    against their labels. Duplicates and unknown sources raise rather than
+    silently collapsing two columns into one or reaching for a reader that
+    does not exist.
+    """
+    specs: list[SignalSpec] = []
+    seen: set[str] = set()
+    for e in weights.get("signals") or []:
+        name = e["name"]
+        if name in seen:
+            raise ValueError(f"duplicate signal name in config/weights.yaml: {name!r}")
+        seen.add(name)
+        source = e.get("source", "bars")
+        if source not in VALID_SIGNAL_SOURCES:
+            raise ValueError(
+                f"signal {name!r} has source {source!r};"
+                f" expected one of {VALID_SIGNAL_SOURCES}"
+            )
+        if source == "price_series" and not e.get("symbol"):
+            raise ValueError(f"signal {name!r} reads a price series but names no symbol")
+        specs.append(SignalSpec(
+            name=name, family=e["family"],
+            timeframes=tuple(e["timeframes"]), source=source,
+            symbol=e.get("symbol"),
+        ))
+    return tuple(specs)
+
+
+def signal_columns(weights: dict) -> tuple[str, ...]:
+    """Ordered feature-column keys, "<signal>@<timeframe>"."""
+    return tuple(
+        f"{s.name}@{tf}" for s in signal_specs(weights) for tf in s.timeframes
+    )
+
+
+def fit_config(weights: dict) -> dict:
+    return weights["fit"]
+
+
+def active_pins(weights: dict, today: str) -> dict[str, float]:
+    """Retro overrides still in force on `today` (an ISO date, YYYY-MM-DD).
+
+    Every pin must carry a reason and an expiry. An un-expiring pin is how a
+    fit quietly stops mattering — the number keeps looking measured while
+    nothing ever revisits the judgement that froze it — so this refuses one
+    rather than honouring it. `expires == today` has already lapsed: a pin
+    is in force strictly before its expiry date, not through it, so the
+    fit that runs ON the expiry date already sees the fitted value.
+
+    A pin's value must also sit inside the same [multiplier_min,
+    multiplier_max] band every fitted coefficient is clamped to. This
+    raises rather than clamps: a pin is honoured verbatim wherever it
+    applies (jamasp/fit.py's run_fit no longer re-clamps it), so an
+    out-of-band value — `value: 0` meant as "turn this column off", say —
+    would otherwise render silently as some other number nobody chose,
+    on a channel (tile area) where the whole point is that the number
+    means something. Refusing it here, alongside the existing reason/expiry
+    refusals, fails loudly at config-load time instead of silently at
+    render time. The check runs on every pin in the file, not only the
+    ones currently active, for the same reason the reason/expiry checks do:
+    a bad entry should fail the moment the file is loaded, not wait until
+    the calendar happens to make it live.
+    """
+    fit = weights.get("fit") or {}
+    lo = float(fit.get("multiplier_min", 0.25))
+    hi = float(fit.get("multiplier_max", 3.0))
+    out: dict[str, float] = {}
+    for p in weights.get("pins") or []:
+        key = p.get("key")
+        if not p.get("reason"):
+            raise ValueError(f"pin {key!r} has no reason")
+        if not p.get("expires"):
+            raise ValueError(f"pin {key!r} has no expires date")
+        value = float(p["value"])
+        if not (lo <= value <= hi):
+            raise ValueError(
+                f"pin {key!r} has value {value!r}, outside the configured "
+                f"multiplier band [{lo}, {hi}]"
+            )
+        if str(p["expires"]) > today:
+            out[key] = value
+    return out

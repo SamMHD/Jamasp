@@ -16,15 +16,18 @@ from jamasp import db as db_mod
 from jamasp import digest as digest_mod
 from jamasp import dispatch as dispatch_mod
 from jamasp import extract as extract_mod
+from jamasp import fit as fit_mod
 from jamasp import flash as flash_mod
 from jamasp import inbox as inbox_mod
 from jamasp import notify as notify_mod
 from jamasp import predictions as predictions_mod
 from jamasp import pricesummary as pricesummary_mod
 from jamasp import runner as runner_mod
+from jamasp import signals as signals_mod
 from jamasp import wakeup as wakeup_mod
 from jamasp import watchdog as watchdog_mod
-from jamasp.config import load_settings, load_sources
+from jamasp.config import load_settings, load_sources, load_weights
+from jamasp.ingest import bars as bars_mod
 from jamasp.ingest import calendar as calendar_mod
 from jamasp.ingest import prices as prices_mod
 from jamasp.ingest import rss as rss_mod
@@ -313,6 +316,67 @@ def wakeup_cancel(wakeup_id, db_path, config_dir):
     except ValueError as exc:
         raise click.ClickException(str(exc))
     click.echo(f"cancelled wakeup #{wakeup_id}")
+
+
+@main.group("bars")
+def bars_group():
+    """OHLC bars: the substrate for indicators and the ridge fit."""
+
+
+@bars_group.command("backfill")
+@click.option("--symbol", default=bars_mod.SYMBOL, show_default=True)
+@db_opt
+@cfg_opt
+def bars_backfill(symbol, db_path, config_dir):
+    """Fetch and store 1h/4h/1d/1w bars. Idempotent — also the daily refresh."""
+    conn, _, _ = _common(db_path, config_dir)
+    written = bars_mod.backfill(conn, symbol)
+    click.echo(
+        f"bars {symbol}: " + " ".join(f"{tf}={n}" for tf, n in written.items())
+    )
+
+
+@main.group("signals")
+def signals_group():
+    """Technical signal states in [-1, +1], positive = bullish for gold."""
+
+
+@signals_group.command("refresh")
+@click.option("--symbol", default="GC", show_default=True)
+@db_opt
+@cfg_opt
+def signals_refresh(symbol, db_path, config_dir):
+    """Recompute the latest state for every configured signal column."""
+    conn, _, _ = _common(db_path, config_dir)
+    weights = load_weights(Path(config_dir) / "weights.yaml")
+    n = signals_mod.refresh(conn, weights, symbol)
+    click.echo(f"{n} signal states written")
+
+
+@main.group("weights")
+def weights_group():
+    """Learned map multipliers: the daily ridge fit."""
+
+
+@weights_group.command("fit")
+@click.option("--symbol", default="GC", show_default=True)
+@click.option("--out", default="state/weights.json", show_default=True)
+@db_opt
+@cfg_opt
+def weights_fit(symbol, out, db_path, config_dir):
+    """Refit every multiplier from history. Deterministic; no agent run."""
+    conn, _, _ = _common(db_path, config_dir)
+    weights = load_weights(Path(config_dir) / "weights.yaml")
+    results = fit_mod.fit_all(conn, weights, symbol)
+    if not results:
+        click.echo("weights fit: not enough rows for any fit yet")
+        return
+    fit_mod.write_results(conn, Path(out), results, db_mod.utcnow())
+    for r in results:
+        unfitted = sum(1 for c in r.coefficients if not c.fitted)
+        click.echo(
+            f"{r.name}: n={r.n} {len(r.coefficients)} columns"
+            f" ({unfitted} unfitted) flags={len(r.flags)}")
 
 
 @main.command()

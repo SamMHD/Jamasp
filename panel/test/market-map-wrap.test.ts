@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { wrapForTile } from "../components/market-map";
+import { wrapForTile } from "../components/map-tiles";
 
 /**
  * Tile geometry maps to a character budget through AVG_CHAR_W (0.58) at

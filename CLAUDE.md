@@ -37,6 +37,9 @@ for the sage-advisor of the Shahnameh: measured, far-sighted, never breathless.
 | `uv run jamasp flash [--dry-run]` | publish top-tier gold items to the Telegram news channel (runs automatically inside `ingest`) |
 | `uv run jamasp flash-rollup [--dry-run]` | send one Persian roundup of held middle-tier items (own timer, 4x/day) |
 | `uv run jamasp calendar` | upcoming economic events (UTC + Dubai), high/medium impact |
+| `uv run jamasp bars backfill` | refresh OHLC bars (idempotent; also the daily refresh) |
+| `uv run jamasp signals refresh` | recompute current technical signal states |
+| `uv run jamasp weights fit` | refit the market maps' learned multipliers |
 | `uv run jamasp wakeup add "<ISO>" <type> "<task>"` | schedule a future run (usually deepdive) |
 | `uv run jamasp wakeup list` | pending wakeups (feed the brief's "watching" section) |
 | `uv run jamasp predictions add\|due\|score` | record and score falsifiable forecasts |
@@ -49,10 +52,10 @@ for the sage-advisor of the Shahnameh: measured, far-sighted, never breathless.
 
 ## Deployment
 
-Jamasp runs on an always-on Linux host: seven systemd timers — 15-minute
+Jamasp runs on an always-on Linux host: eight systemd timers — 15-minute
 ingest, 5-minute dispatcher, daily brief + daily watchdog, 2-hourly scan,
-weekly retro, and the 4x-daily news-channel rollup — drive `jamasp` CLI
-commands, with every agent run
+weekly retro, the 4x-daily news-channel rollup, and a daily weights refit —
+drive `jamasp` CLI commands, with every agent run
 (fixed timers and dispatched wakeups alike) wrapped by `jamasp run`, which
 enforces the daily run cap, retry-with-one-retry, and per-run-type
 timeouts. The full runbook — including the two things that will bite you

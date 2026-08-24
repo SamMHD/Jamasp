@@ -1,0 +1,23 @@
+[Unit]
+Description=Jamasp weights — refresh bars, signal states and the ridge fits
+OnFailure=jamasp-alert@%n.service
+
+[Service]
+Type=oneshot
+# The backfill re-walks 730 days of hourly bars and five years of daily ones,
+# then two ridge fits run over ~17k rows. Comfortable, but a wedged socket
+# must not hold the daily timer down forever.
+TimeoutStartSec=900
+WorkingDirectory=%h/Jamasp
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+EnvironmentFile=-%h/.config/jamasp/env
+# Deterministic pipeline stage, not an agent run: no `jamasp run` wrapper, so
+# it consumes none of the daily agent-run cap — same as the flash pass.
+#
+# Order matters. bars backfill is idempotent and is also the refresh path, so
+# it runs first; signals refresh reads those bars; weights fit recomputes
+# every historical state from bars itself and does not read signal_states, but
+# running it last means a single failed unit leaves nothing half-updated.
+ExecStart=%h/.local/bin/uv run jamasp bars backfill
+ExecStart=%h/.local/bin/uv run jamasp signals refresh
+ExecStart=%h/.local/bin/uv run jamasp weights fit
