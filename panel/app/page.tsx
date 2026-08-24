@@ -30,27 +30,26 @@ const iso = (d: Date) => d.toISOString().replace(/\.\d{3}Z$/, "Z");
 /**
  * `?w=week` selects the trailing 7 days; anything else — including the
  * param being absent, an array (repeated `?w=`), or a garbage value —
- * is "today". A view param must never throw on unexpected input.
+ * is the rolling 24h window. A view param must never throw on unexpected
+ * input, and the fallback also means a bookmarked `?w=today` from before
+ * this window was rolling degrades quietly instead of 404ing or throwing.
  */
 export function resolveRange(param: string | string[] | undefined): MapRange {
   const v = Array.isArray(param) ? param[0] : param;
-  return v === "week" ? "week" : "today";
+  return v === "week" ? "week" : "24h";
 }
 
-const DUBAI_OFFSET_MS = 4 * 3600_000; // UTC+4, no DST — same as jamasp/flashtext.py
-
 /**
- * Window start for the map: Dubai-midnight for "today" (computed the same
- * way jamasp/flashtext.py and db.runsTodayDubai do — shift into Dubai local
- * time, truncate to the day, shift back), trailing 7 days for "week".
+ * Window start for the map: trailing 24 hours, or trailing 7 days.
+ *
+ * Both are rolling. See lib/marketmap.ts#MapRange for why the short window
+ * is not the Dubai calendar day it used to be — in short, the map emptied
+ * at 00:00 Dubai and stayed near-empty for hours, and "what is moving now"
+ * is not a calendar-day question.
  */
 export function windowSinceIso(range: MapRange, now: Date): string {
-  if (range === "week") return iso(new Date(now.getTime() - 7 * 86400_000));
-  const dubaiNow = new Date(now.getTime() + DUBAI_OFFSET_MS);
-  const dubaiMidnightUtcMs = Date.UTC(
-    dubaiNow.getUTCFullYear(), dubaiNow.getUTCMonth(), dubaiNow.getUTCDate(),
-  ) - DUBAI_OFFSET_MS;
-  return iso(new Date(dubaiMidnightUtcMs));
+  const days = range === "week" ? 7 : 1;
+  return iso(new Date(now.getTime() - days * 86400_000));
 }
 
 export default async function Overview({
@@ -65,7 +64,7 @@ export default async function Overview({
   // --- fundamental map ---
   const sp = await searchParams;
   const range = resolveRange(sp.w);
-  const mapSince = range === "week" ? weekAgo : windowSinceIso("today", now);
+  const mapSince = windowSinceIso(range, now);
   const mapItems = db.getScoredItems(mapSince);
   const mapUnscored = db.unscoredCountSince(mapSince);
 
@@ -169,11 +168,11 @@ export default async function Overview({
         <div className="mb-2 flex items-center justify-between">
           <h2 className="text-sm font-medium text-muted-foreground">Market map</h2>
           <nav aria-label="Map window" className="flex gap-1 text-sm">
-            <Link href="/?w=today" aria-current={range === "today" ? "page" : undefined}
+            <Link href="/?w=24h" aria-current={range === "24h" ? "page" : undefined}
               className={cls("rounded px-2 py-0.5",
-                range === "today" ? "bg-foreground text-background"
+                range === "24h" ? "bg-foreground text-background"
                   : "text-muted-foreground hover:text-foreground")}>
-              Today
+              24h
             </Link>
             <Link href="/?w=week" aria-current={range === "week" ? "page" : undefined}
               className={cls("rounded px-2 py-0.5",
