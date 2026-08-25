@@ -1,96 +1,83 @@
-# Stance — 2026-08-24 (post-presser deepdive, ~23:05 Dubai)
+# Stance — 2026-08-25 (Tue morning brief) — EVENT-PENDING (core PCE Wed 12:30Z)
 
-Presser gate RESOLVED on the slow-burn branch. "Operation Economic
-Outcast" = ~60 entity designations + five-sector determinations (digital
-assets, tech, **GOLD**, aviation, shipping) + Trump phoning leaders —
-but **no secondary sanctions today**; Bessent: "Why would I want to blow
-up the global financial system?" New forward marker: *"I expect a major
-financial institution to be sanctioned this week"* (`55412a56`, 0.5).
-Iran's counter is flowing on the primed axis: 45-vessel blacklist (ADNOC,
-AD Ports, Bahri, Nakilat) threatening detention/confiscation + secondary-
-style reach (`8babc60f` near-certain HIT, scoring awaits Tehran's own
-sanctions link); Kpler weekend Hormuz transits <20, Sunday 4. Houthi ASBM
-hit Bahri VLCC AMZAN off Yanbu — `bb86ccc9` HIT, family 15-for-15. Gold
-faded modestly post-presser (4735 high → ~4689), oil eased, Brent >$90.
+Bessent package priced as slow-burn: oil −$2 on "withheld options" relief,
+round-tripped overnight on Iran retaliation vows + a nameless UKMTO-logged
+tanker hit off Oman (Warning 120-26, engine room, crew safe — baseline).
+Gold printed a record ~4750.4 (00:50Z) then was slammed $50 on **no news**
+(investinglive: "volatility, not narrative") — crowding tell, not regime
+change. Fiscal-dominance escalated: Druckenmiller "Treasury is suppressing
+the bond market's warning signal"; DXY at May lows (99.0); Citi target
+4,800 / JPM flags 5k; BTC >$80k (+26% w/w). Treasury: Iran-banker
+sanctions "coming soon" (`55412a56` channel live). PBOC seventh straight
+weak fix, widest gap (~633 pips). Blacklist 45→46; Kuwait named in Iran's
+crosshairs; Munir-Tehran channel stirring (one-side sourced).
 
 ## View
 
-**Weights 65/5/30 (base/bearish/kinetic) — held through the presser gate.
-Wed PCE is the remaining gate; entry still terrible at full stretch (RSI
-75, stoch 97/94, 167 over the 200DMA).**
+**Weights 65/5/30 (base/bearish/kinetic), conviction CAPPED — event-pending
+into Wed core PCE (cons +0.2%/3.3%), then Warsh Fri. Entry still terrible
+(RSI 75, stoch 95/96, 165+ over the 200DMA, net spec 219k); the no-news $50
+air pocket shows what thin exits do.**
 
-- **Base (~65%):** fiscal-credibility hedge sets price — confirmed today:
-  gold printed highs on the buyback signal while the war headline faded.
-  Correction: buybacks have NOT started ("not a single bond yet") —
-  **first operation 9 Sep** (calendar + wakeup added). Benign PCE Wed
-  seals `ec71ce01` (0.8). Defend 4510 (`9b2f3adf` thru Tue), then
-  4450/4380; upper BB ~4757. Dollar leg `b0c2bfeb` (DXY 99.0 <100 thru
-  28th). Yen pillar holds (159.2). Side fronts: US-Canada 50% tariffs
-  (Bessent: "come to the table"); India physical firming; PBOC weak fixes.
-- **Bearish (~5%):** hot core PCE Wed into net spec 219k/RSI 75; or Warsh
-  Fri reads buybacks as easing → hike ammunition. Under 4510 → 4300, then
-  4227.3/50DMA 4216.
-- **Kinetic tail (~30%):** hot, NOT armed — presser did not arm it (no
-  China step-change, no new kinetic event in the Gulf). Escalation
-  markers now concrete: (1) major-FI designation this week — if it's a
-  major CHINESE bank, `f230eca0` (0.7, Thu) MISSES and oil/CNY reprice;
-  (2) blacklist turns physical vs a GCC hull (`b13614a1` says paper thru
-  7 Sep, 0.7); (3) Yanbu/Fujairah ordnance (`d8fda2a3` thru Tue);
-  ultimatum window ~31 Aug–7 Sep; corridor endurance `fe35b77d` (6 Sep).
-  Rezaei total-halt threat stands (`92a5bbb8` bluff, 0.7); nuclear
-  ambiguity unformalized (`30bad8a0`, 0.7).
+- **Base (~65%):** fiscal-credibility hedge sets price — now Druckenmiller-
+  validated, dollar leg confirming (`b0c2bfeb` thru Fri). Benign PCE seals
+  `ec71ce01` (0.8) and opens the 4,800s (Citi there already). Defend 4510
+  (`9b2f3adf` matures tonight, ~180 pts clear), then 4450/4380; upper BB
+  4788. Yen pillar stress-tested in advance: 80%-priced BoJ hike cannot
+  lift the yen (159.3; MUFG skew weaker) — new claim records it thru 4 Sep.
+- **Bearish (~5%):** core PCE ≥0.4% m/m revives the hike case into the
+  crowded book — stress-test 4510 → 4300, then 4227/50DMA 4225. Warsh Fri
+  reading buybacks as easing = the hawk-ammunition variant.
+- **Kinetic tail (~30%):** hot, NOT armed. Markers: (1) major-FI shape —
+  Chinese major = `f230eca0` MISS, oil/CNY reprice (`55412a56` Sun 30);
+  (2) blacklist (46) turns physical vs a GCC hull (`b13614a1` paper thru
+  7 Sep); (3) Yanbu/Fujairah ordnance in the ~31 Aug–7 Sep ultimatum
+  window; corridor endurance `fe35b77d` (6 Sep). Rezaei total-halt =
+  bluff (`92a5bbb8` 0.7); nuclear ambiguity unformalized (`30bad8a0`).
+  Kuwait now on the named threat surface.
 
 ## What flips me
 
-- Settle <4510 by Tue → `9b2f3adf` MISS, breakout failed, revert to chop.
+- Settle <4510 tonight → `9b2f3adf` MISS, breakout failed, revert to chop.
 - Core PCE ≥0.4% m/m Wed → bearish weight up, stress-test 4300 same run.
-- Major Chinese bank designated → `f230eca0` MISS, reassess all limbs
-  same run (non-Chinese/non-major FI scores `55412a56` alone, no flip).
-- Physical enforcement vs listed ADNOC/Bahri/Nakilat hull → `b13614a1`
-  MISS, tail ARMS (d8fda2a3-family escalation).
-- Strike on Yanbu/Fujairah (`d8fda2a3`); escort suspension/≥48h convoy
-  pause (`fe35b77d` MISS) → tail ARMS.
+- Major Chinese bank designated → `f230eca0` MISS, reassess all limbs same
+  run (non-Chinese/non-major scores `55412a56` alone, no flip).
+- Physical enforcement vs a listed GCC hull → `b13614a1` MISS, tail ARMS.
+- Yanbu/Fujairah strike; escort suspension/≥48h convoy pause (`fe35b77d`).
 - Verified total-export-halt ≥72h (`92a5bbb8` MISS) → tail arms, oil-led.
-- Official NPT exit / safeguards break (`30bad8a0` MISS) → Israel-strike
-  branch opens.
+- Official NPT exit / safeguards break (`30bad8a0` MISS).
 - Warsh states a Sept leaning (`1a08ec53` MISS) → rates leg re-prices.
-- Brent settle ≥$95 (`6f8b0433` MISS) → passthrough + tail together.
+- Brent settle ≥$95 (`6f8b0433` MISS; Morgan Stanley calling $100).
+- USDJPY daily close <157 (new yen claim MISS) → debasement pillar cracks.
 
-## Open predictions (19)
+## Open predictions (20)
 
-Scored this run: `bb86ccc9` HIT (AMZAN; Houthi/continuation family
-15-for-15). New: `55412a56` (major FI this week, 0.5, Sun 30),
-`b13614a1` (blacklist stays paper, 0.7, 7 Sep). Tue: `9b2f3adf`
-(4510), `d8fda2a3`. Thu: `f230eca0` (watch `8babc60f`, near-certain).
-Fri: `1a08ec53` (Warsh), `b0c2bfeb` (DXY). 31 Aug: `73281b56` `ac586003`
-`adc2a252` `d9e50362` `f73172f8` `6f8b0433`. ~1 Sep: `951d8286`.
-6–7 Sep: `fe35b77d` `92a5bbb8` `30bad8a0` `b13614a1`. Sept FOMC:
-`ec71ce01` (0.8).
+None matured today. Tonight 23:59Z: `9b2f3adf` (4510) + `d8fda2a3` (UAE
+assets) — both HIT-track. Thu: `f230eca0`. Fri: `1a08ec53`, `b0c2bfeb`,
+`8babc60f`. Sun 30: `55412a56`. 31 Aug: `73281b56` `ac586003` `adc2a252`
+`d9e50362` `f73172f8` `6f8b0433`. ~1 Sep: `951d8286`. 4 Sep: new yen claim.
+6–7 Sep: `fe35b77d` `92a5bbb8` `30bad8a0` `b13614a1`. Sept FOMC: `ec71ce01`.
 
 ## Wakeups
 
-#38 Wed 26 Aug 13:15Z core PCE (+GDP prelim + durables; event-pending
-enters Tue eve). #39 Fri 28 Aug 14:45Z Warsh keynote + benchmark revision
-(verify slot vs KC Fed agenda ~28 Aug 00–02Z). NEW: 9 Sep ~15:15Z first
-Treasury buyback operation (verify slot when Treasury publishes schedule;
-Saturday brief re-verifies per rule 17). #26 11 Sep CPI.
+#38 Wed 26 Aug 13:15Z core PCE (+GDP prelim + durables). #39 Fri 28 Aug
+14:45Z Warsh keynote + benchmark revision (verify slot vs KC Fed agenda
+~28 Aug 00–02Z). #41 9 Sep 15:15Z first Treasury buyback op (Saturday
+brief re-verifies slot, rule 17). #26 11 Sep CPI.
 
 ## Desk-local
 
-**NEW: Treasury issued a sectoral determination on GOLD** (with digital
-assets, tech, aviation, shipping) — facilitating Iranian-origin gold now
-carries explicit US designation risk; screen Iranian-linked counterparties
-and exchange-house flows as a named, published exposure, in force today.
-ADNOC/AD Ports hulls sit on Iran's 45-vessel blacklist — UAE shipping
-stays in the threat set (`d8fda2a3` thru Tue; no impact to date). Red Sea
-routing risk for Saudi-linked cargo elevated again (AMZAN, Yanbu −⅓
-exports). Overnight scans cover the Iranian response + any major-FI
-designation.
+Gold sectoral determination in force since Mon — Iranian-origin gold
+facilitation carries explicit US designation risk; keep screening
+Iranian-linked counterparties and exchange-house flows. Kuwait added to
+Iran's named pressure surface (Gulf News). Blacklist (46 hulls incl.
+ADNOC/AD Ports) still paper; UAE shipping in the threat set. Red Sea
+double-tap killed a rescued crew member — Saudi-linked routing risk
+elevated. Iran-banker designations "coming soon" — watch exchange-house
+second-order effects in Dubai if a regional FI is named.
 
 ## Sourcing health
 
-Presser read triangulated MarketWatch + Gulf News + investinglive
-extracts (all fresh, 24 Aug). Calendar feed live to 29 Aug (todo-001
-horizon stands). gold_spot/dxy_intraday warnings = todo-003 false
-positive (price rows verified current 19:00Z). AIS metrics retired; use
-DoE/Kpler throughput only.
+Extracts fresh (1.2h/0.0h). gold_spot warning = todo-003 false positive
+(GC rows current 03:06Z). Calendar feed live to 29 Aug (todo-001).
+AIS metrics retired; DoE/Kpler throughput only.
