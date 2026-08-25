@@ -36,6 +36,19 @@ function hasTable(db: Database.Database, name: string): boolean {
   ).get(name) !== undefined;
 }
 
+/**
+ * Same reasoning as hasTable, one level down. A column added to a table that
+ * already exists on the deployed host arrives via jamasp/db.py's
+ * ADDED_COLUMNS, which only runs when a `jamasp` CLI command opens the
+ * database. The panel is read-only and may well render first, so selecting a
+ * column that has not landed yet would throw — and q() deliberately rethrows
+ * everything but SQLITE_BUSY.
+ */
+function hasColumn(db: Database.Database, table: string, column: string): boolean {
+  return db.prepare(`PRAGMA table_info(${table})`)
+    .all().some(r => (r as { name: string }).name === column);
+}
+
 // ---- types (exactly as in the Interfaces block above) ----
 export type ItemRow = { id: string; source: string; published_at: string; headline: string;
   lede: string | null; url: string; topic: string; cluster_id: string | null;
@@ -421,9 +434,14 @@ export function unscoredCountSince(sinceIso: string): number {
 export function latestSignalStates(): SignalState[] {
   return q(db => {
     if (!hasTable(db, "signal_states")) return [];
+    // `source` arrives with jamasp/db.py's ADDED_COLUMNS on the first CLI
+    // run after deploy; until then every stored row came from bars, which
+    // is exactly what the literal says.
+    const source = hasColumn(db, "signal_states", "source")
+      ? "source" : "'bars' AS source";
     return db.prepare(`
-      SELECT key, ts, value FROM (
-        SELECT key, ts, value,
+      SELECT key, ts, value, source FROM (
+        SELECT key, ts, value, ${source},
                ROW_NUMBER() OVER (PARTITION BY key ORDER BY ts DESC) AS rn
           FROM signal_states)
        WHERE rn = 1

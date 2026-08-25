@@ -6,7 +6,7 @@ import type { SignalTile } from "@/lib/technicalmap";
 const tile = (over: Partial<SignalTile> = {}): SignalTile => ({
   key: "rsi14@1d", signal: "rsi14", timeframe: "1d", family: "momentum",
   state: 0.8, ts: "2026-08-20T00:00:00Z", multiplier: 2, fitted: true,
-  pinned: false, ...over,
+  pinned: false, source: "bars", ...over,
 });
 
 const render = (tiles: SignalTile[]) =>
@@ -92,4 +92,11 @@ describe("TechnicalMap", () => {
     // nothing, silently removing the second encoding.
     expect(render([tile({ state: -0.9 })])).toContain('id="map-hatch"');
   });
+});
+
+it("names TradingView provenance in the hover title, and only then", () => {
+  // A bar-computed state is the normal path and says nothing; a state read
+  // off TradingView is a real reading from somewhere else and says so.
+  expect(render([tile({ source: "tradingview" })])).toContain("via TradingView");
+  expect(render([tile({ source: "bars" })])).not.toContain("via TradingView");
 });

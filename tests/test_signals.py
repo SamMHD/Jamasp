@@ -253,3 +253,132 @@ def test_refresh_with_no_bars_writes_nothing_rather_than_raising(tmp_path):
     # A host that has not run the backfill yet must not take the timer down.
     conn = db.connect(tmp_path / "j.db")
     assert signals.refresh(conn, load_weights(), "GC") == 0
+
+
+# ---- TradingView fallback -------------------------------------------------
+
+
+def _seed_tv(conn, ts="2026-08-25T04:31:05Z", **overrides):
+    """Seed the daily TradingView series `jamasp ingest` already stores."""
+    values = {
+        "CLOSE": 4700.0, "RSI14": 30.0, "STOCH_K": 20.0, "STOCH_D": 25.0,
+        "WILLR": -80.0, "MACD": 5.0, "MACD_SIG": 0.0, "ADX": 40.0,
+        "SMA50": 4600.0, "SMA200": 4400.0, "BB_UPPER": 4800.0,
+        "BB_LOWER": 4500.0, "ATR14": 40.0, "PIV_R1": 4750.0, "PIV_S1": 4650.0,
+    }
+    values.update(overrides)
+    for suffix, v in values.items():
+        conn.execute("INSERT OR REPLACE INTO prices (symbol, ts, value)"
+                     " VALUES (?, ?, ?)", (f"GC_{suffix}", ts, v))
+    conn.commit()
+    return ts
+
+
+def test_tv_fallback_ctx_maps_stored_prices_onto_classifier_inputs(tmp_path):
+    conn = db.connect(tmp_path / "j.db")
+    ts = _seed_tv(conn)
+    got = signals.tv_fallback_ctx(conn, "GC")
+    assert got is not None
+    at, ctx = got
+    assert at == ts
+    assert ctx["rsi14"] == 30.0
+    assert ctx["close"] == 4700.0
+    assert ctx["macd_signal"] == 0.0
+    assert ctx["pivot_r1"] == 4750.0
+
+
+def test_tv_fallback_ctx_omits_the_fib_retracements(tmp_path):
+    # TradingView's FIB_S1/FIB_R1 are Fibonacci PIVOT levels, a different
+    # quantity from indicators.fib_levels' 0.618/0.5 retracements of a
+    # lookback range. Feeding one as the other would be silently wrong, so
+    # the fallback supplies neither and those classifiers stay unreadable.
+    conn = db.connect(tmp_path / "j.db")
+    _seed_tv(conn)
+    conn.execute("INSERT INTO prices VALUES ('GC_FIB_R1', '2026-08-25T04:31:05Z', 4740.0)")
+    conn.execute("INSERT INTO prices VALUES ('GC_FIB_S1', '2026-08-25T04:31:05Z', 4660.0)")
+    conn.commit()
+    _, ctx = signals.tv_fallback_ctx(conn, "GC")
+    assert "fib618" not in ctx
+    assert "fib50" not in ctx
+    assert signals.classify("fib618", ctx) is None
+    assert signals.classify("fib50", ctx) is None
+
+
+def test_tv_fallback_ctx_is_none_without_prices(tmp_path):
+    conn = db.connect(tmp_path / "j.db")
+    assert signals.tv_fallback_ctx(conn, "GC") is None
+
+
+def test_refresh_falls_back_to_tradingview_when_bars_are_absent(tmp_path):
+    conn = db.connect(tmp_path / "j.db")
+    _seed_tv(conn)
+    n = signals.refresh(conn, load_weights(), "GC")
+    rows = {r["key"]: r["source"]
+            for r in conn.execute("SELECT key, source FROM signal_states")}
+    assert n == len(rows)
+    # The ten daily signals TradingView can actually feed.
+    for key in ("rsi14@1d", "stoch@1d", "willr@1d", "macd@1d", "adx@1d",
+                "sma50@1d", "sma200@1d", "bollinger@1d", "pivot@1d"):
+        assert key in rows, key
+        assert rows[key] == "tradingview"
+    # ...and neither retracement, for want of a real equivalent.
+    assert "fib618@1d" not in rows and "fib50@1d" not in rows
+
+
+def test_tv_fallback_covers_the_daily_timeframe_only(tmp_path):
+    # docs/todo/003: TradingView's |1W and |240 fields come back null for
+    # COMEX:GC1!, so nothing but the daily set is stored to fall back on.
+    conn = db.connect(tmp_path / "j.db")
+    _seed_tv(conn)
+    signals.refresh(conn, load_weights(), "GC")
+    keys = {r["key"] for r in conn.execute("SELECT key FROM signal_states")}
+    # Assert non-emptiness FIRST: `all()` over an empty set is vacuously
+    # true, so without this the test passes just as happily when the
+    # fallback writes nothing at all.
+    assert keys, "expected the fallback to write daily states"
+    assert all(k.endswith("@1d") for k in keys), sorted(keys)
+
+
+def test_refresh_prefers_bars_over_the_tradingview_fallback(tmp_path):
+    # Bars are ours, oracle-checkable and cover every timeframe. The fallback
+    # exists for a host with no bars, not as an alternative to having them.
+    conn = db.connect(tmp_path / "j.db")
+    _seed_tv(conn)
+    for tf in ("1d", "4h", "1w"):
+        store_bars(conn, "GC", tf, _rising(300))
+    signals.refresh(conn, load_weights(), "GC")
+    sources = {r["source"] for r in conn.execute(
+        "SELECT source FROM signal_states WHERE key LIKE 'rsi14@%'")}
+    assert sources == {"bars"}
+
+
+def test_tv_fallback_reads_atr14_avg_from_stored_atr_history(tmp_path):
+    # The atr14 classifier needs a rolling average as well as the level.
+    # Fifty stored ATR observations are exactly what the window wants.
+    conn = db.connect(tmp_path / "j.db")
+    for i in range(60):
+        conn.execute("INSERT INTO prices VALUES ('GC_ATR14', ?, ?)",
+                     (f"2026-06-{i % 28 + 1:02d}T{i % 24:02d}:00:00Z", 20.0))
+    _seed_tv(conn, ATR14=40.0)
+    _, ctx = signals.tv_fallback_ctx(conn, "GC")
+    assert ctx["atr14"] == 40.0
+    assert ctx["atr14_avg"] is not None
+    # Volatility at twice its own average reads as expansion, i.e. bullish.
+    assert signals.classify("atr14", ctx) == pytest.approx(1.0)
+
+
+def test_external_series_signals_are_labelled_series_not_bars(tmp_path):
+    # GVZ never had bars to compute from — `prices` is its normal path, not
+    # a fallback. Labelling it "bars" would claim it went through
+    # indicators.py, which is the one thing the oracle test cross-checks.
+    conn = db.connect(tmp_path / "j.db")
+    for i in range(60):
+        conn.execute("INSERT INTO prices VALUES ('^GVZ', ?, 18.0)",
+                     (f"2026-07-{i % 28 + 1:02d}T{i % 24:02d}:00:00Z",))
+    conn.execute("INSERT INTO prices VALUES ('^GVZ', '2026-08-25T04:00:00Z', 27.0)")
+    conn.commit()
+    signals.refresh(conn, load_weights(), "GC")
+    row = conn.execute(
+        "SELECT source FROM signal_states WHERE key = 'gvz@1d'").fetchone()
+    assert row is not None, "expected a gvz state from the stored series"
+    assert row["source"] == "series"

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildSignalTiles, layoutSignalMap } from "@/lib/technicalmap";
+import { buildSignalTiles, layoutSignalMap, type SignalState } from "@/lib/technicalmap";
 
 const SPECS = [
   { name: "rsi14", family: "momentum", timeframes: ["1d", "4h"] },
@@ -21,10 +21,10 @@ const WEIGHTS = {
   },
 };
 
-const STATES = [
-  { key: "rsi14@1d", ts: "2026-08-20T00:00:00Z", value: 0.8 },
-  { key: "rsi14@4h", ts: "2026-08-20T04:00:00Z", value: -0.3 },
-  { key: "sma50@1d", ts: "2026-08-20T00:00:00Z", value: -0.9 },
+const STATES: SignalState[] = [
+  { key: "rsi14@1d", ts: "2026-08-20T00:00:00Z", value: 0.8, source: "bars" },
+  { key: "rsi14@4h", ts: "2026-08-20T04:00:00Z", value: -0.3, source: "bars" },
+  { key: "sma50@1d", ts: "2026-08-20T00:00:00Z", value: -0.9, source: "bars" },
 ];
 
 describe("buildSignalTiles", () => {
@@ -92,7 +92,8 @@ describe("buildSignalTiles", () => {
     // A stale signal_states row from a removed signal must not draw a tile
     // with no family to sit in.
     const tiles = buildSignalTiles(
-      [...STATES, { key: "vibes@1d", ts: "2026-08-20T00:00:00Z", value: 1 }],
+      [...STATES,
+       { key: "vibes@1d", ts: "2026-08-20T00:00:00Z", value: 1, source: "bars" }],
       SPECS, WEIGHTS);
     expect(tiles.map(t => t.key)).not.toContain("vibes@1d");
   });
@@ -128,5 +129,24 @@ describe("layoutSignalMap", () => {
     // round-trips cannot promise — the same trap that produced a spurious
     // failure at 399.99999999999994 when this layout first landed.
     expect(total / (400 * 300)).toBeCloseTo(1, 6);
+  });
+});
+
+describe("signal provenance", () => {
+  it("carries source through onto the tile", () => {
+    const tiles = buildSignalTiles(
+      [{ key: "rsi14@1d", ts: "2026-08-25T04:31:05Z", value: -0.6,
+         source: "tradingview" }],
+      SPECS, WEIGHTS);
+    expect(tiles[0].source).toBe("tradingview");
+  });
+
+  it("defaults a row with no source to bars", () => {
+    // A database written before signal_states gained its `source` column
+    // holds only bar-computed states, which is what the fallback means.
+    // Cast because the whole point is a row that predates the type.
+    const legacy = [{ key: "rsi14@1d", ts: "2026-08-20T00:00:00Z", value: 0.4 }];
+    const tiles = buildSignalTiles(legacy as never, SPECS, WEIGHTS);
+    expect(tiles[0].source).toBe("bars");
   });
 });

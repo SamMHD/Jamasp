@@ -63,14 +63,18 @@ insertScore.run("map2", 4, -2, 0.8, "geopolitics", weekAt);
 // test/db-marketmap-no-table.test.ts; this file's job is the populated path.
 db.exec(`CREATE TABLE IF NOT EXISTS signal_states (
   key TEXT NOT NULL, ts TEXT NOT NULL, value REAL NOT NULL,
+  source TEXT NOT NULL DEFAULT 'bars',
   PRIMARY KEY (key, ts))`);
 const insertState = db.prepare(
-  "INSERT INTO signal_states (key, ts, value) VALUES (?, ?, ?)");
+  "INSERT INTO signal_states (key, ts, value, source) VALUES (?, ?, ?, ?)");
 // One bullish, one bearish (exercising the hatch path) and one unfitted
 // (exercising the dashed path), across two families so the map has two boxes.
-insertState.run("rsi14@1d", todayAt, -0.9);
-insertState.run("sma50@1d", todayAt, 0.8);
-insertState.run("macd@1d", todayAt, 0.4);
+// macd@1d is TradingView-sourced, so the provenance line in the hover title
+// has something to render — a host with no bars is the case that fallback
+// exists for, and it should be visible end to end.
+insertState.run("rsi14@1d", todayAt, -0.9, "bars");
+insertState.run("sma50@1d", todayAt, 0.8, "bars");
+insertState.run("macd@1d", todayAt, 0.4, "tradingview");
 
 writeFileSync(path.join(root, "state", "weights.json"), JSON.stringify({
   fitted_at: todayAt,
