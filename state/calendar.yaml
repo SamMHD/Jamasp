@@ -510,3 +510,27 @@ events:
     action: wakeup added 2026-09-09 15:15Z deepdive (read the operation
       result + gold/dollar/long-end reaction; reschedule per rule 15 if
       results not yet published)
+
+  - date: 2026-08-26
+    time_dubai: "window open-ended (Iranian response unscheduled)"
+    title: Munir-channel US offer — Iranian response watch
+    why: >
+      US offered via Pakistan's Munir in Tehran (Al Arabiya senior
+      source, extracted 26 Aug) to cancel Economic Outcast, lift all
+      sanctions, and end the blockade for a reopened Hormuz + proxy
+      stand-down; Rezaei took it to "internal consultations." Parallel
+      track: Iran-Oman joint statement (Mehr) proposes a temporary
+      corridor + joint mine-clearing framework. Neither is a text —
+      d9e50362 (no co-confirmed US-Iran text by 31 Aug) and ac586003
+      (no operational corridor + transit by 31 Aug) ride on them, and
+      the sixth "ceasefire reached" rumor of the cycle already moved
+      oil 5% without confirmation. An Iranian formal response, a
+      Muscat readout with a start date, or a US confirmation of the
+      offer are each material; per rule 8, announcement-timing claims
+      stay ≤0.5 and only co-confirmation scores.
+    action: >
+      2-hourly scans carry it (keywords: Munir, Rezaei, Economic
+      Outcast cancellation, corridor start date, mine-clearing); no
+      dedicated wakeup — response is unscheduled by nature. Anchor one
+      the moment either side names a date. Cross-check at the Mon 31
+      Aug cohort scoring.
