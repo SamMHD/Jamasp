@@ -534,3 +534,18 @@ events:
       dedicated wakeup — response is unscheduled by nature. Anchor one
       the moment either side names a date. Cross-check at the Mon 31
       Aug cohort scoring.
+
+  - date: 2026-09-04
+    time_dubai: "16:30 (12:30Z print; wakeup #42 at 17:15)"
+    title: August payrolls — first data gate between Warsh and Sept FOMC
+    why: >
+      In-line July core PCE (26 Aug: +0.2%/3.3% dead-on) left Sept
+      pricing at ~63% hold / ~37% hike — the hike case is dormant, not
+      dead, and now needs a Warsh Sept-leaning or hot data to revive.
+      Payrolls is the next data gate (then CPI 11 Sep, #26). Scores
+      98bbfd33 (Sept-hike odds <50% through the print, 0.7). Same-day
+      context from 28 Aug: BLS benchmark revision + Warsh keynote read
+      (#39). DATE PROVISIONAL first-Friday convention — the calendar
+      feed only covers to 29 Aug (todo-001); the Saturday 29 Aug brief
+      re-verifies date and slot per rule 17.
+    action: wakeup #42 added 2026-09-04T13:15:00Z (print+45, rule 15)
