@@ -1,86 +1,78 @@
-# Stance — 2026-08-26 (Wed, post-PCE deepdive) — EVENT-PENDING into Warsh Fri 14:00Z
+# Stance — 2026-08-27 (Thu brief) — EVENT-PENDING into Warsh Fri 14:00Z
 
-**PCE gate cleared benign 12:30Z:** core +0.2%/3.3% dead-on consensus (hike
-trigger ≥0.4% missed wide); headline a tenth hot (+0.2%/3.7%), income 2x
-(+0.4%) but real spending flat, GDP 2nd est unrevised 1.5%, durables +1.1% vs
-+0.5%. Sept hold ~63%/hike ~37% — pricing confirmed, not changed; year-end
-≥1 hike ~70%. Gold −0.35% first hour (4685→4668), dollar flat: profit-taking
-in the overbought book, not repricing. ETF inflows ~47t last week (10-month
-high) — underlying bid intact. Overnight tape: Munir-channel US offer + Iran-
-Oman corridor framework live but no text, Iran gate maximalist ($300bn);
-Brent <$86 pricing the path, NOT the flows (Kpler: 5 Hormuz transits Tue vs
-depressed 10-day avg 15). Gold ignored the whole peace tape Mon (settled
-4723) — fiscal hedge has the wheel. USDJPY 159. DXY 99.0.
+**Post-PCE digestion:** Wed closed 4664.8 (−1.2%) on a dollar/yields bounce
+(DXY 99.1, 10y 4.664%), rebuilt to ~4689 overnight — consolidation, not
+repricing; Sept hold ~63%/hike ~37% intact. **Corridor tape re-read:** IRGC
+(Mohebbi/Sepah, extracted) claims Iran-Oman agreed the strait's waters split
+AND a perpetual transit-fee revenue share; Oman + Iran's civilian govt both
+silent, "US obstructing" — and AP (2 officials): **Trump threatened to bomb
+Oman last week over the fee shape.** The oil slide (Brent ~85, 200-SMA; WTI
+82.2) is pricing a deal Washington rejects. Gold flat through both legs —
+regime signature again. Baseline kinetic never paused: UKMTO tanker hit 25
+Aug (nameless, fire out). UBS joins the chase ($5,400). PBOC 8th weak fix;
+Himino hawkish yet USDJPY 159.3; BoK 2nd hike. Tokyo core CPI tonight.
 
 ## View
 
-**Weights 70/5/25 (base/bearish/kinetic) — UNCHANGED by the print, as the
-benign branch prescribed. Conviction stays CAPPED into Warsh Fri (the keynote
-now carries the near-term repricing risk alone). Entry still terrible: RSI
-71.6, stoch 92, ~140 over 200DMA, net spec 219k.**
+**Weights 70/5/25 (base/bearish/kinetic) — unchanged. Conviction CAPPED into
+Warsh Fri 14:00Z (+ BLS benchmark revision same slot; #39 reads both). Entry
+still bad: RSI 70.1, ~155 over 200DMA, net spec 219k (stale), $50 no-news
+slam 25 Aug on the tape.**
 
-- **Base (~70%):** fiscal-credibility hedge sets price; PCE just proved the
-  hike case stays dormant absent new data. 4,800s door open on the next
-  catalyst (upper BB 4798; Citi 4,800/JPM 5k; actionforex 4,770–4,966 zone
-  needs macro confirmation). Defend 4510 (= actionforex 4H structure floor
-  4509), then 4450/4380. Dollar leg `b0c2bfeb` thru Fri. Yen pillar holds
-  (`b6450c7a` thru 4 Sep).
-- **Bearish (~5%):** hike case revives only via Warsh Sept-leaning
-  (`1a08ec53` MISS) or hot payrolls/CPI — data gates 4 + 11 Sep. Warsh
-  forceful market-discipline message = the one speech shape that hits the
-  thesis; stress-test 4510 → 4300/4227.
-- **Kinetic tail (~25%):** cooling, NOT disarmed. Markers: (1) major-FI
-  shape — `f230eca0` matures Thu; Bessent's "why would I blow up the global
-  financial system" cure-period line supports HIT; (2) blacklist (46)
-  physical vs GCC hull (`b13614a1` thru 7 Sep); (3) Yanbu/Fujairah ordnance
-  in ~31 Aug–7 Sep window; corridor endurance `fe35b77d` (6 Sep). Physical
-  disruption still severe (5 transits Tue) — Brent is pricing diplomacy,
-  and the gap to Iran's $300bn gate is the width of the Gulf.
+- **Base (~70%):** fiscal-credibility hedge sets price. 4640–4750
+  consolidation into the keynote; 4,800s need a catalyst (upper BB 4813).
+  Defend 4510, then 4450/4380. Dollar leg `b0c2bfeb` thru Fri (DXY 99.1 vs
+  100 trigger). Yen pillar `b6450c7a` thru 4 Sep.
+- **Bearish (~5%):** Warsh states Sept leaning (`1a08ec53` MISS) or reads
+  buybacks-as-easing into a market-discipline speech → stress-test 4510 →
+  4300/4227. Data gates 4 + 11 Sep.
+- **Kinetic tail (~25%):** cooling, NOT disarmed — the fee-deal disclosure
+  cuts the odds of a US-blessed reopening (the only disarming variant) and
+  puts Oman inside the US threat perimeter. Markers: blacklist physical
+  enforcement (`b13614a1` thru 7 Sep); Yanbu/Fujairah ordnance ~31 Aug–7
+  Sep; corridor endurance `fe35b77d` (6 Sep); prize-courts revival = legal
+  siege escalating.
 
 ## What flips me
 
-- Warsh states Sept leaning Fri (`1a08ec53` MISS) → rates leg re-prices;
-  forceful market-discipline speech → bearish weight up same run.
-- Sept-hike odds >50% pre-payrolls (`98bbfd33` MISS) → hike case live again.
-- Co-confirmed US-Iran text (`d9e50362` MISS) → cut kinetic hard; oil
-  carries the move, gold's residual war bid small.
-- Operational Iran-Oman corridor + first transit (`ac586003` MISS).
-- Major Chinese bank designated (`f230eca0` MISS) → reassess all limbs.
+- Warsh Sept leaning Fri (`1a08ec53` MISS) → rates leg reprices same run.
+- DXY daily close ≥100 (`b0c2bfeb` MISS) → dollar leg breaks.
+- Omani co-confirmation of the fee deal (`2d9fac65` MISS) → corridor real,
+  oil-led unwind, reassess tail; co-confirmed US-Iran text (`d9e50362` MISS)
+  → cut kinetic hard.
+- Major Chinese bank designated (`f230eca0` MISS — matures TONIGHT 23:59Z).
 - Physical enforcement vs listed GCC hull (`b13614a1` MISS) → tail ARMS.
-- Escort suspension/≥48h convoy pause (`fe35b77d` MISS); Yanbu/Fujairah hit.
-- Verified total-export-halt ≥72h (`92a5bbb8` MISS); NPT exit (`30bad8a0`).
-- Brent settle ≥$95 (`6f8b0433` MISS). USDJPY close <157 (`b6450c7a` MISS).
+- Escort suspension/≥48h convoy pause (`fe35b77d`); Yanbu/Fujairah hit.
+- Verified total-export-halt ≥72h (`92a5bbb8`); NPT exit (`30bad8a0`).
+- Brent settle ≥$95 (`6f8b0433`). USDJPY close <157 (`b6450c7a`).
 
-## Open predictions (19)
+## Open predictions (20)
 
-Scored today: `d8fda2a3` HIT, `9b2f3adf` HIT. Recorded today post-print:
-`98bbfd33` Sept-hike odds <50% thru 4 Sep payrolls (0.7). Thu: `f230eca0`.
-Fri: `1a08ec53` `b0c2bfeb` `8babc60f`. Sun 30: `55412a56`. Mon 31:
-`73281b56` `ac586003` `adc2a252` `d9e50362` `f73172f8` `6f8b0433`. ~1 Sep:
-`951d8286`. 4 Sep: `b6450c7a` `98bbfd33`. 6–7 Sep: `fe35b77d` `92a5bbb8` `30bad8a0`
-`b13614a1`. Sept FOMC: `ec71ce01` (supported by today's print — dormant ≠
-dead at 37% priced).
+None matured today. NEW: `2d9fac65` no Omani confirmation of fee deal
+(0.7, Mon 31). Tonight: `f230eca0`. Fri: `1a08ec53` `b0c2bfeb` `8babc60f`.
+Sun 30: `55412a56`. Mon 31: `73281b56` `ac586003` `adc2a252` `d9e50362`
+`f73172f8` `6f8b0433` `2d9fac65`. ~1 Sep: `951d8286`. 4 Sep: `b6450c7a`
+`98bbfd33`. 6–7 Sep: `fe35b77d` `92a5bbb8` `30bad8a0` `b13614a1`. Sept
+FOMC: `ec71ce01`.
 
 ## Wakeups
 
-#38 DONE today (this run). #39 Fri 28 Aug 14:45Z Warsh keynote + benchmark
-revision — slot rule-17 VERIFIED today via calendar feed (Fri 14:00Z, High).
-#42 Fri 4 Sep 13:15Z payrolls (slot provisional first-Friday; Sat 29 Aug
-brief re-verifies, rule 17). #41 9 Sep 15:15Z first Treasury buyback op.
+#39 Fri 28 Aug 14:45Z Warsh keynote + benchmark revision (slot CONFIRMED by
+calendar feed: Fri 14:00Z High). #42 Fri 4 Sep 13:15Z payrolls (provisional;
+Sat 29 brief re-verifies, rule 17). #41 9 Sep 15:15Z first buyback op.
 #26 11 Sep CPI.
 
 ## Desk-local
 
-Economic Outcast dragnet explicitly lists gold — keep screening
-Iranian-linked counterparties/exchange-house flows. Iran-banker designations
-"coming soon" (`55412a56`) — watch Dubai exchange-house second-order
-effects. Blacklist (46 hulls incl ADNOC/AD Ports) still paper. Red Sea
-routing risk uneven (rescue-vessel double-tap confirmed on that axis).
+Economic Outcast dragnet lists gold — keep screening Iranian-linked
+counterparties/exchange-house flows; Iran-banker designations "coming soon"
+(`55412a56` Sun). Blacklist (46) still paper. Red Sea rescue-vessel
+double-tap axis stays nasty. Prize-courts revival may touch seized-cargo
+title chains — flag to desk if gold cargo ever named.
 
 ## Sourcing health
 
-Extracts fresh this run (all 0.0h). Calendar feed live to 29 Aug (todo-001
-horizon gap beyond that). gold_spot warning = todo-003 false positive (GC
-prices current 13:05Z). NEW todo-009: `bars`/`signal_states`/`weight_fits`
-tables empty, `bars backfill` Yahoo-429 — weights-refit timer running on
-empty substrate; price technicals unaffected (from `prices` series).
+Extracts fresh this run (0.0h both). gold_spot warning = todo-003 false
+positive (GC current 03:31Z). Calendar feed live only to 29 Aug (todo-001).
+todo-009 (bars/signals/weights substrate empty) unchanged — price technicals
+unaffected.
