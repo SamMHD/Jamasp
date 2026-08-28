@@ -549,3 +549,23 @@ events:
       feed only covers to 29 Aug (todo-001); the Saturday 29 Aug brief
       re-verifies date and slot per rule 17.
     action: wakeup #42 added 2026-09-04T13:15:00Z (print+45, rule 15)
+
+  - date: 2026-08-29
+    time_dubai: "weekend (29-30 Aug; exact sessions unscheduled in feed)"
+    title: G20 finance meeting, Asheville — Iran sanctions push + yen watch
+    why: >
+      Two live threads converge (28 Aug feed): (1) US to press G20 on
+      growth, imbalances and IRAN SANCTIONS — multilateralizing the
+      Bessent siege during the 55412a56 window (major-institution
+      designation "this week", closes Sun 30 23:59Z); (2) Ueda AND
+      Katayama attend with "yen weakness back in focus" (USDJPY 159.45,
+      Tokyo core-core 2.0%) — any joint-statement or intervention
+      language is direct headline risk for b6450c7a (no close <157 thru
+      4 Sep). No scheduled decision point, so no wakeup — weekend scans
+      + Sat/Sun briefs read it; anchor a wakeup only if a communiqué
+      slot or presser gets a published time.
+    action: >
+      weekend 2-hourly scans (keywords: G20, Asheville, communiqué, yen,
+      intervention, Iran sanctions coordination); Sat 29 brief also
+      re-verifies the coming week's calendar by hand (feed dark past
+      29 Aug, todo-001).
