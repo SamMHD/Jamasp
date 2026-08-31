@@ -193,3 +193,26 @@ watches for it. A cheap `watchdog.check` addition — read
 under 3 days remaining — would turn a 3-day outage into a warning with days of
 slack. That is arguably a better first fix than anything above, and is not yet
 filed separately.
+
+## Update, 2026-08-31: the credential check shipped
+
+The third suggestion in the addendum above is built and deployed —
+`watchdog.check` now reads `~/.claude/.credentials.json` and violates when the
+OAuth refresh token has expired or expires within `CREDENTIALS_WARN_DAYS` (3).
+Verified against the host's real credentials file: silent today, warns from
+2026-09-25, reports `EXPIRED` after 2026-09-28.
+
+That closes the *warning* gap — this failure mode should now announce itself
+three days early instead of surfacing as a wall of contentless alerts.
+
+**This item stays open.** It was never only about credentials, and the two
+harder halves are untouched:
+
+1. a failure alert still cannot say *why* the run failed, for any cause, because
+   `_execute_once` discards the child's output (the original **Problem** above);
+2. 27 consecutive identical failures still send 27 identical messages, which is
+   what buried the watchdog's own precise violations at roughly 13 to 1.
+
+The credential check helps only with the one cause it knows about. A quota
+exhaustion, a `PATH` change, or a malformed prompt would still produce the same
+undiagnosable `exit=1` wall it did in August.
