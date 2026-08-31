@@ -1,86 +1,73 @@
-# Stance — 2026-08-28 (Fri brief) — EVENT-PENDING, Warsh TODAY 14:00Z
+# Stance — 2026-08-31 (Mon scan, PROVISIONAL) — RE-BASE PENDING
 
-**Keynote day:** Warsh 14:00Z + BLS payroll benchmark revision + revised UoM
-same slot (agenda published; #39 reads 14:45Z, re-weights same run). Gold
-drifted to 4639 — LOWER EDGE of the 4640–4750 consolidation — on a flat
-dollar (DXY 99.1) and 10y 4.672%: crowded-book de-risking, not repricing.
-**Corridor two-tier structure clarified:** Rezaei (SNSC) confirms the
-Iran-Oman corridor shape AND is drafting a formal conditions list for
-mediators (incl. ending the war) — but the CENTRAL channel stays hostage to
-a US memorandum Trump ruled out same day (oil snapped its slide, WTI 83.53).
-Oman still unconfirming ("talks continuing" — `2d9fac65` on track). Blacklist
-gaining commercial traction (Indian refiners avoiding listed hulls) with NO
-physical enforcement; Haana turn-back framed as corridor regime, not
-sanctions response. Tokyo core-core CPI 2.0%, USDJPY 159.45 regardless —
-yen pillar holds. NEW: Venezuela supply axis (US stake talks, "Vexit");
-Roosevelt relieves GW (net ~1) leaving ZERO Pacific carriers into Xi visit.
+**Written by a scan from headlines only.** Analysis was DARK 28–31 Aug (host
+outage; redeployed 31 Aug ~09:25Z; #39 Warsh read never produced output).
+Two shocks landed in the gap: **(1) Warsh turned hawkish** at Jackson Hole —
+hike bets revived, "retightens financial conditions" (investinglive), DXY
+99.56, USDJPY broke 160 intraday (159.7 now). **(2) US-Iran kinetics
+resumed** — first fighting in a month: US strike on Larak Island, IRGC downs
+MQ-9 over Hormuz, supertanker afire on naval mines in the Strait, Iranian
+drones at a US base in the UAE with Abu Dhabi reserving the right to respond.
+Brent >$90 (was capped <95 thesis). Gold: 4639 → overnight low 4456.9
+(31 Aug 02:36Z) → 4493 — **the 4640–4750 shelf and the 4510 defense both
+broke**; war bid is cushioning the hawkish repricing (24h only -0.24%).
+Spot now BELOW 200DMA (4536), RSI 52 — the overbought-entry problem is gone;
+the trend problem is new.
 
-## View
+## View (provisional weights ~40/25/35 base/bearish-rates/kinetic)
 
-**Weights 70/5/25 (base/bearish/kinetic) — unchanged. Conviction CAPPED
-until #39 reads the keynote. Entry still bad: RSI 69.8, ~104 over 200DMA,
-net spec 219k (stale), 25-Aug no-news $50 slam on the tape.**
+- **Base (~40%):** fiscal-hedge thesis wounded, not dead — August still the
+  strongest monthly gain since January; buyback op 9 Sep (#41) is its next
+  test. Churn 4380–4530 into payrolls 4 Sep.
+- **Bearish-rates (~25%):** the old 5% scenario is IN PROGRESS — Warsh
+  hawkish into a crowded book. If hike odds print >50% (`98bbfd33` MISS),
+  stress-test extends 4300/4227. NFP 4 Sep is the gate.
+- **Kinetic (~35%):** no longer tail — LIVE. Mines in Hormuz = indiscriminate
+  escalation; UAE soil touched = GCC widening risk. Watch: UAE response,
+  second mine/tanker event, Kharg/Larak follow-on strikes (export-capacity
+  transmission), SCO summit optics (Xi-Putin-Modi-Pezeshkian).
 
-- **Base (~70%):** fiscal-credibility hedge sets price. 4640–4750 holds into
-  the keynote (now testing the floor); contentless speech re-arms the drift,
-  4800s need a catalyst (upper BB 4817). Defend 4510, then 4450/4380.
-  Dollar leg `b0c2bfeb` resolves TONIGHT (DXY 99.1 vs 100-close trigger).
-  Yen pillar `b6450c7a` thru 4 Sep.
-- **Bearish (~5%):** Warsh states Sept leaning (`1a08ec53` MISS) or reads
-  buybacks-as-easing into market-discipline framing → stress-test 4510 →
-  4300/4227. Sleeper: small/upward benchmark revision restores a hawk
-  labour alibi into payrolls 4 Sep. Data gates 4 + 11 Sep.
-- **Kinetic tail (~25%):** cooling, NOT disarmed — partial corridor MORE
-  likely, US-blessed reopening (the only disarming variant) LESS. Markers:
-  blacklist physical enforcement (`b13614a1` thru 7 Sep); Yanbu/Fujairah
-  ordnance ~31 Aug–7 Sep; corridor endurance `fe35b77d` (6 Sep; 3 carriers
-  cycling to hold 1 station); prize courts = legal siege.
+**Levels:** resistance 4510–4536 (broken floor + 200DMA); support 4457
+(overnight low), 4450/4380, structural 4300, then 4227.
 
-## What flips me
+## What flips me (provisional)
 
-- Warsh Sept leaning today (`1a08ec53` MISS) → rates leg reprices same run.
-- DXY daily close ≥100 TONIGHT (`b0c2bfeb` MISS) → dollar leg breaks.
-- Omani co-confirmation of the fee/waters deal (`2d9fac65` MISS) → corridor
-  real, oil-led unwind, reassess tail; co-confirmed US-Iran text
-  (`d9e50362` MISS) → cut kinetic hard.
-- Major-institution designation by Sun 30 (`55412a56` — Chinese major would
-  also have MISSed `f230eca0`-family logic, reprice oil/CNY).
-- Physical enforcement vs listed GCC hull (`b13614a1` MISS) → tail ARMS.
-- Escort suspension/≥48h convoy pause (`fe35b77d`); Yanbu/Fujairah hit.
-- Verified total-export-halt ≥72h (`92a5bbb8`); NPT exit (`30bad8a0`).
-- Brent settle ≥$95 (`6f8b0433`). USDJPY close <157 (`b6450c7a`).
+- Hike odds reported ≥50% pre-NFP (`98bbfd33` MISS) → rates leg breaks, cut base.
+- Second Hormuz mine strike or UAE kinetic response → kinetic ≥50%.
+- Verified total-export-halt ≥72h (`92a5bbb8`); NPT exit (`30bad8a0`);
+  physical blacklist enforcement vs GCC hull (`b13614a1` MISS) → tail ARMS more.
+- USDJPY daily close <157 (`b6450c7a` MISS) → yen pillar breaks.
+- Ceasefire re-established + co-confirmed within days → kinetic back to tail,
+  gold retests 4380 from the unwind side.
 
-## Open predictions (19)
+## Open predictions
 
-Scored today: `f230eca0` HIT (no major-Chinese-bank designation;
-structural-negative family 15-for-15). Deferred: `8babc60f` window closes
-TONIGHT 23:59Z (MISS-track: enforcement continuing but UNLINKED to
-sanctions — business-as-usual framing), scores at Sat brief. Tonight:
-`b0c2bfeb`. Sun 30: `55412a56`. Mon 31: `73281b56` `ac586003` `adc2a252`
-`d9e50362` `f73172f8` `6f8b0433` `2d9fac65`. ~1 Sep: `951d8286`. 4 Sep:
-`b6450c7a` `98bbfd33`. 6–7 Sep: `fe35b77d` `92a5bbb8` `30bad8a0`
-`b13614a1`. Sept FOMC: `ec71ce01`. NO new claims today (keynote ~10h out —
-positioned, not predicting).
+**8 matured UNSCORED** (dark-window backlog): `d9e50362` `f73172f8`
+`b0c2bfeb` `6f8b0433` `8babc60f` `1a08ec53` `55412a56` `2d9fac65` — the
+11:00Z deepdive scores them (needs: Warsh speech text for `1a08ec53`, DXY
+daily closes for `b0c2bfeb`, Bessent bank-sanction follow-through for
+`55412a56` — note 31 Aug Gulf News: "US plans to sanction another bank").
+Still open: `951d8286` (~1 Sep ISM), `ec71ce01` (Sept FOMC), `73281b56`
+`ac586003` `adc2a252` (31 Aug 23:59Z), `fe35b77d` `92a5bbb8` `30bad8a0`
+`b13614a1` (6–7 Sep), `b6450c7a` `98bbfd33` (4 Sep). NO new claims from this
+scan (headline-only basis).
 
 ## Wakeups
 
-#39 TODAY 14:45Z Warsh keynote + benchmark revision (slot CONFIRMED:
-calendar feed 14:00Z High + published agenda). #42 Fri 4 Sep 13:15Z
-payrolls (provisional; Sat 29 brief re-verifies, rule 17). #41 9 Sep
-15:15Z first buyback op. #26 11 Sep CPI.
+**NEW 31 Aug 11:00Z deepdive: full re-base** (Warsh text + escalation read +
+score the matured 8). #42 Fri 4 Sep 13:15Z payrolls. #41 9 Sep 15:15Z first
+buyback op. #26 11 Sep CPI.
 
 ## Desk-local
 
-Indian refiners screening Iran's 46-hull blacklist and avoiding STS — the
-paper list now moves counterparty behavior; keep screening Iranian-linked
-counterparties/exchange-house flows (Economic Outcast dragnet lists gold;
-banker designations "coming soon", `55412a56` Sun). Red Sea double-tap axis
-stays nasty. Prize-courts revival may touch seized-cargo title chains —
-flag if gold cargo ever named.
+Drone at a US base **in the UAE** + UAE "right to respond" = home-turf risk;
+watch Dubai premiums/logistics if UAE responds. Hormuz mining touches
+insurance/war-risk premia for any Gulf shipment. Blacklist/exchange-house
+dragnet unchanged; new Bessent bank designation "planned" per AP.
 
 ## Sourcing health
 
-Extracts fresh (0.0h) except two ~5.5–5.8h cache reads (dateline-checked,
-rule 16). gold_spot/dxy_intraday warnings = todo-003 false-positive family
-(both snapshots current @28 Aug 03:31Z). Calendar feed live only to 29 Aug
-(todo-001 — Sat brief must hand-verify next week's map). todo-009 unchanged.
+Inbox+price fresh (10:14Z). gold_spot/dxy_intraday warnings = todo-003
+family. 713-item backlog cleared by this scan's mark-read; dark-window
+outage + lost #39 filed as a todo. Calendar feed coverage still short
+(todo-001) — the re-base deepdive must hand-verify this week's map.
