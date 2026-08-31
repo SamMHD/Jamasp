@@ -62,8 +62,14 @@ function tileTitle(t: SignalTile, now: Date): string {
   const weight = t.pinned ? `weight ${t.multiplier.toFixed(2)} (pinned)`
     : t.fitted ? `weight ${t.multiplier.toFixed(2)}`
     : `weight ${t.multiplier.toFixed(2)} (not yet fitted)`;
+  // Provenance is named only when it is NOT our own bars. A state computed
+  // from our bars is the normal path and the one the TradingView oracle test
+  // cross-checks; a state read straight off TradingView is a real reading
+  // taken from somewhere else, and the desk should be able to see that on
+  // the tile rather than having to know which host has bars.
+  const via = t.source === "tradingview" ? ", via TradingView" : "";
   return `${t.signal} ${t.timeframe} — ${read} ${t.state.toFixed(2)}, `
-    + `${weight}, ${fmtAge(t.ts, now)}`;
+    + `${weight}${via}, ${fmtAge(t.ts, now)}`;
 }
 
 export function TechnicalMap({ tiles, width, height, fittedAt }: {

@@ -1,5 +1,5 @@
-import { beforeAll, describe, expect, it } from "vitest";
-import { mkdtempSync, mkdirSync } from "node:fs";
+import { beforeAll, describe, expect, it, vi } from "vitest";
+import { mkdtempSync, mkdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import Database from "better-sqlite3";
@@ -53,5 +53,38 @@ describe("latestSignalStates against a database with no signal_states table", ()
     // the overview page — the same guard getScoredItems carries.
     expect(() => db.latestSignalStates()).not.toThrow();
     expect(db.latestSignalStates()).toEqual([]);
+  });
+});
+
+describe("latestSignalStates against a signal_states table without `source`", () => {
+  it("reports every row as bars rather than throwing", async () => {
+    // The deployed host has signal_states from before the column existed;
+    // jamasp/db.py's ADDED_COLUMNS only widens it when a CLI command opens
+    // the database, and the panel is read-only and may render first.
+    // Selecting a column that has not landed yet would throw, and q()
+    // deliberately rethrows everything but SQLITE_BUSY.
+    const root = mkdtempSync(path.join(tmpdir(), "jamasp-signal-nosource-"));
+    mkdirSync(path.join(root, "state"), { recursive: true });
+    const d = new Database(path.join(root, "state", "jamasp.db"));
+    d.exec(`
+      CREATE TABLE signal_states (key TEXT NOT NULL, ts TEXT NOT NULL,
+        value REAL NOT NULL, PRIMARY KEY (key, ts));
+      INSERT INTO signal_states VALUES ('rsi14@1d', '2026-08-25T00:00:00Z', 0.5);
+    `);
+    d.close();
+
+    const prev = process.env.JAMASP_ROOT;
+    process.env.JAMASP_ROOT = root;
+    vi.resetModules();
+    try {
+      const m = await import("../lib/db");
+      const rows = m.latestSignalStates();
+      expect(rows).toHaveLength(1);
+      expect(rows[0].source).toBe("bars");
+    } finally {
+      process.env.JAMASP_ROOT = prev;
+      vi.resetModules();
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 });

@@ -174,7 +174,32 @@ def test_bars_primary_key_is_symbol_timeframe_ts(tmp_path):
 def test_signal_states_table_exists(tmp_path):
     conn = db.connect(tmp_path / "j.db")
     cols = {r[1] for r in conn.execute("PRAGMA table_info(signal_states)")}
-    assert cols == {"key", "ts", "value"}
+    assert cols == {"key", "ts", "value", "source"}
+
+
+def test_signal_states_source_column_is_added_to_an_existing_table(tmp_path):
+    # The deployed host already has signal_states without `source`, and
+    # CREATE TABLE IF NOT EXISTS will never widen it — ADDED_COLUMNS is what
+    # carries the column onto a live database. Model exactly that: build the
+    # narrow table, then reopen and check the column arrived with its default
+    # applied to the pre-existing row rather than leaving it NULL.
+    p = tmp_path / "j.db"
+    conn = db.connect(p)
+    conn.executescript("""
+        DROP TABLE signal_states;
+        CREATE TABLE signal_states (
+            key TEXT NOT NULL, ts TEXT NOT NULL, value REAL NOT NULL,
+            PRIMARY KEY (key, ts));
+        INSERT INTO signal_states VALUES ('rsi14@1d', '2026-08-25T00:00:00Z', 0.5);
+    """)
+    conn.commit()
+    conn.close()
+
+    conn = db.connect(p)
+    cols = {r[1] for r in conn.execute("PRAGMA table_info(signal_states)")}
+    assert "source" in cols
+    row = conn.execute("SELECT source FROM signal_states").fetchone()
+    assert row["source"] == "bars"
 
 
 def test_weight_fits_table_exists(tmp_path):

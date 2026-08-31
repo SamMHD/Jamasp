@@ -156,11 +156,19 @@ CREATE INDEX IF NOT EXISTS idx_item_scores_theme ON item_scores(theme);
 --
 -- The fit does NOT read this table. It recomputes every historical state from
 -- bars, so a refit is reproducible from bars alone and cannot inherit a state
--- written by an older version of a classifier.
+-- written by an older version of a classifier. That property is what makes
+-- the `source` column below safe: a row here can come from somewhere the fit
+-- would never train on, without touching the fit's reproducibility at all.
+--
+-- source = 'bars'        ts is the CLOSE time of the bar the state came from.
+-- source = 'tradingview' ts is the moment the value was OBSERVED. TradingView
+--                        serves a level, not a bar, so there is no close to
+--                        stamp; the panel renders this as an age either way.
 CREATE TABLE IF NOT EXISTS signal_states (
-    key   TEXT NOT NULL,   -- "<signal>@<timeframe>", e.g. "rsi14@1d"
-    ts    TEXT NOT NULL,   -- bar CLOSE time, UTC
-    value REAL NOT NULL,   -- [-1, +1], positive = bullish for gold
+    key    TEXT NOT NULL,   -- "<signal>@<timeframe>", e.g. "rsi14@1d"
+    ts     TEXT NOT NULL,   -- bar CLOSE time, or observation time — see above
+    value  REAL NOT NULL,   -- [-1, +1], positive = bullish for gold
+    source TEXT NOT NULL DEFAULT 'bars',
     PRIMARY KEY (key, ts)
 );
 CREATE INDEX IF NOT EXISTS idx_signal_states_key_ts ON signal_states(key, ts DESC);
@@ -188,6 +196,9 @@ CREATE INDEX IF NOT EXISTS idx_weight_fits_key ON weight_fits(fit, key, fitted_a
 ADDED_COLUMNS = (
     ("flash_items", "tier", "INTEGER"),
     ("flash_items", "rollup_id", "INTEGER"),
+    # signal_states shipped without `source`; the deployed host already has
+    # the table, and CREATE TABLE IF NOT EXISTS will never widen it.
+    ("signal_states", "source", "TEXT NOT NULL DEFAULT 'bars'"),
 )
 
 

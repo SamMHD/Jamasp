@@ -36,7 +36,26 @@ import {
   layoutGroups, type GroupBox, type Rect,
 } from "@/lib/marketmap";
 
-export type SignalState = { key: string; ts: string; value: number };
+/**
+ * `source` is provenance, and it is worth surfacing rather than hiding.
+ *
+ * "bars"        computed from our own OHLC bars by jamasp/indicators.py —
+ *               the path the TradingView oracle test cross-checks.
+ * "series"      read from an external scalar series in `prices` (GVZ, CFTC
+ *               net spec). Their NORMAL path, not a fallback: they never had
+ *               bars to compute from.
+ * "tradingview" read straight off TradingView's precomputed daily values,
+ *               because this host has no bars for that timeframe.
+ *
+ * All three are real readings and none is a placeholder, but they are not
+ * interchangeable — only "tradingview" means "we could not compute this
+ * ourselves" — so the tile names that one and stays quiet about the rest.
+ */
+export type SignalSource = "bars" | "series" | "tradingview";
+
+export type SignalState = {
+  key: string; ts: string; value: number; source: SignalSource;
+};
 
 export type SignalSpecConfig = {
   name: string; family: string; timeframes: string[];
@@ -62,7 +81,8 @@ export type FittedWeights = {
 
 export type SignalTile = {
   key: string; signal: string; timeframe: string; family: string;
-  state: number; ts: string; multiplier: number; fitted: boolean; pinned: boolean;
+  state: number; ts: string; multiplier: number; fitted: boolean;
+  pinned: boolean; source: SignalSource;
 };
 
 /** What every tile weighs before anything has been learned. */
@@ -91,7 +111,7 @@ export function buildSignalTiles(
     const pinned = c?.pinned === true;
     out.push({
       key: st.key, signal, timeframe, family: fam,
-      state: st.value, ts: st.ts,
+      state: st.value, ts: st.ts, source: st.source ?? "bars",
       // An unfitted, unpinned column weighs neutral whatever number happens
       // to sit in the file: a coefficient from three observations is not a
       // measurement, and sizing a tile by it would render confidence nobody
