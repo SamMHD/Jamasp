@@ -11,7 +11,22 @@
  * the desk should see that it matters and is unresolved.
  */
 
-export type MapRange = "today" | "week";
+/**
+ * The map's short window is a rolling 24 hours, not a Dubai calendar day.
+ *
+ * It was Dubai-midnight-anchored until the desk hit the consequence: at
+ * 00:00 Dubai the map emptied and stayed near-empty for hours, because
+ * "today" had barely any scored stories in it. A trailing window answers
+ * the question the map is actually for — what is moving now — and never
+ * has a cliff.
+ *
+ * This deliberately disagrees with the Dubai-day boundaries used by the
+ * brief, the flash pipeline (jamasp/flashtext.py) and the agent-run cap
+ * (lib/db.ts#runsTodayDubai). Those answer "what happened today" and
+ * "how many runs have I spent today", which really are calendar-day
+ * questions. Do not "fix" this back into alignment with them.
+ */
+export type MapRange = "24h" | "week";
 
 export type ScoredItem = {
   itemId: string;

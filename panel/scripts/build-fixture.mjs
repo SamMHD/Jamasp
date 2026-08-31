@@ -9,33 +9,25 @@ rmSync(dbPath, { force: true });
 const db = new Database(dbPath);
 db.exec(readFileSync(path.resolve(import.meta.dirname, "../test/fixtures/fixture.sql"), "utf8"));
 
-// The fundamental map's window is anchored to the real clock (Dubai
-// midnight for "today", trailing 7 days for "week") rather than to the
-// newest item, unlike the rest of this fixture — see fixture.sql's
-// comments on how everything else stays fixed at 2026-08-01 and is read
-// through windows anchored to the newest item instead. A hardcoded date
-// can never satisfy "published today" as real time moves on, so these
-// few rows are dated relative to build time, not baked into fixture.sql.
+// The fundamental map's windows are anchored to the real clock (trailing
+// 24h, trailing 7 days) rather than to the newest item, unlike the rest of
+// this fixture — see fixture.sql's comments on how everything else stays
+// fixed at 2026-08-01 and is read through windows anchored to the newest
+// item instead. A hardcoded date can never stay inside a trailing window as
+// real time moves on, so these few rows are dated relative to build time,
+// not baked into fixture.sql.
 //
-// todayAt must be computed from the actual Dubai-midnight boundary, not
-// offset backward from `now` — the "today" window is wall-clock Dubai
-// midnight (UTC 20:00:00 daily, see windowSinceIso in app/page.tsx), and a
-// fixed offset from `now` (e.g. "10 minutes ago") lands *before* that
-// boundary whenever the fixture happens to build within the first few
-// minutes after UTC 20:00:00, silently dropping map1 out of the
-// default-window e2e assertion. Mirrors windowSinceIso's own arithmetic:
-// shift into Dubai local time, truncate to the day, shift back.
+// Both offsets are now plain subtractions from `now`. They did not used to
+// be: the short window was anchored to Dubai midnight, so `recentAt` had to
+// be computed from that boundary — a fixed offset backward from `now` fell
+// *before* it whenever the fixture happened to build in the first minutes
+// after 20:00 UTC, silently dropping map1 out of the default-window
+// assertion. A rolling window has no boundary to fall the wrong side of,
+// which is the same cliff that emptied the live map at 00:00 Dubai.
 const iso = ms => new Date(ms).toISOString().replace(/\.\d{3}Z$/, "Z");
 const now = Date.now();
-const DUBAI_OFFSET_MS = 4 * 3600_000; // UTC+4, no DST — same as app/page.tsx
-const dubaiNow = now + DUBAI_OFFSET_MS;
-const dubaiMidnightUtcMs = Date.UTC(
-  new Date(dubaiNow).getUTCFullYear(),
-  new Date(dubaiNow).getUTCMonth(),
-  new Date(dubaiNow).getUTCDate(),
-) - DUBAI_OFFSET_MS;
-const todayAt = iso(dubaiMidnightUtcMs + 5 * 60_000); // 5 min after Dubai midnight — always "today"
-const weekAt = iso(now - 3 * 86_400_000);   // 3 days ago — "week" but not "today"
+const recentAt = iso(now - 10 * 60_000);  // 10 min ago — inside the 24h window
+const weekAt = iso(now - 3 * 86_400_000); // 3 days ago — "week" but not 24h
 
 const insertItem = db.prepare(`
   INSERT INTO items (id, source, published_at, headline, lede, url, topic, cluster_id, fetched_at, read_at)
@@ -47,9 +39,9 @@ const insertScore = db.prepare(`
 `);
 
 // map1: today, bullish, rates_dollar — exercises the plain (unhatched) tile path.
-insertItem.run("map1", "reuters", todayAt,
-  "Fed officials signal patience on rate cuts", "https://example.com/map1", "map1", todayAt);
-insertScore.run("map1", 5, 2, 0.7, "rates_dollar", todayAt);
+insertItem.run("map1", "reuters", recentAt,
+  "Fed officials signal patience on rate cuts", "https://example.com/map1", "map1", recentAt);
+insertScore.run("map1", 5, 2, 0.7, "rates_dollar", recentAt);
 
 // map2: within the week but not today, bearish, geopolitics — exercises the
 // hatch path (see market-map.tsx's compliance test for why both bearish
@@ -72,12 +64,12 @@ const insertState = db.prepare(
 // macd@1d is TradingView-sourced, so the provenance line in the hover title
 // has something to render — a host with no bars is the case that fallback
 // exists for, and it should be visible end to end.
-insertState.run("rsi14@1d", todayAt, -0.9, "bars");
-insertState.run("sma50@1d", todayAt, 0.8, "bars");
-insertState.run("macd@1d", todayAt, 0.4, "tradingview");
+insertState.run("rsi14@1d", recentAt, -0.9, "bars");
+insertState.run("sma50@1d", recentAt, 0.8, "bars");
+insertState.run("macd@1d", recentAt, 0.4, "tradingview");
 
 writeFileSync(path.join(root, "state", "weights.json"), JSON.stringify({
-  fitted_at: todayAt,
+  fitted_at: recentAt,
   fits: {
     technical: {
       n: 16880, horizon_hours: 24, flags: [],

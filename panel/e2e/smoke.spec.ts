@@ -28,10 +28,10 @@ test("overview renders the market instrument panels", async ({ page }) => {
   await page.goto("/");
 
   // Fundamental map: the hero, above everything else on the page. The
-  // default (no ?w=) window is "today", which only the fixture's ~10-
-  // minutes-ago item (map1, rates_dollar, bullish) falls inside — the
-  // second window is checked in its own test below, where both fixture
-  // items and the hatch path are in play.
+  // default (no ?w=) window is the trailing 24h, which only the fixture's
+  // ~10-minutes-ago item (map1, rates_dollar, bullish) falls inside —
+  // map2 is 3 days old. The wider window is checked in its own test below,
+  // where both fixture items and the hatch path are in play.
   const map = page.getByRole("region", { name: "Market map" });
   await expect(page.getByRole("heading", { name: "Market map" })).toBeVisible();
   await expect(map.locator('svg[aria-label^="scored news treemap"]')).toBeVisible();
@@ -144,7 +144,7 @@ test("fundamental map's week window covers both fixture items and hatches the be
   page.on("pageerror", e => errors.push(String(e)));
 
   // ?w=week widens the window enough to admit map2 (3 days old) alongside
-  // map1 (today) — two themes, and map2's direction=-2/conviction=0.8 is
+  // map1 (10 minutes old) — two themes, and map2's direction=-2/conviction=0.8 is
   // the treemap's bearish pole, which must render hatched (market-map.tsx's
   // own tests pin why: colour alone is not compliant for two of the ramp's
   // ten step-pairs).
