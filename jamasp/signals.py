@@ -185,6 +185,98 @@ def series_states(name: str, points: list[tuple[str, float]]) -> list[tuple[str,
     return out
 
 
+# Classifier context key -> the `prices` symbol suffix TradingView already
+# stores for it (jamasp/ingest/prices.py#_TV_BASE writes these every ingest
+# tick as GC_CLOSE, GC_RSI14, ...).
+#
+# fib618 and fib50 are deliberately ABSENT. TradingView serves
+# Pivot.M.Fibonacci.S1/R1, stored as FIB_S1/FIB_R1 — those are Fibonacci
+# PIVOT levels, a different quantity from indicators.fib_levels' 0.618/0.5
+# retracements of a lookback range. They are the closest-looking numbers in
+# the payload and the wrong ones; supplying them here would put a plausible
+# state on a tile that means something else. Leaving them out lets _need()
+# return None and the tile simply not appear, which is the honest outcome.
+TV_PRICE_SUFFIXES = {
+    "close": "CLOSE",
+    "rsi14": "RSI14",
+    "stoch_k": "STOCH_K",
+    "stoch_d": "STOCH_D",
+    "willr": "WILLR",
+    "macd": "MACD",
+    "macd_signal": "MACD_SIG",
+    "adx": "ADX",
+    "sma50": "SMA50",
+    "sma200": "SMA200",
+    "bb_upper": "BB_UPPER",
+    "bb_lower": "BB_LOWER",
+    "atr14": "ATR14",
+    "pivot_r1": "PIV_R1",
+    "pivot_s1": "PIV_S1",
+}
+
+# Provenance recorded on each signal_states row.
+#
+#   bars        computed from our own OHLC bars by indicators.py — the path
+#               the TradingView oracle test cross-checks.
+#   series      read from an external scalar series in `prices` (GVZ, CFTC
+#               net spec). This is those signals' NORMAL path, not a
+#               fallback; they never had bars to compute from.
+#   tradingview read straight off TradingView's precomputed daily values,
+#               because this host has no bars for that timeframe.
+SOURCE_BARS = "bars"
+SOURCE_SERIES = "series"
+SOURCE_TV = "tradingview"
+
+
+def tv_fallback_ctx(
+    conn: sqlite3.Connection, symbol: str = "GC"
+) -> tuple[str, dict] | None:
+    """Latest TradingView indicator values as a classifier context.
+
+    Returns (observed_at, ctx), or None when nothing is stored.
+
+    This is a DISPLAY path, not a fit path. `signal_states` is documented as
+    display-only — the fit recomputes every historical state from bars — so a
+    row sourced here cannot reach the regression. That separation is the whole
+    reason this is safe rather than a shortcut: TradingView gives us a current
+    level, never the history the fit needs.
+
+    Only the daily set exists to read: docs/todo/003 records that TradingView's
+    |1W and |240 fields come back null for COMEX:GC1!, so nothing else is
+    stored to fall back on.
+    """
+    ctx: dict = {}
+    stamps: list[str] = []
+    for key, suffix in TV_PRICE_SUFFIXES.items():
+        row = conn.execute(
+            "SELECT ts, value FROM prices WHERE symbol = ?"
+            " ORDER BY ts DESC LIMIT 1",
+            (f"{symbol}_{suffix}",),
+        ).fetchone()
+        if row is None:
+            continue
+        ctx[key] = row["value"]
+        stamps.append(row["ts"])
+
+    if not stamps:
+        return None
+
+    # The atr14 classifier wants a rolling average as well as a level. ATR's
+    # own stored history is the series to take it from — the same AVG_WINDOW
+    # the bar path uses, so the two paths agree on what "expansion" means.
+    atrs = [
+        r["value"]
+        for r in conn.execute(
+            "SELECT value FROM prices WHERE symbol = ? ORDER BY ts",
+            (f"{symbol}_{TV_PRICE_SUFFIXES['atr14']}",),
+        )
+    ]
+    avg = ind.sma(atrs, AVG_WINDOW)
+    ctx["atr14_avg"] = avg[-1] if avg else None
+
+    return max(stamps), ctx
+
+
 def refresh(conn: sqlite3.Connection, weights: dict, symbol: str = "GC") -> int:
     """Recompute the latest state for every configured signal column.
 
@@ -194,10 +286,32 @@ def refresh(conn: sqlite3.Connection, weights: dict, symbol: str = "GC") -> int:
     which is a duplicate nobody could keep honest.
     """
     written = 0
+    tv: tuple[str, dict] | None = None  # resolved lazily, at most once
     for spec in signal_specs(weights):
         for tf in spec.timeframes:
+            source = SOURCE_BARS
             if spec.source == "bars":
-                states = bar_states(spec.name, read_bars(conn, symbol, tf), tf)
+                bars = read_bars(conn, symbol, tf)
+                if bars:
+                    states = bar_states(spec.name, bars, tf)
+                elif tf == "1d":
+                    # No bars for this timeframe. TradingView's stored daily
+                    # values can still say what the signal reads right now,
+                    # which is all the map's colour needs. Bars stay the
+                    # preferred path whenever they exist: they are ours,
+                    # oracle-checkable, and cover every timeframe.
+                    if tv is None:
+                        tv = tv_fallback_ctx(conn, symbol)
+                    if tv is None:
+                        continue
+                    observed_at, ctx = tv
+                    state = classify(spec.name, ctx)
+                    if state is None:
+                        continue  # e.g. fib618/fib50 — no TradingView equivalent
+                    states = [(observed_at, state)]
+                    source = SOURCE_TV
+                else:
+                    continue
             else:
                 points = [
                     (r["ts"], r["value"])
@@ -207,13 +321,14 @@ def refresh(conn: sqlite3.Connection, weights: dict, symbol: str = "GC") -> int:
                     )
                 ]
                 states = series_states(spec.name, points)
+                source = SOURCE_SERIES
             if not states:
                 continue
             ts, value = states[-1]
             conn.execute(
-                "INSERT OR REPLACE INTO signal_states (key, ts, value)"
-                " VALUES (?, ?, ?)",
-                (f"{spec.name}@{tf}", ts, value),
+                "INSERT OR REPLACE INTO signal_states (key, ts, value, source)"
+                " VALUES (?, ?, ?, ?)",
+                (f"{spec.name}@{tf}", ts, value, source),
             )
             written += 1
     conn.commit()
