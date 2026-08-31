@@ -54,7 +54,7 @@ function themeLabel(theme: string): string {
 }
 
 const WINDOW_LABEL: Record<MapRange, string> = {
-  today: "today",
+  "24h": "in the last 24h",
   week: "this week",
 };
 

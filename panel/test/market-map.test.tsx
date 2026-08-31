@@ -17,7 +17,7 @@ const render = (
   extra: { themeMultipliers?: Record<string, number>;
            fittedAt?: string | null } = {},
 ) => renderToStaticMarkup(
-  <MarketMap items={items} width={800} height={500} range="today"
+  <MarketMap items={items} width={800} height={500} range="24h"
     coverage={{ scored: items.length, unscored: 0 }} {...extra} />);
 
 describe("MarketMap", () => {
@@ -108,7 +108,7 @@ describe("MarketMap", () => {
 
   it("states coverage rather than implying completeness", () => {
     const html = renderToStaticMarkup(
-      <MarketMap items={[item()]} width={800} height={500} range="today"
+      <MarketMap items={[item()]} width={800} height={500} range="24h"
         coverage={{ scored: 1, unscored: 7 }} />);
     expect(html).toContain("7");
   });
@@ -125,7 +125,7 @@ describe("MarketMap", () => {
       headline: "Gold jumps as Treasury buyback plans push yields lower",
     }));
     const html = renderToStaticMarkup(
-      <MarketMap items={many} width={120} height={70} range="today"
+      <MarketMap items={many} width={120} height={70} range="24h"
         coverage={{ scored: many.length, unscored: 0 }} />);
     expect(html.match(/<rect/g)?.length).toBe(40);
     // Strip <title> content (which legitimately always carries the full

@@ -5,15 +5,21 @@ describe("resolveRange", () => {
   it("selects week only for the exact string 'week'", () => {
     expect(resolveRange("week")).toBe("week");
   });
-  it("defaults to today when the param is absent", () => {
-    expect(resolveRange(undefined)).toBe("today");
+  it("defaults to 24h when the param is absent", () => {
+    expect(resolveRange(undefined)).toBe("24h");
   });
-  it("defaults to today on a garbage value rather than throwing", () => {
-    expect(resolveRange("banana")).toBe("today");
+  it("defaults to 24h on a garbage value rather than throwing", () => {
+    expect(resolveRange("banana")).toBe("24h");
+  });
+  it("degrades a bookmarked ?w=today to 24h", () => {
+    // The short window was Dubai-midnight-anchored and spelled "today"
+    // until it became rolling. An old bookmark must land somewhere sane
+    // rather than throwing or rendering an empty map.
+    expect(resolveRange("today")).toBe("24h");
   });
   it("takes the first value of a repeated param", () => {
-    expect(resolveRange(["week", "today"])).toBe("week");
-    expect(resolveRange(["today", "week"])).toBe("today");
+    expect(resolveRange(["week", "24h"])).toBe("week");
+    expect(resolveRange(["24h", "week"])).toBe("24h");
   });
 });
 
@@ -23,26 +29,29 @@ describe("windowSinceIso", () => {
     expect(windowSinceIso("week", now)).toBe("2026-08-12T23:05:51Z");
   });
 
-  it("today is Dubai midnight (UTC+4, no DST) converted back to UTC", () => {
-    // 2026-08-19T23:05:51Z is 2026-08-20T03:05:51 in Dubai, so Dubai
-    // midnight for "today" is 2026-08-20T00:00 Dubai == 2026-08-19T20:00Z.
+  it("24h is exactly 24 hours before now, to the second", () => {
     const now = new Date("2026-08-19T23:05:51Z");
-    expect(windowSinceIso("today", now)).toBe("2026-08-19T20:00:00Z");
+    expect(windowSinceIso("24h", now)).toBe("2026-08-18T23:05:51Z");
   });
 
-  it("today rolls over at the Dubai day boundary, not the UTC one", () => {
-    // 2026-08-19T21:00:00Z is 2026-08-20T01:00 Dubai — already past Dubai
-    // midnight even though UTC is still on the 19th.
-    const now = new Date("2026-08-19T21:00:00Z");
-    expect(windowSinceIso("today", now)).toBe("2026-08-19T20:00:00Z");
+  it("24h does not snap to any day boundary", () => {
+    // The distinguishing property. Under the old Dubai-midnight window both
+    // of these instants resolved to the SAME start (2026-08-19T20:00:00Z),
+    // because they sit either side of 00:00 Dubai on the same Dubai day.
+    // A rolling window must move with `now`, so they must differ by exactly
+    // the hour that separates them.
+    const before = new Date("2026-08-19T20:30:00Z"); // 00:30 Dubai
+    const after = new Date("2026-08-19T21:30:00Z"); // 01:30 Dubai
+    expect(windowSinceIso("24h", before)).toBe("2026-08-18T20:30:00Z");
+    expect(windowSinceIso("24h", after)).toBe("2026-08-18T21:30:00Z");
+    expect(windowSinceIso("24h", before)).not.toBe(windowSinceIso("24h", after));
   });
 
-  it("just before the Dubai rollover still resolves to the prior Dubai day", () => {
-    // 2026-08-19T19:59:59Z is 2026-08-19T23:59:59 Dubai — one second before
-    // the Dubai day turns over, so "today" is still Aug 19 Dubai-local,
-    // whose midnight (Aug 18 20:00Z) is a full UTC day earlier than the
-    // boundary case above.
-    const now = new Date("2026-08-19T19:59:59Z");
-    expect(windowSinceIso("today", now)).toBe("2026-08-18T20:00:00Z");
+  it("spans the Dubai midnight that used to empty the map", () => {
+    // The bug this change fixes: at 00:11 Dubai (20:11Z) the old window
+    // started 11 minutes earlier and held almost nothing. The rolling
+    // window reaches back a full day, across the boundary.
+    const now = new Date("2026-08-24T20:11:20Z"); // 00:11 Dubai, Aug 25
+    expect(windowSinceIso("24h", now)).toBe("2026-08-23T20:11:20Z");
   });
 });
