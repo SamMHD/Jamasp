@@ -37,7 +37,7 @@ Every task's requirements implicitly include these. Values are copied verbatim f
 |---|---|
 | `panel/lib/color.ts` | Pure colour maths: sRGB↔linear, CIELAB, CIEDE2000, WCAG contrast, Machado CVD simulation. No I/O. |
 | `panel/lib/palette.ts` | Parses design tokens out of `globals.css` and runs the ink×surface and CVD checks. Depends on `color.ts`. |
-| `panel/scripts/validate-palette.mjs` | CLI wrapper over `lib/palette.ts` for local runs. |
+| `panel/scripts/validate-palette.ts` | CLI wrapper over `lib/palette.ts` for local runs. |
 | `panel/lib/theme.ts` | Pure theme-preference resolution and storage key. No DOM access. |
 | `panel/lib/nav.ts` | The single source of navigation destinations, shared by side nav, tab bar and More sheet. |
 | `panel/components/theme-toggle.tsx` | Three-state System/Light/Dark control. |
@@ -293,7 +293,7 @@ git commit -m "feat(panel): colour maths for the palette validator"
 ### Task 2: Palette checker over the token file
 
 **Files:**
-- Create: `panel/lib/palette.ts`, `panel/scripts/validate-palette.mjs`
+- Create: `panel/lib/palette.ts`, `panel/scripts/validate-palette.ts`
 - Test: `panel/test/palette.test.ts`
 
 **Interfaces:**
@@ -444,21 +444,16 @@ export function checkSeries(hexes: string[], surface: string): Finding[] {
 }
 ```
 
-```js
-// panel/scripts/validate-palette.mjs
+```ts
+// panel/scripts/validate-palette.ts
 // Local CLI over the same checks the test runs, for when you are fitting a
 // ramp by hand and want the numbers without a test harness in the way.
-//   node scripts/validate-palette.mjs
+//   npm run validate:palette
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { register } from "node:module";
+import { checkInks, checkSeries, parseTokens } from "../lib/palette";
 
-register("tsx/esm", import.meta.url);
-const here = path.dirname(fileURLToPath(import.meta.url));
-const { checkInks, checkSeries, parseTokens } = await import("../lib/palette.ts");
-
-const T = parseTokens(readFileSync(path.join(here, "../app/globals.css"), "utf8"));
+const T = parseTokens(readFileSync(path.join(import.meta.dirname, "../app/globals.css"), "utf8"));
 const themes = [
   { name: "dark", surfaces: { field: T["dk-background"], panel: T["dk-card"], raised: T["dk-secondary"] },
     inks: { foreground: T["dk-foreground"], muted: T["dk-muted-foreground"], dim: T["dk-ink-dim"],
@@ -489,11 +484,27 @@ for (const [label, hexes, surface] of [
 process.exit(failed > 0 ? 1 : 0);
 ```
 
-Add `tsx` as a devDependency so the CLI can import the TypeScript module:
+Add `tsx` as a devDependency and an npm script so the CLI can run the
+TypeScript module:
 
 ```bash
 cd panel && npm install --save-dev tsx
 ```
+
+Then add to `panel/package.json` scripts:
+
+```json
+    "validate:palette": "tsx scripts/validate-palette.ts"
+```
+
+**Corrected during execution (ruling R8).** This step originally specified a
+`.mjs` script that self-registered the tsx loader via
+`module.register("tsx/esm", import.meta.url)`. That does not work with
+`tsx@4.23.13`, which rejects it with *"tsx must be loaded with `--import`
+instead of `--loader`"* — the controller checked the Node version and inferred
+the tsx API from it, which was wrong. Running the script through the `tsx`
+binary via an npm script is the working form, and it also removes the dynamic
+import and the `fileURLToPath` dance.
 
 - [ ] **Step 4: Run test to verify it fails for the right reason**
 
@@ -503,7 +514,7 @@ Expected: FAIL on `token extraction` — `dk-background is missing from globals.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add panel/lib/palette.ts panel/scripts/validate-palette.mjs panel/test/palette.test.ts panel/package.json panel/package-lock.json
+git add panel/lib/palette.ts panel/scripts/validate-palette.ts panel/test/palette.test.ts panel/package.json panel/package-lock.json
 git commit -m "feat(panel): palette checker over the token file
 
 Replaces scripts/validate_palette.js, which globals.css tells the reader to
@@ -577,7 +588,7 @@ In `panel/app/globals.css`, replace the existing `:root { … }` and `.dark { �
   /* Data-viz series tokens. --viz-1..3 are the categorical trio; the trio is
      held to a CIEDE2000 floor of 6.0 under normal vision and simulated
      protanopia, deuteranopia and tritanopia by test/palette.test.ts. Do not
-     eyeball replacements — run `node scripts/validate-palette.mjs`, which is
+     eyeball replacements — run `npm run validate:palette`, which is
      the same check the test runs. */
   --viz-1: #2a78d6;
   --viz-2: #eb6834;
@@ -689,7 +700,7 @@ Expected: PASS. Every ink clears 4.5:1 on all three surfaces of its theme; worst
 
 Then run the CLI and keep the output — it is the baseline the spec's numbers refer to:
 
-Run: `cd panel && node scripts/validate-palette.mjs`
+Run: `cd panel && npm run validate:palette`
 Expected: exit 0, no `FAIL` lines.
 
 - [ ] **Step 5: Commit**
@@ -771,13 +782,13 @@ Move the existing ramp to `--dk-map-*` in the `:root` inert block, alias it in b
   --map-bear: #b02c2a;
 ```
 
-Iterate: `cd panel && node scripts/validate-palette.mjs`, adjust, repeat.
+Iterate: `cd panel && npm run validate:palette`, adjust, repeat.
 
 **If the poles cannot reach ΔE 6.0 under deuteranopia:** change the bearish hue — rotate it toward magenta, away from the green pole — rather than lightening toward the surface, which would break the ink contrast the same ramp carries. Do not lower `SERIES_FLOOR`. The hatch remains mandatory either way; it is a second encoding, not a licence to ship an indistinguishable first one.
 
 - [ ] **Step 4: Run to verify it passes**
 
-Run: `cd panel && npx vitest run test/palette.test.ts && node scripts/validate-palette.mjs`
+Run: `cd panel && npx vitest run test/palette.test.ts && npm run validate:palette`
 Expected: PASS, CLI exits 0.
 
 - [ ] **Step 5: Commit**
@@ -2729,7 +2740,7 @@ Expected: all suites PASS, including the pre-existing ~30. Any pre-existing suit
 
 - [ ] **Step 2: Run the palette validator**
 
-Run: `cd panel && node scripts/validate-palette.mjs`
+Run: `cd panel && npm run validate:palette`
 Expected: exit 0, no `FAIL` lines.
 
 - [ ] **Step 3: Run both Playwright projects**
