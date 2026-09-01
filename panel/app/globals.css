@@ -24,6 +24,14 @@
   --dk-viz-2: #d95926;
   --dk-viz-3: #199e70;
 
+  /* dark market-map ramp — unchanged values, renamed. See the light ramp's
+     comment below for what this ramp is and why the hatch is mandatory. */
+  --dk-map-bull: #1baf7a;
+  --dk-map-bull-mid: #3e6d55;
+  --dk-map-neutral: #3a3a38;
+  --dk-map-bear-mid: #854741;
+  --dk-map-bear: #e34948;
+
   /* ---- light values, active by default ---- */
   --background: #f6f6f3;
   --card: #ffffff;
@@ -58,16 +66,19 @@
   --viz-spot: #7c5e17;
 
   /* Market-map diverging ramp. Two hues plus a neutral GREY midpoint — never
-     a hue at the midpoint. The bullish/bearish pair sits inside the 6–8 band
-     under deuteranopia, which is legal ONLY with a secondary encoding: the
-     45-degree hatch on bearish tiles is that encoding, and it is required,
-     not decoration. It works at any tile size, which a signed number label
-     does not. Light variant is fitted in Task 3b. */
-  --map-bull: #1baf7a;
-  --map-bull-mid: #3e6d55;
-  --map-neutral: #3a3a38;
-  --map-bear-mid: #854741;
-  --map-bear: #e34948;
+     a hue at the midpoint. Both poles clear the CIEDE2000 floor of 6.0 with
+     room to spare under every simulated CVD type (dark bull/bear: dE 12.5
+     deutan / 19.7 protan / 68.2 tritan; light bull/bear: dE 13.0 deutan /
+     13.2 protan / 59.3 tritan) — but colour is never the sole signal for a
+     bull/bear read: the 45-degree hatch on bearish tiles is a required
+     secondary encoding, not decoration. It works at any tile size, which a
+     signed number label does not. Fitted against `npm run validate:palette`
+     — do not eyeball replacements. */
+  --map-bull: #0f7a52;
+  --map-bull-mid: #6aa389;
+  --map-neutral: #b9b9b4;
+  --map-bear-mid: #c58a86;
+  --map-bear: #b02c2a;
 
   /* Back-compat: sparkline.tsx and price-chart.tsx still read var(--chart-1)
      directly. Alias it to the validated --viz-1 rather than duplicating the
@@ -103,6 +114,11 @@
   --viz-3: var(--dk-viz-3);
   --viz-spot: var(--dk-primary);
   --chart-1: var(--dk-viz-1);
+  --map-bull: var(--dk-map-bull);
+  --map-bull-mid: var(--dk-map-bull-mid);
+  --map-neutral: var(--dk-map-neutral);
+  --map-bear-mid: var(--dk-map-bear-mid);
+  --map-bear: var(--dk-map-bear);
 }
 
 /* No-JS and pre-hydration fallback: a reader whose system is dark gets the
@@ -136,6 +152,11 @@
     --viz-3: var(--dk-viz-3);
     --viz-spot: var(--dk-primary);
     --chart-1: var(--dk-viz-1);
+    --map-bull: var(--dk-map-bull);
+    --map-bull-mid: var(--dk-map-bull-mid);
+    --map-neutral: var(--dk-map-neutral);
+    --map-bear-mid: var(--dk-map-bear-mid);
+    --map-bear: var(--dk-map-bear);
   }
 }
 

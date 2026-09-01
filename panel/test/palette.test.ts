@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { labOf } from "@/lib/color";
 import { checkInks, checkSeries, parseTokens, type Theme } from "@/lib/palette";
 
 const css = readFileSync(path.join(import.meta.dirname, "../app/globals.css"), "utf8");
@@ -55,4 +56,25 @@ describe("categorical series", () => {
     ).filter(f => !f.ok);
     expect(failures.map(f => `${f.label} dE ${f.measured.toFixed(1)}`)).toEqual([]);
   });
+});
+
+describe("market-map ramp", () => {
+  // The poles are what a reader compares across a treemap. The mid steps and
+  // the neutral are only ever adjacent to their own neighbours, so the poles
+  // are the pair that must clear the floor.
+  it.each([
+    ["dark", "dk-map-bull", "dk-map-bear", "dk-card"],
+    ["light", "map-bull", "map-bear", "card"],
+  ])("separates the %s poles under every CVD type", (_name, bull, bear, surface) => {
+    const failures = checkSeries([T[bull], T[bear]], T[surface]).filter(f => !f.ok);
+    expect(failures.map(f => `${f.label} dE ${f.measured.toFixed(1)}`)).toEqual([]);
+  });
+
+  // The midpoint must stay achromatic. A hue at the midpoint makes a
+  // near-zero reading look like a weak signal in one direction.
+  it.each([["dark", "dk-map-neutral"], ["light", "map-neutral"]])(
+    "keeps the %s midpoint achromatic", (_name, token) => {
+      const [, a, b] = labOf(T[token]);
+      expect(Math.hypot(a, b)).toBeLessThan(4);
+    });
 });
