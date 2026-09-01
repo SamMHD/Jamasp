@@ -30,14 +30,18 @@ cushions** — unchanged.
 - **Kinetic (35%):** LIVE, not price-setting. Arming markers: UAE kinetic
   response (`a12de81f`), second mine casualty (`c2eafbf8`), US strike on
   export infra (`f527c209`), Yanbu/Fujairah ordnance (ultimatum window
-  ~31 Aug–7 Sep OPEN), escort suspension (`fe35b77d`). ESCALATED
-  sub-threshold (11:00Z scan): Western wires report TWO Saudi-oil
-  tankers STRUCK in Hormuz (Brent >92, WTI ~88, two-week highs) —
-  weapon and hulls unverified, deepdive #45 12:30Z. If mine confirms →
-  `c2eafbf8` HIT and kinetic takes the wheel; `b13614a1` breaks only on
-  boarding/detention/confiscation of a listed GCC hull, not attack.
-  Gold fell through the report (4432, low 4416.8) — cushion, not
-  driver.
+  ~31 Aug–7 Sep OPEN), escort suspension (`fe35b77d`). Twin-tanker attack
+  VERIFIED (deepdive 16:35 Dubai; Reuters/Marisks/Kpler/UKMTO): VLCCs
+  **Sidr** (Saudi-flagged, Bahri) + **Senegal Prosperity** (Liberian,
+  Sinokor) hit by unknown **projectiles — NOT mines** ~1952–2000Z Mon,
+  outbound Khasab corridor, 2mb Saudi crude each; third corridor strike
+  in 4 days; unclaimed, operators silent. → `c2eafbf8` NOT triggered
+  (wrong weapon branch; open to 7 Sep); `b13614a1` intact (attack ≠
+  enforcement). New `bd825267` (0.7): weapon-agnostic corridor strike
+  continues by 7 Sep. WATCH: Iranian-media "Saudi tanker STOPPED in
+  southern corridor" — nameless echo now; hardening into confirmed
+  detention of a Bahri/ADNOC hull = `b13614a1` MISS, tail ARMS. Brent
+  >92 on the attack while gold fell (low 4416.8) — cushion, not driver.
 
 **Levels:** R 4510–4538, then 4600/4640. S 4457 / 4380 / 4300 / 4205–4245.
 
@@ -59,12 +63,12 @@ Scored today: 31-Aug cohort **7/7 HIT** (`73281b56` `ac586003` `adc2a252`
 `d9e50362` `f73172f8` `6f8b0433` `2d9fac65`). Open: `021357a6` (pre-NFP),
 `951d8286` (ISM today, #44), `b6450c7a` `2ef33025` (4 Sep), `fe35b77d`
 (6 Sep), `92a5bbb8` `30bad8a0` `b13614a1` `f527c209` `a12de81f`
-`c2eafbf8` (7 Sep), `ec71ce01` (FOMC 15–16 Sep).
+`c2eafbf8` `bd825267` (7 Sep), `ec71ce01` (FOMC 15–16 Sep).
 
 ## Wakeups
 
-#45 today 12:30Z Hormuz tanker-attack verification. #44 today 14:45Z
-ISM. #42 Fri 4 Sep 13:15Z payrolls (feed row now
+#45 (tanker verification) DONE 12:30Z — see today's deep dive. #44 today
+14:45Z ISM. #42 Fri 4 Sep 13:15Z payrolls (feed row now
 verifies 12:30Z print — provisional caveat cleared). #41 9 Sep 15:15Z
 buyback op (slot still unverified vs Treasury schedule — Sat brief).
 #26 11 Sep CPI. Feed covers to 4 Sep (todo-001).
@@ -81,5 +85,7 @@ after Hegseth friction) = leadership instability mid-campaign.
 ## Sourcing health
 
 Inbox fresh (101-item overnight delta cleared this run). Extract healthy
-on gulfnews/gcaptain/investinglive. Flow-estimate spread (15–16 vs 6–8
-mb/d) unreconciled — treat all Hormuz throughput numbers as ranges.
+on gulfnews/gcaptain/investinglive/mehr. Marisks (maritime-risk tracker)
+now a named incident source alongside UKMTO — reaches us via Reuters/
+gcaptain. Flow-estimate spread (15–16 vs 6–8 mb/d) unreconciled — treat
+all Hormuz throughput numbers as ranges.
