@@ -32,6 +32,18 @@
   --dk-map-bear-mid: #854741;
   --dk-map-bear: #e34948;
 
+  /* dark market-map tile ink. Dark ink on the bright poles, light ink on
+     the dark mid/neutral steps. See the light ink comment below for why
+     light inverts this pairing rather than reusing it. Both themes are held
+     to the 4.5:1 ink floor (INK_FLOOR in lib/palette.ts) by
+     test/palette.test.ts's "market-map ink-on-fill contrast" block and
+     `npm run validate:palette` — fitted against those, not eyeballed. */
+  --dk-map-ink-bull: #0a0a0a;
+  --dk-map-ink-bull-mid: #f5f5f5;
+  --dk-map-ink-neutral: #f5f5f5;
+  --dk-map-ink-bear-mid: #f5f5f5;
+  --dk-map-ink-bear: #0a0a0a;
+
   /* ---- light values, active by default ---- */
   --background: #f6f6f3;
   --card: #ffffff;
@@ -80,6 +92,20 @@
   --map-bear-mid: #c58a86;
   --map-bear: #b02c2a;
 
+  /* Market-map tile ink, light theme. TONE_INK (map-tiles.tsx) paints this
+     straight onto the ramp fills above, so it has to invert with them: the
+     light poles are dark, saturated colours and read against LIGHT ink; the
+     light mid/neutral steps are pale and read against DARK ink — the exact
+     opposite pairing from the dark ramp's ink above. Held to the 4.5:1 ink
+     floor (INK_FLOOR in lib/palette.ts) by test/palette.test.ts's
+     "market-map ink-on-fill contrast" block and `npm run validate:palette`
+     — fitted against those, not eyeballed. */
+  --map-ink-bull: #f5f5f5;
+  --map-ink-bull-mid: #0a0a0a;
+  --map-ink-neutral: #0a0a0a;
+  --map-ink-bear-mid: #0a0a0a;
+  --map-ink-bear: #f5f5f5;
+
   /* Back-compat: sparkline.tsx and price-chart.tsx still read var(--chart-1)
      directly. Alias it to the validated --viz-1 rather than duplicating the
      value. */
@@ -119,6 +145,11 @@
   --map-neutral: var(--dk-map-neutral);
   --map-bear-mid: var(--dk-map-bear-mid);
   --map-bear: var(--dk-map-bear);
+  --map-ink-bull: var(--dk-map-ink-bull);
+  --map-ink-bull-mid: var(--dk-map-ink-bull-mid);
+  --map-ink-neutral: var(--dk-map-ink-neutral);
+  --map-ink-bear-mid: var(--dk-map-ink-bear-mid);
+  --map-ink-bear: var(--dk-map-ink-bear);
 }
 
 /* No-JS and pre-hydration fallback: a reader whose system is dark gets the
@@ -157,6 +188,11 @@
     --map-neutral: var(--dk-map-neutral);
     --map-bear-mid: var(--dk-map-bear-mid);
     --map-bear: var(--dk-map-bear);
+    --map-ink-bull: var(--dk-map-ink-bull);
+    --map-ink-bull-mid: var(--dk-map-ink-bull-mid);
+    --map-ink-neutral: var(--dk-map-ink-neutral);
+    --map-ink-bear-mid: var(--dk-map-ink-bear-mid);
+    --map-ink-bear: var(--dk-map-ink-bear);
   }
 }
 

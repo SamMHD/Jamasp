@@ -1,8 +1,8 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { labOf } from "@/lib/color";
-import { checkInks, checkSeries, parseTokens, type Theme } from "@/lib/palette";
+import { contrast, labOf } from "@/lib/color";
+import { checkInks, checkSeries, INK_FLOOR, parseTokens, type Theme } from "@/lib/palette";
 
 const css = readFileSync(path.join(import.meta.dirname, "../app/globals.css"), "utf8");
 const T = parseTokens(css);
@@ -77,4 +77,28 @@ describe("market-map ramp", () => {
       const [, a, b] = labOf(T[token]);
       expect(Math.hypot(a, b)).toBeLessThan(4);
     });
+});
+
+describe("market-map ink-on-fill contrast", () => {
+  // TONE_INK (map-tiles.tsx) paints straight onto these fills as the tile
+  // label colour. The fills are theme-aware CSS variables; if the ink isn't
+  // too, one theme's fills can silently drop under the ink floor while the
+  // other theme keeps passing — exactly what happened when the light ramp
+  // shipped with the dark theme's fixed ink still attached.
+  it.each([
+    ["dark", "dk-map-ink-bull", "dk-map-bull"],
+    ["dark", "dk-map-ink-bull-mid", "dk-map-bull-mid"],
+    ["dark", "dk-map-ink-neutral", "dk-map-neutral"],
+    ["dark", "dk-map-ink-bear-mid", "dk-map-bear-mid"],
+    ["dark", "dk-map-ink-bear", "dk-map-bear"],
+    ["light", "map-ink-bull", "map-bull"],
+    ["light", "map-ink-bull-mid", "map-bull-mid"],
+    ["light", "map-ink-neutral", "map-neutral"],
+    ["light", "map-ink-bear-mid", "map-bear-mid"],
+    ["light", "map-ink-bear", "map-bear"],
+  ])("clears %s ink floor for %s on %s", (_name, inkTok, fillTok) => {
+    const measured = contrast(T[inkTok], T[fillTok]);
+    expect(measured, `${inkTok} on ${fillTok}: ${measured.toFixed(2)}:1`)
+      .toBeGreaterThanOrEqual(INK_FLOOR);
+  });
 });

@@ -44,13 +44,22 @@ export const TONE_FILL: Record<Tone, string> = {
  * mid and neutral steps are dark. One ink for all five would be unreadable
  * on at least two of them, so ink follows each tile's own fill rather than
  * being fixed.
+ *
+ * These are theme-aware CSS variables, not literal hex, because the pairing
+ * inverts between themes: the dark ramp's poles are bright (want dark ink)
+ * and its mids/neutral are dark (want light ink), while the light ramp's
+ * poles are dark and saturated (want light ink) and its mids/neutral are
+ * pale (want dark ink). A fixed hex here would silently stop matching one
+ * theme's fills — see app/globals.css's --map-ink-* / --dk-map-ink-*
+ * comments and test/palette.test.ts's "market-map ink-on-fill contrast"
+ * block, which holds every pairing to the 4.5:1 ink floor.
  */
 export const TONE_INK: Record<Tone, string> = {
-  bull: "#0a0a0a",
-  "bull-mid": "#f5f5f5",
-  neutral: "#f5f5f5",
-  "bear-mid": "#f5f5f5",
-  bear: "#0a0a0a",
+  bull: "var(--map-ink-bull)",
+  "bull-mid": "var(--map-ink-bull-mid)",
+  neutral: "var(--map-ink-neutral)",
+  "bear-mid": "var(--map-ink-bear-mid)",
+  bear: "var(--map-ink-bear)",
 };
 
 export const isBearish = (t: Tone): boolean => t === "bear" || t === "bear-mid";

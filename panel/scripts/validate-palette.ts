@@ -3,8 +3,8 @@
 //   npm run validate:palette
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { labOf } from "../lib/color";
-import { checkInks, checkSeries, parseTokens, type Theme } from "../lib/palette";
+import { contrast, labOf } from "../lib/color";
+import { checkInks, checkSeries, INK_FLOOR, parseTokens, type Theme } from "../lib/palette";
 
 const T = parseTokens(readFileSync(path.join(import.meta.dirname, "../app/globals.css"), "utf8"));
 
@@ -22,6 +22,11 @@ const REQUIRED_TOKENS = [
   "viz-1", "viz-2", "viz-3",
   "dk-map-bull", "dk-map-bear", "dk-map-neutral",
   "map-bull", "map-bear", "map-neutral",
+  "dk-map-bull-mid", "dk-map-bear-mid", "map-bull-mid", "map-bear-mid",
+  "dk-map-ink-bull", "dk-map-ink-bull-mid", "dk-map-ink-neutral",
+  "dk-map-ink-bear-mid", "dk-map-ink-bear",
+  "map-ink-bull", "map-ink-bull-mid", "map-ink-neutral",
+  "map-ink-bear-mid", "map-ink-bear",
 ];
 const missing = REQUIRED_TOKENS.filter(name => T[name] === undefined);
 if (missing.length > 0) {
@@ -71,6 +76,26 @@ for (const [label, token] of [["dark", "dk-map-neutral"], ["light", "map-neutral
   const ok = hypot < ACHROMATIC_FLOOR;
   if (!ok) failed++;
   console.log(`  ${ok ? "PASS" : "FAIL"}  ${label} ${token}`.padEnd(46) + ` hypot(a,b) ${hypot.toFixed(2)}`);
+}
+
+console.log(`\n=== market-map ink-on-fill contrast (>= ${INK_FLOOR}:1) ===`);
+const inkChecks: [string, string, string][] = [
+  ["dark", "dk-map-ink-bull", "dk-map-bull"],
+  ["dark", "dk-map-ink-bull-mid", "dk-map-bull-mid"],
+  ["dark", "dk-map-ink-neutral", "dk-map-neutral"],
+  ["dark", "dk-map-ink-bear-mid", "dk-map-bear-mid"],
+  ["dark", "dk-map-ink-bear", "dk-map-bear"],
+  ["light", "map-ink-bull", "map-bull"],
+  ["light", "map-ink-bull-mid", "map-bull-mid"],
+  ["light", "map-ink-neutral", "map-neutral"],
+  ["light", "map-ink-bear-mid", "map-bear-mid"],
+  ["light", "map-ink-bear", "map-bear"],
+];
+for (const [label, inkTok, fillTok] of inkChecks) {
+  const measured = contrast(T[inkTok], T[fillTok]);
+  const ok = measured >= INK_FLOOR;
+  if (!ok) failed++;
+  console.log(`  ${ok ? "PASS" : "FAIL"}  ${label} ${inkTok} on ${fillTok}`.padEnd(46) + ` ${measured.toFixed(2)}:1`);
 }
 
 process.exit(failed > 0 ? 1 : 0);
