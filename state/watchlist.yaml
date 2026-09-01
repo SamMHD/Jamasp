@@ -47,6 +47,13 @@ watchlist:
       recap vs Collins "gradual disinflation" pushback. Sleeper: a
       small/upward benchmark revision restores a hawk labour alibi
       into 4 Sep payrolls.
+      1 Sep: odds ~57% (from ~40% a week ago) — Warsh hardened at G20
+      ("secular stagnation is a thing of the past"), 10y 4.75% three
+      straight up days; Bessent SAME DAY on CNBC: Fed traditionally
+      doesn't hike into a supply shock — Treasury-vs-Fed now explicit on
+      the hike itself. 021357a6: odds stay <65% pre-NFP (0.6); its miss
+      fires the stance flip. Gates: ISM prices-paid today (#44,
+      951d8286), NFP Fri (#42, feed-verified 12:30Z).
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -135,6 +142,14 @@ watchlist:
       (Asheville) with "yen weakness back in focus" — weekend headline
       risk. Periphery keeps tightening around the immovable yen: RBNZ
       hike ~unanimous for 2 Sep, RBA hike chatter rising (not odds-on).
+      1 Sep: USDJPY briefly >160; Tokyo's ~$96bn FAILED intervention
+      effort disclosed late last week; Bessent at G20 pushed Ueda/
+      Katayama for BOJ HIKES (NHK) + "orderly yen moves" language — US
+      now actively leaning on BoJ normalization; b6450c7a intact, BoJ
+      17-18 Sep still the erosion risk. PBOC NINTH straight weak fix at
+      the widest gap yet (6.7809 vs 6.7170 est, ~639 pips). RBNZ
+      decision tomorrow 06:00 Dubai (Westpac: hike to 2.75%) —
+      periphery-tightening-vs-immovable-yen signature test.
     since: 2026-07-31
 
   - theme: middle-east-risk-premium
@@ -449,6 +464,21 @@ watchlist:
       station cycling confirms endurance strain (fe35b77d context).
       Saudi prince: Iran's Hormuz leverage a "strategic liability";
       Qatar PM in Tehran ("friends and brothers").
+      1 Sep (war restarted 30-31 Aug, see stance/briefs): Trump frames
+      strikes "very limited" ("doesn't mean we won't smack them"), Iran
+      "totally defeated militarily", nuke question dismissed. Iran's
+      lever WEAKENING: Hormuz flows ~two-thirds of pre-war (Goldman via
+      Bloomberg; Reuters 15-16 mb/d) — but investinglive same day says
+      6-8 mb/d: 2x estimate spread, use ranges. Weakening lever implies
+      escalation-quality pressure (mining campaign c2eafbf8,
+      Yanbu/Fujairah). NEW sub-threshold: UKMTO tanker+military-forces
+      incident E of Oman in Arabian Sea (sparse advisory, plausibly US
+      interdiction, unconfirmed); time-late tanker projectile hit 12nm N
+      of Khasab (baseline); Iranian-media claim Saudi tanker STOPPED in
+      Hormuz (no Saudi confirmation, no name — verifies vs listed Bahri
+      hull = b13614a1 breaks, tail arms). Bahrain condemns UAE-waters
+      drone; adc2a252 HIT (UAE-Iran suspension held). Pentagon churn:
+      Army Sec Driscoll resigns (Hegseth friction) mid-campaign.
     since: 2026-07-31
 
   - theme: energy-pce-passthrough
@@ -504,6 +534,15 @@ watchlist:
       below pre-war; gcaptain: Hormuz flows RISING as Gulf ramp-up
       accelerates. Supply keeps fattening against the premium —
       6f8b0433 comfortable into Mon maturity.
+      1 Sep: 6f8b0433 scored HIT (no settle >=95; the ~94 flirt was the
+      peak). Escalation re-premium without panic: Brent >90 best day
+      since end-July, WTI >86; oil +2% Aug after +22% Jul; SPR down 3.1M
+      to 286.6M bbl (no cushion — convexity confirmed). Venezuela axis
+      materializing: WH released deal terms (North American Blue Energy
+      Partners), Chevron/ONGC/GE Vernova near final pacts, US firm
+      taking over Chinese/Russian-run fields — UBS: 3 reasons it won't
+      move prices much, Hormuz still key. ISM prices-paid today scores
+      951d8286.
     since: 2026-07-31
 
   - theme: india-gold-formalisation
@@ -611,6 +650,12 @@ watchlist:
       "Bessent put". b0c2bfeb (no DXY close >=100) resolves TONIGHT
       with 0.87 headroom; next mechanism test 9 Sep first buyback op
       (#41).
+      1 Sep: 10y 4.75% "key threshold" (MarketWatch) on 3 straight up
+      days, oil shock pushing yields while BTC resists and gold weakens;
+      Bessent-vs-Warsh now explicit on the Sept hike (supply-shock
+      framing vs G20 hardening) — the institutional-conflict channel
+      deepens whichever side wins. DXY 99.5, USD "corrected" late
+      Monday. Gold below 200DMA yet August still best month since Jan.
     since: 2026-08-20
 
   - theme: us-canada-trade-war
