@@ -6,102 +6,137 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-  /* Data-viz series tokens. --viz-1..3 are the categorical trio (stance
-     weights bar); the set passes the dataviz six-checks validator against
-     this exact surface (#ffffff): worst adjacent CVD dE 9.2, normal-vision
-     27.6, with --viz-3 sub-3:1 contrast relieved by the visible legend
-     labels beside the bar. --viz-spot is the single-series ink for gold
-     marks (chart line, gauge arc, ladder dot): gold hue stepped darker for
-     the white surface, 4.9:1. Do not eyeball replacements — re-run
-     scripts/validate_palette.js from the dataviz skill. */
+
+  /* ---- dark values, declared once, inert until aliased below ---- */
+  --dk-background: #0a0b0a;
+  --dk-card: #161716;
+  --dk-secondary: #242422;
+  --dk-border: #333330;
+  --dk-foreground: #fafafa;
+  --dk-muted-foreground: #a1a1a1;
+  --dk-ink-dim: #8d8d86;
+  --dk-primary: #d4a73e;
+  --dk-primary-foreground: #141310;
+  --dk-up: #4ade80;
+  --dk-down: #ff6467;
+  --dk-destructive: #ff6467;
+  --dk-viz-1: #3987e5;
+  --dk-viz-2: #d95926;
+  --dk-viz-3: #199e70;
+
+  /* ---- light values, active by default ---- */
+  --background: #f6f6f3;
+  --card: #ffffff;
+  --popover: #ffffff;
+  --secondary: #eeeeea;
+  --muted: #eeeeea;
+  --accent: #eeeeea;
+  --border: #dedad2;
+  --input: #dedad2;
+  --foreground: #14140f;
+  --card-foreground: #14140f;
+  --popover-foreground: #14140f;
+  --secondary-foreground: #14140f;
+  --accent-foreground: #14140f;
+  --muted-foreground: #5f5f58;
+  --ink-dim: #69695f;
+  --primary: #7c5e17;
+  --primary-foreground: #ffffff;
+  --ring: #7c5e17;
+  --up: #12784a;
+  --down: #c02a28;
+  --destructive: #c02a28;
+
+  /* Data-viz series tokens. --viz-1..3 are the categorical trio; the trio is
+     held to a CIEDE2000 floor of 6.0 under normal vision and simulated
+     protanopia, deuteranopia and tritanopia by test/palette.test.ts. Do not
+     eyeball replacements — run `npm run validate:palette`, which is
+     the same check the test runs. */
   --viz-1: #2a78d6;
   --viz-2: #eb6834;
   --viz-3: #1baf7a;
-  --viz-spot: oklch(0.55 0.11 85);
-  /* Market-map diverging ramp. Two hues + a neutral GREY midpoint (never a
-     hue at the midpoint). Measured with the dataviz validator against this
-     panel's own surfaces: the pair separates by only dE 6.9 under
-     deuteranopia — inside the 6-8 floor band, which is legal ONLY with a
-     secondary encoding. The 45-degree hatch on bearish tiles is that
-     encoding, and it is required, not decoration: it works at any tile size,
-     which a signed number label does not. */
+  --viz-spot: #7c5e17;
+
+  /* Market-map diverging ramp. Two hues plus a neutral GREY midpoint — never
+     a hue at the midpoint. The bullish/bearish pair sits inside the 6–8 band
+     under deuteranopia, which is legal ONLY with a secondary encoding: the
+     45-degree hatch on bearish tiles is that encoding, and it is required,
+     not decoration. It works at any tile size, which a signed number label
+     does not. Light variant is fitted in Task 3b. */
   --map-bull: #1baf7a;
   --map-bull-mid: #3e6d55;
   --map-neutral: #3a3a38;
   --map-bear-mid: #854741;
   --map-bear: #e34948;
+
+  /* Back-compat: sparkline.tsx and price-chart.tsx still read var(--chart-1)
+     directly. Alias it to the validated --viz-1 rather than duplicating the
+     value. */
+  --chart-1: var(--viz-1);
 }
 
+/* Explicit choice: the pre-paint script in app/layout.tsx sets this class. */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.75 0.13 85);            /* gold */
-  --primary-foreground: oklch(0.2 0.02 85);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.75 0.13 85);
-  --sidebar-primary-foreground: oklch(0.2 0.02 85);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.439 0 0);
-  /* Same hues re-stepped for the dark surface (#0a0a0a) and re-validated:
-     worst adjacent CVD dE 9.4, normal-vision 26.5, all three >= 3:1.
-     --viz-spot matches --primary (the gold accent), 8.8:1. */
-  --viz-1: #3987e5;
-  --viz-2: #d95926;
-  --viz-3: #199e70;
-  --viz-spot: oklch(0.75 0.13 85);
+  --background: var(--dk-background);
+  --card: var(--dk-card);
+  --popover: var(--dk-card);
+  --secondary: var(--dk-secondary);
+  --muted: var(--dk-secondary);
+  --accent: var(--dk-secondary);
+  --border: var(--dk-border);
+  --input: var(--dk-border);
+  --foreground: var(--dk-foreground);
+  --card-foreground: var(--dk-foreground);
+  --popover-foreground: var(--dk-foreground);
+  --secondary-foreground: var(--dk-foreground);
+  --accent-foreground: var(--dk-foreground);
+  --muted-foreground: var(--dk-muted-foreground);
+  --ink-dim: var(--dk-ink-dim);
+  --primary: var(--dk-primary);
+  --primary-foreground: var(--dk-primary-foreground);
+  --ring: var(--dk-primary);
+  --up: var(--dk-up);
+  --down: var(--dk-down);
+  --destructive: var(--dk-destructive);
+  --viz-1: var(--dk-viz-1);
+  --viz-2: var(--dk-viz-2);
+  --viz-3: var(--dk-viz-3);
+  --viz-spot: var(--dk-primary);
+  --chart-1: var(--dk-viz-1);
+}
+
+/* No-JS and pre-hydration fallback: a reader whose system is dark gets the
+   dark appearance without JavaScript. `:not(.light)` so an explicit light
+   choice still wins once the script has run. */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --background: var(--dk-background);
+    --card: var(--dk-card);
+    --popover: var(--dk-card);
+    --secondary: var(--dk-secondary);
+    --muted: var(--dk-secondary);
+    --accent: var(--dk-secondary);
+    --border: var(--dk-border);
+    --input: var(--dk-border);
+    --foreground: var(--dk-foreground);
+    --card-foreground: var(--dk-foreground);
+    --popover-foreground: var(--dk-foreground);
+    --secondary-foreground: var(--dk-foreground);
+    --accent-foreground: var(--dk-foreground);
+    --muted-foreground: var(--dk-muted-foreground);
+    --ink-dim: var(--dk-ink-dim);
+    --primary: var(--dk-primary);
+    --primary-foreground: var(--dk-primary-foreground);
+    --ring: var(--dk-primary);
+    --up: var(--dk-up);
+    --down: var(--dk-down);
+    --destructive: var(--dk-destructive);
+    --viz-1: var(--dk-viz-1);
+    --viz-2: var(--dk-viz-2);
+    --viz-3: var(--dk-viz-3);
+    --viz-spot: var(--dk-primary);
+    --chart-1: var(--dk-viz-1);
+  }
 }
 
 @theme inline {
@@ -123,6 +158,9 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-ink-dim: var(--ink-dim);
+  --color-up: var(--up);
+  --color-down: var(--down);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -148,5 +186,10 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  :root { color-scheme: light; }
+  :root.dark { color-scheme: dark; }
+  @media (prefers-color-scheme: dark) {
+    :root:not(.light) { color-scheme: dark; }
   }
 }
