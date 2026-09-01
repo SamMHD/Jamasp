@@ -954,10 +954,31 @@ Confirm the `next/font/google` import shape and the `variable` option. `panel/AG
 
 - [ ] **Step 2: Verify Vazirmatn is available**
 
-Run: `cd panel && node -e "const m=require('next/font/google'); console.log(typeof m.Inter, typeof m.Vazirmatn)"`
-Expected: `function function`.
+**Corrected during execution (ruling R12).** This step originally said to run
+`node -e "const m=require('next/font/google'); …"` and expect `function
+function`. That check is meaningless in Next 16: `next/font/google` is a
+build-time SWC stub, so **every** export reads `undefined`, Inter included —
+the "fall back to `next/font/local`" branch it guarded would have fired every
+single time. It also tested the wrong thing: that a symbol exists, rather than
+that a font is served.
 
-If `Vazirmatn` is `undefined`, it is not in this Next version's font manifest. Fall back to `next/font/local`: download `Vazirmatn[wght].woff2` from the Vazirmatn releases into `panel/app/fonts/`, and use `localFont({ src: "./fonts/Vazirmatn[wght].woff2", variable: "--font-fa", display: "swap" })`. Do **not** link a CDN stylesheet — the panel sits behind Cloudflare Access and must not make third-party requests.
+Verify after the build instead, which is conclusive:
+
+```bash
+cd panel && npm run build
+grep -rl "Vazirmatn" .next/static/css | head
+```
+
+Then confirm the generated `@font-face` serves a **self-hosted** `woff2` over
+the Arabic unicode range — `U+0600-06FF` and friends — rather than pointing at
+a remote host. A `@font-face` whose `src` is a local `/_next/static/media/…`
+path is the proof; a `fonts.gstatic.com` URL is a failure.
+
+If Vazirmatn turns out not to be in this Next version's font manifest at all,
+fall back to `next/font/local`: place `Vazirmatn[wght].woff2` in
+`panel/app/fonts/` and use `localFont({ src: "./fonts/Vazirmatn[wght].woff2",
+variable: "--font-fa", display: "swap" })`. Do **not** link a CDN stylesheet —
+the panel sits behind Cloudflare Access and must not make third-party requests.
 
 - [ ] **Step 3: Write the theme toggle**
 
