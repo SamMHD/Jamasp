@@ -219,6 +219,8 @@
   --color-up: var(--up);
   --color-down: var(--down);
   --color-chart-1: var(--chart-1);
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-fa: var(--font-fa), ui-sans-serif, system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -231,6 +233,9 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  :where([dir="rtl"], [lang="fa"]) {
+    font-family: var(--font-fa);
   }
   :root { color-scheme: light; }
   :root.dark { color-scheme: dark; }

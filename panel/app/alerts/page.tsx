@@ -44,7 +44,7 @@ export default function AlertsPage() {
                   {m.ok === 0 && <Badge variant="destructive">send failed</Badge>}
                 </div>
                 <p dir={PERSIAN.test(m.text) ? "rtl" : "ltr"}
-                  className="whitespace-pre-wrap text-sm [font-family:Vazirmatn,Tahoma,sans-serif]">
+                  className="whitespace-pre-wrap text-sm">
                   {m.text}
                 </p>
               </li>
