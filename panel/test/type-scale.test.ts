@@ -14,6 +14,26 @@ function sources(dir: string, out: string[] = []): string[] {
   return out;
 }
 
+// Extracts the body of the first `@theme inline { ... }` block in `css`,
+// matching braces so nested rules (none today, but don't assume forever)
+// don't truncate the extraction early.
+function themeInlineBody(css: string): string {
+  const marker = "@theme inline";
+  const markerStart = css.indexOf(marker);
+  if (markerStart === -1) return "";
+  const braceStart = css.indexOf("{", markerStart);
+  if (braceStart === -1) return "";
+  let depth = 0;
+  for (let i = braceStart; i < css.length; i++) {
+    if (css[i] === "{") depth++;
+    else if (css[i] === "}") {
+      depth--;
+      if (depth === 0) return css.slice(braceStart + 1, i);
+    }
+  }
+  return css.slice(braceStart + 1);
+}
+
 describe("type scale", () => {
   it("defines every step", () => {
     const css = readFileSync(path.join(root, "app/globals.css"), "utf8");
@@ -32,5 +52,32 @@ describe("type scale", () => {
       }
     }
     expect(offenders).toEqual([]);
+  });
+
+  // Ruling R4 guard: the type-scale tokens must live in a plain `@theme`
+  // block, never inside `@theme inline`. `inline` bakes each token's
+  // literal value straight into every generated utility (e.g.
+  // `.text-meta{font-size:.6875rem}`), so the utility never reads
+  // `var(--text-meta)` at all — the mobile step-up's `@layer base` media
+  // query then only ever changes a custom property nothing consumes, and
+  // mobile silently renders at desktop sizes with no visible signal. The
+  // other tests above can't catch this: they only check that the tokens
+  // are declared *somewhere* in globals.css, which is equally true whether
+  // they sit in the plain block (working) or the inline block (dead).
+  it("keeps the type scale out of @theme inline", () => {
+    const css = readFileSync(path.join(root, "app/globals.css"), "utf8");
+    const inlineBody = themeInlineBody(css);
+    for (const step of ["display", "title", "heading", "body", "meta", "label"]) {
+      expect(
+        inlineBody,
+        `--text-${step} must not be declared inside @theme inline. ` +
+          `@theme inline bakes the literal value straight into every generated ` +
+          `utility instead of referencing the custom property, so the mobile ` +
+          `step-up's @layer base media-query override of --text-${step} would ` +
+          `change a variable no utility reads — the mobile scale would silently ` +
+          `stop working while every other test here still passes. Keep the type ` +
+          `scale in its own plain @theme block instead.`
+      ).not.toContain(`--text-${step}:`);
+    }
   });
 });
