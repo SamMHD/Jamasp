@@ -217,7 +217,7 @@ const LEGEND_STEPS: { tone: Tone; label: string }[] = [
 
 export function MapLegend() {
   return (
-    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-muted-foreground">
+    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-meta text-muted-foreground">
       {LEGEND_STEPS.map(s => (
         <span key={s.tone} className="flex items-center gap-1">
           <span aria-hidden className="h-2.5 w-2.5 rounded-[2px]"

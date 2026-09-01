@@ -227,6 +227,39 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+/* Type scale. rem throughout so a reader's browser font-size setting scales
+   the whole panel. Nothing here is smaller than 11px. Deliberately a plain
+   @theme block, NOT @theme inline like the block above: inline mode bakes
+   the literal value straight into each generated utility (e.g.
+   `.text-meta{font-size:.6875rem}`), which is exactly right for the color
+   tokens above (their values are themselves var() references that must stay
+   live across the .dark class toggle) but wrong here — it would make the
+   mobile override below dead code, since the utility would never read
+   var(--text-meta) at all. A plain @theme keeps the utility referencing the
+   variable (`.text-meta{font-size:var(--text-meta)}`), so the @layer base
+   override actually takes effect. Confirmed with Playwright: --text-meta and
+   the rendered font-size on a .text-meta element both flip between .6875rem
+   /11px (>=1024px) and .75rem/12px (<1024px). */
+@theme {
+  --text-display: 1.875rem;      /* 30px */
+  --text-display--line-height: 1;
+  --text-display--font-weight: 600;
+  --text-display--letter-spacing: -0.02em;
+  --text-title: 1.25rem;         /* 20px */
+  --text-title--line-height: 1.2;
+  --text-title--font-weight: 600;
+  --text-heading: 0.9375rem;     /* 15px */
+  --text-heading--line-height: 1.3;
+  --text-heading--font-weight: 600;
+  --text-body: 0.8125rem;        /* 13px */
+  --text-body--line-height: 1.5;
+  --text-meta: 0.6875rem;        /* 11px */
+  --text-meta--line-height: 1.45;
+  --text-label: 0.6875rem;       /* 11px */
+  --text-label--line-height: 1.2;
+  --text-label--letter-spacing: 0.1em;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -236,6 +269,19 @@
   }
   :where([dir="rtl"], [lang="fa"]) {
     font-family: var(--font-fa);
+  }
+  /* Mobile step-up for the type scale above. Relies on the desktop values
+     being declared in a plain (non-inline) @theme block — see the comment
+     there — so this override, in the base layer, actually wins over the
+     desktop values in the theme layer. */
+  @media (max-width: 1023px) {
+    :root {
+      --text-display: 1.75rem;   /* 28px */
+      --text-heading: 1rem;      /* 16px */
+      --text-body: 0.9375rem;    /* 15px */
+      --text-meta: 0.75rem;      /* 12px */
+      --text-label: 0.75rem;     /* 12px */
+    }
   }
   :root { color-scheme: light; }
   :root.dark { color-scheme: dark; }

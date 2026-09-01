@@ -70,7 +70,7 @@ export function QuoteTile({ label, value, digits = 2, ts, delta, deltaLabel = "2
 }) {
   return (
     <div className={cls("rounded-md border border-border/60 p-3", className)}>
-      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="text-label uppercase text-ink-dim">{label}</div>
       {value === null ? (
         <div className="mt-1 text-sm text-muted-foreground">no data</div>
       ) : (
@@ -87,7 +87,7 @@ export function QuoteTile({ label, value, digits = 2, ts, delta, deltaLabel = "2
             <Sparkline points={series} stroke="var(--muted-foreground)"
               className="mt-1.5 h-6 opacity-70" />
           )}
-          <div className="mt-1.5 text-[10px] text-muted-foreground">
+          <div className="mt-1.5 text-meta text-ink-dim">
             {note ? `${note} · ` : ""}{ts ? fmtAge(ts, now) : "no timestamp"}
           </div>
         </>

@@ -117,7 +117,7 @@ export function PredictionPanel({ stats, bins }: {
           {decisive > 0 && (
             <div className="mt-3">
               <CalibrationChart bins={bins} />
-              <div className="mt-1 flex gap-4 text-[10px] text-muted-foreground">
+              <div className="mt-1 flex gap-4 text-meta text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <span aria-hidden className="h-2 w-2 rounded-[2px] bg-emerald-700 dark:bg-emerald-400" />
                   hit (above line)
