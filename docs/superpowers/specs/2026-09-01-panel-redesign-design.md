@@ -68,8 +68,10 @@ The information design is strong and is not up for revision:
 - No buy/sell verdict, per `config/sources.yaml:283` and the e2e assertion
   that the panel never renders `/strong buy|strong sell|recommend/i`.
 - Area as the treemap encoding, with a 45° hatch as the required secondary
-  encoding on bearish tiles — not decoration, because the ramp separates by
-  only ΔE 6.9 under deuteranopia.
+  encoding on bearish tiles — deliberate redundancy, not decoration. A
+  treemap's tiles vary in size, sit against each other rather than a common
+  ground, and are read at a glance; colour alone should not have to carry
+  direction under those conditions at any margin.
 - The CVD-validated `--viz-*` trio and market-map ramp.
 - The `stance.md` parsing decisions, which were verified against ten real
   versions on `origin/live`.
@@ -358,13 +360,26 @@ Work happens in a git worktree, not a branch on the main checkout.
 ## Risks
 
 **The light market-map ramp may not clear CVD separation on a white
-surface** without hue changes. The bullish and bearish poles separate by only
-ΔE 6.9 under deuteranopia on the current dark surface — inside the 6–8 floor
-band, legal only because the 45° hatch carries the meaning independently. If
-the light ramp cannot reach even that band, the resolution is to change the
-bearish hue rather than to lighten toward the surface, and the hatch remains
-mandatory. Deciding this needs the validator from phase 1, so the light ramp
-is fitted in phase 1 and not deferred to the sweep.
+surface** without hue changes. If it cannot, the resolution is to rotate the
+bearish hue toward magenta rather than to lighten toward the surface — the
+same ramp has to carry legible ink, so lightening trades a CVD failure for a
+contrast failure. The hatch remains mandatory either way. Deciding this needs
+the validator, so the light ramp is fitted in phase 1 and not deferred to the
+sweep.
+
+*Resolved during execution:* the light poles cleared the 6.0 floor on the
+first candidates — ΔE 13.0 deuteranopia, 13.2 protanopia, 59.3 tritanopia. No
+hue rotation was needed.
+
+**Correction to an earlier claim in this spec.** Previous drafts asserted the
+dark poles separate by "only ΔE 6.9 under deuteranopia — inside the 6–8 floor
+band." That figure came from the `globals.css` comment written by the
+validator that does not exist, and it is **not reproducible**: measured with
+the vendored validator (CIEDE2000, Machado severity 1.0) the same unchanged
+pair reads ΔE 12.5. A different ΔE metric or CVD model would explain the gap,
+so the old number is unreproducible rather than provably wrong — but it
+should never have been repeated here as measured fact. The hatch's
+justification does not depend on it, and the hatch stays.
 
 **The Overview reorder changes `e2e/smoke.spec.ts`.** Those assertions are
 updated deliberately as part of phase 6, never deleted to reach green.
