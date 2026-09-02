@@ -75,6 +75,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <SideNav />
       <main
         id="main"
+        // WCAG technique G1: the skip link's target must itself be
+        // focusable, or activating it moves the *anchor* while focus stays
+        // wherever it was — tabIndex={-1} makes <main> a valid focus target
+        // (via script/hash navigation) without adding it to the normal tab
+        // order.
+        tabIndex={-1}
         className="min-w-0 flex-1 px-4 pt-4 pb-[calc(4rem_+_env(safe-area-inset-bottom))]
                    lg:px-6 lg:pt-6 lg:pb-6"
       >

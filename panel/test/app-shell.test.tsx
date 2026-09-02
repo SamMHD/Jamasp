@@ -76,4 +76,12 @@ describe("AppShell against an isolated root with no db file yet", () => {
     expect(html).toContain("ingest unknown");
     expect(html).toContain("page content");
   });
+
+  // Same fixture proves the WCAG G1 fix: the skip link's target must itself
+  // be focusable, or activating the link moves the anchor while focus stays
+  // put.
+  it("gives <main> tabIndex=-1 so the skip link actually moves focus", async () => {
+    const html = await renderAgainstFreshRoot();
+    expect(html).toMatch(/<main[^>]*id="main"[^>]*tabindex="-1"/);
+  });
 });

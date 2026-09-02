@@ -21,6 +21,12 @@ describe("TopBar", () => {
   it("falls back to the wordmark alone on an unknown route", () => {
     const html = render("/nowhere");
     expect(html).toContain("Jamasp");
+    // Guard audit: `{current && (<span>...)}` — this only proved the
+    // unconditional wordmark renders, which would still pass even if
+    // `current` wrongly matched some other route's label. The label span
+    // itself (not any individual label string, which could coincidentally
+    // appear elsewhere, e.g. in an aria-label) must be entirely absent.
+    expect(html).not.toContain('class="truncate text-body text-muted-foreground"');
   });
 
   // The status indicator is why Alerts does not need a tab slot, so it must

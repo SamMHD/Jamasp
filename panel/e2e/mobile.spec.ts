@@ -59,12 +59,24 @@ test("the theme control cycles and persists", async ({ page }) => {
   await expect(html).toHaveClass(/dark/);                 // survived the reload
 });
 
-test("Persian alerts render right-to-left", async ({ page }) => {
+test("Persian alerts render right-to-left in Vazirmatn", async ({ page }) => {
   await page.goto("/alerts");
-  // The fixture's notify_log carries Persian text; it must be marked rtl so
-  // the Vazirmatn binding in globals.css applies to it.
+  // The fixture's notify_log carries a Persian row (test/fixtures/fixture.sql)
+  // — no `if (count > 0)` guard: if the fixture ever loses that row this test
+  // must fail loudly, not silently no-op. It must be marked rtl so the
+  // Vazirmatn binding in globals.css (`:where([dir="rtl"], [lang="fa"])`)
+  // applies to it.
   const rtl = page.locator('[dir="rtl"]');
-  if (await rtl.count() > 0) await expect(rtl.first()).toBeVisible();
+  await expect(rtl.first()).toBeVisible();
+
+  // This branch's headline claim is that Persian text now renders in
+  // Vazirmatn — self-hosted, requested for the first time — rather than
+  // falling back to a generic sans-serif. Asserting `dir="rtl"` alone proves
+  // the direction is right but says nothing about the font actually
+  // resolving; the computed font-family is the only way to prove the
+  // Vazirmatn `@font-face` — not just its CSS variable — is truly bound.
+  const fontFamily = await rtl.first().evaluate(el => getComputedStyle(el).fontFamily);
+  expect(fontFamily).toContain("Vazirmatn");
 });
 
 // --- Task 6 gap: the type scale's mobile step-up needs a live measurement ---
