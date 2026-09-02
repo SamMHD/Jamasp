@@ -7,9 +7,9 @@ export type NavItem = { href: string; label: string; icon: LucideIcon };
 
 /**
  * The four destinations worth a tab slot on a phone. Alerts is deliberately
- * not among them: the top bar's status dot already links there and turns
- * amber or red when deriveWarnings returns anything, so the alerting path
- * stays one tap away without spending a slot.
+ * not among them: the top bar's status dot already links there and reports
+ * ingest freshness ("fresh" | "stale" | "unknown", from one getMeta read),
+ * so the alerting path stays one tap away without spending a slot.
  */
 export const PRIMARY: NavItem[] = [
   { href: "/", label: "Overview", icon: Gauge },
