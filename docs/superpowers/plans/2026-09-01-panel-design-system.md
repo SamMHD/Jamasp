@@ -2780,8 +2780,20 @@ Expected: no errors.
 
 - [ ] **Step 5: Verify no external font request survives the build**
 
-Run: `cd panel && grep -rl "fonts.googleapis.com\|fonts.gstatic.com" .next 2>/dev/null | head`
+Run: `cd panel && grep -rl "fonts.googleapis.com\|fonts.gstatic.com" .next/static .next/server .next/build 2>/dev/null | head`
 Expected: no output.
+
+**Scope this to the production directories, not all of `.next`.** Grepping the
+whole tree also sweeps `.next/dev/` — Turbopack's dev-server cache and its
+`.css.map` sourcemaps, which Playwright populates when it boots `next dev`
+earlier in this same gate. Those sourcemaps legitimately record where
+`next/font` downloaded the files from at build time, so the broader grep
+reports hits that are provenance comments in a dev cache, not live requests.
+The claim being tested is that nothing the browser fetches in production points
+at a third-party host; the production directories are where that is decided.
+
+A stronger confirmation, if you want it: every `src:url(...)` in the served CSS
+should be a relative local path under `../media/`, never an absolute URL.
 
 - [ ] **Step 6: Commit**
 
