@@ -24,9 +24,13 @@ export function TabBar() {
 
   return (
     <>
+      {/* min-h-14 (56px), not h-14: a fixed h-14 is a total height under
+          border-box, so the safe-area bottom padding below would eat into
+          the row on a notched phone and squeeze items back under 44px.
+          min-h-14 is a floor the bar grows past instead. */}
       <nav
         aria-label="Primary"
-        className="fixed inset-x-0 bottom-0 z-30 flex items-stretch gap-1 border-t
+        className="fixed inset-x-0 bottom-0 z-30 flex min-h-14 items-stretch gap-1 border-t
                    border-border bg-card px-1 pt-1 pb-[env(safe-area-inset-bottom)] lg:hidden"
       >
         {PRIMARY.map(({ href, label, icon: Icon }) => {

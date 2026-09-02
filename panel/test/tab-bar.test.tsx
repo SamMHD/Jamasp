@@ -31,11 +31,20 @@ describe("TabBar", () => {
     expect(render("/inbox")).toContain('aria-current="page"');
   });
 
-  // Every target must clear 44pt. h-14 (56px) on the bar plus min-w-11
+  // Every target must clear 44pt. min-h-14 (56px) on the bar plus min-h-11
   // (44px) per item is the floor this plan sets.
   it("gives every tab a 44px minimum target", () => {
     const html = render("/");
     expect(html).toContain("min-h-11");
+  });
+
+  // The bar's own floor must be 56px, not just each item's 44px — a bar with
+  // no explicit height would shrink to fit its shortest content (icon +
+  // label ≈ 35px), and min-h-11 alone was already meeting that shorter
+  // floor. min-h-14 (not the fixed h-14 the sibling top bar uses) so the
+  // safe-area inset grows the bar instead of eating into it.
+  it("gives the bar itself a 56px floor", () => {
+    expect(render("/")).toContain("min-h-14");
   });
 
   it("respects the bottom safe area", () => {
