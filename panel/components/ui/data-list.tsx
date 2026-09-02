@@ -17,8 +17,11 @@ export type Column<T> = {
  *
  * Both renderings are emitted and a container query hides one, so the switch
  * needs no JavaScript and no device guess — a table inside a narrow column
- * stacks correctly even on a wide screen. The hidden rendering is
- * aria-hidden so assistive technology reads each row once.
+ * stacks correctly even on a wide screen. `display: none` already removes
+ * the hidden rendering from the accessibility tree, so assistive technology
+ * only ever sees the one that's visible — no `aria-hidden` needed, and none
+ * should be added back (it can't respond to the container query, so it
+ * would hide the *visible* table at wide widths instead).
  *
  * The container is the nearest `@container` ancestor, which Panel provides.
  */
@@ -51,7 +54,7 @@ export function DataList<T>({ columns, rows, rowKey, empty }: {
       </ul>
 
       {/* wide: a real table */}
-      <div className="hidden @md:block" aria-hidden="true">
+      <div className="hidden @md:block">
         <Table>
           <TableHeader>
             <TableRow>
