@@ -35,7 +35,7 @@ describe("StatusStrip — ingest staleness", () => {
   it("colors a fresh ingest emerald and shows its age", () => {
     const html = render(BASE);
     expect(html).toContain("5m ago");
-    expect(html).toContain("text-emerald-400");
+    expect(html).toContain("text-up");
     expect(html).not.toContain("text-destructive");
   });
 
@@ -69,18 +69,18 @@ describe("StatusStrip — ingest staleness", () => {
 describe("StatusStrip — runs and source errors", () => {
   it("highlights runs-today once the cap is reached", () => {
     const html = render({ ...BASE, runsToday: 12, cap: 12 });
-    expect(html).toContain("text-amber-400");
+    expect(html).toContain("text-primary");
   });
 
   it("stays quiet on a healthy, under-cap, error-free run", () => {
     const html = render({ ...BASE, runsToday: 3, cap: 12, sourceErrors: 0 });
-    expect(html).not.toContain("text-amber-400");
+    expect(html).not.toContain("text-primary");
     expect(html).not.toContain("text-destructive");
   });
 
   it("flags nonzero source errors as amber", () => {
     const html = render({ ...BASE, sourceErrors: 4 });
-    expect(html).toContain("text-amber-400");
+    expect(html).toContain("text-primary");
     expect(html).toContain("4");
   });
 });
@@ -103,10 +103,10 @@ describe("StatusStrip — per-run-type dots", () => {
         run("deepdive", "deferred", "2026-08-01T10:00:00Z"),
       ],
     });
-    expect(html).toContain("bg-emerald-400");
+    expect(html).toContain("bg-up");
     expect(html).toContain("bg-destructive");
     // deferred means skipped-by-cap, not broken — amber, never destructive red.
-    expect(html).toContain("bg-amber-400");
+    expect(html).toContain("bg-primary");
   });
 
   // An `empty` run exited 0, burnt a slot from the daily cap, and committed
