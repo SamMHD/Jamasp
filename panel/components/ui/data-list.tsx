@@ -24,6 +24,11 @@ export type Column<T> = {
  * would hide the *visible* table at wide widths instead).
  *
  * The container is the nearest `@container` ancestor, which Panel provides.
+ *
+ * docs/todo/010: `Column` has no per-row modifier and no per-column
+ * alignment yet, both of which `/inbox`'s planned migration onto this
+ * component needs (the unread row's gold left rule; numeric-column
+ * alignment). Read that todo before wiring this up there.
  */
 export function DataList<T>({ columns, rows, rowKey, empty }: {
   columns: Column<T>[];

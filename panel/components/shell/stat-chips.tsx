@@ -20,6 +20,11 @@ const SHELL = "inline-flex min-h-11 items-center gap-1.5 rounded-full border bor
 /**
  * Machine health, demoted. Every chip names what it measures, so the tone
  * colour is emphasis rather than the carrier of meaning.
+ *
+ * docs/todo/010: chips below key on `chip.label`, which collides if this
+ * ever renders StatusStrip's four structurally-identical run-type chips
+ * (its planned call site) with a reused label. Read that todo before wiring
+ * that migration up.
  */
 export function StatChips({ chips }: { chips: Chip[] }) {
   if (chips.length === 0) return null;

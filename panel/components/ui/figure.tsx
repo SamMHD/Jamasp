@@ -14,6 +14,10 @@ const SIZE = {
  * `value === null` means no honest reading exists and renders `empty` — it
  * must never fall through to a zero. That is the same contract QuoteTile's
  * Delta already keeps, and the reason spot-delta.test.tsx exists.
+ *
+ * docs/todo/010: no `tone` and no string-value escape hatch yet, both of
+ * which `/schedule`'s planned migration onto this component needs. Read
+ * that todo before wiring this up there.
  */
 export function Figure({
   value, digits = 2, size = "display", label, sub, empty = "—", className, ...props

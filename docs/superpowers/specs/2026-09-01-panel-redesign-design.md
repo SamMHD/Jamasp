@@ -315,7 +315,7 @@ New failure modes introduced by this work:
 |---|---|
 | `localStorage` throws (private browsing) | `try/catch`, fall through to `prefers-color-scheme` |
 | JavaScript disabled | `@media (prefers-color-scheme: dark)` block carries the dark tokens |
-| Font fetch fails at build | `next/font` metric-adjusted fallback; no layout shift |
+| Font fetch fails at build | **Not covered — the build fails outright.** `next/font`'s metric-adjusted fallback only smooths the gap between the fallback font and the real one once a font has loaded (`display: swap`); it does not run if the Google Fonts fetch itself fails. `next/font/google`'s loader calls `nextFontError` on a failed fetch (`node_modules/next/dist/compiled/@next/font/dist/google/loader.js:97,120`), which throws and fails the build with no runtime fallback. See docs/todo/011. |
 | A table placed in a narrow column | `DataList` switches on its own container width, so it stacks correctly even in a wide viewport |
 
 ## Validation and testing
