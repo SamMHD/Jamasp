@@ -222,7 +222,13 @@ export default async function Overview({
           netSpecDelta={netSpecDelta?.delta ?? null} now={now} />
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-5">
+      {/* grid-cols-1 at the base is load-bearing, not decorative: an
+          unprefixed `grid` with only `lg:grid-cols-5` leaves the implicit
+          single track sized `auto` below 1024px, so CSS Grid's default
+          `min-width: auto` on grid items lets that track grow to whichever
+          child's content is widest instead of the container's own width —
+          exactly the kind of overflow the mobile sweep exists to catch. */}
+      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-5">
         <div className="flex flex-col gap-4 lg:col-span-3">
           <FundamentalPanel stance={stance} watchlist={watchlist} now={now} />
           <HorizonStrip horizon={horizon} now={now} />

@@ -6,102 +6,194 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-  /* Data-viz series tokens. --viz-1..3 are the categorical trio (stance
-     weights bar); the set passes the dataviz six-checks validator against
-     this exact surface (#ffffff): worst adjacent CVD dE 9.2, normal-vision
-     27.6, with --viz-3 sub-3:1 contrast relieved by the visible legend
-     labels beside the bar. --viz-spot is the single-series ink for gold
-     marks (chart line, gauge arc, ladder dot): gold hue stepped darker for
-     the white surface, 4.9:1. Do not eyeball replacements — re-run
-     scripts/validate_palette.js from the dataviz skill. */
+
+  /* ---- dark values, declared once, inert until aliased below ---- */
+  --dk-background: #0a0b0a;
+  --dk-card: #161716;
+  --dk-secondary: #242422;
+  --dk-border: #333330;
+  --dk-foreground: #fafafa;
+  --dk-muted-foreground: #a1a1a1;
+  --dk-ink-dim: #8d8d86;
+  --dk-primary: #d4a73e;
+  --dk-primary-foreground: #141310;
+  --dk-up: #4ade80;
+  --dk-down: #ff6467;
+  --dk-destructive: #ff6467;
+  --dk-viz-1: #3987e5;
+  --dk-viz-2: #d95926;
+  --dk-viz-3: #199e70;
+
+  /* dark market-map ramp — unchanged values, renamed. See the light ramp's
+     comment below for what this ramp is and why the hatch is mandatory. */
+  --dk-map-bull: #1baf7a;
+  --dk-map-bull-mid: #3e6d55;
+  --dk-map-neutral: #3a3a38;
+  --dk-map-bear-mid: #854741;
+  --dk-map-bear: #e34948;
+
+  /* dark market-map tile ink. Dark ink on the bright poles, light ink on
+     the dark mid/neutral steps. See the light ink comment below for why
+     light inverts this pairing rather than reusing it. Both themes are held
+     to the 4.5:1 ink floor (INK_FLOOR in lib/palette.ts) by
+     test/palette.test.ts's "market-map ink-on-fill contrast" block and
+     `npm run validate:palette` — fitted against those, not eyeballed. */
+  --dk-map-ink-bull: #0a0a0a;
+  --dk-map-ink-bull-mid: #f5f5f5;
+  --dk-map-ink-neutral: #f5f5f5;
+  --dk-map-ink-bear-mid: #f5f5f5;
+  --dk-map-ink-bear: #0a0a0a;
+
+  /* ---- light values, active by default ---- */
+  --background: #f6f6f3;
+  --card: #ffffff;
+  --popover: #ffffff;
+  --secondary: #eeeeea;
+  --muted: #eeeeea;
+  --accent: #eeeeea;
+  --border: #dedad2;
+  --input: #dedad2;
+  --foreground: #14140f;
+  --card-foreground: #14140f;
+  --popover-foreground: #14140f;
+  --secondary-foreground: #14140f;
+  --accent-foreground: #14140f;
+  --muted-foreground: #5f5f58;
+  --ink-dim: #69695f;
+  --primary: #7c5e17;
+  --primary-foreground: #ffffff;
+  --ring: #7c5e17;
+  --up: #12784a;
+  --down: #c02a28;
+  --destructive: #c02a28;
+
+  /* Data-viz series tokens. --viz-1..3 are the categorical trio; the trio is
+     held to a CIEDE2000 floor of 6.0 under normal vision and simulated
+     protanopia, deuteranopia and tritanopia by test/palette.test.ts. Do not
+     eyeball replacements — run `npm run validate:palette`, which is
+     the same check the test runs. */
   --viz-1: #2a78d6;
   --viz-2: #eb6834;
   --viz-3: #1baf7a;
-  --viz-spot: oklch(0.55 0.11 85);
-  /* Market-map diverging ramp. Two hues + a neutral GREY midpoint (never a
-     hue at the midpoint). Measured with the dataviz validator against this
-     panel's own surfaces: the pair separates by only dE 6.9 under
-     deuteranopia — inside the 6-8 floor band, which is legal ONLY with a
-     secondary encoding. The 45-degree hatch on bearish tiles is that
-     encoding, and it is required, not decoration: it works at any tile size,
-     which a signed number label does not. */
-  --map-bull: #1baf7a;
-  --map-bull-mid: #3e6d55;
-  --map-neutral: #3a3a38;
-  --map-bear-mid: #854741;
-  --map-bear: #e34948;
+  --viz-spot: #7c5e17;
+
+  /* Market-map diverging ramp. Two hues plus a neutral GREY midpoint — never
+     a hue at the midpoint. Both poles clear the CIEDE2000 floor of 6.0 with
+     room to spare under every simulated CVD type (dark bull/bear: dE 12.5
+     deutan / 19.7 protan / 68.2 tritan; light bull/bear: dE 13.0 deutan /
+     13.2 protan / 59.3 tritan) — but colour is never the sole signal for a
+     bull/bear read: the 45-degree hatch on bearish tiles is a required
+     secondary encoding, not decoration. It works at any tile size, which a
+     signed number label does not. Fitted against `npm run validate:palette`
+     — do not eyeball replacements. */
+  --map-bull: #0f7a52;
+  --map-bull-mid: #6aa389;
+  --map-neutral: #b9b9b4;
+  --map-bear-mid: #c58a86;
+  --map-bear: #b02c2a;
+
+  /* Market-map tile ink, light theme. TONE_INK (map-tiles.tsx) paints this
+     straight onto the ramp fills above, so it has to invert with them: the
+     light poles are dark, saturated colours and read against LIGHT ink; the
+     light mid/neutral steps are pale and read against DARK ink — the exact
+     opposite pairing from the dark ramp's ink above. Held to the 4.5:1 ink
+     floor (INK_FLOOR in lib/palette.ts) by test/palette.test.ts's
+     "market-map ink-on-fill contrast" block and `npm run validate:palette`
+     — fitted against those, not eyeballed. */
+  --map-ink-bull: #f5f5f5;
+  --map-ink-bull-mid: #0a0a0a;
+  --map-ink-neutral: #0a0a0a;
+  --map-ink-bear-mid: #0a0a0a;
+  --map-ink-bear: #f5f5f5;
+
+  /* Back-compat: sparkline.tsx and price-chart.tsx still read var(--chart-1)
+     directly. Alias it to the validated --viz-1 rather than duplicating the
+     value. */
+  --chart-1: var(--viz-1);
 }
 
+/* Explicit choice: the pre-paint script in app/layout.tsx sets this class. */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.75 0.13 85);            /* gold */
-  --primary-foreground: oklch(0.2 0.02 85);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.75 0.13 85);
-  --sidebar-primary-foreground: oklch(0.2 0.02 85);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.439 0 0);
-  /* Same hues re-stepped for the dark surface (#0a0a0a) and re-validated:
-     worst adjacent CVD dE 9.4, normal-vision 26.5, all three >= 3:1.
-     --viz-spot matches --primary (the gold accent), 8.8:1. */
-  --viz-1: #3987e5;
-  --viz-2: #d95926;
-  --viz-3: #199e70;
-  --viz-spot: oklch(0.75 0.13 85);
+  --background: var(--dk-background);
+  --card: var(--dk-card);
+  --popover: var(--dk-card);
+  --secondary: var(--dk-secondary);
+  --muted: var(--dk-secondary);
+  --accent: var(--dk-secondary);
+  --border: var(--dk-border);
+  --input: var(--dk-border);
+  --foreground: var(--dk-foreground);
+  --card-foreground: var(--dk-foreground);
+  --popover-foreground: var(--dk-foreground);
+  --secondary-foreground: var(--dk-foreground);
+  --accent-foreground: var(--dk-foreground);
+  --muted-foreground: var(--dk-muted-foreground);
+  --ink-dim: var(--dk-ink-dim);
+  --primary: var(--dk-primary);
+  --primary-foreground: var(--dk-primary-foreground);
+  --ring: var(--dk-primary);
+  --up: var(--dk-up);
+  --down: var(--dk-down);
+  --destructive: var(--dk-destructive);
+  --viz-1: var(--dk-viz-1);
+  --viz-2: var(--dk-viz-2);
+  --viz-3: var(--dk-viz-3);
+  --viz-spot: var(--dk-primary);
+  --chart-1: var(--dk-viz-1);
+  --map-bull: var(--dk-map-bull);
+  --map-bull-mid: var(--dk-map-bull-mid);
+  --map-neutral: var(--dk-map-neutral);
+  --map-bear-mid: var(--dk-map-bear-mid);
+  --map-bear: var(--dk-map-bear);
+  --map-ink-bull: var(--dk-map-ink-bull);
+  --map-ink-bull-mid: var(--dk-map-ink-bull-mid);
+  --map-ink-neutral: var(--dk-map-ink-neutral);
+  --map-ink-bear-mid: var(--dk-map-ink-bear-mid);
+  --map-ink-bear: var(--dk-map-ink-bear);
+}
+
+/* No-JS and pre-hydration fallback: a reader whose system is dark gets the
+   dark appearance without JavaScript. `:not(.light)` so an explicit light
+   choice still wins once the script has run. */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --background: var(--dk-background);
+    --card: var(--dk-card);
+    --popover: var(--dk-card);
+    --secondary: var(--dk-secondary);
+    --muted: var(--dk-secondary);
+    --accent: var(--dk-secondary);
+    --border: var(--dk-border);
+    --input: var(--dk-border);
+    --foreground: var(--dk-foreground);
+    --card-foreground: var(--dk-foreground);
+    --popover-foreground: var(--dk-foreground);
+    --secondary-foreground: var(--dk-foreground);
+    --accent-foreground: var(--dk-foreground);
+    --muted-foreground: var(--dk-muted-foreground);
+    --ink-dim: var(--dk-ink-dim);
+    --primary: var(--dk-primary);
+    --primary-foreground: var(--dk-primary-foreground);
+    --ring: var(--dk-primary);
+    --up: var(--dk-up);
+    --down: var(--dk-down);
+    --destructive: var(--dk-destructive);
+    --viz-1: var(--dk-viz-1);
+    --viz-2: var(--dk-viz-2);
+    --viz-3: var(--dk-viz-3);
+    --viz-spot: var(--dk-primary);
+    --chart-1: var(--dk-viz-1);
+    --map-bull: var(--dk-map-bull);
+    --map-bull-mid: var(--dk-map-bull-mid);
+    --map-neutral: var(--dk-map-neutral);
+    --map-bear-mid: var(--dk-map-bear-mid);
+    --map-bear: var(--dk-map-bear);
+    --map-ink-bull: var(--dk-map-ink-bull);
+    --map-ink-bull-mid: var(--dk-map-ink-bull-mid);
+    --map-ink-neutral: var(--dk-map-ink-neutral);
+    --map-ink-bear-mid: var(--dk-map-ink-bear-mid);
+    --map-ink-bear: var(--dk-map-ink-bear);
+  }
 }
 
 @theme inline {
@@ -123,23 +215,49 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-ink-dim: var(--ink-dim);
+  --color-up: var(--up);
+  --color-down: var(--down);
   --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-fa: var(--font-fa), ui-sans-serif, system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* Type scale. rem throughout so a reader's browser font-size setting scales
+   the whole panel. Nothing here is smaller than 11px. Deliberately a plain
+   @theme block, NOT @theme inline like the block above: inline mode bakes
+   the literal value straight into each generated utility (e.g.
+   `.text-meta{font-size:.6875rem}`), which is exactly right for the color
+   tokens above (their values are themselves var() references that must stay
+   live across the .dark class toggle) but wrong here — it would make the
+   mobile override below dead code, since the utility would never read
+   var(--text-meta) at all. A plain @theme keeps the utility referencing the
+   variable (`.text-meta{font-size:var(--text-meta)}`), so the @layer base
+   override actually takes effect. Confirmed with Playwright: --text-meta and
+   the rendered font-size on a .text-meta element both flip between .6875rem
+   /11px (>=1024px) and .75rem/12px (<1024px). */
+@theme {
+  --text-display: 1.875rem;      /* 30px */
+  --text-display--line-height: 1;
+  --text-display--font-weight: 600;
+  --text-display--letter-spacing: -0.02em;
+  --text-title: 1.25rem;         /* 20px */
+  --text-title--line-height: 1.2;
+  --text-title--font-weight: 600;
+  --text-heading: 0.9375rem;     /* 15px */
+  --text-heading--line-height: 1.3;
+  --text-heading--font-weight: 600;
+  --text-body: 0.8125rem;        /* 13px */
+  --text-body--line-height: 1.5;
+  --text-meta: 0.6875rem;        /* 11px */
+  --text-meta--line-height: 1.45;
+  --text-label: 0.6875rem;       /* 11px */
+  --text-label--line-height: 1.2;
+  --text-label--letter-spacing: 0.1em;
 }
 
 @layer base {
@@ -148,5 +266,26 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  :where([dir="rtl"], [lang="fa"]) {
+    font-family: var(--font-fa);
+  }
+  /* Mobile step-up for the type scale above. Relies on the desktop values
+     being declared in a plain (non-inline) @theme block — see the comment
+     there — so this override, in the base layer, actually wins over the
+     desktop values in the theme layer. */
+  @media (max-width: 63.999rem) {
+    :root {
+      --text-display: 1.75rem;   /* 28px */
+      --text-heading: 1rem;      /* 16px */
+      --text-body: 0.9375rem;    /* 15px */
+      --text-meta: 0.75rem;      /* 12px */
+      --text-label: 0.75rem;     /* 12px */
+    }
+  }
+  :root { color-scheme: light; }
+  :root.dark { color-scheme: dark; }
+  @media (prefers-color-scheme: dark) {
+    :root:not(.light) { color-scheme: dark; }
   }
 }

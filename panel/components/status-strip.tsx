@@ -5,10 +5,10 @@ import { cls, fmtAge, fmtDubai, fmtUtc } from "@/lib/format";
 const RUN_TYPES = ["brief", "scan", "deepdive", "retro"] as const;
 
 const DOT: Record<string, string> = {
-  ok: "bg-emerald-400",
+  ok: "bg-up",
   failed: "bg-destructive",
   timeout: "bg-destructive",
-  deferred: "bg-amber-400",
+  deferred: "bg-primary",
   // exited 0 but committed nothing: burnt a cap slot and produced no work,
   // so it needs attention like a failure — the tooltip separates the two.
   empty: "bg-destructive",
@@ -24,19 +24,19 @@ export function StatusStrip({ lastIngest, runsToday, cap, sourceErrors, lastRuns
     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded border border-border px-3 py-2 text-xs">
       <Link href="/crawl" className="hover:underline">
         <span className="text-muted-foreground">ingest </span>
-        <span className={cls("tabular-nums", ingestStale ? "text-destructive" : "text-emerald-400")}>
+        <span className={cls("tabular-nums", ingestStale ? "text-destructive" : "text-up")}>
           {lastIngest ? fmtAge(lastIngest, now) : "never"}
         </span>
       </Link>
       <Link href="/schedule" className="hover:underline">
         <span className="text-muted-foreground">runs </span>
-        <span className={cls("tabular-nums", runsToday >= cap && "text-amber-400")}>
+        <span className={cls("tabular-nums", runsToday >= cap && "text-primary")}>
           {runsToday}/{cap}
         </span>
       </Link>
       <Link href="/crawl" className="hover:underline">
         <span className="text-muted-foreground">errors 24h </span>
-        <span className={cls("tabular-nums", sourceErrors > 0 ? "text-amber-400" : "text-emerald-400")}>
+        <span className={cls("tabular-nums", sourceErrors > 0 ? "text-primary" : "text-up")}>
           {sourceErrors}
         </span>
       </Link>
