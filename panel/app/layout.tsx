@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Vazirmatn } from "next/font/google";
 import "./globals.css";
-import { Nav } from "@/components/nav";
+import { AppShell } from "@/components/shell/app-shell";
 import { Toaster } from "@/components/ui/sonner";
 import { THEME_STORAGE_KEY } from "@/lib/theme";
 
@@ -9,6 +9,10 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-sans", display: "swa
 const vazirmatn = Vazirmatn({ subsets: ["arabic"], variable: "--font-fa", display: "swap" });
 
 export const metadata: Metadata = { title: "Jamasp Panel" };
+
+// AppShell reads state/jamasp.db (via getMeta, for the ingest freshness
+// indicator) on every render, so the layout can't be statically rendered.
+export const dynamic = "force-dynamic";
 
 /**
  * Runs before first paint, so the correct appearance is on <html> before
@@ -30,11 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
       <body className="min-h-screen bg-background font-sans text-foreground antialiased">
-        {/* Replaced by <AppShell> in Task 11. */}
-        <div className="flex min-h-screen">
-          <Nav />
-          <main className="flex-1 overflow-x-hidden p-6">{children}</main>
-        </div>
+        <AppShell>{children}</AppShell>
         <Toaster richColors />
       </body>
     </html>
