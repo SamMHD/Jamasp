@@ -54,6 +54,12 @@ watchlist:
       the hike itself. 021357a6: odds stay <65% pre-NFP (0.6); its miss
       fires the stance flip. Gates: ISM prices-paid today (#44,
       951d8286), NFP Fri (#42, feed-verified 12:30Z).
+      2 Sep: odds ~70% (021357a6 MISSED, flip fired 1 Sep 19:00Z scan);
+      10y tagged 4.80% — war risk failing to stop the gold selloff, rates
+      desk driving THROUGH the war desk. UBS rate-cut thesis "tougher
+      test" (investinglive). No USD high-impact data before NFP
+      (ADP/claims/ISM services all medium). New: 16085af9 (odds >=60% at
+      the print, 0.6).
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -67,6 +73,10 @@ watchlist:
       COUNTER-SIGNAL: Russia's CB — once the top buyer — is now a steady
       SELLER (investinglive); first named crack in the floor narrative.
       Net effect check at next WGC monthly before trimming theme weight.
+      2 Sep: Schroders turns MORE bullish on gold citing CB buying —
+      first named institutional dip-buyer of the ~8.6% drawdown from
+      4750; watch whether the CB-demand floor shows in the tape around
+      4300 into NFP.
     since: 2026-07-31
 
   - theme: warsh-credibility
@@ -150,6 +160,14 @@ watchlist:
       the widest gap yet (6.7809 vs 6.7170 est, ~639 pips). RBNZ
       decision tomorrow 06:00 Dubai (Westpac: hike to 2.75%) —
       periphery-tightening-vs-immovable-yen signature test.
+      2 Sep: signature test PASSED in textbook form — RBNZ hiked a second
+      straight time to 2.75% and NZD FELL (gradual guidance; chief:
+      settings "still accommodative"); Australia Q2 GDP beat 0.4% keeps
+      an RBA hike in play; Ueda backs further hikes (no comment on Sept
+      pricing), hawk Takata wants "nimble" hikes, Bessent publicly
+      presses BoJ — USDJPY >160 REGARDLESS (b6450c7a intact). PBOC TENTH
+      straight weak fix (6.7829 vs 6.7238 est, ~591 pips). Debasement
+      underbid survives even as the rates desk sells gold down.
     since: 2026-07-31
 
   - theme: middle-east-risk-premium
@@ -479,6 +497,28 @@ watchlist:
       hull = b13614a1 breaks, tail arms). Bahrain condemns UAE-waters
       drone; adc2a252 HIT (UAE-Iran suspension held). Pentagon churn:
       Army Sec Driscoll resigns (Hegseth friction) mid-campaign.
+      2 Sep (extracted, Axios via investinglive + Gulf News + gcaptain/
+      Reuters): US wave ~100 targets incl. FIRST-EVER strikes on two
+      Iranian government tankers (anchored, engine rooms, N of blockade
+      line) under new "tanker-for-tanker" ROE personally approved by
+      Trump — explicitly RETALIATORY, new escalation category tied to
+      shipping attacks; rest of target set stayed disciplined (AD/radar/
+      mine-laying/ASCM/drone launchers/comms — no export or port infra,
+      f527c209/973a3143 intact). Iran's salvo largely FAILED: ~25 BMs at
+      Jordan (half reached airspace), ~24 drones at Bahrain + Kuwait +
+      Erbil pair mostly intercepted (IRGC claims Erbil warehouse/aerostat
+      damage, disputed); interceptor-depletion fear did NOT materialize;
+      ~40 escorted transits ON strike day; US: capability degraded ">=1
+      month", Iran "lost control"; Bessent "death spiral" / "tinker-toy
+      radar". Kuhestak wedding-strike claim (4 dead/35 wounded, Iranian
+      state media; CENTCOM disputes) = information risk. JMIC 48h pair:
+      UKMTO 122-26 Burgan (security incident, anchored) + 124-26 (three
+      projectiles 17nm E Khasab — likely the 31 Aug Sidr/Senegal
+      Prosperity event, verify before counting as persistence). Qalibaf
+      doubled down: "no one will be able to export oil". Pezeshkian
+      (Kyrgyzstan summit): reciprocity if US honors June MoU; Guterres
+      urges talks + freedom of navigation. 72h checkpoint -> wakeup #47
+      (3 Sep 20:30Z); bd825267 = scoreboard for the degradation claim.
     since: 2026-07-31
 
   - theme: energy-pce-passthrough
@@ -543,6 +583,14 @@ watchlist:
       taking over Chinese/Russian-run fields — UBS: 3 reasons it won't
       move prices much, Hormuz still key. ISM prices-paid today scores
       951d8286.
+      2 Sep: Brent >96 (3rd straight up day, settle +$4), WTI ~90 first
+      since June; FXEmpire eyes $101 WTI on the breakout; private survey
+      shows bigger-than-expected crude DRAW; EIA production data DELAYED
+      (technical glitch) — supply-data fog. Passthrough now the active
+      hike-odds driver (~70%); 40 escorted transits on strike day + US
+      degradation claim argue disruption risk eased even as conflict
+      runs. Ust-Luga strike + Turkish operators suspending Russia runs
+      feed the floor from the Russia axis.
     since: 2026-07-31
 
   - theme: india-gold-formalisation
@@ -656,6 +704,12 @@ watchlist:
       framing vs G20 hardening) — the institutional-conflict channel
       deepens whichever side wins. DXY 99.5, USD "corrected" late
       Monday. Gold below 200DMA yet August still best month since Jan.
+      2 Sep: 10y through the threshold to 4.80% (bond bears), DXY 99.8
+      pressing 100; systematic-fund momentum-basket deleveraging
+      "self-fulfilling" (investinglive), Nasdaq sharply lower, Dow below
+      key chart level — gold caught in the LIQUIDATION, not the haven
+      flow (settle broke 4380 with Brent >96). BTC 77.2k holding better
+      than gold. Mechanism test unchanged: first buyback op 9 Sep (#41).
     since: 2026-08-20
 
   - theme: us-canada-trade-war
@@ -675,6 +729,10 @@ watchlist:
       price-setter.
       28 Aug: CAD GDP prints today 12:30Z (High, scans cover); ING —
       "Canadian dollar has further to fall on tariff chaos."
+      2 Sep: BOC decision TODAY 13:45Z + presser 14:30Z (High) — first
+      rate decision inside the tariff war; scans read it (statement
+      language on tariff passthrough vs growth hit is the gold-relevant
+      line).
     since: 2026-08-24
 # REMOVED 4 Aug: gold-basis-lbma-comex — resolved. 3 Aug PM fix pair printed
 # $56 (fix 4028.15 vs GC 4084.3, ±5 min), inside the $50-90 Dec-26 fair-carry

@@ -550,6 +550,25 @@ events:
       re-verifies date and slot per rule 17.
     action: wakeup #42 added 2026-09-04T13:15:00Z (print+45, rule 15)
 
+  - date: 2026-09-03
+    time_dubai: "2026-09-04 00:30 (3 Sep 20:30Z; checkpoint ~20:00Z)"
+    title: Qalibaf-direction 72h checkpoint + tanker-for-tanker follow-through
+    why: >
+      Stance flip condition set 1 Sep: GCC-cargo corridor attacks
+      persisting >=72h from the 31 Aug ~19:52Z twin Saudi-crude VLCC
+      strikes (Sidr/Senegal Prosperity) moves kinetic >=45. The window
+      closes ~3 Sep 20:00Z — inside the overnight scan gap (scans run
+      09:00-23:00 Dubai), so it needs a wakeup. Same run reads the new
+      tanker-for-tanker ROE's first days (2 Sep brief: US struck two
+      Iranian government tankers, first time, explicitly retaliatory —
+      does Iran strike again and draw another counter, or hold off?) and
+      the trajectory of bd825267/c2eafbf8, which are now the scoreboard
+      for CENTCOM's ">=1 month degraded threat" claim. Trap flagged: the
+      1 Sep JMIC/UKMTO pair (122-26 Burgan / 124-26 three projectiles
+      17nm E Khasab) likely re-reports the 31 Aug event — verify identity
+      before counting it as persistence.
+    action: wakeup #47 added 2026-09-03T20:30:00Z (deepdive)
+
   - date: 2026-08-29
     time_dubai: "weekend (29-30 Aug; exact sessions unscheduled in feed)"
     title: G20 finance meeting, Asheville — Iran sanctions push + yen watch
