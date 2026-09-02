@@ -140,7 +140,7 @@ export function NewsFlow({ pulse, heads, top, lastItemTs, now }: {
       ) : (
         <>
           <VolumeChart pulse={pulse} />
-          <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-muted-foreground">
+          <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-meta text-muted-foreground">
             <span className="flex items-center gap-1">
               <span aria-hidden className="h-2 w-2 rounded-[2px]"
                 style={{ background: "var(--viz-spot)" }} /> gold topic
@@ -215,7 +215,7 @@ export function NewsFlow({ pulse, heads, top, lastItemTs, now }: {
               <a href={i.url} target="_blank" rel="noreferrer"
                 className="min-w-0 flex-1 truncate hover:underline">{i.headline}</a>
               {i.sources_n >= 2 && (
-                <span className="shrink-0 rounded border border-border px-1 text-[10px] text-muted-foreground tabular-nums"
+                <span className="shrink-0 rounded border border-border px-1 text-meta text-muted-foreground tabular-nums"
                   title={`carried by ${i.sources_n} distinct sources`}>
                   {i.sources_n} wires
                 </span>

@@ -92,18 +92,20 @@ describe("MarketMap", () => {
   });
 
   it("gives different tones different text ink, not one colour for all five", () => {
-    // TONE_INK puts dark ink on the bright poles and light ink on the mid
-    // and neutral steps. Nothing else in the suite would catch a
-    // regression that collapsed this to a single constant.
+    // TONE_INK references a distinct theme-aware CSS variable per tone
+    // (--map-ink-bull vs --map-ink-neutral, etc.) rather than a literal hex,
+    // since the ink/fill pairing inverts between the light and dark ramps.
+    // Nothing else in the suite would catch a regression that collapsed
+    // this to a single constant.
     const html = render([
-      item({ itemId: "a", direction: 2, conviction: 0.8, theme: "rates_dollar" }), // bull -> dark ink
+      item({ itemId: "a", direction: 2, conviction: 0.8, theme: "rates_dollar" }), // bull
       item({
-        itemId: "b", direction: 0, conviction: 0, theme: "geopolitics", // neutral -> light ink
+        itemId: "b", direction: 0, conviction: 0, theme: "geopolitics", // neutral
         headline: "Central bank buying steady into September",
       }),
     ]);
-    expect(html).toContain('fill="#0a0a0a"');
-    expect(html).toContain('fill="#f5f5f5"');
+    expect(html).toContain('fill="var(--map-ink-bull)"');
+    expect(html).toContain('fill="var(--map-ink-neutral)"');
   });
 
   it("states coverage rather than implying completeness", () => {

@@ -141,7 +141,7 @@ export function HorizonStrip({ horizon, now }: { horizon: Horizon; now: Date }) 
             ))}
           </svg>
 
-          <div className="mt-1 flex gap-4 text-[10px] text-muted-foreground">
+          <div className="mt-1 flex gap-4 text-meta text-muted-foreground">
             <span className="flex items-center gap-1">
               <span aria-hidden className="h-2.5 w-2.5 rounded-full"
                 style={{ background: "var(--viz-1)" }} /> high impact

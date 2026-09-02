@@ -37,7 +37,7 @@ export function RunNowButtons({ capped }: { capped: boolean }) {
       <Input className="w-64"
         placeholder="optional task text — blank defaults to a generic note, for any run type"
         value={task} onChange={e => setTask(e.target.value)} />
-      {capped && <span className="text-xs text-amber-400">cap reached — runs disabled</span>}
+      {capped && <span className="text-xs text-primary">cap reached — runs disabled</span>}
     </div>
   );
 }
