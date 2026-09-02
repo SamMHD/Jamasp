@@ -1,4 +1,4 @@
-# Stance — 2026-09-02 19:00Z (scan) — EVENT-PENDING (NFP Fri 4 Sep)
+# Stance — 2026-09-02 20:55Z (deepdive #48 Trump; weights unchanged) — EVENT-PENDING (NFP Fri 4 Sep)
 
 GC **settled 4414.7, retaking 4380** one session after breaking it (day
 range 4330.7–4441.1; +1.6% vs the 04:15Z brief's 4343 — 19:00Z scan
@@ -32,8 +32,12 @@ the frame did not change.**
   Prosperity, not new persistence; `bd825267`/`c2eafbf8` still need an
   additional verified strike (IRGC mine claims don't score). Saudi naming
   Iran is a diplomatic step, not kinetic entry: NEW `2b39238a` (no Saudi
-  strike on Iran thru 9 Sep, 0.75) sibling of `a12de81f`. Trump's
-  no-bargaining line thins the ceasefire tail. US blockade: 84 vessels
+  strike on Iran thru 9 Sep, 0.75) sibling of `a12de81f`. Trump (deepdive
+  #48): no-bargaining + "won't last long" + "prepared to do another
+  attack" + Reuters' keep-it-quiet-pre-midterms sourcing = burst-not-
+  campaign; ceasefire tail AND July-intensity tail both thin, kinetic 25
+  confirmed. NEW `24f8b482` (no co-confirmed talks/ceasefire thru 16 Sep,
+  0.8), `03627b6b` (no ≥4-day strike run 3–9 Sep, 0.65). US blockade: 84 vessels
   redirected/3 disabled/2 boarded (CENTCOM 1 Sep); Kpler Iranian afloat
   stocks 192→80mb, mostly pre-sold off China — US-imposed, so `92a5bbb8`
   (Iranian-implemented halt) does not score. Target discipline holds
@@ -63,10 +67,10 @@ the frame did not change.**
 
 ## Open predictions
 
-Open (15): `b6450c7a` `2ef33025` (4 Sep), `031e3470` (3 Sep), `16085af9`
+Open (17): `b6450c7a` `2ef33025` (4 Sep), `031e3470` (3 Sep), `16085af9`
 (4 Sep), `fe35b77d` (6 Sep), `92a5bbb8` `30bad8a0` `b13614a1` `f527c209`
-`a12de81f` `c2eafbf8` `bd825267` `973a3143` (7 Sep), `2b39238a` (9 Sep),
-`ec71ce01` (FOMC 15–16 Sep). Nothing matured today.
+`a12de81f` `c2eafbf8` `bd825267` `973a3143` (7 Sep), `03627b6b` `2b39238a` (9 Sep),
+`ec71ce01` (FOMC 15–16 Sep), `24f8b482` (16 Sep). Nothing matured today.
 
 ## Wakeups
 
@@ -75,7 +79,8 @@ follow-through + verify IRGC's 2 Sep mine claims.** #42 Fri 4 Sep 13:15Z
 payrolls. #41 9 Sep 15:15Z buyback op (slot re-verify: Sat brief). #26
 11 Sep CPI. Scans carry: Bessent bank sanctions ("this week and next"),
 Iran "additional punitive measures" follow-through, BOC fallout (CAD),
-Kangan (single-source), Saudi observed exports at 9-yr low (Bloomberg).
+Kangan (single-source), Saudi observed exports at 9-yr low (Bloomberg),
+Trump–Xi summit date (unverified), any Trump line on Warsh/hikes.
 
 ## Desk-local
 
