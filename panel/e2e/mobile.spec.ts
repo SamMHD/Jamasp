@@ -109,7 +109,25 @@ test("the type scale's mobile step-up is a real rendered increase", async ({ pag
 // (asserting the class name, or a fixed pixel constant) would pass even if
 // someone reverts to a flat pb-* that only happens to clear *this*
 // environment's zero safe-area inset.
+//
+// This environment's browser reports a real `env(safe-area-inset-bottom)`
+// of 0 by default, which is the trap: at 0 inset the bar sits at its
+// `min-h-14` floor of 56px, and *both* the current `calc(4rem + 0) = 64px`
+// fix and the original buggy flat `pb-20` (80px) clear that — so a test run
+// at the default inset cannot tell the two apart, no matter how the
+// assertion below is phrased. Task 11 found the real bug at the standard
+// 34px iOS home-indicator inset, where the bar renders 83px and `pb-20`
+// (80px) undershoots by 3px; only reproducing that inset can catch a
+// regression to that shape. `page.context().newCDPSession` plus the
+// experimental `Emulation.setSafeAreaInsetsOverride` command does that —
+// confirmed working in this Chromium build (bar height 83px, `main`'s
+// resolved padding-bottom 98px, matching the app-shell.tsx comment's
+// numbers exactly) — so it is used here rather than accepting the 0-inset
+// default.
 test("page content is not occluded by the fixed tab bar", async ({ page }) => {
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Emulation.setSafeAreaInsetsOverride", { insets: { bottom: 34 } });
+
   await page.goto("/");
   // The tab bar is `position: fixed` and contributes no flex height, so the
   // only way to know whether the true last row of content clears it is to
@@ -131,6 +149,7 @@ test("page content is not occluded by the fixed tab bar", async ({ page }) => {
   const contentBottom = contentBox!.y + contentBox!.height;
   expect(contentBottom,
     `last content bottom at ${contentBottom}px sits below the tab bar's top at ${barBox!.y}px — ` +
-    "the bar's box model changed and main's bottom padding no longer clears it")
+    "the bar's box model changed and main's bottom padding no longer clears it " +
+    "(checked at a real 34px safe-area inset via CDP, not this environment's 0-inset default)")
     .toBeLessThanOrEqual(barBox!.y);
 });
