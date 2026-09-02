@@ -1960,8 +1960,8 @@ export function ingestTone(lastIngest: string | null, now: Date): IngestTone {
  * Sidebar at >=1024px; top bar plus bottom tab bar below it. The breakpoint
  * is deliberately late — a full layout is preferable for as long as it fits.
  *
- * `pb-20` on main clears the fixed tab bar so the last row of any page is
- * reachable; it is dropped at lg where no tab bar exists.
+ * The bottom padding on main clears the fixed tab bar so the last row of any
+ * page is reachable; it is dropped at lg where no tab bar exists.
  */
 export function AppShell({ children }: { children: React.ReactNode }) {
   const tone = ingestTone(getMeta("last_ingest_at"), new Date());
@@ -1977,7 +1977,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </a>
       <TopBar ingestTone={tone} />
       <SideNav />
-      <main id="main" className="min-w-0 flex-1 px-4 pt-4 pb-20 lg:px-6 lg:pt-6 lg:pb-6">
+      <main id="main" className="min-w-0 flex-1 px-4 pt-4 pb-[calc(4rem_+_env(safe-area-inset-bottom))] lg:px-6 lg:pt-6 lg:pb-6">
         {children}
       </main>
       <TabBar />
@@ -2813,3 +2813,27 @@ vitest, palette validator, both Playwright projects, lint and build."
 
 **Import-time safety checked.** `lib/db.ts` opens its handle lazily inside `getDb()`, so `test/app-shell.test.tsx` importing `app-shell.tsx` does not open `state/jamasp.db`. Client components are importable under this vitest setup — `test/fullscreen-button.test.tsx` is the existing precedent.
 
+
+---
+
+## Corrections made during execution
+
+Recorded here so the plan text and the shipped code agree. Each was ruled on
+at the time and is reflected in the code; the reasoning lives with the ruling.
+
+| # | What the plan said | What shipped, and why |
+|---|---|---|
+| R1 | Replace `:root`/`.dark` wholesale | `--chart-1` is **kept**, aliased to `--viz-1`. `sparkline.tsx:9` and `price-chart.tsx:77,78` read it; dropping it would have rendered those strokes with an invalid colour. `--chart-2..5` and `--sidebar-*` were removed as provably unreferenced. |
+| R8 | A `.mjs` validator CLI self-registering `tsx/esm` via `module.register` | `scripts/validate-palette.ts` run through an npm script. `tsx@4.23.13` rejects `register()` with *"must be loaded with `--import`"*, so the CLI could never have run. |
+| R10 | The map ramp's poles separate by "only ΔE 6.9 under deuteranopia" | Unreproducible — it came from the validator that does not exist. Measured with the vendored one (CIEDE2000, Machado severity 1.0) the same unchanged pair reads **ΔE 12.5**. The hatch stays; its justification never depended on the number. |
+| R11 | Fit the light ramp's fills | The fills were only half the job. Tile ink was **theme-fixed**, so the light ramp rendered labels at 1.81–3.70:1 against a 4.5:1 floor. `--map-ink-*` tokens added, plus the ink-on-fill assertion that was missing. |
+| R12 | Verify Vazirmatn with `require('next/font/google')` | Meaningless — that module is a build-time SWC stub, so every export reads `undefined`, Inter included. Replaced with a post-build check of the generated `@font-face`. |
+| R14 | A type-scale test asserting the tokens exist | Token presence cannot detect the failure that actually occurred (`@theme inline` bakes literals, so the mobile override changed what nothing read). A guard now fails if any `--text-*` returns to `@theme inline`. |
+| R18 | `h-14` on the tab bar | `min-h-14`. Under border-box a fixed height would let `env(safe-area-inset-bottom)` eat into the row and push items back under their 44px targets — trading a cosmetic miss for an accessibility regression on exactly the notched devices the inset serves. |
+| R19 | `pb-20` (80px) on `main` | `pb-[calc(4rem + env(safe-area-inset-bottom))]`. The bar measures 83px at the standard 34px inset, so 80px undershoots by 3px. Tying the padding to the same `env()` term the bar uses means the two cannot drift. |
+| R21 | `aria-hidden="true"` on the wide table rendering | **Removed.** ARIA cannot respond to a container query, so at wide widths it hid the *visible* table from assistive technology while the stacked list was `display:none` — leaving screen readers with nothing. `display:none` already excludes from the accessibility tree; the CSS toggle alone is correct. |
+| R24 | A geometric tab-bar occlusion assertion | It could not distinguish the fix from the `pb-20` bug, because the test environment's safe-area inset is always 0 and both clear a 56px bar. Now sets a real 34px inset over CDP, where 80px genuinely fails. |
+
+Two defects were found by implementers rather than reviewers: the `tsx`
+loader incompatibility (R8) and a `cn("min-w-0", …)` in Task 13's own sample
+code that would have broken that task's own `not.toContain("0")` assertion.

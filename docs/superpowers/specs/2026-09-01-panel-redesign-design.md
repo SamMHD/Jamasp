@@ -34,6 +34,17 @@ platform default is 44×44pt with 28×28pt as the floor.
 (`components/quote-tile.tsx:78,96`) and the map legends — sit below the 11pt
 mobile minimum.
 
+*Scope of the 11px floor, clarified during execution.* That count covers
+**CSS-styled text** only, which is what the `text-[Npx]` form and the
+type-scale test can see. Several chart components — `news-flow`,
+`prediction-panel`, `horizon-strip`, `spot-chart`, `arc-gauge`, `map-tiles`,
+`market-map`, `technical-map` — also carry SVG `fontSize` labels under 11px.
+Those are a **different problem**: SVG text sits inside a scaled `viewBox`, so
+its rendered size depends on the display width and a flat 11px rule does not
+transfer without separate analysis. Raising them blind would reflow chart
+layouts. They are deliberately out of scope here and belong with the work that
+touches those components.
+
 **The app overrides the system appearance.** `<html className="dark">` is
 hardcoded at `app/layout.tsx:11`. The light tokens in `:root` are dead code,
 and broken if ever reached: `--primary` gold is defined **only** inside
@@ -111,6 +122,14 @@ not replacements.
 | Identity / focus | `--primary`, `--ring` | `#d4a73e` | `#7c5e17` |
 | Direction up (new) | `--up` | `#4ade80` | `#12784a` |
 | Direction down (new) | `--down` | `#ff6467` | `#c02a28` |
+| Map tile ink (new) | `--map-ink-*` | per tone | per tone |
+
+The `--map-ink-*` set was added during execution and is not optional. The
+market map's tile labels were previously painted with **theme-fixed** hex
+while the tile fills came from `var(--map-*)` and flipped with the theme — so
+the light ramp rendered labels at 1.81:1 to 3.70:1 against a 4.5:1 floor, the
+neutral tile at under half. One token per tone, per theme, fixes it, and an
+ink-on-fill assertion covering all five tones in both themes now guards it.
 
 Every ink is measured against **all three surfaces of its own theme**, not
 just the panel — the raised/inset surface is the worst case and the one an
