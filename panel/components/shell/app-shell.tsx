@@ -37,10 +37,30 @@ export function ingestTone(lastIngest: string | null, now: Date): IngestTone {
  * arithmetic). Padding by the same `env(safe-area-inset-bottom)` term the
  * bar itself pads with — rather than a constant tuned to one inset value —
  * tracks any device's real inset instead of quietly clipping again on the
- * next one, with ~8px of breathing room to spare above the bar itself.
+ * next one. Both terms carry the same `+ inset`, so it cancels rather than
+ * growing: the slack above the bar is a constant 15px — (64px + inset) −
+ * (49px + inset) — at any inset ≥7px, not a value tied to one device.
  */
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const tone = ingestTone(getMeta("last_ingest_at"), new Date());
+  // getMeta can throw here for real reasons: a fresh host before the first
+  // CLI run, a deploy that's mid-swap on state/jamasp.db, or a
+  // misconfigured JAMASP_ROOT. lib/db.ts's q() deliberately rethrows
+  // everything but SQLITE_BUSY (see hasTable's comment there), and this read
+  // happens during ROOT layout render — app/error.tsx cannot catch a throw
+  // here, because Next only wraps layouts *below* the root (see
+  // app/global-error.tsx for the root's own boundary). Left uncatched, every
+  // one of the panel's nine routes would serve the framework's bare
+  // "Application error" page instead of a working shell. Falling back to
+  // null lets ingestTone's own null-handling produce "unknown" — the state
+  // it already models for "no reading available" — rather than a fabricated
+  // "stale". Do not remove this catch as defensive clutter.
+  let lastIngestAt: string | null = null;
+  try {
+    lastIngestAt = getMeta("last_ingest_at");
+  } catch {
+    lastIngestAt = null;
+  }
+  const tone = ingestTone(lastIngestAt, new Date());
   return (
     <div className="flex min-h-screen flex-col lg:flex-row">
       <a
