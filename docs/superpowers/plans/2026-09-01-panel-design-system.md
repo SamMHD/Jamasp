@@ -1447,10 +1447,14 @@ describe("SideNav", () => {
     expect(html.match(/aria-current="page"/g)).toHaveLength(1);
   });
 
+  // Extract the overview's own <a> tag rather than slicing between two href
+  // occurrences. React emits aria-current BEFORE href — the rendered active
+  // link is `<a aria-current="page" class="…" href="/inbox">` — so a slice
+  // running from the overview's href to the inbox link's href swallows the
+  // inbox link's aria-current and fails against a correct component.
   it("does not mark the overview active on a sub-route", () => {
-    const html = render("/inbox");
-    const overviewLink = html.slice(html.indexOf('href="/"'), html.indexOf('href="/inbox"'));
-    expect(overviewLink).not.toContain('aria-current');
+    const overviewTag = render("/inbox").match(/<a\b[^>]*href="\/"[^>]*>/)![0];
+    expect(overviewTag).not.toContain("aria-current");
   });
 
   // 44pt targets are a mobile rule, but a 40px row is the desktop floor this
