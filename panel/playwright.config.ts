@@ -16,8 +16,11 @@ export default defineConfig({
       use: { baseURL: "http://127.0.0.1:3311", launchOptions, viewport: { width: 1440, height: 900 } },
     },
     {
-      // 390x844 — compact width, regular height. The size class the panel
-      // was never tested at, and the one most desk phones report.
+      // 390x664 — devices["iPhone 13"]'s *viewport* (844 is that device's
+      // screen height, not its viewport — the two differ because of the
+      // browser chrome Safari reserves). Compact width, regular height: the
+      // size class the panel was never tested at, and the one most desk
+      // phones report.
       //
       // browserName is pinned to chromium rather than left to devices'
       // own defaultBrowserType ("webkit"): only Chromium is provisioned

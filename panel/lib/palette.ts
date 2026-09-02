@@ -20,11 +20,30 @@ const CVDS: CvdKind[] = ["protan", "deutan", "tritan"];
 /** Pulls `--name: #hex;` declarations out of the stylesheet. Non-hex values
  *  (oklch, var() aliases, percentages) are skipped rather than guessed at —
  *  a token the validator cannot read must fail loudly in the test that looks
- *  it up, not silently pass here. */
+ *  it up, not silently pass here.
+ *
+ *  Only 3- and 6-digit (fully opaque) hex forms are accepted. hexToRgb only
+ *  ever reads the first six hex digits, so a 4-digit (#rgba) or 8-digit
+ *  (#rrggbbaa) token would silently be treated as fully opaque and validated
+ *  for a contrast nobody actually sees once the alpha channel is composited
+ *  over whatever sits behind it. The base commit's `--border` really was
+ *  `oklch(1 0 0 / 10%)` before this branch, so alpha tokens are not a
+ *  hypothetical here — an alpha hex form throws instead of being silently
+ *  truncated into a false pass. */
 export function parseTokens(css: string): Record<string, string> {
   const out: Record<string, string> = {};
   for (const m of css.matchAll(/--([a-z0-9-]+)\s*:\s*(#[0-9a-fA-F]{3,8})\s*;/g)) {
-    out[m[1]] = m[2].toLowerCase();
+    const [, name, hex] = m;
+    const digits = hex.length - 1;
+    if (digits !== 3 && digits !== 6) {
+      throw new Error(
+        `parseTokens: --${name}: ${hex} is a ${digits}-digit hex value with an ` +
+        "alpha channel, which hexToRgb cannot measure correctly (it reads only " +
+        "the first six digits). Use a 3- or 6-digit opaque hex, or express the " +
+        "alpha as a separate, non-colour token."
+      );
+    }
+    out[name] = hex.toLowerCase();
   }
   return out;
 }

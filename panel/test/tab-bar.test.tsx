@@ -22,7 +22,7 @@ describe("TabBar", () => {
   it("does not put overflow destinations in the bar itself", () => {
     const html = render("/");
     // Crawl, Calendar, State and Prices live in the sheet, which is closed.
-    for (const label of ["Crawl", "Calendar", "Prices"]) {
+    for (const label of ["Crawl", "Calendar", "State", "Prices"]) {
       expect(html).not.toContain(`>${label}<`);
     }
   });

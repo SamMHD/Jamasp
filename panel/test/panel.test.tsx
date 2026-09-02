@@ -29,6 +29,21 @@ describe("Panel", () => {
     expect(html).toContain("nothing yet");
   });
 
+  // Guard audit: `empty !== undefined` treated `empty={false}` and
+  // `empty={null}` as "supplied", rendering an empty <p> and hiding the
+  // children — exactly what an idiomatic `empty={rows.length === 0 && "..."}`
+  // passes when rows.length is 0. `empty != null && empty !== false` is the
+  // fix; both falsy-but-not-empty-string forms must fall through to children.
+  it("renders children, not an empty paragraph, when empty is false", () => {
+    const html = renderToStaticMarkup(<Panel empty={false}>real content</Panel>);
+    expect(html).toContain("real content");
+  });
+
+  it("renders children, not an empty paragraph, when empty is null", () => {
+    const html = renderToStaticMarkup(<Panel empty={null}>real content</Panel>);
+    expect(html).toContain("real content");
+  });
+
   // Tone must not rest on colour alone; it sets role=status so the state is
   // announced, and the caller supplies the words.
   it("marks a warn tone as a status region", () => {

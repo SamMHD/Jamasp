@@ -274,7 +274,7 @@
      being declared in a plain (non-inline) @theme block — see the comment
      there — so this override, in the base layer, actually wins over the
      desktop values in the theme layer. */
-  @media (max-width: 1023px) {
+  @media (max-width: 63.999rem) {
     :root {
       --text-display: 1.75rem;   /* 28px */
       --text-heading: 1rem;      /* 16px */

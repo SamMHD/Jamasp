@@ -40,7 +40,7 @@ export function TabBar() {
               key={href}
               href={href}
               aria-current={active ? "page" : undefined}
-              className={cls(ITEM, active ? "text-primary" : "text-muted-foreground")}
+              className={cls(ITEM, active ? "font-medium text-primary" : "text-muted-foreground")}
             >
               <Icon className="h-5 w-5" aria-hidden="true" />
               {label}
@@ -52,7 +52,7 @@ export function TabBar() {
           onClick={() => setMoreOpen(true)}
           aria-haspopup="dialog"
           aria-expanded={moreOpen}
-          className={cls(ITEM, overflowActive ? "text-primary" : "text-muted-foreground")}
+          className={cls(ITEM, overflowActive ? "font-medium text-primary" : "text-muted-foreground")}
         >
           <Ellipsis className="h-5 w-5" aria-hidden="true" />
           More

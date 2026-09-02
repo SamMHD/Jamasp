@@ -32,6 +32,24 @@ describe("token extraction", () => {
       }
     }
   });
+
+  // Guard audit: hexToRgb only ever reads the first six hex digits, so an
+  // 8-digit token (or 4-digit shorthand) with an alpha channel would
+  // silently be treated as fully opaque and validated for a contrast nobody
+  // sees. The base commit's --border really was `oklch(1 0 0 / 10%)`, so
+  // alpha tokens are not hypothetical here — parseTokens must fail loudly
+  // rather than truncate and pass.
+  it("rejects an 8-digit hex token instead of silently truncating it", () => {
+    expect(() => parseTokens("--x: #ffffff1a;")).toThrow(/alpha channel/);
+  });
+
+  it("rejects a 4-digit hex token instead of silently truncating it", () => {
+    expect(() => parseTokens("--x: #fff1;")).toThrow(/alpha channel/);
+  });
+
+  it("still accepts opaque 3- and 6-digit hex tokens", () => {
+    expect(parseTokens("--x: #fff; --y: #ffffff;")).toEqual({ x: "#fff", y: "#ffffff" });
+  });
 });
 
 describe.each([DARK, LIGHT])("$name theme", theme => {

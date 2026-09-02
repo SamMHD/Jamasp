@@ -41,7 +41,7 @@ export function Panel({
           {action && <div className="shrink-0">{action}</div>}
         </div>
       )}
-      {empty !== undefined
+      {empty != null && empty !== false
         ? <p className="text-body text-muted-foreground">{empty}</p>
         : children}
       {footer && <div className="mt-3 text-meta text-ink-dim">{footer}</div>}

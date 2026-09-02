@@ -94,7 +94,7 @@ test("the type scale's mobile step-up is a real rendered increase", async ({ pag
   const mobileSize = await step.evaluate(el => parseFloat(getComputedStyle(el).fontSize));
 
   expect(mobileSize, `mobile computed ${mobileSize}px vs desktop computed ${desktopSize}px — ` +
-    "the mobile step-up (globals.css's max-width:1023px @layer base override) " +
+    "the mobile step-up (globals.css's max-width:63.999rem @layer base override) " +
     "must render strictly larger, not merely change a token nothing reads")
     .toBeGreaterThan(desktopSize);
 });
