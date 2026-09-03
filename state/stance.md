@@ -35,10 +35,10 @@ MACD still falling, ATR 103, 50DMA 4262 / 200DMA 4540.
   still the read (`03627b6b`, no ≥4-day US strike run 3–9 Sep) — but WSJ says
   he favours declaring the war over: NEW `302708ab` (no formal declaration
   thru 9 Sep, 0.65); a unilateral post does NOT score `24f8b482`. IRGC's
-  two-tankers-mined claim unverified (#49). Target discipline holds
+  two-tankers-mined claim unverified (#50). Target discipline holds
   (`f527c209`/`973a3143`); GCC entry not on record (`a12de81f`/`2b39238a`);
   escorts at record (40 hulls/18mb; `fe35b77d` intact). Sirik wedding claim =
-  information risk. **72h GCC-cargo checkpoint tonight → wakeup #49.**
+  information risk. **72h GCC-cargo checkpoint tonight → wakeup #50.**
 
 **Levels:** R 4457 (cap under test) / 4510–4538 (200DMA 4540). S 4380 /
 4300 (`2ef33025` line) / 4205–4245 (50DMA 4262) / month S1 4118.7. ATR 103.
@@ -69,7 +69,7 @@ Open (19): `031e3470` (3 Sep), `b6450c7a` `2ef33025` `16085af9` (4 Sep),
 
 ## Wakeups
 
-**#49: 3 Sep 20:30Z (replaces #47)** — 72h GCC-cargo checkpoint, Kuwait
+**#50: 3 Sep 20:30Z (replaces #49; 15:00Z scan added Waller/odds, USDJPY 157 close, settle vs 4457 & 200DMA)** — 72h GCC-cargo checkpoint, Kuwait
 second-night verification (Gulf News/National/KUNA), CENTCOM strike-day count
 for `03627b6b`, WSJ war-over follow-through, IRGC mine claims, the 3 Sep
 settle vs 4457. #42 Fri 4 Sep 13:15Z payrolls. #41 9 Sep 15:15Z buyback op
