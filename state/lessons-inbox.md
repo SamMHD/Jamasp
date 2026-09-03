@@ -26,3 +26,14 @@ by the weekly /retro. One bullet per lesson: date, observation, suggested rule.
   of official guidance — pricing can reprice on diagnosis/tone; enumerate
   "hawkish tone without guidance" as its own channel when writing odds
   claims (rule-7 shape: the third channel was real).
+- 2026-09-03 (deepdive #50): `c2eafbf8` (additional mine strike by 7 Sep)
+  was written with "UKMTO/operator/maritime-press reported OR IRGC-claimed"
+  as the trigger. The IRGC's 2 Sep claim (two tankers "on an unauthorized
+  route", "currently on fire", no names/positions; Mehr relay only) satisfies
+  the literal wording while CENTCOM denied the sibling 31 Aug claim, UKMTO
+  relayed nothing and ISW/Gulf News frame both as infowar. A claim that
+  counts adversary information ops as its own trigger cannot miss and cannot
+  inform. Suggested rule (rule-13/18 shape): incident-count claims score on
+  UKMTO/operator/host-state confirmation only; adversary claims are a
+  separate, explicitly-labelled "claims cadence" metric if tracked at all.
+  Score `c2eafbf8` per wording at maturity but discount it in calibration.
