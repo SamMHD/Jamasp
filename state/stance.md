@@ -1,94 +1,91 @@
-# Stance — 2026-09-03 04:00Z (brief) — EVENT-PENDING (NFP Fri 4 Sep 12:30Z)
+# Stance — 2026-09-03 19:00Z (scan) — EVENT-PENDING (NFP Fri 4 Sep 12:30Z)
 
-GC **4472 in Asia (+3% 24h; 2 Sep close 4433.4)** with the 10y UNCHANGED at
-4.80% and Sept-hike odds ~66% (from ~70%): not a rates turn. The overnight
-leg is the FX desk — USDJPY 160.39→157.77 (hawkish BoJ + intervention
-speculation, unconfirmed), DXY −0.3% — plus a second night of Iranian fire at
-Kuwait (Kuwaiti military, ~01:45Z). WSJ: Trump privately favours declaring
-the war over while Hegseth extends deployments into 2027. Read: **the rates
-desk no longer holds the wheel alone; the settle vs 4457 tonight says
-whether it holds it at all.** Technicals: RSI 50, stoch K 17.5 turning,
-MACD still falling, ATR 103, 50DMA 4262 / 200DMA 4540.
+**Flip line crossed.** GC settled **4538.4** (+2.4% d/d; day high 4554.4 at
+15:21Z — through the 4457 cap and onto the 200DMA 4540.5), 19:00Z print 4527.
+The 04:00Z read "not a rates turn" was wrong on the impulse: Waller (~13:30Z)
+leans to a Sept HOLD if the next two weeks' inflation data keep improving,
+Williams echoed (tariff passthrough fading, energy not yet in services);
+Sept-hike odds ~66% → ~50%, 10y 4.80 → 4.76, DXY 98.9 (−0.7%), USDJPY 155.5
+(1% below the 157 line; NY close ~21:00Z decides `b6450c7a`). FX-desk leg
+(BoJ hawks, GPIF talk) and rates leg now point the same way; the kinetic leg
+(Kuwait night 2, Vance "no talks until they stop shooting at ships") is the
+floor. Technicals: RSI 56.7, stoch K 25.7 crossing up, MACD still below
+signal, ATR 112, 50DMA 4264 / 200DMA 4540.5. **No fresh directional call
+into NFP: today is pre-positioning; the print resolves it.**
 
-## View (weights 30/40/30 base/bearish-rates/kinetic, event-pending cap)
+## View (weights 35/35/30 base/bearish-rates/kinetic, event-pending cap)
 
-- **Bearish-rates (40, from 45):** odds 66%, 10y 4.80%, Williams "strong
-  economy not distress", 242k book still the overhang; oil at post-July
-  highs (WTI 90.9) feeds CPI 11 Sep. Hot NFP → 4380 → 4300 → 4205–4245.
-  `ec71ce01` (no Sept hike, 0.8) under pressure; `16085af9` (odds ≥60% at
-  the print, 0.6) on track. `031e3470` (no settle >4457 thru 3 Sep, 0.65):
-  day 2 held at 4433.4; **day 3 printing 4472 intraday — settle pending,
-  read it from `jamasp price` tonight, not memory.** Settle >4457 = miss AND
-  the frame's flip line → bearish-rates ≤35.
-- **Base (30):** fiscal-hedge underbid confirmed at 4331; yen pillar now
-  two-sided — `b6450c7a` (no USDJPY close <157 thru 4 Sep, 0.65) is 0.5%
-  from its line; near term yen-up is gold-up, structurally a tightening BoJ
-  (17–18 Sep) erodes the pillar. PBOC fix 6.7807 vs 6.7167 est (640 pips
-  weak); Dutch CB moved 86t US/Canada→London (custody vote, not demand).
-  Buyback op 9 Sep (#41) the mechanism test. `2ef33025` (no settle <4300
-  thru 4 Sep): intact, window low 4330.7.
-- **Kinetic (30, from 25):** base-for-strike rung added to the
-  tanker-for-tanker ladder — Iran fired at Bahrain/Jordan/Kuwait/Iraq 1–2
-  Sep (largely intercepted, no US casualties) and Kuwait again 3 Sep; Iran's
-  stated aim is base expulsion, host states warned. NEW `81564330` (another
-  GCC-state-confirmed attack by 6 Sep, up 0.55). Trump: burst-not-campaign
-  still the read (`03627b6b`, no ≥4-day US strike run 3–9 Sep) — but WSJ says
-  he favours declaring the war over: NEW `302708ab` (no formal declaration
-  thru 9 Sep, 0.65); a unilateral post does NOT score `24f8b482`. IRGC's
-  two-tankers-mined claim unverified (#50). Target discipline holds
-  (`f527c209`/`973a3143`); GCC entry not on record (`a12de81f`/`2b39238a`);
-  escorts at record (40 hulls/18mb; `fe35b77d` intact). Sirik wedding claim =
-  information risk. **72h GCC-cargo checkpoint tonight → wakeup #50.**
+- **Bearish-rates (35, from 40):** cap broke and odds fell — the frame is
+  down to "Warsh's hike stays on the table if CPI 11 Sep is hot." Waller's
+  condition is contained energy; WTI ~91 sits on the other side of it. Hot
+  NFP + firm AHE → odds back ≥60%, 4457 → 4380 → 4300. `031e3470` (no settle
+  >4457 thru 3 Sep, 0.65) = **MISS** at 4538.4 (score at maturity).
+  `16085af9` (odds ≥60% at the print, 0.6) now the likely miss; `ec71ce01`
+  (no Sept hike, 0.8) relieved.
+- **Base (35, from 30):** fiscal-hedge underbid (4331) plus a two-sided yen
+  that ran gold's way today: USDJPY 155.5 is through `b6450c7a`'s 157 close
+  line — a close below = yen pillar broken, near-term gold-positive;
+  structurally the debasement leg needs reweighting (tightening BoJ 17–18
+  Sep). PBOC fix weak (6.7807 vs 6.7167 est); Dutch CB 86t move = custody
+  vote. Buyback op 9 Sep (#41) the mechanism test. `2ef33025` (no settle
+  <4300 thru 4 Sep): intact, window 4330.7–4554.4.
+- **Kinetic (30):** unchanged pending #50 at 20:30Z — Kuwait second night
+  (single relay), base-for-strike rung, Vance hardline (`24f8b482` intact),
+  IRGC mine claims unverified, escorts at record. `81564330` (another
+  GCC-state-confirmed attack by 6 Sep, up 0.55); `03627b6b` (no ≥4-day US
+  strike run 3–9 Sep); `302708ab` (no formal "war over" thru 9 Sep, 0.65).
 
-**Levels:** R 4457 (cap under test) / 4510–4538 (200DMA 4540). S 4380 /
-4300 (`2ef33025` line) / 4205–4245 (50DMA 4262) / month S1 4118.7. ATR 103.
+**Levels:** R 4540 (200DMA, tested) / 4554 (3 Sep high) / 4697 (Fib R1) /
+4727–4750 (BB upper, 25-Aug top). S 4457 (old cap, first retest) / 4380 /
+4300 (`2ef33025` line) / 4205–4245 (50DMA 4264). ATR 112.
 
 ## What flips me
 
-- Settle >4457 today with odds ≥60% → rates-desk-control read wrong;
-  bearish-rates ≤35, base up.
-- Hot NFP or odds ≥80% → bearish-rates 55; 4300 settle = churn thesis dead.
-- Second straight negative NFP → hike case gutted; base 50+, 4538 in play.
+- Hot NFP (above consensus, firm AHE) or odds back ≥70% → today was a Waller
+  squeeze; bearish-rates 50, 4457 → 4380 first targets.
+- Soft/negative NFP with odds <40% → hike case gutted; base 50+, a settle
+  >4540 opens 4697.
+- USDJPY NY close <157 tonight (`b6450c7a` miss) → yen pillar broken; base
+  debasement leg reweighted at the brief.
 - Third consecutive night of GCC-state-confirmed Iranian fire, GCC-cargo
   persistence at tonight's checkpoint, US ordnance on export/port infra,
   UAE/Saudi strike on Iran, or a verified listed-GCC-hull seizure → kinetic
   ≥40–45.
 - Formal "war over" declaration (`302708ab` miss) → oil premium unwinds,
-  gold two-sided; reassess weights same run.
-- USDJPY daily close <157 (`b6450c7a` miss) → yen pillar breaks; near-term
-  gold-positive, base-case debasement leg reweighted.
+  gold two-sided; reassess same run.
 - Co-confirmed talks/ceasefire (`24f8b482` miss) → kinetic to tail.
 
 ## Open predictions
 
-Open (19): `031e3470` (3 Sep), `b6450c7a` `2ef33025` `16085af9` (4 Sep),
-`fe35b77d` (6 Sep), `81564330` (6 Sep), `92a5bbb8` `30bad8a0` `b13614a1`
-`f527c209` `a12de81f` `c2eafbf8` `bd825267` `973a3143` (7 Sep), `03627b6b`
-`2b39238a` `302708ab` (9 Sep), `ec71ce01` (FOMC 15–16 Sep), `24f8b482`
-(16 Sep). Nothing matured today.
+Open (19): `031e3470` (3 Sep, miss pending score), `b6450c7a` `2ef33025`
+`16085af9` (4 Sep), `fe35b77d` `81564330` (6 Sep), `92a5bbb8` `30bad8a0`
+`b13614a1` `f527c209` `a12de81f` `c2eafbf8` `bd825267` `973a3143` (7 Sep),
+`03627b6b` `2b39238a` `302708ab` (9 Sep), `ec71ce01` (FOMC 15–16 Sep),
+`24f8b482` (16 Sep). No new claim added — event-pending.
 
 ## Wakeups
 
-**#50: 3 Sep 20:30Z (replaces #49; 15:00Z scan added Waller/odds, USDJPY 157 close, settle vs 4457 & 200DMA)** — 72h GCC-cargo checkpoint, Kuwait
-second-night verification (Gulf News/National/KUNA), CENTCOM strike-day count
-for `03627b6b`, WSJ war-over follow-through, IRGC mine claims, the 3 Sep
-settle vs 4457. #42 Fri 4 Sep 13:15Z payrolls. #41 9 Sep 15:15Z buyback op
-(slot re-verify: Sat brief). #26 11 Sep CPI. Scans carry: Kuwait/Bahrain/
-Qatar statements, Trump "war over" wording, BoJ/MoF intervention
-confirmation, Bessent airline/maritime/digital-asset designations, Kangan
-(single-source), Trump–Xi summit date (unverified).
+**#50: 3 Sep 20:30Z** — 72h GCC-cargo checkpoint, Kuwait second-night
+verification, CENTCOM strike-day count, WSJ war-over follow-through, IRGC
+mine claims, Waller/odds reassessment (firm the ~50% figure), USDJPY NY
+close vs 157, settle vs 4457/200DMA (settle now known: 4538.4). #42 Fri
+4 Sep 13:15Z payrolls (investinglive "by the numbers" preview, inbox
+17:52Z). #41 9 Sep 15:15Z buyback op. #26 11 Sep CPI — now the Fed's stated
+decider. Scans carry: Kuwait/Bahrain/Qatar statements, Trump "war over"
+wording, BoJ/MoF intervention confirmation, other FOMC voices vs Waller,
+Bessent designations, Kangan (single-source), Trump–Xi summit (unverified).
 
 ## Desk-local
 
-Bessent's next pressure set is airlines, the maritime industry and digital
-assets — exchange-house and shipping counterparties the channel. Kuwait
-tightened AML rules for gold (Gulf News 3 Sep). Chabahar carries Indian
-equity. Saudi exports at a 9-year low (gcaptain/Bloomberg) feeds the oil
-floor.
+Bessent's next pressure set: airlines, maritime, digital assets —
+exchange-house and shipping counterparties the channel. Kuwait tightened
+gold AML rules (Gulf News 3 Sep). Saudi exports at a 9-year low feed the
+oil floor. Gold +$100 intraday with silver +2.6%: Dubai retail
+premium/discount worth a check at tomorrow's open.
 
 ## Sourcing health
 
-gold_spot/gold_vol/yield_10y_nominal "coverage gap" warnings = todo-003
-false positive; GC rows landing to 03:20Z. Calendar feed covers only to
-4 Sep (todo-001). Kuwait second-night attack is a single relay
-(investinglive quoting the Kuwaiti military) pending Gulf News/KUNA.
+gold_spot "coverage gap" = todo-003 false positive; GC rows landing.
+Calendar feed covers only to 4 Sep (todo-001). Kuwait second-night attack
+still a single relay. Hike-odds figure (~50%) is FXEmpire's read of the
+futures, not a CME print — #50 to firm it up.
