@@ -60,6 +60,12 @@ watchlist:
       test" (investinglive). No USD high-impact data before NFP
       (ADP/claims/ISM services all medium). New: 16085af9 (odds >=60% at
       the print, 0.6).
+      3 Sep: odds ~66% (CME FedWatch via investinglive), off ~70%;
+      Williams: yield surge = strong economy, not distress; 10y 4.80%
+      flat while gold +3% on yen/war — the rates desk was outbid
+      overnight without yields moving. 16085af9 on track; 031e3470 (no
+      settle >4457 thru 3 Sep) printing 4472 intraday, settle is the
+      test. WSJ war-over thread is the odds-DOWN risk (oil premium off).
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -77,6 +83,12 @@ watchlist:
       first named institutional dip-buyer of the ~8.6% drawdown from
       4750; watch whether the CB-demand floor shows in the tape around
       4300 into NFP.
+      3 Sep: Dutch central bank moved 86t from US/Canada custody to
+      London citing 'geopolitical unrest' (Gulf News, forexlive) — a
+      custody vote, not new demand, but a G10 CB re-domiciling away from
+      the US is the reserve-diversification reflex in physical form.
+      Watch for other Europeans following; WGC monthly still the demand
+      check.
     since: 2026-07-31
 
   - theme: warsh-credibility
@@ -168,6 +180,10 @@ watchlist:
       presses BoJ — USDJPY >160 REGARDLESS (b6450c7a intact). PBOC TENTH
       straight weak fix (6.7829 vs 6.7238 est, ~591 pips). Debasement
       underbid survives even as the rates desk sells gold down.
+      3 Sep: PBOC fix 6.7807 vs 6.7167 est — a 640-pip weak fix, widest
+      gap of the run; RatingDog services PMI beat on domestic demand.
+      Debasement limb supported on the CNY side while the JPY side
+      turned (see boj-yen-pillar).
     since: 2026-07-31
 
   - theme: middle-east-risk-premium
@@ -519,7 +535,42 @@ watchlist:
       (Kyrgyzstan summit): reciprocity if US honors June MoU; Guterres
       urges talks + freedom of navigation. 72h checkpoint -> wakeup #47
       (3 Sep 20:30Z); bd825267 = scoreboard for the degradation claim.
+      3 Sep (extracted: Reuters via gcaptain, investinglive x2): biggest
+      exchange since July confirmed — US hit AD/radar/maritime/mine-
+      laying/comms on the southern coast, Iran fired at US bases in
+      Bahrain/Jordan/Kuwait/Iraq (no US casualties, initial), Qatar
+      holds Iran responsible, Iran's command: aim is base EXPULSION,
+      host states warned. SECOND NIGHT: Kuwait military ~01:45Z 3 Sep
+      intercepting Iranian missiles/drones (single relay, verify #49).
+      Sirik wedding claim (4-5 dead/68 wounded) unverified; IRGC claims
+      2 tankers mined under US pilotage (unverified). WSJ: Trump
+      privately favours declaring the war over, Hegseth extends
+      deployments into 2027 (50k troops, 19 warships, 2 carriers;
+      escalation options briefed incl. island seizure, Pickaxe
+      Mountain). Kinetic 25->30. New: 81564330 (another GCC-state-
+      confirmed attack by 6 Sep, 0.55), 302708ab (no formal war-over
+      declaration thru 9 Sep, 0.65). Russia reportedly helping Iran
+      develop a supersonic ASCM (Maritime Executive). Bessent next
+      targets: airlines, maritime industry, digital assets.
     since: 2026-07-31
+
+  - theme: boj-yen-pillar
+    why: >
+      The yen is a pillar of the base case's debasement/fiscal-hedge bid:
+      USDJPY ~159-160 after the failed Aug intervention meant carry +
+      fiscal absorption outweighed BoJ normalisation, and gold's floor
+      leaned on it (b6450c7a: no daily close <157 thru 4 Sep, 0.65;
+      successor to 0deccd97, hit). 3 Sep: USDJPY 160.39 -> 157.77 in a
+      session on hawkish BoJ officials calling for quick action, Japan
+      services PMI at a five-month high with record selling prices, and
+      intervention speculation (unconfirmed; last op began near 164;
+      actionforex extract). Two-sided for gold: yen-up is dollar-down =
+      gold-up near term, but a BoJ that can actually tighten erodes the
+      pillar structurally. Gates: any MoF/BoJ intervention confirmation,
+      the 4 Sep close vs 157, BoJ meeting 17-18 Sep (days after the
+      15-16 Sep FOMC). Reads into Bessent's 'I know what the Japanese are
+      planning' (2 Sep).
+    since: 2026-09-03
 
   - theme: energy-pce-passthrough
     why: >

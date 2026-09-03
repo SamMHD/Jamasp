@@ -22,7 +22,8 @@ events:
       (no Iranian confirmation, no terms); talks convening IS verifiable.
       Convened with substance = bearish-tail evidence; no talks / Iranian
       denial = the claim deflates and the reopen's crude −6% whips back.
-    action: wakeup added 2026-08-03 20:00Z (Tue 00:00 Dubai deepdive);
+    action: >
+      wakeup added 2026-08-03 20:00Z (Tue 00:00 Dubai deepdive);
       2-hourly scans cover an earlier Iranian denial
     outcome: >
       RESOLVED 3 Aug 20:00Z — denial branch: talks did not convene; FM
@@ -143,7 +144,8 @@ events:
       stagflation mix, gold-supportive both channels; soft CPI = no-hike
       view (ec71ce01, 0.8) hardens and the 200DMA path (3e704df1) clears.
       Also first test of energy-PCE passthrough easing (951d8286 thread).
-    action: wakeup added 2026-08-12 12:45Z (deepdive on the print vs
+    action: >
+      wakeup added 2026-08-12 12:45Z (deepdive on the print vs
       consensus, core m/m the decisive line; check hike-odds repricing)
     outcome: >
       RESOLVED 12 Aug — the soft branch: headline +0.1% m/m / 3.4% y/y,
@@ -207,7 +209,8 @@ events:
       dates concentrate escalation risk while Trump's "rapidly" deal clause
       is unresolved; falls after Sunday's reopen but inside the week's risk
       window, ahead of Friday payrolls.
-    action: wakeup #10 (Tue 06:00Z deepdive) checks whether rhetoric turns
+    action: >
+      wakeup #10 (Tue 06:00Z deepdive) checks whether rhetoric turns
       operational; scan runs cover the interim.
     outcome: >
       CHECKED 4 Aug 10:15 Dubai (deepdive) — rhetoric staying symbolic:
@@ -229,7 +232,8 @@ events:
       the Sept 15-16 FOMC. Weak again = ec71ce01 (no Sept hike, 0.8)
       effectively sealed regardless of CPI; strong = the hike debate
       reopens with gold's book still crowded.
-    action: covered by the ~17:00 Dubai scan; the 11 Sep CPI deepdive
+    action: >
+      covered by the ~17:00 Dubai scan; the 11 Sep CPI deepdive
       (wakeup #26) reads it as context.
 
   - date: 2026-08-16
@@ -245,7 +249,8 @@ events:
       weights move. Silence through the window = hollow-claim base case
       (8f491cb0, 0.7) and the trigger re-cocks for the next claim
       (a64b23c1: new Houthi attack claim on Saudi target by 20 Aug, 0.8).
-    action: wakeup #28 (Sun 01:00Z deepdive) scores 8f491cb0 and closes or
+    action: >
+      wakeup #28 (Sun 01:00Z deepdive) scores 8f491cb0 and closes or
       arms the trigger; 2-hourly scans arm it EARLIER on any verification.
 
   - date: 2026-08-15
@@ -443,7 +448,8 @@ events:
       up in the passthrough or doesn't — the branch point for the Sept
       FOMC and ec71ce01. EIA's 17.4M bbl build (12 Aug) argues the
       passthrough softens; IEA's thin global buffer argues it persists.
-    action: wakeup #26 (13:15Z deepdive — 45 min post-print so ingest
+    action: >
+      wakeup #26 (13:15Z deepdive — 45 min post-print so ingest
       lands the items first; run-130 lesson from 12 Aug).
 
   - date: 2026-08-24
@@ -507,7 +513,8 @@ events:
       debasement-rotation bid in one print. Slot needs verification when
       Treasury publishes the operation schedule (rule 17 — Saturday brief
       re-verifies; wakeup set 15:15Z provisional).
-    action: wakeup added 2026-09-09 15:15Z deepdive (read the operation
+    action: >
+      wakeup added 2026-09-09 15:15Z deepdive (read the operation
       result + gold/dollar/long-end reaction; reschedule per rule 15 if
       results not yet published)
 
@@ -548,7 +555,8 @@ events:
       (#39). DATE PROVISIONAL first-Friday convention — the calendar
       feed only covers to 29 Aug (todo-001); the Saturday 29 Aug brief
       re-verifies date and slot per rule 17.
-    action: wakeup #42 added 2026-09-04T13:15:00Z (print+45, rule 15)
+    action: >
+      wakeup #42 added 2026-09-04T13:15:00Z (print+45, rule 15)
 
   - date: 2026-09-03
     time_dubai: "2026-09-04 00:30 (3 Sep 20:30Z; checkpoint ~20:00Z)"
@@ -567,7 +575,13 @@ events:
       1 Sep JMIC/UKMTO pair (122-26 Burgan / 124-26 three projectiles
       17nm E Khasab) likely re-reports the 31 Aug event — verify identity
       before counting it as persistence.
-    action: wakeup #47 added 2026-09-03T20:30:00Z (deepdive)
+    action: >
+      wakeup #47 added 2026-09-03T20:30:00Z (deepdive). UPDATED 3 Sep
+      brief: #47 cancelled -> #49 at the same slot with an expanded task —
+      Kuwait second-night attack verification (Kuwaiti military ~01:45Z
+      3 Sep, single relay), CENTCOM strike-day count for 03627b6b, the
+      WSJ war-over thread (302708ab), IRGC's two-tankers-mined claim, and
+      the 3 Sep settle vs 4457 (031e3470) read from jamasp price.
 
   - date: 2026-08-29
     time_dubai: "weekend (29-30 Aug; exact sessions unscheduled in feed)"
