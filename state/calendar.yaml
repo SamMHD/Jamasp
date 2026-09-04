@@ -602,3 +602,21 @@ events:
       intervention, Iran sanctions coordination); Sat 29 brief also
       re-verifies the coming week's calendar by hand (feed dark past
       29 Aug, todo-001).
+
+  - date: 2026-09-10
+    time_dubai: "16:15 decision / 16:45 presser (12:15Z / 12:45Z); wakeup #51 at 17:45"
+    title: ECB decision — +25bp to a 2.50% deposit rate expected
+    why: >
+      Well telegraphed and fully priced (actionforex preview extracted
+      4 Sep names Thursday 10 September — rule-17 anchor); the read is not
+      the hike but Lagarde's optionality beyond it (market prices a ~3.0%
+      peak in 2027 vs house calls for no further tightening) and the staff
+      core-inflation pass-through scenarios (a cut = dovish tell; ECB
+      blog: energy is 90% of the 2026 episode). Euro is ~57% of DXY and
+      gold has been riding the dollar-down leg, so the DXY reaction on
+      CPI eve matters; it also shows whether G10 peers keep treating the
+      oil shock as hike-worthy while the Fed is priced 50/50 — cover for
+      Warsh if CPI is hot.
+    action: >
+      wakeup #51 added 2026-09-10T13:45:00Z (presser+60, rule 15) —
+      cross-reads 41aec282 status and the 9 Sep buyback result (#41).

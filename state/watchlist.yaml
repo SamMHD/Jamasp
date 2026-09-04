@@ -66,6 +66,17 @@ watchlist:
       overnight without yields moving. 16085af9 on track; 031e3470 (no
       settle >4457 thru 3 Sep) printing 4472 intraday, settle is the
       test. WSJ war-over thread is the odds-DOWN risk (oil premium off).
+      4 Sep (brief): odds 48-50% at the 3 Sep NY close (CME via
+      CNBC/FXEmpire), no FOMC pushback; reaction went to equities/BTC, not
+      gold. NFP setup (CNBC extract): consensus +53k/4.1%, Citi +20k/4.2%,
+      Vanguard 401k +8k, Haitian TPS drag, Aug first print revised down 4
+      yrs running; Barr 'stable', Waller 'satisfactory' -> labour is an
+      afterthought, CPI 11 Sep decides. Asymmetric transmission: soft print
+      muted (Waller pre-sold it), hot print + AHE >=0.4% revives the hike
+      case. G10 tilt: ECB +25bp Thu 10 Sep expected (wakeup #51), BoE Pill
+      early hike, RBNZ Dec -> Warsh has cover if CPI is hot. 031e3470
+      scored MISS (cap window contained a voting governor's speech).
+      41aec282 intact; 16085af9 miss trajectory.
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -552,6 +563,26 @@ watchlist:
       declaration thru 9 Sep, 0.65). Russia reportedly helping Iran
       develop a supersonic ASCM (Maritime Executive). Bessent next
       targets: airlines, maritime industry, digital assets.
+      4 Sep (brief; Gulf News x2 + investinglive extracted): QUIET NIGHT --
+      no third GCC-state night, no US strike (items 19:00-03:30Z none);
+      JMIC Advisory 093 (3 Sep 03:15Z): threat 'severe', IRGC harassment
+      persists, NO confirmed attacks in the Arabian Gulf 48h, single-digit
+      independent transits vs NCAGS >20/day. Trump: 'virtually unlimited'
+      ammunition, strikes 'any time we want', 'almost total control' of
+      Hormuz; 'clashes flare up again' = the 1 Sep exchange. Sirik toll
+      revised by Iran's Red Crescent to 4 dead/68 wounded; Vance 'extremely
+      sceptical'. Siege widens: EU 'officially joined Operation Economic
+      Outcast' (Bessent); Iranian crude exports 1.7mb/d -> ~260kb/d
+      (Reuters loadings 220-255kb/d Aug), rial record low, inflation ~70%.
+      Oil at 3-month highs (Brent ~96, WTI 91.6) on the blockade, not
+      strikes; war-risk claims >$2bn, attacks 'spread beyond Hormuz'
+      (gcaptain, unextracted). Oman said to REJECT Iran's joint fee plan
+      (NY Post single unnamed official, TASS repeat; uncorroborated) ->
+      b13614a1 reinforced; new 2d098d6c (no on-record Omani fee
+      confirmation thru 11 Sep, 0.7). TRAP: investinglive frames a live
+      'US-Iran memorandum' 60-day window -- expired 17 Aug, Trump ruled
+      out revival 28 Aug. 81564330/c4ef5615 unhit; 03627b6b one strike day.
+      Kinetic 30 unchanged: the floor, not the driver.
     since: 2026-07-31
 
   - theme: boj-yen-pillar
@@ -576,6 +607,13 @@ watchlist:
       read. Pillar reweighted: base 40 on the near-term dollar-down leg,
       but the structural debasement anchor now runs through the 17-18 Sep
       BoJ; MoF/BoJ intervention confirmation still unseen.
+      4 Sep (brief): b6450c7a scored MISS pre-maturity (3 Sep NY close
+      ~155.8 from hourly snapshots; bars table empty). JPMorgan flags a
+      $103bn yen short, unwind could take USDJPY to 142 -> dollar-down
+      tail is gold-positive via DXY but a disorderly unwind is a liquidity
+      event for the crowded gold long (Aug 2024 shape). Counter: Japan
+      household spending at an 18-month low. Bounce to 156.1 overnight;
+      155.34 is the low to hold. No MoF/BoJ intervention confirmation.
     since: 2026-09-03
 
   - theme: energy-pce-passthrough
@@ -648,6 +686,13 @@ watchlist:
       degradation claim argue disruption risk eased even as conflict
       runs. Ust-Luga strike + Turkish operators suspending Russia runs
       feed the floor from the Russia axis.
+      4 Sep (brief): Brent ~96 testing resistance, WTI 91.6, 3-month highs,
+      steepest weekly gain since mid-July, US DIESEL at a record
+      (Investing.com/investinglive) -- on a night with no new kinetic event:
+      blockade barrels (Iran exports ~260kb/d) + insurance, not strikes.
+      This is the counter to Waller's frame: energy feeds the 11 Sep CPI
+      whatever NFP prints. ECB blog: energy = 90% of the 2026 inflation
+      episode, no spillover to core yet (actionforex extract).
     since: 2026-07-31
 
   - theme: india-gold-formalisation
@@ -767,6 +812,13 @@ watchlist:
       key chart level — gold caught in the LIQUIDATION, not the haven
       flow (settle broke 4380 with Brent >96). BTC 77.2k holding better
       than gold. Mechanism test unchanged: first buyback op 9 Sep (#41).
+      4 Sep (brief): 10y 4.76 (off 4.80), DXY 99.0 (-0.4%), dollar-down leg
+      pausing at USDJPY 156.1; Deutsche Bank: dollar 'leveraged to the AI
+      race' (risk-on now dollar-supportive at the margin, S&P +1.1%, BTC
+      80.9k +4%); MarketWatch: Street betting on Warsh to keep the 'manic
+      bond market from unravelling'. Mechanism test unchanged: 9 Sep
+      buyback op (#41, slot re-verify Sat). Citi: Q3 Brent $86, $65 by
+      2027 on reopening -- assumes a settlement the tape does not.
     since: 2026-08-20
 
   - theme: us-canada-trade-war

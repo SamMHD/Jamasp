@@ -37,3 +37,23 @@ by the weekly /retro. One bullet per lesson: date, observation, suggested rule.
   UKMTO/operator/host-state confirmation only; adversary claims are a
   separate, explicitly-labelled "claims cadence" metric if tracked at all.
   Score `c2eafbf8` per wording at maturity but discount it in calibration.
+- 2026-09-04 (brief): `031e3470` (no settle >4457 thru 3 Sep, 0.65) missed
+  because its "no dovish catalyst scheduled before payrolls" premise
+  enumerated only scheduled DATA (ADP/claims/ISM) and not scheduled FOMC
+  SPEAKERS — Waller (voting governor) was on the 3 Sep tape and repriced
+  Sept-hike odds 63-66% -> 48-50% in one session, flipping the controlling
+  desk's impulse the day the cap was tested. Suggested rule (rule-6/7
+  shape): a "no catalyst in window" premise must list scheduled Fed
+  speakers (and their known lean) as catalysts alongside data; a cap whose
+  window contains a governor/chair speech either names the speaker's
+  expected lean as consistent with the cap or is capped at 0.55.
+- 2026-09-04 (brief): `b6450c7a` (no USDJPY daily close <157 thru 4 Sep,
+  0.65) missed 1.2 yen through the line. Two nameable causes: (a) it priced
+  one break channel (MoF intervention) and ignored BoJ-side hawkish talk +
+  Japan data and a US-side dovish repricing — rule-7 third channel again,
+  now on an FX pillar; (b) structural thinness — the falsifier sat ~1.4%
+  from spot over a 10-day window in a pair running >1% daily ranges.
+  Suggested rule: a level-hold claim needs falsifier distance of at least
+  ~1.5x the window's expected range (daily ATR x sqrt(days)) or it is not
+  written above 0.55; and FX-pillar claims enumerate both central banks'
+  channels, not just the intervention one.
