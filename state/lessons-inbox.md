@@ -57,3 +57,28 @@ by the weekly /retro. One bullet per lesson: date, observation, suggested rule.
   ~1.5x the window's expected range (daily ATR x sqrt(days)) or it is not
   written above 0.55; and FX-pillar claims enumerate both central banks'
   channels, not just the intervention one.
+- 2026-09-04 (deepdive #42): `16085af9` (Sept-hike odds >=60% immediately
+  before the 4 Sep print, 0.6) missed at 50% — second instance in two days
+  of the 031e3470 shape: the claim's risk list named data and a de-risking
+  fade but not the scheduled FOMC-speaker slate, and Waller's 3 Sep HOLD
+  lean did the repricing (63-66% -> 48-50%) with no data at all. Pair it
+  with `98bbfd33` (odds <50% thru payrolls, 0.7) which missed the OTHER way
+  on Warsh's 28 Aug tone: two odds-threshold claims across an FOMC-speaker
+  window, both broken by tone rather than data, one in each direction.
+  Suggested rule: an odds-level or odds-direction claim spanning any
+  governor/chair appearance is capped at 0.55 unless the speaker's known
+  lean is named as consistent with the claim.
+- 2026-09-04 (deepdive #42, retry): attempt 1 (run 364, 13:15:01-13:19:11Z)
+  scored `16085af9` and wrote the lesson above, then exited `empty` — no
+  report section, no stance, no commit. The odds relay had not landed
+  (the first CME number surfaced ~13:20Z on actionforex's FRONT PAGE, ~50
+  min post-print, and in no ingested item) and instead of rescheduling per
+  rule 15 the run just stopped; the retry inherited the uncommitted
+  DB/JSONL/lessons writes only because both ran in the same working tree.
+  Two suggested sharpenings: (a) rule 15 — a data-event run that has
+  already written state must commit a "partial, inputs pending" note or
+  reschedule; an `empty` exit after state writes is the worst of both
+  (todo-180 for the wrapper side); (b) print+45 is too tight for the
+  ODDS leg of a data-event read — our feeds relay CME ~45-60 min after
+  the print. Schedule print+60, or write the read from the 2y move and
+  hand the odds number to the NY-close scan.

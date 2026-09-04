@@ -1,93 +1,90 @@
-# Stance — 2026-09-04 03:55Z (brief) — EVENT-PENDING (NFP today 12:30Z)
+# Stance — 2026-09-04 13:30Z (deepdive #42) — POST-PAYROLLS, RATES DESK IN CONTROL
 
-**Holding the Waller squeeze under the 200DMA.** GC 4518 in Asia; 3 Sep
-close **4521.4** (settle read 4538.4; high 4554.4, 200DMA 4542.7 rejected).
-Both supportive legs intact: Sept-hike odds **48–50%** at the NY close (no
-FOMC pushback), 10y 4.76, DXY 99.0, USDJPY 156.1 after a ~155.8 close (low
-155.34) — the reaction went to equities/BTC (+4%), not gold. Quiet kinetic
-night: no third GCC-state night, no US strike, JMIC 093 "no confirmed attacks
-in the Arabian Gulf 48h" — yet Brent ~96/WTI 91.6 at 3-month highs on the
-blockade (Iranian exports ~260 kb/d) and $2bn+ war-risk claims. Payrolls
-consensus +53k / 4.1% (Citi +20k/4.2%, Vanguard +8k); Fed voices call labour
-an afterthought — soft print transmits weakly, hot print + AHE ≥0.4% revives
-the hike case. Technicals: RSI 55, stoch crossed up, MACD < signal, ATR 105,
-50DMA 4274 / 200DMA 4543. **No fresh directional call before 12:30Z.**
+**The labour alibi is gone; CPI on the 11th is the only gate left.** Aug
+NFP **+162k** vs +56k (Jun–Jul +55k, 3-mo avg 71k, participation 61.6%,
+U-6 7.7%), AHE +0.3%/3.1% **in line**. Sept-hike odds **50% → ~60%**
+(actionforex), 2y +7bp 4.40, 10y 4.79, EUR/USD 1.159, USDJPY ~156 (yen
+holding on GPIF/BoJ, not the dollar), Brent 97.6 intraday (6-week high).
+GC 4512 pre-print → **4425** at 13:06Z (−1.9% in 36 min); 4457 broke on
+the first candle and is now resistance. Composition is the dovish counter
+(education +34–42k, restaurants +59k ≈ 93k of 162k) — the market ignored
+it. **FOMC blackout from Sat 5 Sep**: no speaker-tone repricing until the
+15–16 Sep meeting; only data, oil and Treasury can move odds. 28 Aug
+benchmark revision recovered: −79k (year to Mar 2026), stale. Technicals
+(pre-print): RSI 55, ATR 106, 50DMA 4274 / 200DMA 4543.
 
-## View (weights 40/30/30 base/bearish-rates/kinetic, event-pending cap)
+## View (weights 30/40/30 base/bearish-rates/kinetic — from 40/30/30)
 
-- **Base (40):** dollar-down leg (yen pillar broken: `b6450c7a` MISS scored;
-  JPM flags a $103bn yen short, unwind tail to 142 — gold-positive via DXY
-  but a liquidity event for the crowded long), ECB +25bp Thu 10 Sep adds a
-  euro leg, Dutch 86t custody vote, 9 Sep buyback op (#41) is the mechanism
-  test. `2ef33025` (no settle <4300 thru tonight) window low 4330.7, intact.
-- **Bearish-rates (30):** a coin flip with the decider (11 Sep CPI) a week
-  out. Oil at 3-month highs on a quiet night is the counter to Waller's
-  frame — the energy leg feeds CPI whatever NFP prints; G10 peers (ECB, BoE
-  Pill, RBNZ) treat the shock as hike-worthy, giving Warsh cover.
-  `031e3470` MISS scored; `16085af9` (odds ≥60% at print) miss trajectory;
-  `41aec282` (no NY close ≥60% 4–10 Sep, 0.6) intact; `ec71ce01` relieved.
-- **Kinetic (30):** the floor, not the driver. Trump "unlimited ammunition",
-  "any time we want"; Vance "not a war… no active shooting"; EU joins
-  Operation Economic Outcast — the siege, not strikes, is the supply shock.
-  `81564330` (third GCC-confirmed night by 6 Sep) unhit, ~2.5 days left;
-  `c4ef5615`/`03627b6b` bracket burst-not-campaign, one strike day so far.
-  Sirik toll revised to 4/68 by Iran's Red Crescent. Oman said to reject
-  Iran's joint fee plan (NY Post single source) — `b13614a1` reinforced;
-  new `2d098d6c` (no on-record Omani fee confirmation thru 11 Sep, 0.7).
+- **Bearish-rates (40, from 30):** the rates desk sets the price and its
+  impulse is up. Hot headline + firm participation removes the soft-labour
+  hold case Waller leaned on; wages in line mean the hike case rides
+  oil → CPI, not labour. Hot 11 Sep core (≥0.4%) makes a Sept hike the
+  base case; benign core (≤0.2%) keeps a coin flip. `41aec282` (no NY
+  close ≥60% thru 10 Sep, 0.6) on the line tonight; `ec71ce01` (no Sept
+  hike, 0.8) is now against market pricing — survives only on CPI. New
+  `a2171cad`: odds ≥50% at the 10 Sep NY close (0.6); with `41aec282` it
+  brackets a 50–60% band into CPI.
+- **Base (30, from 40):** the dollar-down leg is yen-specific (GPIF/BoJ),
+  not broad — EUR/USD fell on the print. Legs still live: ECB +25bp Thu
+  10 Sep (#51, euro), 9 Sep buyback op (#41, fiscal-hedge test), Dutch
+  custody vote, Citi "dip is a buy" (4 Sep). `2ef33025` (no settle <4300
+  thru tonight) has 125 pts of room; settles ~17:30Z.
+- **Kinetic (30):** floor, not driver — and it now *feeds* the
+  bearish-rates leg (Brent 97.6 → CPI) rather than opposing it.
+  `81564330` (third GCC-confirmed night by 6 Sep) unhit; corridor quiet
+  >72h; `c4ef5615`/`03627b6b` bracket burst-not-campaign; `b13614a1`,
+  `2d098d6c` (Oman) intact. War-over (`302708ab`) or co-confirmed talks
+  (`24f8b482`) = oil premium off → odds down → gold two-sided.
 
-**Levels:** R 4543 (200DMA) / 4554 (3 Sep high) / 4580 / 4697 (Fib R1) /
-4726 (BB upper). S 4457 / 4380 / 4300 (`2ef33025`) / 4274 (50DMA). ATR 105.
+**Levels:** R 4457 (broken support) / 4543 (200DMA) / 4554 (3 Sep high).
+S 4380 / 4331 (2 Sep low) / 4300 (`2ef33025`) / 4274 (50DMA) / 4177
+(Fib S1). ATR 106.
 
 ## What flips me
 
-- Hot NFP (>+100k, AHE ≥0.4%) or odds ≥60% → bearish-rates 45–50, 4457 →
-  4380 first targets, `41aec282` at risk.
-- Soft NFP (<+20k / UE ≥4.2%) with odds <40% → base 50+, a settle >4543
-  opens 4697 — but muted, Waller pre-sold it; CPI can reverse.
-- Third GCC-state-confirmed night → kinetic 40 (`81564330` hit); confirmed
-  strike on a GCC-cargo hull, US ordnance on export/port infra, UAE/Saudi
-  strike on Iran, or verified listed-GCC-hull seizure → kinetic 45.
-- Formal "war over" declaration (`302708ab` miss) → oil premium unwinds,
-  gold two-sided; co-confirmed talks/ceasefire (`24f8b482` miss) → kinetic
-  to tail. Verified strike on Qatari LNG facilities → kinetic tail arms.
-- Disorderly yen carry unwind (USDJPY gapping toward 150) → treat as
-  liquidity shock first, dollar-down second; expect gold to trade with
-  equities for the session.
+- NY-close odds ≥60% tonight (`41aec282` miss) or a settle <4380 →
+  bearish-rates 45–50, 4300 in play before CPI.
+- Odds back <50% with no war-over/oil catalyst (market fading the
+  composition) → base 40, bearish-rates 30, `a2171cad` at risk.
+- 11 Sep core ≥0.4% → bearish-rates 55, Sept hike base case; core ≤0.2%
+  → back to 40/30/30, `ec71ce01` sealed.
+- Third GCC-confirmed night → kinetic 40; hull/port/export-infra strike or
+  a GCC strike on Iran → 45. War-over declaration or co-confirmed
+  ceasefire → kinetic to tail, gold two-sided.
+- Disorderly yen unwind (USDJPY → 150) → liquidity shock first; gold trades
+  with equities for the session.
 
 ## Open predictions
 
-Open (20): `2ef33025` `16085af9` (4 Sep), `fe35b77d` `81564330` (6 Sep),
-`92a5bbb8` `30bad8a0` `b13614a1` `f527c209` `a12de81f` `c2eafbf8` (score per
-wording, discount) `bd825267` `973a3143` (7 Sep), `03627b6b` `2b39238a`
-`302708ab` `c4ef5615` (9 Sep), `41aec282` (10 Sep), `2d098d6c` (11 Sep),
-`ec71ce01` (FOMC 15–16 Sep), `24f8b482` (16 Sep).
+Open (20): `2ef33025` (tonight), `fe35b77d` `81564330` (6 Sep),
+`92a5bbb8` `30bad8a0` `b13614a1` `f527c209` `a12de81f` `c2eafbf8` (score
+per wording, discount) `bd825267` `973a3143` (7 Sep), `03627b6b`
+`2b39238a` `302708ab` `c4ef5615` (9 Sep), `41aec282` `a2171cad` (10 Sep),
+`2d098d6c` (11 Sep), `ec71ce01` (FOMC 15–16 Sep), `24f8b482` (16 Sep).
+Scored today: `16085af9` MISS (50% pre-print).
 
 ## Wakeups
 
-**#42 today 13:15Z** — payrolls read + odds at the print + gold's first
-hour (`031e3470`/`b6450c7a` already scored — skip). **#41 9 Sep 15:15Z**
-buyback op (Saturday brief re-verifies the slot). **#51 10 Sep 13:45Z** ECB
-decision + Lagarde. **#26 11 Sep 13:15Z** CPI — the Fed's stated decider.
-Scans carry: Kuwait/Bahrain/Qatar third-night statements, CENTCOM strike
-announcements, UKMTO relays via gcaptain, Trump "war over" wording, BoJ/MoF
-intervention confirmation, other FOMC voices vs Waller, Bailey 08:50Z tone,
-Netanyahu follow-through, QatarEnergy/Edison facility teaser (unverified),
-on-record Omani fee statement, Bessent designations, Kangan (dormant).
+**#41 9 Sep 15:15Z** buyback op (Saturday brief re-verifies the slot).
+**#51 10 Sep 13:45Z** ECB + Lagarde. **#26 11 Sep 13:15Z** CPI — the
+decider. Scans carry: NY-close Sept-hike odds tonight (`41aec282`), GC
+settle vs 4380/4300, Bessent "no hike into a supply shock" lines (the one
+non-data channel left), Kuwait/Bahrain/Qatar third-night statements,
+CENTCOM announcements, UKMTO relays via gcaptain, Trump "war over"
+wording, BoJ/MoF/GPIF, on-record Omani fee statement.
 
 ## Desk-local
 
-War-risk cover 40–60x pre-crisis, claims >$2bn, ~$7–8/bbl embedded in
-crude; charterers' liability blanket-excludes Saudi-nexus tonnage. US diesel
-at a record. Kuwait gold AML tightening (3 Sep). Gold +$100 Wednesday with
-silver stalled at 67.55 — check Dubai retail premium/discount at the open
-and again after the 16:30 print.
+Gold −$90 on the print with silver rebounding from 63.27 (support
+62.5–62.9): check the Dubai retail premium/discount at the Saturday open.
+War-risk cover 40–60x, ~$7–8/bbl embedded in crude; US diesel at a record;
+Kuwait gold AML tightening (3 Sep).
 
 ## Sourcing health
 
-`gold_spot` warning = todo-003 false positive (GC rows landing). `bars`
-table empty (todo-009) — close-based claims read from hourly `prices`
-snapshots. XAU AM/PM for 3 Sep not yet landed. Calendar feed covers only
-to 4 Sep (todo-001) — week-ahead map hand-anchored on ≤7-day extracts.
-Gulf News URLs must come from the DB (guessed suffix 404s). Investing.com
-403; KUNA unreachable; The National teasers only. investinglive framed a
-live "US–Iran memorandum" safe-passage window — it expired 17 Aug; stale.
+BLS release 403 (direct + proxy) — print read via investinglive /
+actionforex / CNBC. Post-print odds relay lagged ~50 min and surfaced on
+actionforex's front page, not in any ingested item (lesson filed). GC
+snapshot cadence 15 min. `bars` empty (todo-009); calendar feed to 4 Sep
+(todo-001); wakeup #42 attempt 1 exited `empty` after state writes
+(todo-180). Investing.com 403; Gulf News URLs from the DB only.

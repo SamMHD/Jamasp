@@ -77,6 +77,19 @@ watchlist:
       early hike, RBNZ Dec -> Warsh has cover if CPI is hot. 031e3470
       scored MISS (cap window contained a voting governor's speech).
       41aec282 intact; 16085af9 miss trajectory.
+      4 Sep (deepdive #42, 13:30Z): NFP +162k vs +56k, Jun-Jul +55k,
+      3-mo avg 71k, participation 61.6%, U-6 7.7%, AHE +0.3%/3.1% IN
+      LINE — labour alibi for a hold is gone but wages are not a trigger;
+      hike case rides oil->CPI (Brent 97.6 intraday, 6-wk high). Odds 50%
+      pre-print -> ~60% (actionforex); 2y +7bp 4.40, 10y 4.79; GC 4512 ->
+      4425 in 36 min, 4457 broken. 16085af9 MISS (50% pre-print);
+      41aec282 on the line at the NY close; ec71ce01 now against market
+      pricing, survives only on a benign 11 Sep core. FOMC blackout from
+      Sat 5 Sep: no speaker-tone repricing until the meeting — data, oil
+      and Treasury are the only channels (calendar.yaml). Weights
+      40/30/30 -> 30/40/30. 28 Aug benchmark revision recovered from the
+      DB: -79k (year to Mar 2026) vs +183k cons / WF ~-100k — stale,
+      superseded.
     since: 2026-07-31
 
   - theme: central-bank-gold-buying

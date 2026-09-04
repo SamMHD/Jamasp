@@ -620,3 +620,23 @@ events:
     action: >
       wakeup #51 added 2026-09-10T13:45:00Z (presser+60, rule 15) —
       cross-reads 41aec282 status and the 9 Sep buyback result (#41).
+
+  - date: 2026-09-05
+    time_dubai: "from Sat 5 Sep through Thu 17 Sep (FOMC standing blackout rule; convention, not a feed row)"
+    title: FOMC communications blackout — data-only window into the 15-16 Sep meeting
+    why: >
+      Deepdive #42 (4 Sep): the last three odds-threshold claims
+      (98bbfd33, 16085af9, 031e3470) all broke on FOMC-speaker TONE, not
+      data (Warsh 28 Aug up, Waller 3 Sep down). Under the Fed's standing
+      rule the blackout begins the second Saturday before a meeting, so
+      from 5 Sep no governor or president can move Sept-hike odds; only
+      data (CPI 11 Sep #26, PPI, claims, UoM), oil, and Treasury/Bessent
+      can. Payrolls +162k removed the labour alibi for holding, so CPI is
+      now the single gate. Odds claims written inside this window escape
+      the speaker-tone cap (lessons-inbox 4 Sep) but must name oil and
+      Treasury as the remaining channels.
+    action: >
+      No wakeup (not an event). Briefs treat 5-11 Sep as data-only for
+      the rates leg; 41aec282 (no NY close >=60% thru 10 Sep) and any new
+      odds claim are read against CME FedWatch press relays at the NY
+      close. CPI wakeup #26 stands at 11 Sep 13:15Z.
