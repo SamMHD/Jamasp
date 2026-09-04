@@ -1,4 +1,4 @@
-# Stance — 2026-09-04 13:30Z (deepdive #42) — POST-PAYROLLS, RATES DESK IN CONTROL
+# Stance — 2026-09-04 13:30Z (deepdive #42; scan 19:00Z edits) — POST-PAYROLLS, RATES DESK IN CONTROL
 
 **The labour alibi is gone; CPI on the 11th is the only gate left.** Aug
 NFP **+162k** vs +56k (Jun–Jul +55k, 3-mo avg 71k, participation 61.6%,
@@ -23,14 +23,21 @@ benchmark revision recovered: −79k (year to Mar 2026), stale. Technicals
   close ≥60% thru 10 Sep, 0.6) on the line tonight; `ec71ce01` (no Sept
   hike, 0.8) is now against market pricing — survives only on CPI. New
   `a2171cad`: odds ≥50% at the 10 Sep NY close (0.6); with `41aec282` it
-  brackets a 50–60% band into CPI.
+  brackets a 50–60% band into CPI. New non-data channel: Trump 4 Sep
+  "lower the rate or I'll stop trading with deficit countries" — Fed-
+  independence pressure beside Bessent's; no pricing effect yet.
 - **Base (30, from 40):** the dollar-down leg is yen-specific (GPIF/BoJ),
   not broad — EUR/USD fell on the print. Legs still live: ECB +25bp Thu
   10 Sep (#51, euro), 9 Sep buyback op (#41, fiscal-hedge test), Dutch
   custody vote, Citi "dip is a buy" (4 Sep). `2ef33025` (no settle <4300
-  thru tonight) has 125 pts of room; settles ~17:30Z.
+  thru tonight) settled 4487.5 — holds; scores at maturity.
 - **Kinetic (30):** floor, not driver — and it now *feeds* the
   bearish-rates leg (Brent 97.6 → CPI) rather than opposing it.
+  4 Sep ~17:40Z Iran claims a "pre-emptive" missile strike on US bases
+  in Jordan (Azraq/Muwaffaq al-Salti; intercepts reported, no US
+  confirmation) — GC/WTI shrugged; the US response window falls in the
+  weekend closure → `c4ef5615` more likely, Sunday-reopen gap two-sided
+  (`58b7daab`: first print within 4420–4555, 0.65). Jordan is not GCC:
   `81564330` (third GCC-confirmed night by 6 Sep) unhit; corridor quiet
   >72h; `c4ef5615`/`03627b6b` bracket burst-not-campaign; `b13614a1`,
   `2d098d6c` (Oman) intact. War-over (`302708ab`) or co-confirmed talks
@@ -56,7 +63,7 @@ S 4380 / 4331 (2 Sep low) / 4300 (`2ef33025`) / 4274 (50DMA) / 4177
 
 ## Open predictions
 
-Open (20): `2ef33025` (tonight), `fe35b77d` `81564330` (6 Sep),
+Open (21): `2ef33025` (tonight), `58b7daab` (Sun reopen), `fe35b77d` `81564330` (6 Sep),
 `92a5bbb8` `30bad8a0` `b13614a1` `f527c209` `a12de81f` `c2eafbf8` (score
 per wording, discount) `bd825267` `973a3143` (7 Sep), `03627b6b`
 `2b39238a` `302708ab` `c4ef5615` (9 Sep), `41aec282` `a2171cad` (10 Sep),
@@ -71,7 +78,8 @@ decider. Scans carry: NY-close Sept-hike odds tonight (`41aec282`), GC
 settle vs 4380/4300, Bessent "no hike into a supply shock" lines (the one
 non-data channel left), Kuwait/Bahrain/Qatar third-night statements,
 CENTCOM announcements, UKMTO relays via gcaptain, Trump "war over"
-wording, BoJ/MoF/GPIF, on-record Omani fee statement.
+wording and rate-ultimatum follow-through, CENTCOM response to the Jordan
+strike (weekend), BoJ/MoF/GPIF, on-record Omani fee statement.
 
 ## Desk-local
 
