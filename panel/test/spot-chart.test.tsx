@@ -29,11 +29,10 @@ describe("SpotChart", () => {
     expect(html).not.toContain("pivot S1");
   });
 
-  it("keeps every value reachable without hover: the table view twin", () => {
-    const html = renderToStaticMarkup(<SpotChart points={SERIES} levels={[]} />);
-    expect(html).toContain("view as table");
-    expect(html).toContain("4,383.7");
-  });
+  // The value-exact table used to live inside this component. It moved to
+  // components/series-table.tsx when the live TradingView widget took the
+  // chart slot: the table has to stay on screen in the live case, while this
+  // chart is now only the fallback. test/series-table.test.tsx owns it.
 
   it("carries native hover readouts that pair value with timestamp", () => {
     const html = renderToStaticMarkup(<SpotChart points={SERIES} levels={[]} />);

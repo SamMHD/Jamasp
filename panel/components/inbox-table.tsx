@@ -61,8 +61,12 @@ export function InboxTable({ sources, topics }: { sources: string[]; topics: str
 
   const hasMore = !!data && data.length > 0 && data[data.length - 1].items.length === PAGE_SIZE;
   const loadingMore = !!data && size > data.length;
+  // Written in an effect, not during render (react-hooks/refs). The only
+  // reader is the IntersectionObserver callback below, which can only run
+  // from the event loop — i.e. after effects have flushed — so it sees the
+  // same value it saw when this was a render-phase assignment.
   const loadingRef = useRef(false);
-  loadingRef.current = loadingMore;
+  useEffect(() => { loadingRef.current = loadingMore; }, [loadingMore]);
 
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {

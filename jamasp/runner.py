@@ -9,12 +9,19 @@ import os
 import signal
 import sqlite3
 import subprocess
+import sys
+import tempfile
 from datetime import datetime, timedelta, timezone
 
 from jamasp import notify as notify_mod
 from jamasp.db import utcnow
 
 DUBAI = timezone(timedelta(hours=4))
+
+# How much of a failed run's output to keep. Enough for a stack trace's last
+# frame or an auth error, small enough that a Telegram message (hard limit
+# 4096 chars) still fits with the frame around it.
+OUTPUT_TAIL_CHARS = 500
 
 
 def _notify_safe(conn: sqlite3.Connection, settings: dict, text: str) -> None:
@@ -65,35 +72,61 @@ def _git_head() -> str | None:
     return proc.stdout.strip() if proc.returncode == 0 else None
 
 
-def _execute_once(cmd: list[str], timeout: int) -> tuple[int | None, str]:
-    """Run once; return (exit_code, status) where status is ok|failed|timeout.
+def _tail(path: str) -> str:
+    """Last OUTPUT_TAIL_CHARS of a file, or "" if it can't be read."""
+    try:
+        with open(path, "r", errors="replace") as fh:
+            try:
+                fh.seek(max(0, os.path.getsize(path) - OUTPUT_TAIL_CHARS))
+            except OSError:
+                pass
+            return fh.read()[-OUTPUT_TAIL_CHARS:].strip()
+    except OSError:
+        return ""
+
+
+def _execute_once(cmd: list[str], timeout: int) -> tuple[int | None, str, str]:
+    """Run once; return (exit_code, status, tail) — status is ok|failed|timeout.
 
     Uses Popen + a new process group so a timeout can be enforced by killing
     the whole group (SIGKILL) rather than subprocess.run's timeout path,
     which only kills the direct child and then blocks in communicate()
     until grandchildren (claude's own tool subprocesses) close the pipes
-    they inherited — i.e. it can hang forever. Output was always discarded,
-    so we route both streams to DEVNULL instead of capturing.
+    they inherited — i.e. it can hang forever.
+
+    Both streams go to a temporary **file**, never a pipe: a file has no
+    buffer to fill and no reader to block on, so a grandchild holding the
+    inherited handle open cannot wedge us the way the pipe path could. `tail`
+    is the last chunk of that file on a failure and "" on success — an
+    `exit=1` with no reason cost 3.5 dark days on 2026-08-28 (docs/todo/007).
     """
-    try:
-        proc = subprocess.Popen(
-            cmd,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            start_new_session=True,
-        )
-    except OSError:
-        return None, "failed"
-    try:
-        proc.wait(timeout=timeout)
-    except subprocess.TimeoutExpired:
+    with tempfile.TemporaryDirectory(prefix="jamasp-run-") as tmp:
+        out_path = os.path.join(tmp, "output")
         try:
-            os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
-        except ProcessLookupError:
-            pass
-        proc.wait()
-        return None, "timeout"
-    return proc.returncode, "ok" if proc.returncode == 0 else "failed"
+            out = open(out_path, "wb")
+        except OSError:
+            return None, "failed", ""
+        try:
+            try:
+                proc = subprocess.Popen(
+                    cmd, stdout=out, stderr=subprocess.STDOUT, start_new_session=True
+                )
+            except OSError as exc:
+                return None, "failed", str(exc)
+        finally:
+            out.close()
+        try:
+            proc.wait(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            try:
+                os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            proc.wait()
+            return None, "timeout", _tail(out_path)
+        if proc.returncode == 0:
+            return proc.returncode, "ok", ""
+        return proc.returncode, "failed", _tail(out_path)
 
 
 def run_agent(
@@ -122,9 +155,9 @@ def run_agent(
         return "deferred"
     timeout = cfg["timeouts_seconds"][run_type]
     head_before = _git_head()
-    exit_code, status = _execute_once(cmd, timeout)
+    exit_code, status, tail = _execute_once(cmd, timeout)
     if status != "ok":  # one retry, immediately
-        exit_code, status = _execute_once(cmd, timeout)
+        exit_code, status, tail = _execute_once(cmd, timeout)
     # Every run commits (CLAUDE.md rule 4), so exit 0 with HEAD untouched
     # means the run did nothing — the failure mode that made the 12 Aug CPI
     # deepdive invisible. Deliberately not retried: an empty run may still
@@ -144,6 +177,11 @@ def run_agent(
                 f"Jamasp FAILURE: {run_type} run {status} after retry"
                 + (f" (task: {task})" if task else "")
                 + f", exit={exit_code}."
+                + (f"\n--- last output ---\n{tail}" if tail else "")
             )
+        # journalctl alone must be enough next time: through the whole
+        # 2026-08-28 outage the unit's log carried only "scan: failed".
+        if tail:
+            print(f"{run_type}: {status} — last output:\n{tail}", file=sys.stderr)
         _notify_safe(conn, settings, text)
     return status

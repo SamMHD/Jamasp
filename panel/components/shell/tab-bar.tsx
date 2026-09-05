@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Ellipsis } from "lucide-react";
 import { isActive, OVERFLOW, PRIMARY } from "@/lib/nav";
 import { MoreSheet } from "@/components/shell/more-sheet";
+import { NavItemBody } from "@/components/shell/nav-pending";
 import { cls } from "@/lib/format";
 
 const ITEM = "flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 " +
@@ -42,8 +43,7 @@ export function TabBar() {
               aria-current={active ? "page" : undefined}
               className={cls(ITEM, active ? "font-medium text-primary" : "text-muted-foreground")}
             >
-              <Icon className="h-5 w-5" aria-hidden="true" />
-              {label}
+              <NavItemBody icon={Icon} label={label} size="h-5 w-5" />
             </Link>
           );
         })}

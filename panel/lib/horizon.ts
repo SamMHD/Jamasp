@@ -99,7 +99,9 @@ export function deriveHorizon(
       ts: iso(matures), lane: "prediction", label: p.id, detail: p.claim,
       confidence: typeof p.confidence === "number" && Number.isFinite(p.confidence)
         ? p.confidence : null,
-      href: "/state",
+      // The ledger page, not /state: this mark IS a prediction maturity, and
+      // /predictions is where that row's state, note and due status live.
+      href: "/predictions",
     });
   }
 

@@ -289,3 +289,39 @@
     :root:not(.light) { color-scheme: dark; }
   }
 }
+
+/* ---- navigation pending hint ----
+   Consumed by components/shell/nav-pending.tsx, which reads `useLinkStatus()`
+   inside each nav <Link>. The whole point of these three rules is the 120ms
+   `animation-delay`: a transition that resolves faster than that finishes
+   with nothing ever having been drawn, so the office LAN never sees a
+   one-frame spinner flash, while the weak connection this was written for
+   gets a clear answer to "did my click register?" a tenth of a second in.
+   The delay lives here rather than in a setTimeout so React does no extra
+   render to reveal it. */
+@keyframes jamasp-nav-hint-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes jamasp-nav-hint-out { from { opacity: 1; } to { opacity: 0; } }
+
+.nav-hint-in {
+  opacity: 0;
+  animation: jamasp-nav-hint-in 150ms ease 120ms forwards;
+}
+.nav-hint-out {
+  animation: jamasp-nav-hint-out 150ms ease 120ms forwards;
+}
+/* The label goes gold on the same 120ms guard as the spinner. Applied as a
+   fill-forwards animation rather than a `text-primary` class so the delay
+   holds for the colour too — a class would recolour the label on the click
+   frame, which is the flash the guard exists to prevent. */
+@keyframes jamasp-nav-hint-gold { to { color: var(--primary); } }
+.nav-hint-label {
+  animation: jamasp-nav-hint-gold 150ms ease 120ms forwards;
+}
+
+/* A reader who asked for reduced motion still needs the state change — it is
+   the answer to "did the click work?" — so the cross-fade collapses to a cut
+   rather than disappearing. The spinner keeps turning: an indeterminate wait
+   has no other way to say it is still going. */
+@media (prefers-reduced-motion: reduce) {
+  .nav-hint-in, .nav-hint-out { animation-duration: 1ms; }
+}

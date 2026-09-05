@@ -2,14 +2,21 @@ import type { PricePoint } from "@/lib/db";
 import { fmtUtc } from "@/lib/format";
 
 /**
- * The overview's gold futures chart — server-rendered inline SVG, real
- * axes, no client JS.
+ * Jamasp's own gold futures chart — server-rendered inline SVG, real axes,
+ * no client JS.
+ *
+ * Since the live TradingView widget took the chart slot (components/
+ * live-chart.tsx), this is the FALLBACK: what the panel shows before the
+ * widget confirms it drew, and what it keeps showing when TradingView is
+ * blocked, unreachable, or when hydration never completes. It plots stored
+ * readings, so it is never live — which is exactly why it is the safe thing
+ * to degrade to rather than a blank box.
  *
  * Deliberately not recharts: this panel is a wall-screen instrument and
  * must paint fully from the server render alone (this dev deployment
  * demonstrably serves pages whose client hydration never completes — the
  * recharts charts on /prices draw nothing there). Native SVG <title>
- * elements give per-point hover readouts and the table view underneath is
+ * elements give per-point hover readouts and components/series-table.tsx is
  * the value-exact twin, so nothing is gated on a tooltip layer.
  *
  * Stored levels (SMAs, pivots) are drawn as hairline reference lines, but
@@ -129,29 +136,6 @@ export function SpotChart({ points, levels }: {
           </circle>
         ))}
       </svg>
-      <details className="mt-1">
-        <summary className="cursor-pointer text-xs text-muted-foreground">
-          view as table
-        </summary>
-        <div className="mt-2 max-h-40 overflow-y-auto">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="text-left text-muted-foreground">
-                <th className="font-normal">time (UTC)</th>
-                <th className="font-normal">value</th>
-              </tr>
-            </thead>
-            <tbody className="tabular-nums">
-              {points.map(p => (
-                <tr key={p.ts}>
-                  <td className="pr-4">{fmtUtc(p.ts)}</td>
-                  <td>{fmtValue(p.value)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </details>
     </div>
   );
 }

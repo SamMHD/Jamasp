@@ -2,8 +2,7 @@ import { fmtAge } from "@/lib/format";
 import { layoutMap, tone, type MapRange, type ScoredItem } from "@/lib/marketmap";
 import { FullscreenButton } from "@/components/fullscreen-button";
 import {
-  MapHatchDefs, MapLegend, MapTile, LABEL_PAD, MIN_LABEL_H, MIN_LABEL_W,
-  truncateForWidth, wrapForTile,
+  MapGroupHeader, MapHatchDefs, MapLegend, MapTile, GROUP_HEADER_H, fitLabel,
 } from "@/components/map-tiles";
 
 /**
@@ -33,7 +32,7 @@ import {
  * live in `components/map-tiles.tsx`, shared with the technical map.
  */
 
-const THEME_HEADER_H = 20;
+const THEME_HEADER_H = GROUP_HEADER_H;
 
 /** Shared between the section and the button that fullscreens it. */
 export const MAP_ELEMENT_ID = "market-map";
@@ -58,7 +57,6 @@ const WINDOW_LABEL: Record<MapRange, string> = {
   week: "this week",
 };
 
-const HEADER_FONT = 9;
 
 function tileTitle(item: ScoredItem, now: Date): string {
   const dirWord = item.direction > 0 ? "bullish" : item.direction < 0 ? "bearish" : "neutral";
@@ -119,21 +117,18 @@ export function MarketMap({ items, width, height, range, coverage,
         <MapHatchDefs />
         {boxes.map(box => (
           <g key={box.theme}>
-            <text x={box.x + LABEL_PAD} y={box.y + 13} fontSize={HEADER_FONT}
-              fill="var(--muted-foreground)"
-              style={{ textTransform: "uppercase", letterSpacing: "0.08em" }}>
-              {truncateForWidth(themeLabel(box.theme), box.w, HEADER_FONT)}
-            </text>
+            <MapGroupHeader x={box.x} y={box.y} w={box.w}
+              label={themeLabel(box.theme)} />
             {box.items.map(cell => {
               const t = tone(cell.node.direction, cell.node.conviction);
-              const showLabel = cell.w >= MIN_LABEL_W && cell.h >= MIN_LABEL_H;
-              const lines = showLabel
-                ? wrapForTile(cell.node.headline, cell.w, cell.h)
-                : [];
+              // The headline is sized to its own tile rather than to one
+              // map-wide constant — see map-tiles.tsx#fitLabel.
+              const label = fitLabel(cell.node.headline, cell.w, cell.h);
               return (
                 <MapTile key={cell.node.itemId}
                   x={cell.x} y={cell.y} w={cell.w} h={cell.h}
-                  tone={t} title={tileTitle(cell.node, now)} lines={lines} />
+                  tone={t} title={tileTitle(cell.node, now)}
+                  lines={label.lines} fontSize={label.fontSize} />
               );
             })}
           </g>
