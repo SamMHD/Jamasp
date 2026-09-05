@@ -91,8 +91,9 @@ test("overview renders the market instrument panels", async ({ page }) => {
   await expect(news.getByText(/last item/)).toBeVisible();
   await expect(page.getByText("Dollar slides on jobs data")).toHaveCount(0);
 
-  // Technical: heading, the server-rendered spot chart, ladder rows, regime
-  // line, and the RSI gauge with the fixture's exact reading in its name.
+  // Technical: heading, the live-chart slot, Jamasp's own labelled reading,
+  // ladder rows, regime line, and the RSI gauge with the fixture's exact
+  // reading in its name.
   //
   // exact: true on the region name — the technical map's own two sections
   // ("Technical map", "Technical signal treemap") both contain "Technical"
@@ -102,7 +103,31 @@ test("overview renders the market instrument panels", async ({ page }) => {
   // and the technical map's "Technical map" heading.
   const technical = page.getByRole("region", { name: "Technical", exact: true });
   await expect(technical.getByRole("heading")).toBeVisible();
-  await expect(technical.locator('svg[aria-label^="gold futures"]')).toBeVisible();
+
+  // The chart slot is deliberately NOT asserted as the inline SVG any more.
+  // It now holds TradingView's live widget, with that SVG as the fallback
+  // underneath — so which of the two is on screen depends on whether this
+  // runner can reach tradingview.com, and pinning either would make the
+  // suite fail on exactly the network condition the fallback exists for.
+  // The caption is what is true in every state: it names the instrument, and
+  // it says which of live/loading/unavailable the reader is looking at.
+  //
+  // .first() because "spot XAU/USD" is deliberately said TWICE — once in the
+  // caption under the chart, once in the reading box's basis note. Both are
+  // load-bearing (the widget charts spot, Jamasp reads the front-month
+  // future), so an exact locator would just be pinning one phrasing.
+  await expect(technical.getByText(/spot XAU\/USD/).first()).toBeVisible();
+
+  // Jamasp's own figure, explicitly labelled as a stored reading rather than
+  // presented in the typography of a live quote — the defect the widget was
+  // added to fix. GC=F names the feed it came from.
+  await expect(technical.getByText(/last reading/i)).toBeVisible();
+  await expect(technical.getByText(/GC=F · COMEX front-month/)).toBeVisible();
+  // The widget charts spot and the reading is the front-month future; the
+  // basis between them must be stated, not left to be misread as staleness.
+  await expect(technical.getByText(/carry premium/)).toBeVisible();
+  // The value-exact twin of the chart stays reachable in the live case too.
+  await expect(technical.getByText(/stored readings as table/)).toBeVisible();
   // Exact match: the stance prose itself contains "200DMA" as a substring
   // (in the View and What-flips-me bullets), which collides with a plain
   // substring getByText and produces a Playwright strict-mode violation.
