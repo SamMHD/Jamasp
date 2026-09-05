@@ -1,5 +1,15 @@
 import { expect, test } from "@playwright/test";
 
+// The Drivers card upgrades its tiles to live TradingView embeds when the
+// widget CDN is reachable. Block it for the whole suite: these tests assert
+// what Jamasp's own database says, which must stay true when the embed does
+// not arrive, and a suite that reached out to a third party would be asserting
+// TradingView's uptime rather than the panel's behaviour. Blocking here means
+// the fallback path — the one that has to hold offline — is what runs.
+test.beforeEach(async ({ page }) => {
+  await page.route("**://*.tradingview-widget.com/**", route => route.abort());
+});
+
 const ROUTES: [string, string][] = [
   ["/", "Overview"], ["/inbox", "Inbox"], ["/crawl", "Crawl"], ["/briefs", "Briefs"],
   ["/schedule", "Schedule"], ["/calendar", "Calendar"], ["/alerts", "Alerts"],
