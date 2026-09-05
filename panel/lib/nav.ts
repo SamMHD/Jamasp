@@ -1,5 +1,5 @@
 import {
-  Bell, CalendarDays, Clock, FileText, Gauge, Inbox, LineChart, Radio, Rss,
+  Bell, CalendarDays, Clock, FileText, Gauge, Inbox, LineChart, Radio, Rss, Target,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -23,6 +23,7 @@ export const OVERFLOW: NavItem[] = [
   { href: "/calendar", label: "Calendar", icon: CalendarDays },
   { href: "/alerts", label: "Alerts", icon: Bell },
   { href: "/state", label: "State", icon: Radio },
+  { href: "/predictions", label: "Predictions", icon: Target },
   { href: "/prices", label: "Prices", icon: LineChart },
 ];
 

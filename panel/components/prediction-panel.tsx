@@ -84,9 +84,20 @@ export function PredictionPanel({ stats, bins }: {
   const decisive = stats.hits + stats.misses;
   return (
     <section aria-label="Forecast record" className="rounded border border-border p-4">
+      {/* → predictions, not → state. This card is entirely the prediction
+          ledger, and /predictions is the ledger itself — every row, its state,
+          and what is overdue — where /state is stance + watchlist + playbook
+          with a prediction table wedged into the middle. Nothing is lost by
+          the swap: FundamentalPanel already carries two "→ state" links on
+          this same overview, and State keeps its own nav slot. The "view as
+          table" disclosure below stays; it is not a weaker version of this
+          link but the chart's non-hover, non-colour twin, which the page owes
+          a reader who cannot use either. */}
       <h2 className="mb-3 font-medium">
         Forecast record
-        <Link className="ml-2 text-xs font-normal text-primary" href="/state">→ state</Link>
+        <Link className="ml-2 text-xs font-normal text-primary" href="/predictions">
+          → predictions
+        </Link>
       </h2>
       {none ? (
         <p className="text-sm text-muted-foreground">no predictions recorded</p>

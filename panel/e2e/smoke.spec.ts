@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 const ROUTES: [string, string][] = [
   ["/", "Overview"], ["/inbox", "Inbox"], ["/crawl", "Crawl"], ["/briefs", "Briefs"],
   ["/schedule", "Schedule"], ["/calendar", "Calendar"], ["/alerts", "Alerts"],
-  ["/state", "State"], ["/prices", "Prices"],
+  ["/state", "State"], ["/predictions", "Predictions"], ["/prices", "Prices"],
 ];
 
 for (const [path, title] of ROUTES) {
@@ -173,4 +173,63 @@ test("overview renders the technical map", async ({ page }) => {
   await expect(map.locator('rect[fill="url(#map-hatch)"]')).toHaveCount(1);
   // macd@1d has no fitted coefficient, so its tile must be dashed.
   await expect(map.locator("rect[stroke-dasharray]")).toHaveCount(1);
+});
+
+// --- the forecast ledger page ---
+//
+// The fixture ledger is five entries and time-stable: both unscored ones
+// (aaaa0001, aaaa0002) matured well before any future render, so they are
+// permanently "due", and the other three carry a fixed outcome each. That
+// makes every count below a constant rather than something that drifts as
+// the real clock advances.
+test("the Forecast record card leads to the ledger page", async ({ page }) => {
+  await page.goto("/");
+  const card = page.getByRole("region", { name: "Forecast record" });
+  await card.getByRole("link", { name: "→ predictions" }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Predictions");
+  await expect(page).toHaveURL(/\/predictions$/);
+});
+
+test("the ledger lists every prediction, live ones first", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", e => errors.push(String(e)));
+  await page.goto("/predictions");
+
+  // Header arithmetic: 5 entries, 1 hit / 1 miss decisive, 2 still live.
+  await expect(page.getByText("5 in the ledger · 50% hit rate over 2 decisive · 2 still live"))
+    .toBeVisible();
+
+  // Every state is reachable as a filter, with its own count.
+  const filters = page.getByRole("navigation", { name: "Filter by state" });
+  for (const [label, n] of [["all", "5"], ["due", "2"], ["open", "0"],
+                            ["hit", "1"], ["miss", "1"], ["unclear", "1"]]) {
+    await expect(filters.getByRole("link", { name: `${label} ${n}` })).toBeVisible();
+  }
+
+  // Matured-but-unscored is called out, in the same words the CLI uses.
+  await expect(page.getByText(/2 matured but unscored/)).toBeVisible();
+
+  const live = page.getByRole("region", { name: "Live predictions" });
+  const resolved = page.getByRole("region", { name: "Resolved predictions" });
+  await expect(live.getByText("GC above 3350 within 5 days")).toBeVisible();
+  await expect(resolved.getByText("DXY down on CPI")).toBeVisible();
+  // Most overdue first: aaaa0002 (20 Jul) matured before aaaa0001 (1 Aug).
+  await expect(live.locator("li").first()).toContainText("GC flat through July");
+
+  // A row's disclosure carries the scoring note, which the collapsed row does not.
+  await expect(page.getByText("no clean read")).toBeHidden();
+  await resolved.getByText("CPI print ambiguous effect on gold").click();
+  await expect(page.getByText("no clean read")).toBeVisible();
+
+  expect(errors).toEqual([]);
+});
+
+test("a state filter narrows the ledger to that state alone", async ({ page }) => {
+  await page.goto("/predictions?state=miss");
+  await expect(page.getByText("GC up on FOMC")).toBeVisible();
+  await expect(page.getByText("DXY down on CPI")).toHaveCount(0);
+  // A garbage param degrades to the whole ledger rather than throwing.
+  await page.goto("/predictions?state=nonsense");
+  await expect(page.getByText("DXY down on CPI")).toBeVisible();
+  await expect(page.getByText("GC up on FOMC")).toBeVisible();
 });

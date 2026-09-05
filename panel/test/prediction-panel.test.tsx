@@ -30,6 +30,17 @@ describe("PredictionPanel", () => {
     expect(html).toContain("view as table");
   });
 
+  // The card's heading link points at the ledger page, not at /state: this
+  // card is entirely the prediction ledger, and /state is stance + watchlist
+  // + playbook. The table twin below stays regardless — it is the chart's
+  // accessible counterpart, not a stand-in for a real page.
+  it("links out to the ledger page", () => {
+    const html = renderToStaticMarkup(
+      <PredictionPanel bins={calibrationBins([])} stats={stats({ open: 1 })} />);
+    expect(html).toContain('href="/predictions"');
+    expect(html).toContain("→ predictions");
+  });
+
   it("keeps every count reachable without hover via the table twin", () => {
     const preds = [pred(0.72, "hit"), pred(0.72, "hit"), pred(0.85, "miss")];
     const html = renderToStaticMarkup(
