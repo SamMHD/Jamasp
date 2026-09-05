@@ -107,14 +107,14 @@ def test_resample_of_empty_is_empty():
 
 
 from jamasp import db
-from jamasp.ingest.bars import backfill, read_bars, store_bars
+from jamasp.ingest.bars import SOURCE_YAHOO, backfill, read_bars, store_bars
 
 
 def test_store_and_read_bars_round_trip(tmp_path):
     conn = db.connect(tmp_path / "j.db")
     bars = [Bar("2026-01-02T00:00:00Z", 2, 3, 1, 2.5),
             Bar("2026-01-01T00:00:00Z", 1, 2, 0.5, 1.5)]
-    assert store_bars(conn, "GC", "1d", bars) == 2
+    assert store_bars(conn, "GC", "1d", bars, SOURCE_YAHOO) == 2
     assert read_bars(conn, "GC", "1d") == sorted(bars, key=lambda b: b.ts)
 
 
@@ -124,8 +124,8 @@ def test_store_bars_is_idempotent(tmp_path):
     # every day for the rest of the deployment's life.
     conn = db.connect(tmp_path / "j.db")
     bars = [Bar("2026-01-01T00:00:00Z", 1, 2, 0.5, 1.5)]
-    store_bars(conn, "GC", "1d", bars)
-    store_bars(conn, "GC", "1d", bars)
+    store_bars(conn, "GC", "1d", bars, SOURCE_YAHOO)
+    store_bars(conn, "GC", "1d", bars, SOURCE_YAHOO)
     assert len(read_bars(conn, "GC", "1d")) == 1
 
 
@@ -133,8 +133,8 @@ def test_store_bars_overwrites_a_revised_bar(tmp_path):
     # Yahoo revises the most recent bar as it forms. The stored copy must
     # follow it rather than freeze at the first value seen.
     conn = db.connect(tmp_path / "j.db")
-    store_bars(conn, "GC", "1d", [Bar("2026-01-01T00:00:00Z", 1, 2, 0.5, 1.5)])
-    store_bars(conn, "GC", "1d", [Bar("2026-01-01T00:00:00Z", 1, 9, 0.5, 8.0)])
+    store_bars(conn, "GC", "1d", [Bar("2026-01-01T00:00:00Z", 1, 2, 0.5, 1.5)], SOURCE_YAHOO)
+    store_bars(conn, "GC", "1d", [Bar("2026-01-01T00:00:00Z", 1, 9, 0.5, 8.0)], SOURCE_YAHOO)
     assert read_bars(conn, "GC", "1d") == [Bar("2026-01-01T00:00:00Z", 1, 9, 0.5, 8.0)]
 
 
@@ -151,10 +151,10 @@ def test_store_bars_of_identical_rows_does_not_change_max_rowid(tmp_path):
     bars = [Bar("2026-01-01T00:00:00Z", 1, 2, 0.5, 1.5),
             Bar("2026-01-02T00:00:00Z", 2, 3, 1.0, 2.5),
             Bar("2026-01-03T00:00:00Z", 3, 4, 1.5, 3.5)]
-    store_bars(conn, "GC", "1d", bars)
+    store_bars(conn, "GC", "1d", bars, SOURCE_YAHOO)
     before = conn.execute("SELECT max(rowid) AS m FROM bars").fetchone()["m"]
 
-    store_bars(conn, "GC", "1d", bars)  # re-store byte-identical rows
+    store_bars(conn, "GC", "1d", bars, SOURCE_YAHOO)  # byte-identical rows
     after = conn.execute("SELECT max(rowid) AS m FROM bars").fetchone()["m"]
 
     assert after == before
@@ -164,8 +164,8 @@ def test_store_bars_of_identical_rows_does_not_change_max_rowid(tmp_path):
 def test_store_bars_keeps_timeframes_separate(tmp_path):
     conn = db.connect(tmp_path / "j.db")
     b = Bar("2026-01-01T00:00:00Z", 1, 2, 0.5, 1.5)
-    store_bars(conn, "GC", "1h", [b])
-    store_bars(conn, "GC", "1d", [b])
+    store_bars(conn, "GC", "1h", [b], SOURCE_YAHOO)
+    store_bars(conn, "GC", "1d", [b], SOURCE_YAHOO)
     assert len(read_bars(conn, "GC", "1h")) == 1
     assert len(read_bars(conn, "GC", "1d")) == 1
 
@@ -281,3 +281,172 @@ def test_close_ts_is_open_plus_one_period():
 
 def test_timeframe_seconds_covers_every_stored_timeframe():
     assert set(TIMEFRAME_SECONDS) == {"1h", "4h", "1d", "1w"}
+
+
+# --- Bitfinex fallback provider -------------------------------------------
+#
+# Yahoo refuses every deep-history request from the production egress (see
+# docs/todo/012), so `bars` needs a second source or it stays empty forever.
+
+from jamasp.ingest.bars import (
+    SOURCE_BITFINEX,
+    comex_sessions_only,
+    parse_bitfinex_candles,
+)
+
+_MON = 1767571200      # 2026-01-05T00:00:00Z, a Monday
+_SAT = _MON - 2 * 86400  # 2026-01-03, Saturday
+_SUN = _MON - 86400      # 2026-01-04, Sunday
+
+
+def _bfx(rows):
+    """rows: (epoch_seconds, open, close, high, low) -> Bitfinex candle JSON."""
+    return json.dumps([[ts * 1000, o, c, h, low, 1.0] for ts, o, c, h, low in rows])
+
+
+def test_parse_bitfinex_candles_reads_the_open_close_high_low_column_order():
+    # Bitfinex candles are [MTS, OPEN, CLOSE, HIGH, LOW, VOLUME] — CLOSE comes
+    # SECOND, not fourth. Reading them as OHLC swaps close with high and low
+    # with close, which would feed ATR and every level signal a silently
+    # wrong bar. This is the single most likely bug in this parser, so it is
+    # pinned on its own.
+    bars = parse_bitfinex_candles(_bfx([(_MON, 10.0, 11.0, 12.0, 9.0)]))
+    assert bars == [Bar("2026-01-05T00:00:00Z", 10.0, 12.0, 9.0, 11.0)]
+
+
+def test_parse_bitfinex_candles_sorts_ascending_from_a_newest_first_page():
+    # We ask for sort=-1 (newest first) because that is the only way to get
+    # the most recent 10,000 candles; every indicator downstream is
+    # order-dependent, so the parser must restore ascending order.
+    text = _bfx([(_MON + 86400, 2.0, 2.5, 3.0, 1.0), (_MON, 1.0, 1.5, 2.0, 0.5)])
+    assert [b.ts for b in parse_bitfinex_candles(text)] == [
+        "2026-01-05T00:00:00Z", "2026-01-06T00:00:00Z"]
+
+
+def test_parse_bitfinex_candles_drops_a_row_with_a_null_leg():
+    text = json.dumps([[_MON * 1000, 10.0, None, 12.0, 9.0, 1.0],
+                       [(_MON + 86400) * 1000, 1.0, 1.5, 2.0, 0.5, 1.0]])
+    assert [b.ts for b in parse_bitfinex_candles(text)] == ["2026-01-06T00:00:00Z"]
+
+
+def test_parse_bitfinex_candles_refuses_an_empty_page():
+    with pytest.raises(ValueError):
+        parse_bitfinex_candles("[]")
+
+
+def test_comex_sessions_only_drops_saturday_and_the_closed_part_of_sunday():
+    # XAUT trades 24/7; COMEX gold does not. Keeping weekend bars would make a
+    # "200-day" SMA span ~143 trading days and let thin weekend wicks into
+    # ATR. Globex reopens Sunday 22:00 UTC, so Sunday bars before that are
+    # closed-market prints.
+    bars = [
+        Bar("2026-01-02T00:00:00Z", 1, 1, 1, 1),   # Friday   - kept
+        Bar("2026-01-03T00:00:00Z", 1, 1, 1, 1),   # Saturday - dropped
+        Bar("2026-01-04T00:00:00Z", 1, 1, 1, 1),   # Sunday 00:00 - dropped
+        Bar("2026-01-04T22:00:00Z", 1, 1, 1, 1),   # Sunday 22:00 - kept
+        Bar("2026-01-05T00:00:00Z", 1, 1, 1, 1),   # Monday   - kept
+    ]
+    assert [b.ts for b in comex_sessions_only(bars)] == [
+        "2026-01-02T00:00:00Z", "2026-01-04T22:00:00Z", "2026-01-05T00:00:00Z"]
+
+
+def _split_fetch(yahoo_hourly=None, yahoo_daily=None,
+                 bfx_hourly=None, bfx_daily=None):
+    """Route by URL, raising for whichever provider a test wants dark."""
+    def fetch(url):
+        if "bitfinex" in url:
+            body = bfx_hourly if "trade:1h:" in url else bfx_daily
+            who = "bitfinex"
+        else:
+            body = yahoo_hourly if "interval=1h" in url else yahoo_daily
+            who = "yahoo"
+        if body is None:
+            raise RuntimeError(f"{who} endpoint refused")
+        return body
+    return fetch
+
+
+def test_backfill_falls_back_to_bitfinex_when_yahoo_refuses_the_daily_leg(tmp_path):
+    conn = db.connect(tmp_path / "j.db")
+    yahoo_hourly = _payload([_MON + i * 3600 for i in range(4)],
+                            [10.0] * 4, [20.0] * 4, [1.0] * 4, [11.0] * 4)
+    bfx_daily = _bfx([(_MON, 10.0, 15.0, 30.0, 1.0),
+                      (_MON + 86400, 20.0, 25.0, 40.0, 2.0)])
+    result = backfill(conn, "GC", fetch=_split_fetch(
+        yahoo_hourly=yahoo_hourly, bfx_daily=bfx_daily))
+
+    assert result.failures == {}
+    assert read_bars(conn, "GC", "1d") == [
+        Bar("2026-01-05T00:00:00Z", 10.0, 30.0, 1.0, 15.0),
+        Bar("2026-01-06T00:00:00Z", 20.0, 40.0, 2.0, 25.0)]
+    assert result.sources["1d"] == SOURCE_BITFINEX
+    assert result.sources["1h"] == SOURCE_YAHOO
+
+
+def test_backfill_falls_back_to_bitfinex_when_yahoo_refuses_the_hourly_leg(tmp_path):
+    # The production case: Yahoo 429s range=730d&interval=1h AND
+    # range=5y&interval=1d, so both legs land on the fallback.
+    conn = db.connect(tmp_path / "j.db")
+    bfx_hourly = _bfx([(_MON + i * 3600, 10.0, 11.0, 12.0, 9.0) for i in range(8)])
+    bfx_daily = _bfx([(_MON, 10.0, 15.0, 30.0, 1.0)])
+    result = backfill(conn, "GC", fetch=_split_fetch(
+        bfx_hourly=bfx_hourly, bfx_daily=bfx_daily))
+
+    assert result.failures == {}
+    assert result.written == {"1h": 8, "4h": 2, "1d": 1, "1w": 1}
+    assert result.sources == {"1h": SOURCE_BITFINEX, "4h": SOURCE_BITFINEX,
+                              "1d": SOURCE_BITFINEX, "1w": SOURCE_BITFINEX}
+
+
+def test_backfill_does_not_call_bitfinex_when_yahoo_serves(tmp_path):
+    # Yahoo stays PRIMARY. GC=F is the instrument the desk actually trades;
+    # the fallback is a spot proxy ~1.5% below it, so it must never be
+    # preferred while the real thing is available.
+    conn = db.connect(tmp_path / "j.db")
+    called = []
+    hourly = _payload([_MON + i * 3600 for i in range(4)],
+                      [10.0] * 4, [20.0] * 4, [1.0] * 4, [11.0] * 4)
+    daily = _payload([_MON], [10.0], [30.0], [1.0], [15.0])
+
+    def fetch(url):
+        called.append(url)
+        return hourly if "interval=1h" in url else daily
+
+    result = backfill(conn, "GC", fetch=fetch)
+    assert not any("bitfinex" in u for u in called)
+    assert set(result.sources.values()) == {SOURCE_YAHOO}
+
+
+def test_backfill_reports_both_providers_when_a_leg_is_fully_dark(tmp_path):
+    # Total darkness must name every provider that refused, so the journal
+    # says whether this is a Yahoo problem or an everything problem.
+    conn = db.connect(tmp_path / "j.db")
+    result = backfill(conn, "GC", fetch=_split_fetch())
+    assert result.written == {}
+    assert set(result.failures) == {"1h", "1d"}
+    for leg in ("1h", "1d"):
+        assert "yahoo" in result.failures[leg]
+        assert "bitfinex" in result.failures[leg]
+
+
+def test_store_bars_evicts_rows_written_by_a_different_source(tmp_path):
+    # The seam guard. Yahoo stamps GC=F daily bars at the session open;
+    # Bitfinex stamps XAUT at 00:00 UTC, and the two series sit ~1.5% apart.
+    # Letting both live in one timeframe would put duplicate days under
+    # different keys and a 1.5% cliff in the middle of the series, which
+    # every indicator would read as a real gap. One timeframe, one source.
+    conn = db.connect(tmp_path / "j.db")
+    store_bars(conn, "GC", "1d",
+               [Bar("2026-01-05T00:00:00Z", 1, 2, 0.5, 1.5)], SOURCE_BITFINEX)
+    store_bars(conn, "GC", "1d",
+               [Bar("2026-01-05T04:00:00Z", 9, 9, 9, 9.0)], SOURCE_YAHOO)
+    assert read_bars(conn, "GC", "1d") == [Bar("2026-01-05T04:00:00Z", 9, 9, 9, 9.0)]
+
+
+def test_store_bars_does_not_evict_rows_from_the_same_source(tmp_path):
+    conn = db.connect(tmp_path / "j.db")
+    store_bars(conn, "GC", "1d",
+               [Bar("2026-01-05T00:00:00Z", 1, 2, 0.5, 1.5)], SOURCE_BITFINEX)
+    store_bars(conn, "GC", "1d",
+               [Bar("2026-01-06T00:00:00Z", 2, 3, 1.0, 2.5)], SOURCE_BITFINEX)
+    assert len(read_bars(conn, "GC", "1d")) == 2

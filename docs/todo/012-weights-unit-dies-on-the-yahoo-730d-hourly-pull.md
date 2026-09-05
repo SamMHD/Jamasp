@@ -335,3 +335,110 @@ is the divisor that normalises the fit's target. Local derivation is not a
 substitute for a real OHLC feed. It becomes interesting only as a
 forward-accumulating supplement, roughly ten months from now, which is not a
 plan.
+
+## Update 2026-09-05 21:15 UTC — Yahoo is closed; a fallback provider is the fix
+
+### The last two Yahoo hypotheses, tested and dead
+
+Two requests from the production egress, five minutes apart, ingest health
+confirmed clean before, between and after (`0 source errors` on every tick).
+
+| # | Request | Result |
+|---|---|---|
+| 1 | `…/chart/GC=F?period1=1630962419&period2=1788642419&interval=1d` | **429**, 19 bytes |
+| 2 | `https://query1.finance.yahoo.com/v1/test/getcrumb` | **429**, `Too Many Requests` |
+
+1. **Epoch paging is gated identically to `range=`.** `period1`/`period2` is a
+   different parameter path and it buys nothing.
+2. **The crumb workaround cannot even be bootstrapped.** `fc.yahoo.com` did
+   set an `A3` cookie (HTTP 404, as expected), but `/v1/test/getcrumb` — a
+   trivial endpoint that returns an 11-character token — is itself 429'd. The
+   chart request was therefore never made; there was no crumb to make it with.
+
+That last result reframes everything. `query1.finance.yahoo.com` is not
+metering us by cost or by depth: it is **blanket-refusing this IP** for
+everything except the one URL `range=1d&interval=1h` for `GC=F`, which is
+almost certainly served from an edge cache (a URL polled continuously by
+clients worldwide, never reaching the rate-limited origin) rather than
+granted to us. That single cached URL is why `gold_spot` still works, and it
+is not a foothold that can be widened.
+
+**Conclusion: there is no anonymous Yahoo request from this host that returns
+deep gold history.** Item 1 of the three at the top of this file is closed —
+not solved, closed. No further Yahoo probing is warranted.
+
+### The fallback: Bitfinex XAUT/USD
+
+Measured against this repo's own `prices` GC=F values, 31 overlapping
+sessions 2026-07-31..2026-09-04:
+
+| Candidate | Instrument | History | ratio vs GC | return corr | Verdict |
+|---|---|---|---|---|---|
+| **Bitfinex XAUT/USD** | LBMA spot (1 token = 1 oz) | **6.6y daily, 15mo hourly** | 0.98524 ± 0.0025 | **0.9951** | **chosen** |
+| Kraken PAXG/USD | LBMA spot | 2y daily, no deep hourly | 0.98681 ± 0.0022 | 0.9957 | too shallow; cannot feed the fit target |
+| GLD via stockanalysis.com | ETF | 1y from the API | needs ×11.04 | 0.9683 | NYSE hours only; scale drifts with the expense ratio |
+
+Blocked or unusable, all tested from the host: Stooq (JS proof-of-work wall —
+the same one that pushed `gold_spot` onto Yahoo on 2026-07-31), Barchart
+(403), Dukascopy (403), investing.com (403), MarketWatch and WSJ (401 JS
+challenge), CNBC (403), Nasdaq (`assetclass=commodities` no longer exists;
+a `stocks` control request succeeded, so the API works and gold simply is not
+in it), TradingEconomics (guest account discontinued). Retried through the
+WARP egress: no change. Everything else found needs an API key.
+
+**XAUT sits ~1.5% below GC=F because that is the futures basis, not because
+it is a different market.** Why that is acceptable *here specifically*: every
+consumer of `bars` is scale-invariant or a ratio of scale-equivariant
+quantities — the classifiers read pure ratios (RSI, Stochastic, Williams %R,
+ADX), or `(close − level) / ATR`, or a position within a band; the fit's
+target is `(forward close − close) / ATR14`. A constant multiplicative offset
+cancels in all of them. Nothing reads a bar close as a price: the panel and
+the brief quote `prices`, which is still genuine GC=F from the working
+15-minute poll. Verified by grep — `bars` has exactly three readers,
+`signals.py`, `features.py` and `watchdog.py`.
+
+Two guards make the substitution safe rather than silent:
+
+- **One timeframe, one source.** `bars` gained a `source` column and
+  `store_bars` evicts any rows in a timeframe written by a different
+  provider. Yahoo stamps GC=F daily bars at the session open and Bitfinex
+  stamps XAUT at 00:00 UTC, ~1.5% apart — mixed, that would put duplicate
+  days in the series and a vendor seam every indicator would read as a real
+  overnight gap. In the steady state the eviction matches zero rows, so it
+  costs no page rewrite and no git diff.
+- **`comex_sessions_only`.** XAUT trades 24/7 and COMEX gold does not.
+  Unfiltered, a "200-day" SMA would span ~143 trading days and thin weekend
+  wicks would reach ATR. Saturdays and pre-22:00-UTC Sundays are dropped, so
+  the fallback series has the same *shape* as the Yahoo series it stands in
+  for and only the level differs.
+
+Yahoo stays **primary** on both legs and is tried first every run; the
+fallback is only reached when it refuses. If the block ever lifts, real GC=F
+bars take over and evict the proxy automatically.
+
+### Measured end to end
+
+Real Bitfinex fetch, Yahoo stubbed dark:
+
+```
+written : {'1h': 7618, '4h': 2052, '1d': 1726, '1w': 346}
+sources : {'1h': 'bitfinex', '4h': 'bitfinex', '1d': 'bitfinex', '1w': 'bitfinex'}
+ 1d: n=1726  2020-01-24 .. 2026-09-04     (6.6 years, deeper than Yahoo's 5y leg)
+weekend daily bars remaining: 0
+signals refresh -> 36 signal states written
+weights fit     -> technical: n=5789 38 columns (2 unfitted) flags=24
+```
+
+**All four timeframes work.** Nothing needs abandoning and
+`config/weights.yaml` needs no narrowing — `1d`, `4h` and `1w` all compute,
+including the 4h and weekly sets that `docs/todo/003` records TradingView
+cannot serve. The 2 unfitted columns in that scratch run are `gvz` and
+`net_spec`, which read `prices` series absent from the scratch database.
+
+### What remains
+
+- Yahoo deep history stays dark. Nothing further to try from this host; the
+  next lead would be a different egress, which is an infrastructure decision.
+- `net_spec` has 6 observations against `min_observations: 50`, so it will
+  report unfitted for roughly another year. That is the CFTC print's weekly
+  cadence, not a bug.

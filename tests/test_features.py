@@ -4,7 +4,7 @@ import pytest
 
 from jamasp import db, features
 from jamasp.config import load_weights, signal_columns, themes
-from jamasp.ingest.bars import TS_FMT, Bar, close_ts, store_bars
+from jamasp.ingest.bars import SOURCE_YAHOO, TS_FMT, Bar, close_ts, store_bars
 
 # Daily bars start a month BEFORE the hourly ones on purpose. The target
 # divides by ATR14, which needs fourteen daily bars to warm up, and `as_of`
@@ -68,8 +68,8 @@ def test_as_of_boundary_is_inclusive_at_t_and_excludes_t_plus_one_second():
 def test_target_is_the_forward_return_divided_by_atr(tmp_path):
     conn = db.connect(tmp_path / "j.db")
     # +1 per hour, so the 3-hour forward return is exactly +3, over an ATR of 4.
-    store_bars(conn, "GC", "1h", _hourly(48))
-    store_bars(conn, "GC", "1d", _daily(40))
+    store_bars(conn, "GC", "1h", _hourly(48), SOURCE_YAHOO)
+    store_bars(conn, "GC", "1d", _daily(40), SOURCE_YAHOO)
     out = dict(features.target_series(conn, "GC", horizon_hours=3))
     assert out[HOURLY_START] == pytest.approx(3.0 / 4.0)
 
@@ -79,8 +79,8 @@ def test_target_drops_hours_with_no_future_close(tmp_path):
     # inventing a return across a weekend gap would be a fabricated
     # observation, and the cost is only that weekend-adjacent hours drop out.
     conn = db.connect(tmp_path / "j.db")
-    store_bars(conn, "GC", "1h", _hourly(10))
-    store_bars(conn, "GC", "1d", _daily(40))
+    store_bars(conn, "GC", "1h", _hourly(10), SOURCE_YAHOO)
+    store_bars(conn, "GC", "1d", _daily(40), SOURCE_YAHOO)
     stamps = [ts for ts, _ in features.target_series(conn, "GC", horizon_hours=3)]
     # 10 hourly bars, horizon 3 -> the last three have no future close.
     assert len(stamps) == 7
@@ -93,15 +93,15 @@ def test_target_is_empty_when_the_hourly_window_predates_atr(tmp_path):
     # which is the correct answer, and the reason DAILY_START leads
     # HOURLY_START by a month everywhere else in this file.
     conn = db.connect(tmp_path / "j.db")
-    store_bars(conn, "GC", "1h", _hourly(48, start=DAILY_START))
-    store_bars(conn, "GC", "1d", _daily(40))
+    store_bars(conn, "GC", "1h", _hourly(48, start=DAILY_START), SOURCE_YAHOO)
+    store_bars(conn, "GC", "1d", _daily(40), SOURCE_YAHOO)
     assert features.target_series(conn, "GC", horizon_hours=3) == []
 
 
 def test_target_is_empty_when_atr_has_not_warmed_up(tmp_path):
     conn = db.connect(tmp_path / "j.db")
-    store_bars(conn, "GC", "1h", _hourly(48))
-    store_bars(conn, "GC", "1d", _daily(5))   # far short of ATR14's 14 bars
+    store_bars(conn, "GC", "1h", _hourly(48), SOURCE_YAHOO)
+    store_bars(conn, "GC", "1d", _daily(5), SOURCE_YAHOO)   # far short of ATR14's 14 bars
     assert features.target_series(conn, "GC", horizon_hours=3) == []
 
 
@@ -110,7 +110,7 @@ def test_target_is_empty_when_atr_has_not_warmed_up(tmp_path):
 def test_a_state_is_not_visible_before_its_bar_closes(tmp_path):
     conn = db.connect(tmp_path / "j.db")
     daily = _daily(60)
-    store_bars(conn, "GC", "1d", daily)
+    store_bars(conn, "GC", "1d", daily, SOURCE_YAHOO)
     hist = features.column_history(conn, load_weights(), "GC")
 
     # The earliest instant ANY daily state could legitimately carry is the
@@ -141,10 +141,10 @@ def test_states_are_forward_filled_between_bar_closes():
 # ---- technical matrix -------------------------------------------------------
 
 def _seed_bars(conn, hours=200):
-    store_bars(conn, "GC", "1h", _hourly(hours))
-    store_bars(conn, "GC", "4h", _hourly(hours))
-    store_bars(conn, "GC", "1d", _daily(60))
-    store_bars(conn, "GC", "1w", _daily(60))
+    store_bars(conn, "GC", "1h", _hourly(hours), SOURCE_YAHOO)
+    store_bars(conn, "GC", "4h", _hourly(hours), SOURCE_YAHOO)
+    store_bars(conn, "GC", "1d", _daily(60), SOURCE_YAHOO)
+    store_bars(conn, "GC", "1w", _daily(60), SOURCE_YAHOO)
 
 
 def test_technical_matrix_columns_are_the_configured_signal_columns(tmp_path):
@@ -251,10 +251,10 @@ def test_build_theme_raises_when_hourly_bars_are_stamped_off_the_hour(tmp_path):
     # yet".
     conn = db.connect(tmp_path / "j.db")
     off_hour_start = "2026-02-01T00:30:00Z"
-    store_bars(conn, "GC", "1h", _hourly(200, start=off_hour_start))
-    store_bars(conn, "GC", "4h", _hourly(200, start=off_hour_start))
-    store_bars(conn, "GC", "1d", _daily(60))
-    store_bars(conn, "GC", "1w", _daily(60))
+    store_bars(conn, "GC", "1h", _hourly(200, start=off_hour_start), SOURCE_YAHOO)
+    store_bars(conn, "GC", "4h", _hourly(200, start=off_hour_start), SOURCE_YAHOO)
+    store_bars(conn, "GC", "1d", _daily(60), SOURCE_YAHOO)
+    store_bars(conn, "GC", "1w", _daily(60), SOURCE_YAHOO)
     # Published well inside the seeded bar range, on the hour as every real
     # item's published_at is -- it is the BAR that is off, not the story.
     _score(conn, "a", "2026-02-02T02:10:00Z", 5, "rates_dollar")

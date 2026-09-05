@@ -46,9 +46,10 @@ CREATE TABLE IF NOT EXISTS prices (
 --
 -- '1h' is stored as well as the spec's '1d'/'4h'/'1w': the fit's target is a
 -- forward return at hourly resolution, so it needs an hourly close to
--- measure from. Yahoo returns the hourly series in the same call we make for
--- the 4h resample, so storing it is free. Yahoo caps interval=1h at
--- range=730d, which is what bounds the hourly history — not this table.
+-- measure from. Both providers return the hourly series in the same call we
+-- make for the 4h resample, so storing it is free. What bounds the hourly
+-- history is the provider, never this table: Yahoo caps interval=1h at
+-- range=730d, and Bitfinex caps a page at 10,000 candles (~15 months).
 CREATE TABLE IF NOT EXISTS bars (
     symbol    TEXT NOT NULL,
     timeframe TEXT NOT NULL,   -- '1h' | '4h' | '1d' | '1w'
@@ -57,6 +58,13 @@ CREATE TABLE IF NOT EXISTS bars (
     high      REAL NOT NULL,
     low       REAL NOT NULL,
     close     REAL NOT NULL,
+    -- Which provider served this row. A timeframe is served by exactly one
+    -- provider at a time (jamasp/ingest/bars.py store_bars evicts the other
+    -- one's rows on a switch): Yahoo's GC=F futures and the Bitfinex XAUT
+    -- spot fallback stamp the same trading day at different hours and sit
+    -- ~1.5% apart, so a mixed timeframe would carry duplicate days and a
+    -- vendor seam that every indicator would read as a real price gap.
+    source    TEXT NOT NULL DEFAULT 'yahoo',
     PRIMARY KEY (symbol, timeframe, ts)
 );
 CREATE TABLE IF NOT EXISTS extract_cache (
@@ -199,6 +207,8 @@ ADDED_COLUMNS = (
     # signal_states shipped without `source`; the deployed host already has
     # the table, and CREATE TABLE IF NOT EXISTS will never widen it.
     ("signal_states", "source", "TEXT NOT NULL DEFAULT 'bars'"),
+    # bars shipped without `source` too; same reason, same fix.
+    ("bars", "source", "TEXT NOT NULL DEFAULT 'yahoo'"),
 )
 
 

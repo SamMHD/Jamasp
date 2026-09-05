@@ -156,16 +156,19 @@ def test_bars_table_exists(tmp_path):
         "SELECT name FROM sqlite_master WHERE type='table' AND name='bars'"
     ).fetchone()
     cols = {r[1] for r in conn.execute("PRAGMA table_info(bars)")}
-    assert cols == {"symbol", "timeframe", "ts", "open", "high", "low", "close"}
+    assert cols == {"symbol", "timeframe", "ts", "open", "high", "low", "close",
+                    "source"}
 
 
 def test_bars_primary_key_is_symbol_timeframe_ts(tmp_path):
     conn = db.connect(tmp_path / "j.db")
-    row = ("GC", "1d", "2026-08-01T00:00:00Z", 1.0, 2.0, 0.5, 1.5)
-    conn.execute("INSERT INTO bars VALUES (?,?,?,?,?,?,?)", row)
+    row = ("GC", "1d", "2026-08-01T00:00:00Z", 1.0, 2.0, 0.5, 1.5, "yahoo")
+    conn.execute("INSERT INTO bars VALUES (?,?,?,?,?,?,?,?)", row)
     # Same key, different values: INSERT OR REPLACE must overwrite, not duplicate.
-    conn.execute("INSERT OR REPLACE INTO bars VALUES (?,?,?,?,?,?,?)",
-                 ("GC", "1d", "2026-08-01T00:00:00Z", 9.0, 9.0, 9.0, 9.0))
+    # `source` is deliberately NOT in the key — a bar is one row with a
+    # provenance, not one row per vendor that ever quoted it.
+    conn.execute("INSERT OR REPLACE INTO bars VALUES (?,?,?,?,?,?,?,?)",
+                 ("GC", "1d", "2026-08-01T00:00:00Z", 9.0, 9.0, 9.0, 9.0, "yahoo"))
     conn.commit()
     rows = conn.execute("SELECT close FROM bars").fetchall()
     assert len(rows) == 1 and rows[0]["close"] == 9.0
