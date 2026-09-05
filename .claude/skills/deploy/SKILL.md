@@ -236,10 +236,15 @@ oneshot timer units).
    `systemctl --user enable --now jamasp-panel.service` for user units, or
    for the system variant (`User=jamasp`), drop `--user`:
    `systemctl enable --now jamasp-panel.service`.
-5. Verify: `curl -s http://127.0.0.1:3300/ | grep -q "Last ingest" && echo OK`.
+5. Verify: `curl -s http://127.0.0.1:3300/ | grep -q "errors 24h" && echo OK`.
    Grepping for "Overview" is not a real check — that's the sidebar nav
-   link, present even when the page body has failed; "Last ingest" only
-   appears once the Overview's stat cards actually render.
+   link, present even when the page body has failed. `errors 24h` is a
+   `StatusStrip` label (`panel/components/status-strip.tsx`), so it only
+   appears once the Overview's status strip actually renders.
+   **The old marker for this was "Last ingest"; it no longer exists** —
+   the design-system work (PR #27) replaced those stat cards with the
+   compact strip that reads `ingest 11m ago · runs 0/20 · errors 24h 0`.
+   A check for "Last ingest" now fails on a perfectly healthy panel.
 6. Access from a workstation: `ssh -L 3300:127.0.0.1:3300 jamasp@<host>`
    or `tailscale serve 3300`. The panel is still bound to localhost with
    no auth of its own — public access is provided by the nginx + Access +
@@ -695,14 +700,16 @@ infrastructure.
 
 As of this writing, two on-host checkouts are not simply "at main":
 
-- `/home/jamasp/Jamasp` is on branch `live`, and has a hand-installed
-  `next.config.ts` that is **byte-identical** to the one committed to this
-  branch but which git still reports as modified (likely a line-ending or
-  mtime artifact from how it was placed on the host rather than checked
-  out). A post-merge `git pull` there will refuse with "local changes would
-  be overwritten" until that's reconciled — `git diff` will show no
-  content difference, which is the tell that this is the drift, not a real
-  divergence.
+- `/home/jamasp/Jamasp` is on branch `live`, which tracks `origin/live` and
+  runs hundreds of commits ahead of `main` with its own per-run state
+  commits. **Never `git pull` there** — the convention is
+  `git merge origin/main` into `live` (verified 2026-09-05: `git status`
+  stays clean apart from the expected ` M state/jamasp.db`, which every run
+  rewrites and which must never be staged, stashed or reverted). The host
+  has no git write credential, so nothing can be pushed back from it.
+  *Resolved:* the `next.config.ts` drift this section used to warn about —
+  a byte-identical file that git still reported as modified — is gone as of
+  2026-09-05; `git status --porcelain panel/next.config.ts` is empty.
 - `/root/Jamasp` is a stale second checkout, left over from before the
   service user was set up, carrying the **old** (pre-panel-public-access)
   `next.config.ts`. It is not what's running the panel and should not be
