@@ -262,3 +262,76 @@ Test suite: 480 passed, 4 skipped (10 new tests, each written failing first).
   explicitly and `config/weights.yaml` narrowed to what exists, rather than
   leaving a permanently-failing fetch in place. That decision is not taken
   here.
+
+## Update 2026-09-05 21:00 UTC — the daily leg 429s too; metering-by-cost is refuted
+
+The partial-success fix (#28 `ec4bab6`, on the host as `51993f0`) deployed and
+did exactly what it was designed to do: it let the **daily leg run for the
+first time in production**. It failed.
+
+`jamasp-weights.service`, 2026-09-05 20:52:07 UTC, verbatim:
+
+```
+Sep 05 20:52:08 Jamasp uv[2886034]: WARNING bars GC: 1h leg failed — HTTPStatusError: Client error '429 Too Many Requests' for url 'https://query1.finance.yahoo.com/v8/finance/chart/GC=F?range=730d&interval=1h'
+Sep 05 20:52:08 Jamasp uv[2886034]: WARNING bars GC: 1d leg failed — HTTPStatusError: Client error '429 Too Many Requests' for url 'https://query1.finance.yahoo.com/v8/finance/chart/GC=F?range=5y&interval=1d'
+Sep 05 20:52:08 Jamasp uv[2886034]: Error: bars GC: no timeframe could be fetched — …
+Sep 05 20:52:08 Jamasp systemd[1]: jamasp-weights.service: Main process exited, code=exited, status=1/FAILURE
+```
+
+Both legs now run, both legs are refused, and the unit exits 1 for the right
+reason — total darkness, not an abort chain. The exit-code policy is working;
+there is simply nothing to write.
+
+### What this refutes
+
+**Hypothesis A (metering by response cost) is dead.** The four data points:
+
+| Request | Approx. bars | Result |
+|---|---|---|
+| `range=1d&interval=1h` | ~24 | **200**, ~96×/day, indefinitely |
+| `range=730d&interval=1h` | ~17,400 | 429 |
+| `range=2y&interval=1h` | ~17,400 | 429 |
+| `range=5y&interval=1d` | ~1,250 | **429** |
+
+The daily pull is ~14× *smaller* than the hourly one and ~52× larger than the
+one that works, and it is refused just like the big ones. A quota priced in
+response bytes or row count would have served it. It did not. So the
+discriminator is not size and not the range-token spelling.
+
+What is left is a **depth/entitlement gate**: `range=1d` — the "current
+quote" shape — is served anonymously; anything reaching back beyond roughly a
+session is not, from this egress. That is hypothesis **C** (deep history now
+needs a crumb/cookie, or is simply closed to anonymous datacenter IPs), and it
+is now the only one standing.
+
+### Consequence for the fix
+
+The item can no longer be closed by choosing a better Yahoo range token; there
+is no token that works. The remaining Yahoo options are (a) `period1`/`period2`
+epoch paging, in case the epoch parameter path is not gated the same way, and
+(b) a crumb/cookie authenticated request. Both are cheap to test but must be
+tested sparingly — the working `range=1d` poll is the desk's price lifeline and
+protecting it outranks fixing bars.
+
+If neither works, the answer is a **second provider for daily/weekly bars**,
+with Yahoo kept as the primary attempt and the partial-success semantics in
+`backfill()` reused unchanged.
+
+### Local derivation is not a way out — measured
+
+`prices` is the obvious candidate: 2,146 `GC` rows accumulated by the working
+15-minute poll. Its actual span, measured on the production DB 2026-09-05:
+
+```
+GC  2146 rows  2026-07-31T00:07:45Z … 2026-09-04T20:59:58Z   31 distinct days
+```
+
+Thirty-one calendar days, ~25 trading sessions. A 200DMA needs 200 sessions;
+a 50DMA needs 50. Deriving daily OHLC from these polls would produce a series
+too short for the majority of the configured signals, and its highs and lows
+would be *systematically understated* — a 15-minute sample cannot see the
+extremes between samples, so the ATR it implies would be biased low, and ATR
+is the divisor that normalises the fit's target. Local derivation is not a
+substitute for a real OHLC feed. It becomes interesting only as a
+forward-accumulating supplement, roughly ten months from now, which is not a
+plan.
