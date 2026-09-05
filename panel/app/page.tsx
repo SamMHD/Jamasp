@@ -20,6 +20,7 @@ import { deriveNewsPulse } from "@/lib/newsflow";
 import { parseStance } from "@/lib/stance";
 import { buildSignalTiles } from "@/lib/technicalmap";
 import { deriveTechnicals, TECHNICAL_SYMBOLS } from "@/lib/technicals";
+import { liveGoldSymbol } from "@/lib/tradingview";
 import { buildThemeMultipliers, type MapRange } from "@/lib/marketmap";
 import { cls, fmtUtc } from "@/lib/format";
 
@@ -218,6 +219,7 @@ export default async function Overview({
 
       <div className="mt-4">
         <TechnicalPanel tech={tech} series={series} gvzSeries={gvzSeries}
+          tvSymbol={liveGoldSymbol(files.loadSettings())}
           gvzDelta={gvz && gvzRef !== null ? gvz.value - gvzRef : null}
           netSpecDelta={netSpecDelta?.delta ?? null} now={now} />
       </div>

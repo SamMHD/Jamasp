@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { TechnicalPanel } from "../components/technical-panel";
+import type { PricePoint } from "../lib/db";
 import type { GoldTechnicals } from "../lib/technicals";
 
 const NOW = new Date("2026-08-01T12:00:00Z");
@@ -20,8 +21,16 @@ const full: GoldTechnicals = {
   netSpecAsOf: "2026-07-28T00:00:00Z",
 };
 
+const SERIES: PricePoint[] = [
+  { ts: "2026-07-31T08:00:00Z", value: 3310.5 },
+  { ts: "2026-08-01T08:00:00Z", value: 3325 },
+];
+
 const render = (tech: GoldTechnicals) =>
   renderToStaticMarkup(<TechnicalPanel tech={tech} series={[]} now={NOW} />);
+
+const renderWithSeries = (tech: GoldTechnicals, series = SERIES) =>
+  renderToStaticMarkup(<TechnicalPanel tech={tech} series={series} now={NOW} />);
 
 describe("TechnicalPanel", () => {
   it("renders the regime and indicator readout when data is present", () => {
@@ -110,6 +119,60 @@ describe("TechnicalPanel", () => {
     // spot.ts 08:00Z against NOW 12:00Z. The indicator line reads "6h ago",
     // so this string belongs to the spot quote alone.
     expect(render(full)).toContain("4h ago");
+  });
+
+
+  // --- the live/stored split (TradingView widget beside Jamasp's reading) ---
+  //
+  // The panel's big figure used to be unlabelled, and `prices.GC` carries the
+  // market bar timestamp — so a frozen feed printed a day-old number in the
+  // typography of a live quote. The number is now explicitly Jamasp's, with
+  // its provenance and age, and the live half comes from TradingView.
+
+  it("labels the stored figure as Jamasp's own reading, with provenance", () => {
+    const html = render(full);
+    expect(html).toContain("Jamasp");
+    expect(html).toContain("last reading");
+    expect(html).toContain("GC=F");           // which feed the number came from
+    expect(html).toContain("3,325");          // the reading itself still renders
+  });
+
+  it("names both instruments, because they are not the same one", () => {
+    // The keyless widget cannot render COMEX futures (lib/tradingview.ts), so
+    // it charts spot while Jamasp reads the front-month future. A panel that
+    // named only one of them would invite the reader to take the two figures
+    // for the same contract, and read the carry basis as drift.
+    const html = render(full);
+    expect(html).toContain("spot XAU/USD");          // what the widget shows
+    expect(html).toContain("COMEX front-month");     // what the reading is
+    expect(html).toContain("carry premium");         // why they differ
+  });
+
+  it("still offers the live chart when Jamasp has no price at all", () => {
+    // A dead price feed is exactly when the desk most needs a live number to
+    // check against, so the widget must not sit inside the spot guard.
+    const html = render({ ...full, spot: null });
+    expect(html).toContain("no price data yet");
+    expect(html).toContain("spot XAU/USD");
+  });
+
+  it("server-renders Jamasp's own chart as the widget's fallback", () => {
+    // Hydration on this deployment has failed outright before (see
+    // components/spot-chart.tsx); the fallback is what the SERVER draws, so
+    // a blocked or unloadable widget degrades to a real chart, never a hole.
+    const html = renderWithSeries(full);
+    expect(html).toContain('aria-label="gold futures');
+    expect(html).toContain('stroke="var(--viz-spot)"');
+  });
+
+  it("keeps the value-exact table on screen alongside the live chart", () => {
+    const html = renderWithSeries(full);
+    expect(html).toContain("stored readings as table");
+    expect(html).toContain("3,310.5");
+  });
+
+  it("says so when there is no stored series to fall back on", () => {
+    expect(render(full)).toContain("no stored price history to fall back on");
   });
 
   it("shows the spot age even when the indicator feed reports fresh", () => {

@@ -196,3 +196,62 @@ def test_failed_run_keeps_failed_status(tmp_path, monkeypatch):
 def test_git_head_returns_none_outside_a_repo(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     assert runner._git_head() is None
+
+
+def test_failure_notice_carries_the_reason(tmp_path, monkeypatch):
+    # 2026-08-28..31: the OAuth refresh token lapsed and every agent run
+    # failed with a bare `exit=1`. The cause was one line on claude's stderr
+    # and _execute_once threw it away (docs/todo/007).
+    sent = []
+    monkeypatch.setattr(runner, "_notify_safe", lambda c, s, t: sent.append(t))
+    conn = db.connect(tmp_path / "j.db")
+    assert runner.run_agent(conn, settings_with(["fail"]), "scan") == "failed"
+    assert sent and "boom" in sent[0], sent
+
+
+def test_failure_reason_reaches_the_journal(tmp_path, monkeypatch, capsys):
+    # journalctl alone must be enough next time: the unit's own log carried
+    # only "scan: failed" through the whole 3.5-day outage.
+    monkeypatch.setattr(runner, "_notify_safe", lambda c, s, t: None)
+    conn = db.connect(tmp_path / "j.db")
+    runner.run_agent(conn, settings_with(["fail"]), "scan")
+    assert "boom" in capsys.readouterr().err
+
+
+def test_successful_run_captures_no_output(tmp_path, monkeypatch):
+    # Success is not interesting and must not carry the child's chatter into
+    # a notice or the journal.
+    code, status, tail = runner._execute_once(
+        settings_with(["ok"])["runs"]["claude_cmd"] + ["/scan"], 30
+    )
+    assert (code, status) == (0, "ok")
+    assert tail == ""
+
+
+def test_failed_run_tail_is_bounded(tmp_path, monkeypatch):
+    # A crash can dump megabytes; a Telegram message hard-fails over 4096.
+    code, status, tail = runner._execute_once(
+        settings_with(["flood"])["runs"]["claude_cmd"] + ["/scan"], 30
+    )
+    assert status == "failed"
+    assert 0 < len(tail) <= runner.OUTPUT_TAIL_CHARS
+    # the tail is the END of the stream, where the error message lives
+    assert tail.rstrip().endswith("LAST-LINE-MARKER")
+
+
+def test_timeout_with_output_file_does_not_hang(tmp_path, monkeypatch):
+    # The DEVNULL this replaced was deliberate: a grandchild inheriting the
+    # output handle can hold a *pipe* open forever. A file has no reader to
+    # block on, so the timeout path must still return promptly.
+    monkeypatch.setattr(runner, "_notify_safe", lambda c, s, t: None)
+    conn = db.connect(tmp_path / "j.db")
+    marker = tmp_path / "child_pid2"
+    start = time.monotonic()
+    status = runner.run_agent(
+        conn, settings_with(["spawn_orphan", str(marker)], scan_timeout=1), "scan"
+    )
+    elapsed = time.monotonic() - start
+    assert status == "timeout"
+    # two attempts x 1s timeout, plus slack — nowhere near the 30s the
+    # grandchild sleeps for.
+    assert elapsed < 15, f"timeout path took {elapsed:.1f}s — it is blocking on the child's output"

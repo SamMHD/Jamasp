@@ -1,7 +1,16 @@
 import { expect, test } from "@playwright/test";
 
+// See smoke.spec.ts: both TradingView embeds — the Drivers card's Mini
+// Charts and the technical panel's Advanced Chart — are blocked so the sweep
+// measures the panel's own layout, not a third party's, and so a
+// narrow-viewport overflow can never be blamed on someone else's iframe.
+test.beforeEach(async ({ page }) => {
+  await page.route("**://*.tradingview-widget.com/**", route => route.abort());
+  await page.route("**://*.tradingview.com/**", route => route.abort());
+});
+
 const ROUTES = ["/", "/inbox", "/crawl", "/briefs", "/schedule",
-                "/calendar", "/alerts", "/state", "/prices"];
+                "/calendar", "/alerts", "/state", "/predictions", "/prices"];
 
 for (const path of ROUTES) {
   test(`${path} fits the viewport`, async ({ page }) => {
@@ -42,9 +51,34 @@ test("the More sheet reaches the overflow destinations", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "More" }).click();
   const sheet = page.getByRole("dialog");
-  for (const label of ["Crawl", "Calendar", "Alerts", "State", "Prices"]) {
+  for (const label of ["Crawl", "Calendar", "Alerts", "State", "Predictions", "Prices"]) {
     await expect(sheet.getByRole("link", { name: label })).toBeVisible();
   }
+});
+
+// The sheet used to close on the tap itself, which threw away the one
+// surface carrying click feedback (the row's pending spinner) and dropped
+// the reader back on the page they were already on with nothing to show the
+// tap had registered. It now closes when the navigation LANDS. Both halves
+// matter: a sheet that never closed would be worse than the original bug.
+test("the More sheet closes once the navigation lands", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "More" }).click();
+  const sheet = page.getByRole("dialog");
+  await sheet.getByRole("link", { name: "Calendar" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Calendar" })).toBeVisible();
+  await expect(sheet).toBeHidden();
+});
+
+// Tapping the row that is already current changes no pathname, so the
+// close-on-landing effect never fires for it — that one still has to close
+// on the tap or the sheet is stuck.
+test("the More sheet closes when tapping the route already open", async ({ page }) => {
+  await page.goto("/calendar");
+  await page.getByRole("button", { name: "More" }).click();
+  const sheet = page.getByRole("dialog");
+  await sheet.getByRole("link", { name: "Calendar" }).click();
+  await expect(sheet).toBeHidden();
 });
 
 test("the theme control cycles and persists", async ({ page }) => {

@@ -120,17 +120,59 @@ export type ClusterHeadRow = ItemRow & { sources_n: number };
  * Newest cluster representatives with the number of distinct sources
  * carrying each story. The head convention matches getUnreadCount:
  * `cluster_id = id` marks the representative, NULL means unclustered
- * (counted as its own single source — the subquery would otherwise return
+ * (counted as its own single source — the count would otherwise return
  * 0 for NULL and claim a sourceless story).
+ *
+ * Two statements, deliberately, and the limit is applied by the FIRST one.
+ *
+ * This used to be a single query whose SELECT list carried a correlated
+ * `(SELECT COUNT(DISTINCT c.source) FROM items c WHERE c.cluster_id =
+ * i.cluster_id)`. That subquery is evaluated per candidate row — and the
+ * candidates are every head in the table, because `LIMIT 8` cannot be
+ * applied until after `ORDER BY published_at DESC` has ranked them all.
+ * `items` has no index on `cluster_id`, so each evaluation was a full scan
+ * plus a temp b-tree for the DISTINCT. On the live database (14.1k items,
+ * 12.3k of them heads) that is ~173M row visits: the overview's data layer
+ * measured **9.3 seconds**, of which this one call was 9.27s — the whole
+ * reason clicking "Overview" looked like a dead click for the length of a
+ * server round trip. Every other route answered in 15–35ms.
+ *
+ * Ranking first and counting second reduces it to one 12k-row sort plus a
+ * single grouped scan over the ≤`limit` clusters that survive: **5.4ms** on
+ * that same database, a ~1,700x cut, with byte-identical output. Do not fold
+ * this back into one statement — the SQLite planner is free to evaluate a
+ * result-column subquery before the sorter's LIMIT, and quietly does.
+ * test/cluster-heads-perf.test.ts holds the shape to account.
+ *
+ * A grouped IN-list rather than a per-head correlated lookup for the same
+ * reason at a smaller scale: one scan of `items` instead of `limit` of them.
  */
 export function getClusterHeads(limit: number): ClusterHeadRow[] {
-  return q(db => db.prepare(
-    `SELECT i.*, CASE WHEN i.cluster_id IS NULL THEN 1 ELSE
-       (SELECT COUNT(DISTINCT c.source) FROM items c WHERE c.cluster_id = i.cluster_id)
-     END AS sources_n
-     FROM items i WHERE i.cluster_id = i.id OR i.cluster_id IS NULL
-     ORDER BY i.published_at DESC LIMIT ?`
-  ).all(limit) as ClusterHeadRow[]);
+  return q(db => {
+    const heads = db.prepare(
+      `SELECT * FROM items WHERE cluster_id = id OR cluster_id IS NULL
+       ORDER BY published_at DESC LIMIT ?`
+    ).all(limit) as ItemRow[];
+
+    const clustered = heads.map(h => h.cluster_id).filter((c): c is string => c !== null);
+    const counts = new Map<string, number>();
+    if (clustered.length > 0) {
+      const rows = db.prepare(
+        `SELECT cluster_id, COUNT(DISTINCT source) n FROM items
+          WHERE cluster_id IN (${clustered.map(() => "?").join(",")})
+          GROUP BY cluster_id`
+      ).all(...clustered) as { cluster_id: string; n: number }[];
+      for (const r of rows) counts.set(r.cluster_id, r.n);
+    }
+
+    // `?? 1` is the same floor the old CASE expression set for an
+    // unclustered head, reused for the (impossible-by-construction, but
+    // cheap to hold) case of a head whose cluster has no rows.
+    return heads.map(h => ({
+      ...h,
+      sources_n: h.cluster_id === null ? 1 : counts.get(h.cluster_id) ?? 1,
+    }));
+  });
 }
 
 /**

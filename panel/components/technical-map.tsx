@@ -2,8 +2,7 @@ import { fmtAge } from "@/lib/format";
 import { toneFromIntensity } from "@/lib/marketmap";
 import { layoutSignalMap, type SignalTile } from "@/lib/technicalmap";
 import {
-  MapHatchDefs, MapLegend, MapTile, LABEL_PAD, MIN_LABEL_H, MIN_LABEL_W,
-  truncateForWidth, wrapForTile,
+  MapGroupHeader, MapHatchDefs, MapLegend, MapTile, GROUP_HEADER_H, fitLabel,
 } from "@/components/map-tiles";
 import { FullscreenButton } from "@/components/fullscreen-button";
 
@@ -36,8 +35,7 @@ import { FullscreenButton } from "@/components/fullscreen-button";
  * hover title (below) still says PINNED for anyone who wants the detail.
  */
 
-const FAMILY_HEADER_H = 20;
-const HEADER_FONT = 9;
+const FAMILY_HEADER_H = GROUP_HEADER_H;
 
 export const TECHNICAL_MAP_ELEMENT_ID = "technical-map";
 
@@ -111,24 +109,20 @@ export function TechnicalMap({ tiles, width, height, fittedAt }: {
         <MapHatchDefs />
         {boxes.map(box => (
           <g key={box.group}>
-            <text x={box.x + LABEL_PAD} y={box.y + 13} fontSize={HEADER_FONT}
-              fill="var(--muted-foreground)"
-              style={{ textTransform: "uppercase", letterSpacing: "0.08em" }}>
-              {truncateForWidth(familyLabel(box.group), box.w, HEADER_FONT)}
-            </text>
+            <MapGroupHeader x={box.x} y={box.y} w={box.w}
+              label={familyLabel(box.group)} />
             {box.items.map(cell => {
-              const showLabel = cell.w >= MIN_LABEL_W && cell.h >= MIN_LABEL_H;
+              // The label is sized to its own tile rather than to one
+              // map-wide constant — see map-tiles.tsx#fitLabel.
+              const label = fitLabel(
+                `${cell.node.signal} ${cell.node.timeframe}`, cell.w, cell.h);
               return (
                 <MapTile key={cell.node.key}
                   x={cell.x} y={cell.y} w={cell.w} h={cell.h}
                   tone={toneFromIntensity(cell.node.state)}
                   title={tileTitle(cell.node, now)}
                   dashed={!cell.node.fitted && !cell.node.pinned}
-                  lines={showLabel
-                    ? wrapForTile(
-                        `${cell.node.signal} ${cell.node.timeframe}`,
-                        cell.w, cell.h)
-                    : []} />
+                  lines={label.lines} fontSize={label.fontSize} />
               );
             })}
           </g>

@@ -1,9 +1,25 @@
 import { expect, test } from "@playwright/test";
 
+// The panel embeds TradingView in two places — the Drivers card's Mini
+// Charts (widgets.tradingview-widget.com) and the technical panel's Advanced
+// Chart (s3.tradingview.com). Block BOTH hosts for the whole suite: these
+// tests assert what Jamasp's own database says, which must stay true when an
+// embed does not arrive, and a suite that reached out to a third party would
+// be asserting TradingView's uptime rather than the panel's behaviour.
+// Blocking here means the fallback paths — the ones that have to hold
+// offline — are what run, and the suite is hermetic.
+//
+// The live paths are exercised separately and just as hermetically, against
+// locally-fulfilled stubs, in tradingview-live.spec.ts.
+test.beforeEach(async ({ page }) => {
+  await page.route("**://*.tradingview-widget.com/**", route => route.abort());
+  await page.route("**://*.tradingview.com/**", route => route.abort());
+});
+
 const ROUTES: [string, string][] = [
   ["/", "Overview"], ["/inbox", "Inbox"], ["/crawl", "Crawl"], ["/briefs", "Briefs"],
   ["/schedule", "Schedule"], ["/calendar", "Calendar"], ["/alerts", "Alerts"],
-  ["/state", "State"], ["/prices", "Prices"],
+  ["/state", "State"], ["/predictions", "Predictions"], ["/prices", "Prices"],
 ];
 
 for (const [path, title] of ROUTES) {
@@ -81,8 +97,9 @@ test("overview renders the market instrument panels", async ({ page }) => {
   await expect(news.getByText(/last item/)).toBeVisible();
   await expect(page.getByText("Dollar slides on jobs data")).toHaveCount(0);
 
-  // Technical: heading, the server-rendered spot chart, ladder rows, regime
-  // line, and the RSI gauge with the fixture's exact reading in its name.
+  // Technical: heading, the live-chart slot, Jamasp's own labelled reading,
+  // ladder rows, regime line, and the RSI gauge with the fixture's exact
+  // reading in its name.
   //
   // exact: true on the region name — the technical map's own two sections
   // ("Technical map", "Technical signal treemap") both contain "Technical"
@@ -92,7 +109,31 @@ test("overview renders the market instrument panels", async ({ page }) => {
   // and the technical map's "Technical map" heading.
   const technical = page.getByRole("region", { name: "Technical", exact: true });
   await expect(technical.getByRole("heading")).toBeVisible();
-  await expect(technical.locator('svg[aria-label^="gold futures"]')).toBeVisible();
+
+  // The chart slot is deliberately NOT asserted as the inline SVG any more.
+  // It now holds TradingView's live widget, with that SVG as the fallback
+  // underneath — so which of the two is on screen depends on whether this
+  // runner can reach tradingview.com, and pinning either would make the
+  // suite fail on exactly the network condition the fallback exists for.
+  // The caption is what is true in every state: it names the instrument, and
+  // it says which of live/loading/unavailable the reader is looking at.
+  //
+  // .first() because "spot XAU/USD" is deliberately said TWICE — once in the
+  // caption under the chart, once in the reading box's basis note. Both are
+  // load-bearing (the widget charts spot, Jamasp reads the front-month
+  // future), so an exact locator would just be pinning one phrasing.
+  await expect(technical.getByText(/spot XAU\/USD/).first()).toBeVisible();
+
+  // Jamasp's own figure, explicitly labelled as a stored reading rather than
+  // presented in the typography of a live quote — the defect the widget was
+  // added to fix. GC=F names the feed it came from.
+  await expect(technical.getByText(/last reading/i)).toBeVisible();
+  await expect(technical.getByText(/GC=F · COMEX front-month/)).toBeVisible();
+  // The widget charts spot and the reading is the front-month future; the
+  // basis between them must be stated, not left to be misread as staleness.
+  await expect(technical.getByText(/carry premium/)).toBeVisible();
+  // The value-exact twin of the chart stays reachable in the live case too.
+  await expect(technical.getByText(/stored readings as table/)).toBeVisible();
   // Exact match: the stance prose itself contains "200DMA" as a substring
   // (in the View and What-flips-me bullets), which collides with a plain
   // substring getByText and produces a Playwright strict-mode violation.
@@ -173,4 +214,63 @@ test("overview renders the technical map", async ({ page }) => {
   await expect(map.locator('rect[fill="url(#map-hatch)"]')).toHaveCount(1);
   // macd@1d has no fitted coefficient, so its tile must be dashed.
   await expect(map.locator("rect[stroke-dasharray]")).toHaveCount(1);
+});
+
+// --- the forecast ledger page ---
+//
+// The fixture ledger is five entries and time-stable: both unscored ones
+// (aaaa0001, aaaa0002) matured well before any future render, so they are
+// permanently "due", and the other three carry a fixed outcome each. That
+// makes every count below a constant rather than something that drifts as
+// the real clock advances.
+test("the Forecast record card leads to the ledger page", async ({ page }) => {
+  await page.goto("/");
+  const card = page.getByRole("region", { name: "Forecast record" });
+  await card.getByRole("link", { name: "→ predictions" }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Predictions");
+  await expect(page).toHaveURL(/\/predictions$/);
+});
+
+test("the ledger lists every prediction, live ones first", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", e => errors.push(String(e)));
+  await page.goto("/predictions");
+
+  // Header arithmetic: 5 entries, 1 hit / 1 miss decisive, 2 still live.
+  await expect(page.getByText("5 in the ledger · 50% hit rate over 2 decisive · 2 still live"))
+    .toBeVisible();
+
+  // Every state is reachable as a filter, with its own count.
+  const filters = page.getByRole("navigation", { name: "Filter by state" });
+  for (const [label, n] of [["all", "5"], ["due", "2"], ["open", "0"],
+                            ["hit", "1"], ["miss", "1"], ["unclear", "1"]]) {
+    await expect(filters.getByRole("link", { name: `${label} ${n}` })).toBeVisible();
+  }
+
+  // Matured-but-unscored is called out, in the same words the CLI uses.
+  await expect(page.getByText(/2 matured but unscored/)).toBeVisible();
+
+  const live = page.getByRole("region", { name: "Live predictions" });
+  const resolved = page.getByRole("region", { name: "Resolved predictions" });
+  await expect(live.getByText("GC above 3350 within 5 days")).toBeVisible();
+  await expect(resolved.getByText("DXY down on CPI")).toBeVisible();
+  // Most overdue first: aaaa0002 (20 Jul) matured before aaaa0001 (1 Aug).
+  await expect(live.locator("li").first()).toContainText("GC flat through July");
+
+  // A row's disclosure carries the scoring note, which the collapsed row does not.
+  await expect(page.getByText("no clean read")).toBeHidden();
+  await resolved.getByText("CPI print ambiguous effect on gold").click();
+  await expect(page.getByText("no clean read")).toBeVisible();
+
+  expect(errors).toEqual([]);
+});
+
+test("a state filter narrows the ledger to that state alone", async ({ page }) => {
+  await page.goto("/predictions?state=miss");
+  await expect(page.getByText("GC up on FOMC")).toBeVisible();
+  await expect(page.getByText("DXY down on CPI")).toHaveCount(0);
+  // A garbage param degrades to the whole ledger rather than throwing.
+  await page.goto("/predictions?state=nonsense");
+  await expect(page.getByText("DXY down on CPI")).toBeVisible();
+  await expect(page.getByText("GC up on FOMC")).toBeVisible();
 });
