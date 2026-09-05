@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ALL, isActive } from "@/lib/nav";
+import { NavItemBody } from "@/components/shell/nav-pending";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cls } from "@/lib/format";
 
@@ -41,8 +42,7 @@ export function SideNav() {
                   : "border-l-transparent text-muted-foreground hover:bg-secondary hover:text-foreground",
               )}
             >
-              <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-              {label}
+              <NavItemBody icon={Icon} label={label} />
             </Link>
           );
         })}
