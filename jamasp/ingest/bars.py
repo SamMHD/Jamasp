@@ -37,7 +37,8 @@ class BackfillResult(NamedTuple):
     """
 
     written: dict[str, int]      # timeframe -> rows written
-    failures: dict[str, str]     # leg ("1h"/"1d") -> error text
+    failures: dict[str, str]     # leg ("1h"/"1d") -> every provider's error
+    sources: dict[str, str]      # timeframe -> the provider that served it
 
 
 def _fmt(epoch: int) -> str:
@@ -121,9 +122,21 @@ def resample_weekly(bars: list[Bar]) -> list[Bar]:
 
 SYMBOL = "GC"
 
+# Provenance. `bars` carries one of these per row, and a timeframe is served
+# by exactly ONE of them at a time — see store_bars for why mixing is unsafe.
+SOURCE_YAHOO = "yahoo"
+SOURCE_BITFINEX = "bitfinex"
+
+# --- primary: Yahoo, COMEX gold futures (GC=F) ----------------------------
+#
 # The same host and endpoint gold_spot already polls (config/sources.yaml:224),
 # at the two depths Yahoo actually serves: interval=1h is capped at range=730d,
 # interval=1d reaches five years. Measured 2026-08-18: 17,395 hourly bars.
+#
+# Both of these are refused with 429 from the production egress and have been
+# since 2026-08-24 (docs/todo/012). They stay PRIMARY anyway: GC=F is the
+# instrument the desk actually trades, the block may lift, and the fallback
+# below is a proxy rather than the real thing.
 HOURLY_URL = (
     "https://query1.finance.yahoo.com/v8/finance/chart/GC=F"
     "?range=730d&interval=1h"
@@ -133,11 +146,141 @@ DAILY_URL = (
     "?range=5y&interval=1d"
 )
 
+# --- fallback: Bitfinex, Tether Gold (XAUT/USD) ---------------------------
+#
+# WHAT THIS IS, stated plainly because it is not GC=F: XAUT is a token
+# redeemable for one troy ounce of LBMA Good Delivery gold, so XAUT/USD is a
+# SPOT gold price. GC=F is a futures price on the same metal, and it trades
+# above spot by the cost of carry.
+#
+# Measured against this repo's own `prices` GC=F history, 31 overlapping
+# sessions 2026-07-31..2026-09-04:
+#
+#     XAUT/GC ratio   mean 0.98524   sd 0.00250   max deviation 1.89%
+#     daily-return correlation                      0.9951
+#
+# So it sits ~1.5% below GC=F, steadily, and moves with it almost exactly.
+# That is the futures basis, not a different market.
+#
+# Why a ~1.5% level offset is acceptable HERE specifically: every consumer of
+# this table is scale-invariant or a ratio of scale-equivariant quantities.
+# The twelve classifiers in signals.py read RSI/Stochastic/Williams %R/ADX
+# (pure ratios), or (close - level) / ATR, or a position within a band — a
+# constant multiplicative offset cancels in all of them. features.py's fit
+# target is (forward close - close) / ATR14, where it cancels again. Nothing
+# reads a bar close as a gold price: the panel and the brief quote `prices`,
+# which is still real GC=F from the working 15-minute poll. Verified by
+# grep — the only readers of `bars` are signals.py, features.py and
+# watchdog.py's freshness check.
+#
+# Chosen over the alternatives that were also measured from the host:
+#   Kraken PAXG/USD  ratio 0.98681, corr 0.9957, but only 720 daily candles
+#                    (~2y) and no deep hourly — cannot feed the fit's target.
+#   GLD via stockanalysis.com  corr 0.9683 (NYSE hours only, so it misses the
+#                    overnight session that moves gold) and needs an ~11x
+#                    scale factor that drifts with the fund's expense ratio.
+# Stooq, Barchart, Dukascopy, investing.com, MarketWatch, WSJ, CNBC and
+# Nasdaq were all tried and are blocked, walled or key-only — see docs/todo/012.
+#
+# Keyless, no account, 30 req/min public limit; we make at most two per day.
+# limit=10000 is the API maximum and sort=-1 asks for the NEWEST page, which
+# is the only way to reach current data — sort=1 returns the oldest 10,000
+# and would hand back 2020. Measured 2026-09-05: 10,000 hourly candles
+# (~15 months, 7,618 after the weekend filter) and 2,416 daily (back to
+# 2020-01-24, 1,726 after the filter) — deeper than Yahoo's 5-year daily leg.
+_BITFINEX = "https://api-pub.bitfinex.com/v2/candles/trade:{tf}:tXAUT:USD/hist"
+BITFINEX_HOURLY_URL = _BITFINEX.format(tf="1h") + "?limit=10000&sort=-1"
+BITFINEX_DAILY_URL = _BITFINEX.format(tf="1D") + "?limit=10000&sort=-1"
+
+
+def parse_bitfinex_candles(text: str) -> list[Bar]:
+    """Bitfinex v2 candle JSON -> bars, oldest first.
+
+    The row shape is [MTS, OPEN, CLOSE, HIGH, LOW, VOLUME] — close is the
+    SECOND field, not the fourth. Reading it as OHLC would swap close with
+    high and low with close on every bar, which ATR and every level signal
+    would consume without complaint.
+
+    `MTS` is milliseconds and is the bar's OPEN time, matching `ts`.
+    """
+    rows = json.loads(text)
+    out = [
+        Bar(_fmt(int(ts // 1000)), float(o), float(h), float(low), float(c))
+        for ts, o, c, h, low, *_ in rows
+        if None not in (o, c, h, low)
+    ]
+    if not out:
+        raise ValueError("no complete OHLC bars in bitfinex candle json")
+    # sort=-1 gives newest first; every indicator downstream is order-dependent.
+    return sorted(out, key=lambda b: b.ts)
+
+
+def comex_sessions_only(bars: list[Bar]) -> list[Bar]:
+    """Drop bars struck while COMEX gold was shut.
+
+    XAUT trades continuously; GC=F does not. Keeping weekend bars would make
+    a "200-day" SMA span roughly 143 trading days, and would let the thin,
+    wide-spread weekend book into ATR and into the highs and lows every level
+    signal reads. Filtering here keeps the fallback series the same SHAPE as
+    the Yahoo series it stands in for, so switching sources changes the level
+    by the basis and nothing else.
+
+    CME Globex runs Sunday 22:00 UTC to Friday 21:00 UTC (US Eastern summer
+    time), so Saturday is closed outright and Sunday is closed until 22:00.
+    Under US winter time the reopen is 23:00 UTC, so one Sunday bar a week is
+    kept that Yahoo would not have had; that is the same order of
+    approximation as resample_weekly's Monday-UTC week boundary, and for the
+    same reason — a consistent rule beats an exact one nobody can verify.
+    """
+    out = []
+    for b in bars:
+        d = datetime.strptime(b.ts, TS_FMT).replace(tzinfo=timezone.utc)
+        if d.weekday() == 5:                      # Saturday: shut all day
+            continue
+        if d.weekday() == 6 and d.hour < 22:      # Sunday, before the reopen
+            continue
+        out.append(b)
+    return out
+
+
+def _bitfinex_bars(text: str) -> list[Bar]:
+    return comex_sessions_only(parse_bitfinex_candles(text))
+
+
+# Ordered provider chain per leg: (source, url, parser). First one that
+# returns bars wins; the rest are not called.
+HOURLY_PROVIDERS = (
+    (SOURCE_YAHOO, HOURLY_URL, parse_yahoo_bars),
+    (SOURCE_BITFINEX, BITFINEX_HOURLY_URL, _bitfinex_bars),
+)
+DAILY_PROVIDERS = (
+    (SOURCE_YAHOO, DAILY_URL, parse_yahoo_bars),
+    (SOURCE_BITFINEX, BITFINEX_DAILY_URL, _bitfinex_bars),
+)
+
 
 def store_bars(
-    conn: sqlite3.Connection, symbol: str, timeframe: str, bars: list[Bar]
+    conn: sqlite3.Connection, symbol: str, timeframe: str, bars: list[Bar],
+    source: str,
 ) -> int:
-    """Upsert bars. Returns the number of rows written.
+    """Upsert bars from `source`. Returns the number of rows written.
+
+    `source` is required rather than defaulted because a mislabelled row is
+    exactly the failure this column exists to prevent.
+
+    ONE TIMEFRAME, ONE SOURCE. The first statement evicts any rows in this
+    timeframe written by a different provider. Yahoo stamps GC=F daily bars
+    at the session open and Bitfinex stamps XAUT at 00:00 UTC, so the same
+    trading day lands under two different keys; and the two series sit ~1.5%
+    apart (the futures basis). Left to accumulate, that would put duplicate
+    days in the series and a 1.5% cliff in the middle of it, which every
+    indicator would read as a genuine overnight gap rather than a change of
+    vendor. Wholesale eviction on a provider change is the only way to keep
+    the series internally consistent.
+
+    In the steady state — the same provider serving the same timeframe every
+    day — that DELETE matches zero rows and touches nothing, so it costs
+    neither a page rewrite nor a git diff (see below).
 
     ON CONFLICT DO UPDATE rather than INSERT OR REPLACE: `bars` is a rowid
     table, and REPLACE is a delete+insert under the hood — even a
@@ -161,13 +304,18 @@ def store_bars(
     REPLACE cannot do that: a new rowid every time means a rewritten page
     every time, whether or not anything actually changed.
     """
+    conn.execute(
+        "DELETE FROM bars WHERE symbol = ? AND timeframe = ? AND source <> ?",
+        (symbol, timeframe, source),
+    )
     conn.executemany(
-        "INSERT INTO bars (symbol, timeframe, ts, open, high, low, close)"
-        " VALUES (?, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO bars (symbol, timeframe, ts, open, high, low, close, source)"
+        " VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         " ON CONFLICT(symbol, timeframe, ts) DO UPDATE SET"
         " open = excluded.open, high = excluded.high,"
-        " low = excluded.low, close = excluded.close",
-        [(symbol, timeframe, b.ts, b.open, b.high, b.low, b.close) for b in bars],
+        " low = excluded.low, close = excluded.close, source = excluded.source",
+        [(symbol, timeframe, b.ts, b.open, b.high, b.low, b.close, source)
+         for b in bars],
     )
     conn.commit()
     return len(bars)
@@ -188,6 +336,25 @@ def _default_fetch(url: str) -> str:
     from jamasp.net import get_with_fallback
 
     return get_with_fallback(url).text
+
+
+class _LegDark(Exception):
+    """Every provider for one leg refused. Carries all their errors."""
+
+
+def _fetch_leg(fetch, providers) -> tuple[str, list[Bar]]:
+    """First provider that returns bars wins; later ones are never called.
+
+    Raises _LegDark naming every provider that refused, so the journal line
+    distinguishes "Yahoo is blocked again" from "the whole internet is gone".
+    """
+    errors: list[str] = []
+    for source, url, parse in providers:
+        try:
+            return source, parse(fetch(url))
+        except Exception as exc:  # noqa: BLE001 - collected, not swallowed
+            errors.append(f"{source}: {type(exc).__name__}: {exc}")
+    raise _LegDark("; ".join(errors))
 
 
 def backfill(
@@ -220,22 +387,27 @@ def backfill(
     fetch = fetch or _default_fetch
     written: dict[str, int] = {}
     failures: dict[str, str] = {}
+    sources: dict[str, str] = {}
 
     try:
-        hourly = parse_yahoo_bars(fetch(HOURLY_URL))
-        written["1h"] = store_bars(conn, symbol, "1h", hourly)
-        written["4h"] = store_bars(conn, symbol, "4h", resample(hourly, 4 * 3600))
-    except Exception as exc:  # noqa: BLE001 - reported, not swallowed
-        failures["1h"] = f"{type(exc).__name__}: {exc}"
+        source, hourly = _fetch_leg(fetch, HOURLY_PROVIDERS)
+        written["1h"] = store_bars(conn, symbol, "1h", hourly, source)
+        written["4h"] = store_bars(
+            conn, symbol, "4h", resample(hourly, 4 * 3600), source)
+        sources["1h"] = sources["4h"] = source
+    except _LegDark as exc:
+        failures["1h"] = str(exc)
 
     try:
-        daily = parse_yahoo_bars(fetch(DAILY_URL))
-        written["1d"] = store_bars(conn, symbol, "1d", daily)
-        written["1w"] = store_bars(conn, symbol, "1w", resample_weekly(daily))
-    except Exception as exc:  # noqa: BLE001 - reported, not swallowed
-        failures["1d"] = f"{type(exc).__name__}: {exc}"
+        source, daily = _fetch_leg(fetch, DAILY_PROVIDERS)
+        written["1d"] = store_bars(conn, symbol, "1d", daily, source)
+        written["1w"] = store_bars(
+            conn, symbol, "1w", resample_weekly(daily), source)
+        sources["1d"] = sources["1w"] = source
+    except _LegDark as exc:
+        failures["1d"] = str(exc)
 
-    return BackfillResult(written, failures)
+    return BackfillResult(written, failures, sources)
 
 
 TIMEFRAME_SECONDS = {"1h": 3600, "4h": 4 * 3600, "1d": 86400, "1w": 7 * 86400}
