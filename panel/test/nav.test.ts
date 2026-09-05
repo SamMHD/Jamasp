@@ -2,11 +2,11 @@ import { describe, expect, it } from "vitest";
 import { ALL, isActive, OVERFLOW, PRIMARY } from "@/lib/nav";
 
 describe("nav model", () => {
-  it("covers all nine routes exactly once", () => {
+  it("covers all ten routes exactly once", () => {
     const hrefs = ALL.map(i => i.href);
     expect(hrefs.sort()).toEqual([
       "/", "/alerts", "/briefs", "/calendar", "/crawl",
-      "/inbox", "/prices", "/schedule", "/state",
+      "/inbox", "/predictions", "/prices", "/schedule", "/state",
     ]);
     expect(new Set(hrefs).size).toBe(hrefs.length);
   });
@@ -19,7 +19,7 @@ describe("nav model", () => {
 
   it("puts everything else in the overflow sheet", () => {
     expect(OVERFLOW.map(i => i.href).sort())
-      .toEqual(["/alerts", "/calendar", "/crawl", "/prices", "/state"]);
+      .toEqual(["/alerts", "/calendar", "/crawl", "/predictions", "/prices", "/state"]);
   });
 
   it("gives every destination an icon and a label", () => {

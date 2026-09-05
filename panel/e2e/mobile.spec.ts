@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 const ROUTES = ["/", "/inbox", "/crawl", "/briefs", "/schedule",
-                "/calendar", "/alerts", "/state", "/prices"];
+                "/calendar", "/alerts", "/state", "/predictions", "/prices"];
 
 for (const path of ROUTES) {
   test(`${path} fits the viewport`, async ({ page }) => {
@@ -42,7 +42,7 @@ test("the More sheet reaches the overflow destinations", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "More" }).click();
   const sheet = page.getByRole("dialog");
-  for (const label of ["Crawl", "Calendar", "Alerts", "State", "Prices"]) {
+  for (const label of ["Crawl", "Calendar", "Alerts", "State", "Predictions", "Prices"]) {
     await expect(sheet.getByRole("link", { name: label })).toBeVisible();
   }
 });

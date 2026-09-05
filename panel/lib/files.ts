@@ -2,6 +2,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import YAML from "yaml";
 import { CONFIG_DIR, REPORTS_DIR, STATE_DIR } from "./paths";
+import { predictionState } from "./predictions";
 import type { FittedCoefficient, FittedWeights, WeightsConfig } from "@/lib/technicalmap";
 
 export type WatchlistEntry = { theme: string; why: string; since: string };
@@ -52,21 +53,19 @@ export function readPredictions(): Prediction[] {
   return out;
 }
 
+/**
+ * Counted through lib/predictions.ts#predictionState rather than with its own
+ * copy of the branch: the Forecast-record card (these counts) and the
+ * /predictions page (the same classifier, per row) must never be able to
+ * disagree about how many predictions are open, due or scored.
+ */
 export function predictionStats(preds: Prediction[], now: Date = new Date()): PredictionStats {
-  let open = 0, maturedUnscored = 0, hits = 0, misses = 0, unclear = 0;
-  for (const p of preds) {
-    if (p.outcome === "hit") hits++;
-    else if (p.outcome === "miss") misses++;
-    else if (p.outcome === "unclear") unclear++;
-    else {
-      const matures = new Date(p.created_at).getTime() + p.horizon_days * 86400_000;
-      if (matures <= now.getTime()) maturedUnscored++;
-      else open++;
-    }
-  }
-  const decisive = hits + misses;
-  return { open, maturedUnscored, scored: hits + misses + unclear, hits, misses,
-    unclear, hitRate: decisive ? hits / decisive : null };
+  const n = { due: 0, open: 0, hit: 0, miss: 0, unclear: 0 };
+  for (const p of preds) n[predictionState(p, now)]++;
+  const decisive = n.hit + n.miss;
+  return { open: n.open, maturedUnscored: n.due, scored: n.hit + n.miss + n.unclear,
+    hits: n.hit, misses: n.miss, unclear: n.unclear,
+    hitRate: decisive ? n.hit / decisive : null };
 }
 
 export function loadSources(): SourceConfig[] {
