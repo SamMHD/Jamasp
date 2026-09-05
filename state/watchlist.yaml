@@ -90,6 +90,21 @@ watchlist:
       40/30/30 -> 30/40/30. 28 Aug benchmark revision recovered from the
       DB: -79k (year to Mar 2026) vs +183k cons / WF ~-100k — stale,
       superseded.
+      5 Sep (Sat brief): 4 Sep NY close — implied Sept-hike odds 58%
+      (from 49%; investinglive wrap), short-dated yields +4bp, 2y at its
+      highest since Jan 2025 (FXEmpire), 10y 4.78 (−1.8bp) = bear-
+      flattening: the hike is priced, the long end is not. 41aec282
+      survives session 1 (58 < 60); a2171cad on track. Hammack (voter)
+      'decidedly hawkish' as the last voice before the blackout — from
+      Sat 5 Sep no FOMC tone until the 15–16 Sep meeting. Week map
+      VERIFIED (actionforex calendar + WF preview, rule 17): US Labor Day
+      Mon 7 Sep (cash Treasuries shut, thin CME); PPI Thu 10 Sep 12:30Z
+      cons +0.4% m/m (from 0.0), 4.7% y/y + claims 205k; CPI FRI 11 Sep
+      12:30Z cons headline +0.4%/3.4%, core +0.3%/2.5% (WF 0.40/0.23,
+      core y/y -> 2.4%); UoM 1y expectations 14:00Z. Consensus core at
+      0.3 means a 0.2 print is a DOWNSIDE surprise — the 'benign' bar is
+      lower than the stance's <=0.2 gate implies. Trump 4 Sep rate
+      ultimatum on the tape; no pricing effect.
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -596,6 +611,34 @@ watchlist:
       'US-Iran memorandum' 60-day window -- expired 17 Aug, Trump ruled
       out revival 28 Aug. 81564330/c4ef5615 unhit; 03627b6b one strike day.
       Kinetic 30 unchanged: the floor, not the driver.
+      5 Sep (Sat brief; Gulf News/AP + investinglive extracted): the
+      Jordan 'pre-emptive strike' (4 Sep 17:40Z, Khatam al-Anbia) is
+      DOUBTED — Trump: 'there's been no shooting for days'; investinglive:
+      'some talk that the Jordan strikes did not happen and Trump seems to
+      confirm it'; no US/Jordanian confirmation -> not an event (rule 13).
+      Trump Oval Office: 'we may hit Pickaxe very soon' but CONDITIONAL on
+      detected activity ('if anything goes bad, we hit them hard'); 'no
+      mines in the Strait'; radar knocked out twice, 'now we don't notice
+      any activity'; 'intermittent strikes', 'we're not fighting right
+      now'; the war is 'small potatoes'/'a military conflict' (Vance: 'I
+      wouldn't call it a war') — a minimisation script for pump-price
+      politics, NOT a war-over declaration (302708ab: rhetoric does not
+      score). New tracks: (1) E3+US draft IAEA Board of Governors
+      resolution referring Iran to the UNSC (AP/Reuters; under
+      negotiation; vote at NEXT WEEK's BoG in Vienna, day unverified) —
+      Russia/China veto blunts UNSC action, but the June 2025
+      noncompliance finding was followed the next day by the US/Israeli
+      strikes: the referral is a kinetic-risk marker; (2) $5bn US
+      bomb/guidance-kit sale to Saudi Arabia approved (State Dept,
+      Congress notified) — GCC arming, not GCC entry. No third GCC-
+      confirmed night 4–5 Sep (81564330 unhit, one day left); no CENTCOM
+      strike on Iranian territory 4 Sep (c4ef5615 open; 03627b6b one
+      strike day). Oil ended the week at 3-month highs (WTI 91.3, Brent
+      ~96) on blockade + long-weekend risk after dipping to $89 on the
+      'no shooting' line. Witkoff/Kushner to Moscow/Kyiv this weekend
+      with a Russia-Ukraine proposal — the Russia-axis oil floor is the
+      one that could come off. New claim: no US strike on Pickaxe thru
+      11 Sep (0.7). Kinetic 30 unchanged.
     since: 2026-07-31
 
   - theme: boj-yen-pillar
@@ -627,6 +670,14 @@ watchlist:
       event for the crowded gold long (Aug 2024 shape). Counter: Japan
       household spending at an 18-month low. Bounce to 156.1 overnight;
       155.34 is the low to hold. No MoF/BoJ intervention confirmation.
+      5 Sep (Sat brief): 4 Sep 'fresh signs of meddling' (investinglive)
+      — USDJPY fell >200 pips from the post-NFP jump to 155.40, then
+      climbed steadily to 156.26 (+50 on the day); JPY lagged G10 even as
+      the hot-print dollar pop reversed. actionforex 4 Sep: 'yen's
+      appreciation potential may be running out'. 155.34 (3 Sep low)
+      held. No MoF/BoJ confirmation. Inputs next week: labour cash
+      earnings (cons 3.9% y/y) + Q2 GDP revision Tue 8 Sep 23:30–23:50Z,
+      PPI Thu 23:50Z (cons 7.4% y/y) — BoJ-hike case into 17–18 Sep.
     since: 2026-09-03
 
   - theme: energy-pce-passthrough
@@ -706,6 +757,18 @@ watchlist:
       This is the counter to Waller's frame: energy feeds the 11 Sep CPI
       whatever NFP prints. ECB blog: energy = 90% of the 2026 inflation
       episode, no spillover to core yet (actionforex extract).
+      5 Sep (Sat brief): Aug CPI setup numbered — consensus headline
+      +0.4% m/m / 3.4% y/y, core +0.3% / 2.5% (actionforex calendar);
+      Wells Fargo 0.40 headline on gasoline +4% and a grocery rebound,
+      core 0.23 (core y/y -> 2.4%, 3-mo annualised 1.7%); PPI Thu 10 Sep
+      cons +0.4% m/m after 0.0%, 4.7% y/y. Energy is the whole headline
+      story; core decides the hike. Oil ended the week WTI 91.3 / Brent
+      ~96, three-month highs, US diesel record; it dipped to $89 on
+      Trump's 'no shooting for days' before long-weekend risk bid it back
+      — the premium is fragile to de-escalation talk. Crude inventories
+      Thu 16:00Z (cons −4.45M). Russia-Ukraine: Witkoff/Kushner proposal
+      this weekend (wheat fell on it) — a deal takes the Black Sea/
+      Ust-Luga floor off oil.
     since: 2026-07-31
 
   - theme: india-gold-formalisation
@@ -832,6 +895,16 @@ watchlist:
       bond market from unravelling'. Mechanism test unchanged: 9 Sep
       buyback op (#41, slot re-verify Sat). Citi: Q3 Brent $86, $65 by
       2027 on reopening -- assumes a settlement the tape does not.
+      5 Sep (Sat brief): 9 Sep first buyback op — slot STILL UNVERIFIED:
+      no Treasury schedule item in any ingested source since 28 Aug (only
+      the 1 Sep actionforex 'Futility of Bessent's buybacks' op-ed); #41
+      stays 15:15Z provisional with its rule-15 reschedule clause. Bear-
+      flattening on 4 Sep (2y cycle high, 10y −1.8bp to 4.78) — the long
+      end did NOT sell on the hot print; DXY 99.16 (+0.17%) gave back most
+      of the 35-pip NFP pop. Trump 4 Sep 'lower the rate or I'll stop
+      trading with deficit countries' — Fed-independence pressure on the
+      tape beside Bessent's supply-shock framing. Mining.com: top-50
+      miners +$357bn on the August rally.
     since: 2026-08-20
 
   - theme: us-canada-trade-war
@@ -855,6 +928,10 @@ watchlist:
       rate decision inside the tariff war; scans read it (statement
       language on tariff passthrough vs growth hit is the gold-relevant
       line).
+      5 Sep (Sat brief): Canada Aug employment −41.7k vs +15k cons (US
+      +162k the same minute) — USD/CAD 1.3871 peak; the divergence hands
+      the BoC a cut argument before its next meeting. Tariff passthrough
+      vs growth hit resolving toward growth hit on the Canadian side.
     since: 2026-08-24
 # REMOVED 4 Aug: gold-basis-lbma-comex — resolved. 3 Aug PM fix pair printed
 # $56 (fix 4028.15 vs GC 4084.3, ±5 min), inside the $50-90 Dec-26 fair-carry

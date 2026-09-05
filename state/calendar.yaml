@@ -451,6 +451,10 @@ events:
     action: >
       wakeup #26 (13:15Z deepdive — 45 min post-print so ingest
       lands the items first; run-130 lesson from 12 Aug).
+      VERIFIED 5 Sep (rule 17, actionforex calendar + WF preview): Fri
+      11 Sep 12:30Z; cons headline +0.4% m/m / 3.4% y/y, core +0.3% /
+      2.5% (WF 0.40 / 0.23); UoM 1y inflation expectations 14:00Z. With
+      consensus core at 0.3, a 0.2 print is a downside surprise.
 
   - date: 2026-08-24
     time_dubai: "US morning, unscheduled (~17:00-21:00 Dubai)"
@@ -516,7 +520,10 @@ events:
     action: >
       wakeup added 2026-09-09 15:15Z deepdive (read the operation
       result + gold/dollar/long-end reaction; reschedule per rule 15 if
-      results not yet published)
+      results not yet published). 5 Sep Saturday re-verify (rule 17):
+      slot STILL unverified — no Treasury buyback schedule in any
+      ingested source since 28 Aug; #41 stands provisional with its
+      rule-15 clause; the 9 Sep brief re-checks before it fires.
 
   - date: 2026-08-26
     time_dubai: "window open-ended (Iranian response unscheduled)"
@@ -640,3 +647,39 @@ events:
       the rates leg; 41aec282 (no NY close >=60% thru 10 Sep) and any new
       odds claim are read against CME FedWatch press relays at the NY
       close. CPI wakeup #26 stands at 11 Sep 13:15Z.
+
+  - date: 2026-09-07
+    time_dubai: "all day (US Labor Day); IAEA Board of Governors week in Vienna, vote day unverified"
+    title: US Labor Day + IAEA Board of Governors meeting (E3+US referral resolution)
+    why: >
+      Labor Day shuts cash Treasuries and thins the CME session that
+      follows the Sunday reopen (58b7daab) — a thin tape into a week
+      with PPI, ECB and CPI. Separately, AP/Reuters (via Gulf News, 5
+      Sep) report a US-UK-France-Germany draft IAEA Board resolution
+      referring Iran to the UN Security Council for NPT noncompliance,
+      to be voted at next week's Board of Governors meeting in Vienna
+      (text still under negotiation). UNSC action is veto-blocked, but
+      the June 2025 noncompliance finding preceded the US/Israeli strikes
+      by one day and Trump has just named Pickaxe Mountain — the
+      referral is a kinetic-risk marker, and Tehran's stated responses
+      (NPT/safeguards steps, 30bad8a0 family) are the other branch.
+    action: >
+      No wakeup — vote day not published (rules 8 and 17). Scans carry
+      'IAEA', 'Board of Governors', 'referral', 'Grossi' keywords; a
+      published vote slot earns a deepdive wakeup at vote+60. Pickaxe
+      claim recorded 5 Sep (no US strike thru 11 Sep, 0.7).
+
+  - date: 2026-09-10
+    time_dubai: "16:30 (12:30Z) — 15 min after the ECB decision, before the presser"
+    title: US PPI (Aug) + initial claims — last inflation input before CPI
+    why: >
+      PPI cons +0.4% m/m after 0.0% in July, 4.7% y/y; claims 205k
+      (actionforex calendar, extracted 5 Sep). Inside the FOMC blackout
+      this is one of only two scheduled US repricers before the 11 Sep
+      CPI; it lands in the same quarter-hour as the ECB decision, so the
+      dollar reaction is a blend. A hot PPI (>=0.6%) is the named breaker
+      of the 4300 pre-CPI floor claim; a flat PPI drains hike ammunition
+      into CPI.
+    action: >
+      Covered by wakeup #51 (13:45Z) — cross-read PPI with the ECB; no
+      separate wakeup. The 10 Sep brief carries the consensus.
