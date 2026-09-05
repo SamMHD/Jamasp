@@ -34,3 +34,11 @@ if mode == "spawn_orphan":
     marker.write_text(str(child.pid))
     time.sleep(30)
     sys.exit(0)
+if mode == "flood":
+    # Dumps far more than any sane tail, ending on a recognisable marker so a
+    # test can prove the *end* of the stream was kept.
+    for i in range(2000):
+        print(f"line {i} " + "x" * 60)
+    sys.stdout.flush()  # stdout is block-buffered to a file; stderr is not
+    print("LAST-LINE-MARKER", file=sys.stderr)
+    sys.exit(1)
