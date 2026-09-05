@@ -26,6 +26,20 @@ class Bar(NamedTuple):
     close: float
 
 
+class BackfillResult(NamedTuple):
+    """What landed, and what didn't.
+
+    Returned rather than raised because a partial backfill is a NORMAL
+    outcome, not an error: one endpoint being unavailable must not stop the
+    pipeline standing behind this one. The caller decides what a given
+    combination means — `jamasp bars backfill` exits 0 whenever anything was
+    written and non-zero only on total darkness.
+    """
+
+    written: dict[str, int]      # timeframe -> rows written
+    failures: dict[str, str]     # leg ("1h"/"1d") -> error text
+
+
 def _fmt(epoch: int) -> str:
     return datetime.fromtimestamp(epoch, tz=timezone.utc).strftime(TS_FMT)
 
@@ -176,7 +190,9 @@ def _default_fetch(url: str) -> str:
     return get_with_fallback(url).text
 
 
-def backfill(conn: sqlite3.Connection, symbol: str = SYMBOL, fetch=None) -> dict[str, int]:
+def backfill(
+    conn: sqlite3.Connection, symbol: str = SYMBOL, fetch=None
+) -> BackfillResult:
     """Fetch and store every timeframe. Returns timeframe -> rows written.
 
     Idempotent on the primary key, which makes one command serve as both the
@@ -184,21 +200,42 @@ def backfill(conn: sqlite3.Connection, symbol: str = SYMBOL, fetch=None) -> dict
     history and upsert, so no separate incremental path exists to drift out
     of agreement with this one.
 
-    Each timeframe is committed as it is derived, before the next fetch. A
-    daily-endpoint failure must not cost the 730-day hourly pull that already
-    succeeded.
+    Each timeframe is committed as it is derived, before the next fetch, and
+    the two endpoints are independent in BOTH directions: a daily-endpoint
+    failure must not cost the 730-day hourly pull that already succeeded, and
+    an hourly failure must not cost the daily pull that would have worked.
+
+    That symmetry is not hypothetical. Yahoo serves
+    `range=1d&interval=1h` (what `gold_spot` polls every 15 minutes) while
+    429ing `range=730d&interval=1h`, so from 2026-08-24 the hourly leg failed
+    every single day. Aborting there took the 5-year daily pull with it:
+    `bars` stayed empty, so `signals refresh` had nothing to compute from and
+    the ridge fits never saw a row.
+
+    Never raises for a leg failure — it reports one. Deciding that a dead
+    hourly endpoint should abort the daily pull, `signals refresh` and the
+    ridge fits is not this function's call to make, and making it here is
+    precisely what kept `bars` empty for twelve days.
     """
     fetch = fetch or _default_fetch
     written: dict[str, int] = {}
+    failures: dict[str, str] = {}
 
-    hourly = parse_yahoo_bars(fetch(HOURLY_URL))
-    written["1h"] = store_bars(conn, symbol, "1h", hourly)
-    written["4h"] = store_bars(conn, symbol, "4h", resample(hourly, 4 * 3600))
+    try:
+        hourly = parse_yahoo_bars(fetch(HOURLY_URL))
+        written["1h"] = store_bars(conn, symbol, "1h", hourly)
+        written["4h"] = store_bars(conn, symbol, "4h", resample(hourly, 4 * 3600))
+    except Exception as exc:  # noqa: BLE001 - reported, not swallowed
+        failures["1h"] = f"{type(exc).__name__}: {exc}"
 
-    daily = parse_yahoo_bars(fetch(DAILY_URL))
-    written["1d"] = store_bars(conn, symbol, "1d", daily)
-    written["1w"] = store_bars(conn, symbol, "1w", resample_weekly(daily))
-    return written
+    try:
+        daily = parse_yahoo_bars(fetch(DAILY_URL))
+        written["1d"] = store_bars(conn, symbol, "1d", daily)
+        written["1w"] = store_bars(conn, symbol, "1w", resample_weekly(daily))
+    except Exception as exc:  # noqa: BLE001 - reported, not swallowed
+        failures["1d"] = f"{type(exc).__name__}: {exc}"
+
+    return BackfillResult(written, failures)
 
 
 TIMEFRAME_SECONDS = {"1h": 3600, "4h": 4 * 3600, "1d": 86400, "1w": 7 * 86400}

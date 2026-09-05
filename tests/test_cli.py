@@ -564,20 +564,55 @@ def test_flash_line_reports_tier_outcomes():
     assert "23 scored" in line
 
 
-def test_bars_backfill_reports_rows_per_timeframe(tmp_path, monkeypatch):
+def _patch_backfill(monkeypatch, written, failures):
     from jamasp.ingest import bars as bars_mod
 
-    cfg = _write_configs(tmp_path, "sources: []\n")
-    dbp = tmp_path / "j.db"
-
     def fake_backfill(conn, symbol="GC", fetch=None):
-        return {"1h": 17395, "4h": 4349, "1d": 1258, "1w": 261}
+        return bars_mod.BackfillResult(written, failures)
 
     monkeypatch.setattr(bars_mod, "backfill", fake_backfill)
+
+
+def test_bars_backfill_reports_rows_per_timeframe(tmp_path, monkeypatch):
+    cfg = _write_configs(tmp_path, "sources: []\n")
+    dbp = tmp_path / "j.db"
+    _patch_backfill(
+        monkeypatch, {"1h": 17395, "4h": 4349, "1d": 1258, "1w": 261}, {})
     res = CliRunner().invoke(
         main, ["bars", "backfill", "--db", str(dbp), "--config-dir", str(cfg)])
     assert res.exit_code == 0, res.output
     assert "1h=17395" in res.output and "1w=261" in res.output
+
+
+def test_bars_backfill_succeeds_but_warns_when_one_leg_fails(tmp_path, monkeypatch):
+    # The whole point of the exit-code policy: a dead hourly endpoint must
+    # not stop `signals refresh` and `weights fit`, which run as later
+    # ExecStart lines in jamasp-weights.service and are skipped entirely if
+    # this command exits non-zero. The failed leg still has to be named.
+    cfg = _write_configs(tmp_path, "sources: []\n")
+    dbp = tmp_path / "j.db"
+    _patch_backfill(
+        monkeypatch, {"1d": 1258, "1w": 261},
+        {"1h": "HTTPStatusError: Client error '429 Too Many Requests'"})
+    res = CliRunner().invoke(
+        main, ["bars", "backfill", "--db", str(dbp), "--config-dir", str(cfg)])
+    assert res.exit_code == 0, res.output
+    assert "1d=1258" in res.output
+    assert "1h" in res.output and "429" in res.output
+    assert "WARNING" in res.output
+
+
+def test_bars_backfill_fails_when_no_timeframe_lands(tmp_path, monkeypatch):
+    # Total darkness stays loud — this is the case that must keep alerting.
+    cfg = _write_configs(tmp_path, "sources: []\n")
+    dbp = tmp_path / "j.db"
+    _patch_backfill(
+        monkeypatch, {},
+        {"1h": "HTTPStatusError: 429", "1d": "HTTPStatusError: 429"})
+    res = CliRunner().invoke(
+        main, ["bars", "backfill", "--db", str(dbp), "--config-dir", str(cfg)])
+    assert res.exit_code != 0
+    assert "429" in res.output
 
 
 def test_signals_refresh_reports_a_count(tmp_path):

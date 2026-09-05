@@ -23,9 +23,27 @@ def _creds(tmp_path, *, refresh_in_days=30, body=None):
     return p
 
 
+def _seed_weights_pipeline(conn, *, bar_ts="2026-07-31T00:00:00Z",
+                           state_ts="2026-08-01T00:00:00Z",
+                           fitted_at="2026-08-01T03:30:00Z"):
+    """A weights pipeline that ran this morning: bars -> states -> fits."""
+    if bar_ts:
+        conn.execute("INSERT INTO bars (symbol, timeframe, ts, open, high, low,"
+                     " close) VALUES ('GC', '1d', ?, 1, 2, 0.5, 1.5)", (bar_ts,))
+    if state_ts:
+        conn.execute("INSERT INTO signal_states (key, ts, value, source)"
+                     " VALUES ('rsi14@1d', ?, 0.1, 'bars')", (state_ts,))
+    if fitted_at:
+        conn.execute("INSERT INTO weight_fits (fitted_at, fit, key, beta, se,"
+                     " multiplier, n) VALUES (?, 'technical', 'rsi14', 0.1,"
+                     " 0.01, 1.2, 900)", (fitted_at,))
+    conn.commit()
+
+
 def healthy(tmp_path):
     conn = db.connect(tmp_path / "j.db")
     db.set_meta(conn, "last_ingest_at", "2026-08-01T05:30:00Z")
+    _seed_weights_pipeline(conn)
     reports = tmp_path / "reports"
     (reports / "2026" / "07").mkdir(parents=True)
     (reports / "2026" / "07" / "2026-07-31-brief.md").write_text("# brief")
@@ -172,3 +190,90 @@ def test_the_violation_says_what_to_do(tmp_path):
     # ...and so does the case where the file is not there at all.
     got = _cred_violations(_check(conn, reports, tmp_path / "nope.json"))
     assert got and "re-authenticate" in got[0], got
+
+
+# --- the weights pipeline: bars -> signal states -> ridge fits -------------
+# Added after jamasp-weights.service failed silently-in-effect for 12 days:
+# it alerted loudly every night, but once `bars backfill` was made non-fatal
+# the ONLY thing left watching this pipeline is these checks.
+
+
+def test_bars_never_backfilled_is_a_violation(tmp_path):
+    conn, reports, creds = healthy(tmp_path)
+    conn.execute("DELETE FROM bars")
+    conn.commit()
+    assert any("bars have never been backfilled" in v
+               for v in _check(conn, reports, creds))
+
+
+def test_stale_bars_are_a_violation(tmp_path):
+    conn, reports, creds = healthy(tmp_path)
+    conn.execute("DELETE FROM bars")
+    _seed_weights_pipeline(conn, bar_ts="2026-07-25T00:00:00Z",
+                           state_ts=None, fitted_at=None)
+    assert any("bars stale" in v for v in _check(conn, reports, creds))
+
+
+def test_a_long_weekend_of_bars_is_not_a_violation(tmp_path):
+    # Gold futures do not print at the weekend. On a Monday the newest daily
+    # bar is Friday's — three days old — and that must not page anyone.
+    conn, reports, creds = healthy(tmp_path)
+    conn.execute("DELETE FROM bars")
+    _seed_weights_pipeline(conn, bar_ts="2026-07-29T00:00:00Z",
+                           state_ts=None, fitted_at=None)
+    assert not any("bars" in v for v in _check(conn, reports, creds))
+
+
+def test_stale_signal_states_are_a_violation(tmp_path):
+    conn, reports, creds = healthy(tmp_path)
+    conn.execute("DELETE FROM signal_states")
+    _seed_weights_pipeline(conn, bar_ts=None, state_ts="2026-07-20T00:00:00Z",
+                           fitted_at=None)
+    assert any("signal states stale" in v for v in _check(conn, reports, creds))
+
+
+def test_no_fit_has_ever_landed_is_a_violation(tmp_path):
+    conn, reports, creds = healthy(tmp_path)
+    conn.execute("DELETE FROM weight_fits")
+    conn.commit()
+    assert any("weight fit has never landed" in v
+               for v in _check(conn, reports, creds))
+
+
+def test_stale_weight_fit_is_a_violation(tmp_path):
+    conn, reports, creds = healthy(tmp_path)
+    conn.execute("DELETE FROM weight_fits")
+    _seed_weights_pipeline(conn, bar_ts=None, state_ts=None,
+                           fitted_at="2026-07-27T03:30:00Z")
+    assert any("weight fit stale" in v for v in _check(conn, reports, creds))
+
+
+def test_fires_on_the_real_2026_09_05_production_state(tmp_path):
+    """The exact host state this check was written for, on the day it was found.
+
+    bars empty, weight_fits empty, signal_states frozen at 2026-08-31T04:45:43Z
+    (the last manual run), watchdog running at its normal 09:00 Dubai slot.
+    A check that stays quiet here would be worthless.
+    """
+    conn = db.connect(tmp_path / "j.db")
+    db.set_meta(conn, "last_ingest_at", "2026-09-05T04:50:00Z")
+    conn.execute("INSERT INTO signal_states (key, ts, value, source)"
+                 " VALUES ('rsi14@1d', '2026-08-31T04:45:43Z', -0.11,"
+                 " 'tradingview')")
+    conn.commit()
+    reports = tmp_path / "reports"
+    (reports / "2026" / "09").mkdir(parents=True)
+    (reports / "2026" / "09" / "2026-09-04-brief.md").write_text("# brief")
+    creds = _creds(tmp_path, refresh_in_days=0)
+    creds.write_text(json.dumps({"claudeAiOauth": {
+        "refreshTokenExpiresAt": int(
+            (datetime(2026, 10, 5, tzinfo=timezone.utc)).timestamp() * 1000)}}))
+
+    violations = _check(conn, reports, creds, now="2026-09-05T05:00:00Z")
+    joined = "\n".join(violations)
+    assert "bars have never been backfilled" in joined
+    assert "signal states stale" in joined
+    assert "weight fit has never landed" in joined
+    assert "unfitted priors" in joined
+    # and it names what to look at
+    assert "jamasp-weights" in joined
