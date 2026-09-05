@@ -330,10 +330,25 @@ def bars_group():
 def bars_backfill(symbol, db_path, config_dir):
     """Fetch and store 1h/4h/1d/1w bars. Idempotent — also the daily refresh."""
     conn, _, _ = _common(db_path, config_dir)
-    written = bars_mod.backfill(conn, symbol)
-    click.echo(
-        f"bars {symbol}: " + " ".join(f"{tf}={n}" for tf, n in written.items())
-    )
+    result = bars_mod.backfill(conn, symbol)
+    if result.written:
+        click.echo(
+            f"bars {symbol}: "
+            + " ".join(f"{tf}={n}" for tf, n in result.written.items())
+        )
+    for leg, err in result.failures.items():
+        click.echo(f"WARNING bars {symbol}: {leg} leg failed — {err}", err=True)
+    # Exit 0 whenever anything landed. This command is the FIRST ExecStart of
+    # jamasp-weights.service, and a non-zero exit there stops `signals
+    # refresh` and `weights fit` from running at all — which is how a dead
+    # hourly endpoint kept the fits empty for twelve days. Total darkness is
+    # still loud; partial darkness is caught by the watchdog's bars/fit
+    # freshness checks instead, so it is reported without being fatal.
+    if not result.written:
+        raise click.ClickException(
+            f"bars {symbol}: no timeframe could be fetched — "
+            + "; ".join(f"{leg}: {err}" for leg, err in result.failures.items())
+        )
 
 
 @main.group("signals")

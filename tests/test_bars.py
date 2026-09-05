@@ -185,8 +185,9 @@ def test_backfill_writes_all_four_timeframes(tmp_path):
                       [1.0] * 8, [11.0 + i for i in range(8)])
     daily = _payload([base, base + 86400], [10.0, 20.0], [30.0, 40.0],
                      [1.0, 2.0], [15.0, 25.0])
-    written = backfill(conn, "GC", fetch=_fake_fetch(hourly, daily))
-    assert written == {"1h": 8, "4h": 2, "1d": 2, "1w": 1}
+    result = backfill(conn, "GC", fetch=_fake_fetch(hourly, daily))
+    assert result.written == {"1h": 8, "4h": 2, "1d": 2, "1w": 1}
+    assert result.failures == {}
     assert len(read_bars(conn, "GC", "1h")) == 8
     assert len(read_bars(conn, "GC", "4h")) == 2
     assert len(read_bars(conn, "GC", "1d")) == 2
@@ -212,7 +213,8 @@ def test_backfill_is_idempotent(tmp_path):
 def test_backfill_keeps_the_hourly_set_when_the_daily_fetch_fails(tmp_path):
     # A partial fetch must leave what it already got. Losing the 730-day
     # hourly pull because the daily call 404'd would make every retry pay for
-    # it again.
+    # it again. It reports the failed leg rather than raising: a partial
+    # backfill is a normal outcome that must not stop the pipeline behind it.
     conn = db.connect(tmp_path / "j.db")
     base = 1767571200
     hourly = _payload([base + i * 3600 for i in range(4)],
@@ -223,9 +225,48 @@ def test_backfill_keeps_the_hourly_set_when_the_daily_fetch_fails(tmp_path):
             return hourly
         raise RuntimeError("daily endpoint down")
 
-    with pytest.raises(RuntimeError):
-        backfill(conn, "GC", fetch=fetch)
+    result = backfill(conn, "GC", fetch=fetch)
     assert len(read_bars(conn, "GC", "1h")) == 4
+    assert set(result.written) == {"1h", "4h"}
+    assert "daily endpoint down" in result.failures["1d"]
+
+
+def test_backfill_still_stores_daily_when_the_hourly_fetch_fails(tmp_path):
+    # The symmetric case of the test above, and the one that actually bit us:
+    # Yahoo 429s the 730-day hourly pull while happily serving shallow
+    # requests. Aborting on the hourly failure cost the daily and weekly bars
+    # too, so `bars` stayed empty, `signals refresh` had nothing to compute
+    # from and the ridge fits never saw a row — jamasp-weights.service failed
+    # every day from 2026-08-24 without ever reaching its second ExecStart.
+    conn = db.connect(tmp_path / "j.db")
+    base = 1767571200
+    daily = _payload([base, base + 86400], [10.0, 20.0], [30.0, 40.0],
+                     [1.0, 2.0], [15.0, 25.0])
+
+    def fetch(url):
+        if "interval=1h" in url:
+            raise RuntimeError("429 Too Many Requests")
+        return daily
+
+    result = backfill(conn, "GC", fetch=fetch)
+    assert read_bars(conn, "GC", "1h") == []
+    assert len(read_bars(conn, "GC", "1d")) == 2
+    assert len(read_bars(conn, "GC", "1w")) == 1
+    assert set(result.written) == {"1d", "1w"}
+    assert "429" in result.failures["1h"]
+
+
+def test_backfill_reports_every_leg_when_nothing_lands(tmp_path):
+    # Total darkness is the one case that must still be loud: no timeframe
+    # written means the caller has to exit non-zero.
+    conn = db.connect(tmp_path / "j.db")
+
+    def fetch(url):
+        raise RuntimeError("429 Too Many Requests")
+
+    result = backfill(conn, "GC", fetch=fetch)
+    assert result.written == {}
+    assert set(result.failures) == {"1h", "1d"}
 
 
 from jamasp.ingest.bars import TIMEFRAME_SECONDS, close_ts
