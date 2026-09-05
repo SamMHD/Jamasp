@@ -1,13 +1,19 @@
 import { expect, test } from "@playwright/test";
 
-// The Drivers card upgrades its tiles to live TradingView embeds when the
-// widget CDN is reachable. Block it for the whole suite: these tests assert
-// what Jamasp's own database says, which must stay true when the embed does
-// not arrive, and a suite that reached out to a third party would be asserting
-// TradingView's uptime rather than the panel's behaviour. Blocking here means
-// the fallback path — the one that has to hold offline — is what runs.
+// The panel embeds TradingView in two places — the Drivers card's Mini
+// Charts (widgets.tradingview-widget.com) and the technical panel's Advanced
+// Chart (s3.tradingview.com). Block BOTH hosts for the whole suite: these
+// tests assert what Jamasp's own database says, which must stay true when an
+// embed does not arrive, and a suite that reached out to a third party would
+// be asserting TradingView's uptime rather than the panel's behaviour.
+// Blocking here means the fallback paths — the ones that have to hold
+// offline — are what run, and the suite is hermetic.
+//
+// The live paths are exercised separately and just as hermetically, against
+// locally-fulfilled stubs, in tradingview-live.spec.ts.
 test.beforeEach(async ({ page }) => {
   await page.route("**://*.tradingview-widget.com/**", route => route.abort());
+  await page.route("**://*.tradingview.com/**", route => route.abort());
 });
 
 const ROUTES: [string, string][] = [
