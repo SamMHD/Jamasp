@@ -1,5 +1,12 @@
 import { expect, test } from "@playwright/test";
 
+// See smoke.spec.ts: the Drivers card's TradingView embeds are blocked so the
+// sweep measures the panel's own layout, not a third party's, and so a
+// narrow-viewport overflow can never be blamed on someone else's iframe.
+test.beforeEach(async ({ page }) => {
+  await page.route("**://*.tradingview-widget.com/**", route => route.abort());
+});
+
 const ROUTES = ["/", "/inbox", "/crawl", "/briefs", "/schedule",
                 "/calendar", "/alerts", "/state", "/predictions", "/prices"];
 
