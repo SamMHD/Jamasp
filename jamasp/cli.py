@@ -336,6 +336,19 @@ def bars_backfill(symbol, db_path, config_dir):
             f"bars {symbol}: "
             + " ".join(f"{tf}={n}" for tf, n in result.written.items())
         )
+    # Say which instrument produced today's bars whenever it was not the
+    # primary. The fallback is spot gold (Bitfinex XAUT/USD), ~1.5% below
+    # GC=F — harmless to every consumer of `bars`, all of which are
+    # scale-invariant, but never something the journal should leave unsaid.
+    fallback: dict[str, list[str]] = {}
+    for tf, src in sorted(result.sources.items()):
+        if src != bars_mod.SOURCE_YAHOO:
+            fallback.setdefault(src, []).append(tf)
+    for src, tfs in fallback.items():
+        click.echo(
+            f"WARNING bars {symbol}: {','.join(tfs)} served by the {src}"
+            f" fallback, not {bars_mod.SOURCE_YAHOO} GC=F — see docs/todo/012",
+            err=True)
     for leg, err in result.failures.items():
         click.echo(f"WARNING bars {symbol}: {leg} leg failed — {err}", err=True)
     # Exit 0 whenever anything landed. This command is the FIRST ExecStart of

@@ -223,13 +223,13 @@ def test_bar_states_atr_avg_ignores_the_pre_warm_up_none_prefix():
 
 
 from jamasp import db
-from jamasp.ingest.bars import store_bars
+from jamasp.ingest.bars import SOURCE_YAHOO, store_bars
 
 
 def test_refresh_writes_one_row_per_readable_column(tmp_path):
     conn = db.connect(tmp_path / "j.db")
     for tf in ("1d", "4h", "1w"):
-        store_bars(conn, "GC", tf, _rising(300))
+        store_bars(conn, "GC", tf, _rising(300), SOURCE_YAHOO)
     n = signals.refresh(conn, load_weights(), "GC")
     keys = {r["key"] for r in conn.execute("SELECT key FROM signal_states")}
     assert n == len(keys)
@@ -241,7 +241,7 @@ def test_refresh_writes_one_row_per_readable_column(tmp_path):
 def test_refresh_is_idempotent(tmp_path):
     conn = db.connect(tmp_path / "j.db")
     for tf in ("1d", "4h", "1w"):
-        store_bars(conn, "GC", tf, _rising(300))
+        store_bars(conn, "GC", tf, _rising(300), SOURCE_YAHOO)
     signals.refresh(conn, load_weights(), "GC")
     before = conn.execute("SELECT COUNT(*) c FROM signal_states").fetchone()["c"]
     signals.refresh(conn, load_weights(), "GC")
@@ -345,7 +345,7 @@ def test_refresh_prefers_bars_over_the_tradingview_fallback(tmp_path):
     conn = db.connect(tmp_path / "j.db")
     _seed_tv(conn)
     for tf in ("1d", "4h", "1w"):
-        store_bars(conn, "GC", tf, _rising(300))
+        store_bars(conn, "GC", tf, _rising(300), SOURCE_YAHOO)
     signals.refresh(conn, load_weights(), "GC")
     sources = {r["source"] for r in conn.execute(
         "SELECT source FROM signal_states WHERE key LIKE 'rsi14@%'")}

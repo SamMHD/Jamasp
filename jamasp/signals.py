@@ -222,7 +222,11 @@ TV_PRICE_SUFFIXES = {
 #               net spec). This is those signals' NORMAL path, not a
 #               fallback; they never had bars to compute from.
 #   tradingview read straight off TradingView's precomputed daily values,
-#               because this host has no bars for that timeframe.
+#               because no provider served bars for that timeframe. This was
+#               the normal state from 2026-08-24 to 2026-09-05, when Yahoo
+#               refused every deep-history request and `bars` was empty; with
+#               the Bitfinex fallback in place it is once again what it was
+#               meant to be — an outage path, not the steady state.
 SOURCE_BARS = "bars"
 SOURCE_SERIES = "series"
 SOURCE_TV = "tradingview"

@@ -564,11 +564,13 @@ def test_flash_line_reports_tier_outcomes():
     assert "23 scored" in line
 
 
-def _patch_backfill(monkeypatch, written, failures):
+def _patch_backfill(monkeypatch, written, failures, sources=None):
     from jamasp.ingest import bars as bars_mod
 
+    srcs = {tf: bars_mod.SOURCE_YAHOO for tf in written} if sources is None else sources
+
     def fake_backfill(conn, symbol="GC", fetch=None):
-        return bars_mod.BackfillResult(written, failures)
+        return bars_mod.BackfillResult(written, failures, srcs)
 
     monkeypatch.setattr(bars_mod, "backfill", fake_backfill)
 
@@ -602,6 +604,39 @@ def test_bars_backfill_succeeds_but_warns_when_one_leg_fails(tmp_path, monkeypat
     assert "WARNING" in res.output
 
 
+def test_bars_backfill_names_the_fallback_provider_when_it_serves(tmp_path,
+                                                                  monkeypatch):
+    # A run served by the fallback is NOT reading GC=F. It is reading spot
+    # gold ~1.5% below it. That is fine for every consumer of `bars` (all of
+    # them are scale-invariant) but it must never be silent — someone reading
+    # the journal has to be able to tell which instrument produced the day's
+    # signal states.
+    from jamasp.ingest import bars as bars_mod
+    cfg = _write_configs(tmp_path, "sources: []\n")
+    dbp = tmp_path / "j.db"
+    _patch_backfill(
+        monkeypatch, {"1h": 7618, "4h": 1905, "1d": 1726, "1w": 345}, {},
+        sources={tf: bars_mod.SOURCE_BITFINEX
+                 for tf in ("1h", "4h", "1d", "1w")})
+    res = CliRunner().invoke(
+        main, ["bars", "backfill", "--db", str(dbp), "--config-dir", str(cfg)])
+    assert res.exit_code == 0, res.output
+    assert "1d=1726" in res.output
+    assert "bitfinex" in res.output
+    assert "WARNING" in res.output
+
+
+def test_bars_backfill_is_quiet_about_provenance_when_yahoo_serves(tmp_path,
+                                                                  monkeypatch):
+    cfg = _write_configs(tmp_path, "sources: []\n")
+    dbp = tmp_path / "j.db"
+    _patch_backfill(monkeypatch, {"1h": 17395, "1d": 1258}, {})
+    res = CliRunner().invoke(
+        main, ["bars", "backfill", "--db", str(dbp), "--config-dir", str(cfg)])
+    assert res.exit_code == 0, res.output
+    assert "WARNING" not in res.output
+
+
 def test_bars_backfill_fails_when_no_timeframe_lands(tmp_path, monkeypatch):
     # Total darkness stays loud — this is the case that must keep alerting.
     cfg = _write_configs(tmp_path, "sources: []\n")
@@ -630,7 +665,7 @@ def test_signals_refresh_reports_a_count(tmp_path):
         for i in range(300)
     ]
     for tf in ("1d", "4h", "1w"):
-        store_bars(conn, "GC", tf, bars)
+        store_bars(conn, "GC", tf, bars, "yahoo")
     conn.close()
 
     res = CliRunner().invoke(
