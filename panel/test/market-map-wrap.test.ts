@@ -2,14 +2,21 @@ import { describe, expect, it } from "vitest";
 import { wrapForTile } from "../components/map-tiles";
 
 /**
- * Tile geometry maps to a character budget through AVG_CHAR_W (0.58) at
- * LABEL_FONT (10): a 200px-wide tile leaves floor((200 - 8) / 5.8) = 33
- * characters a line. Height maps to a line count through LINE_H
- * (LABEL_FONT * 1.25 = 12.5px).
+ * `wrapForTile` is the FLOOR case — the size labels fall back to when a tile
+ * cannot hold the whole text at any larger size. `fitLabel` (see
+ * test/map-label-fit.test.ts) is what picks the size above it.
+ *
+ * Tile geometry maps to a character budget through AVG_CHAR_W (0.66) at
+ * LABEL_FONT (10): a 200px-wide tile leaves floor((200 - 8) / 6.6) = 29
+ * characters a line. Height maps to a line count through the line advance
+ * (LABEL_FONT * LINE_RATIO = 12.5px).
  *
  * These numbers are deliberately spelled out rather than imported: if the
  * typography constants change, these tests should fail loudly and be
- * re-derived, not silently follow along.
+ * re-derived, not silently follow along. AVG_CHAR_W was 0.58 until labels
+ * were sized to fill their tiles — an estimate that only picked a truncation
+ * point could sit on the true average, but one that decides how large text
+ * is SET has to sit above the widest label, or the biggest tiles overflow.
  */
 const WIDE = 200;
 
