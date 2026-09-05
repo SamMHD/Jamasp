@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ALL, isActive } from "@/lib/nav";
+import { NavPendingDot } from "@/components/shell/nav-pending";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cls } from "@/lib/format";
 
@@ -41,7 +42,7 @@ export function TopBar({ ingestTone }: { ingestTone: "fresh" | "stale" | "unknow
                        hover:bg-secondary focus-visible:outline-2
                        focus-visible:outline-offset-2 focus-visible:outline-ring"
           >
-            <span className={cls("h-2.5 w-2.5 rounded-full", DOT[ingestTone])} aria-hidden="true" />
+            <NavPendingDot className={cls("h-2.5 w-2.5 rounded-full", DOT[ingestTone])} />
           </Link>
           <ThemeToggle />
         </span>

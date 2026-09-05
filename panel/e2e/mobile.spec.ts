@@ -47,6 +47,31 @@ test("the More sheet reaches the overflow destinations", async ({ page }) => {
   }
 });
 
+// The sheet used to close on the tap itself, which threw away the one
+// surface carrying click feedback (the row's pending spinner) and dropped
+// the reader back on the page they were already on with nothing to show the
+// tap had registered. It now closes when the navigation LANDS. Both halves
+// matter: a sheet that never closed would be worse than the original bug.
+test("the More sheet closes once the navigation lands", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "More" }).click();
+  const sheet = page.getByRole("dialog");
+  await sheet.getByRole("link", { name: "Calendar" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Calendar" })).toBeVisible();
+  await expect(sheet).toBeHidden();
+});
+
+// Tapping the row that is already current changes no pathname, so the
+// close-on-landing effect never fires for it — that one still has to close
+// on the tap or the sheet is stuck.
+test("the More sheet closes when tapping the route already open", async ({ page }) => {
+  await page.goto("/calendar");
+  await page.getByRole("button", { name: "More" }).click();
+  const sheet = page.getByRole("dialog");
+  await sheet.getByRole("link", { name: "Calendar" }).click();
+  await expect(sheet).toBeHidden();
+});
+
 test("the theme control cycles and persists", async ({ page }) => {
   await page.goto("/");
   const html = page.locator("html");
