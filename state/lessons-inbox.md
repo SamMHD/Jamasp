@@ -82,3 +82,18 @@ by the weekly /retro. One bullet per lesson: date, observation, suggested rule.
   ODDS leg of a data-event read — our feeds relay CME ~45-60 min after
   the print. Schedule print+60, or write the read from the 2y move and
   hand the odds number to the NY-close scan.
+- 2026-09-05 (scan 11:00Z): the stance's flip line "third GCC-confirmed
+  night or a hull strike -> kinetic 40" is AMBIGUOUS. Mehr 08:23Z reported
+  a US missile strike on an Iranian tanker ~6nm off Kharg in the anchorage
+  zone (four projectiles, no casualties, single-source, no CENTCOM
+  confirmation). Is that the trigger? `03627b6b`/`c4ef5615` carve US hull
+  strikes OUT as base-case tanker-for-tanker (1 Sep precedent, no gap);
+  the 2-3 Sep briefs used "hull" for Iranian hits on corridor traffic
+  (Sidr). Scan read it as the Iranian-hit sense and stayed silent —
+  market closed, `58b7daab` pre-commits a weekend CENTCOM strike to
+  inside the band. Sharpening: flip triggers must name the ACTOR and the
+  TARGET CLASS (Iranian hit on non-Iranian hull vs US counter on Iranian
+  hull vs strike on Kharg/Larak loading infra) — a scan should never have
+  to guess which side's strike a trigger means. Carry for the Sunday
+  brief: second tanker-for-tanker episode, first at Kharg anchorage, the
+  morning after "no shooting for days"; watch CENTCOM/NIOC loading lines.
