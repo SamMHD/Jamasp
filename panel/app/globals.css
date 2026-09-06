@@ -24,25 +24,38 @@
   --dk-viz-2: #d95926;
   --dk-viz-3: #199e70;
 
-  /* dark market-map ramp — unchanged values, renamed. See the light ramp's
-     comment below for what this ramp is and why the hatch is mandatory. */
-  --dk-map-bull: #1baf7a;
-  --dk-map-bull-mid: #3e6d55;
-  --dk-map-neutral: #3a3a38;
-  --dk-map-bear-mid: #854741;
-  --dk-map-bear: #e34948;
+  /* dark market-map ramp. See the light ramp's comment below for what this
+     ramp is and why the hatch is mandatory.
 
-  /* dark market-map tile ink. Dark ink on the bright poles, light ink on
-     the dark mid/neutral steps. See the light ink comment below for why
-     light inverts this pairing rather than reusing it. Both themes are held
-     to the 4.5:1 ink floor (INK_FLOOR in lib/palette.ts) by
+     Lightness diverges from the midpoint OUTWARD (L* 26 neutral, 33/37 mids,
+     43/45 poles) and chroma rises with it (C 1 / 31,23 / 62,39), which is the
+     shape a diverging ramp is supposed to have. The previous ramp did not:
+     its poles sat at L* 54 and 64 against a midpoint at L* 24, so a
+     no-signal tile was the darkest thing on the map while a strong read
+     glared, and the ink had to flip to black on exactly those two steps —
+     which put black text next to white text between neighbouring tiles. The
+     whole ramp now lives in one lightness band, so ONE ink serves all five
+     steps and the flip is gone. */
+  --dk-map-bull: #147a56;
+  --dk-map-bull-mid: #33604a;
+  --dk-map-neutral: #3e3e3c;
+  --dk-map-bear-mid: #7a3b36;
+  --dk-map-bear: #b8352f;
+
+  /* dark market-map tile ink: light ink on every step, because every dark
+     fill above is dark enough to take it (4.88:1 at the tightest, on
+     --dk-map-bull). The five tokens stay five rather than collapsing to one
+     because the validator measures ink against ITS OWN fill — one token per
+     pairing is what makes a future ramp edit that darkens a single step fail
+     loudly instead of silently dropping that step under the floor. Held to
+     the 4.5:1 ink floor (INK_FLOOR in lib/palette.ts) by
      test/palette.test.ts's "market-map ink-on-fill contrast" block and
      `npm run validate:palette` — fitted against those, not eyeballed. */
-  --dk-map-ink-bull: #0a0a0a;
+  --dk-map-ink-bull: #f5f5f5;
   --dk-map-ink-bull-mid: #f5f5f5;
   --dk-map-ink-neutral: #f5f5f5;
   --dk-map-ink-bear-mid: #f5f5f5;
-  --dk-map-ink-bear: #0a0a0a;
+  --dk-map-ink-bear: #f5f5f5;
 
   /* ---- light values, active by default ---- */
   --background: #f6f6f3;
@@ -78,33 +91,42 @@
   --viz-spot: #7c5e17;
 
   /* Market-map diverging ramp. Two hues plus a neutral GREY midpoint — never
-     a hue at the midpoint. Both poles clear the CIEDE2000 floor of 6.0 with
-     room to spare under every simulated CVD type (dark bull/bear: dE 12.5
-     deutan / 19.7 protan / 68.2 tritan; light bull/bear: dE 13.0 deutan /
-     13.2 protan / 59.3 tritan) — but colour is never the sole signal for a
-     bull/bear read: the 45-degree hatch on bearish tiles is a required
-     secondary encoding, not decoration. It works at any tile size, which a
-     signed number label does not. Fitted against `npm run validate:palette`
-     — do not eyeball replacements. */
-  --map-bull: #0f7a52;
-  --map-bull-mid: #6aa389;
-  --map-neutral: #b9b9b4;
-  --map-bear-mid: #c58a86;
-  --map-bear: #b02c2a;
+     a hue at the midpoint. Both poles clear the CIEDE2000 floor of 6.0 under
+     every simulated CVD type (dark bull/bear: dE 14.4 deutan / 11.4 protan /
+     59.9 tritan; light bull/bear: dE 10.3 deutan / 10.6 protan / 60.3
+     tritan) — but colour is never the sole signal for a bull/bear read: the
+     45-degree hatch on bearish tiles is a required secondary encoding, not
+     decoration. It works at any tile size, which a signed number label does
+     not. Fitted against `npm run validate:palette` — do not eyeball
+     replacements.
+
+     Lightness diverges from the midpoint outward, mirroring the dark ramp:
+     L* 81 neutral, 72/71 mids, 56/60 poles, with chroma rising the same way
+     (C 3 / 27,28 / 51,39). Every step is pale enough for ONE dark ink, which
+     is what removed the per-tile ink flip the previous ramp forced. The one
+     all-pairs reading still under the 6.0 floor is bear-mid/bull-mid (dE 3.4
+     deutan) — as before, that pair is exactly why BOTH bearish tones hatch,
+     so the failing pair always has one hatched member. */
+  --map-bull: #47a077;
+  --map-bull-mid: #7cbb9f;
+  --map-neutral: #c6c6c1;
+  --map-bear-mid: #e2a09a;
+  --map-bear: #d4645c;
 
   /* Market-map tile ink, light theme. TONE_INK (map-tiles.tsx) paints this
-     straight onto the ramp fills above, so it has to invert with them: the
-     light poles are dark, saturated colours and read against LIGHT ink; the
-     light mid/neutral steps are pale and read against DARK ink — the exact
-     opposite pairing from the dark ramp's ink above. Held to the 4.5:1 ink
+     straight onto the ramp fills above. Dark ink on every step, because
+     every light fill above is light enough to take it (5.08:1 at the
+     tightest, on --map-bear) — the mirror of the dark theme's single light
+     ink, and the reason the ink still has to be a theme-aware variable even
+     though it no longer varies by tone WITHIN a theme. Held to the 4.5:1 ink
      floor (INK_FLOOR in lib/palette.ts) by test/palette.test.ts's
      "market-map ink-on-fill contrast" block and `npm run validate:palette`
      — fitted against those, not eyeballed. */
-  --map-ink-bull: #f5f5f5;
-  --map-ink-bull-mid: #0a0a0a;
-  --map-ink-neutral: #0a0a0a;
-  --map-ink-bear-mid: #0a0a0a;
-  --map-ink-bear: #f5f5f5;
+  --map-ink-bull: #14140f;
+  --map-ink-bull-mid: #14140f;
+  --map-ink-neutral: #14140f;
+  --map-ink-bear-mid: #14140f;
+  --map-ink-bear: #14140f;
 
   /* Back-compat: sparkline.tsx and price-chart.tsx still read var(--chart-1)
      directly. Alias it to the validated --viz-1 rather than duplicating the

@@ -91,12 +91,17 @@ describe("MarketMap", () => {
     expect(html.toLowerCase()).toContain("bullish");
   });
 
-  it("gives different tones different text ink, not one colour for all five", () => {
+  it("paints tile ink through a per-tone theme variable, never a literal", () => {
     // TONE_INK references a distinct theme-aware CSS variable per tone
     // (--map-ink-bull vs --map-ink-neutral, etc.) rather than a literal hex,
-    // since the ink/fill pairing inverts between the light and dark ramps.
-    // Nothing else in the suite would catch a regression that collapsed
-    // this to a single constant.
+    // because the ink/fill pairing inverts between the light and dark ramps:
+    // pale light fills take dark ink, dark fills take light ink. Within one
+    // theme the five now resolve to the SAME value — the ramp is a single
+    // lightness band on purpose, so that ink does not flip from tile to
+    // neighbouring tile — but they stay five separate tokens so the palette
+    // validator measures each pairing against its own fill. Nothing else in
+    // the suite would catch a regression that collapsed this to one
+    // hard-coded constant and silently unhooked it from the theme.
     const html = render([
       item({ itemId: "a", direction: 2, conviction: 0.8, theme: "rates_dollar" }), // bull
       item({

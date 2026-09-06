@@ -90,9 +90,17 @@ export const LABEL_PAD = 4;
  * measures the painted block (ascent + descent, not the bare font size), so
  * nothing overflows at any ceiling. Without one, though, a two-word signal
  * name in a quarter-canvas tile sets at 70px+ and reads as a poster rather
- * than a map. 48px is about where a tile still reads as a tile.
+ * than a map.
+ *
+ * 34, not 48. At 48 the largest tiles were three and a half times the size of
+ * the group headers above them and nearly five times the floor: the biggest
+ * headline stopped being a label and became the page's masthead, and the eye
+ * had nowhere to go afterwards. The area channel already says which tile
+ * matters; the type only has to stay readable across the range, and a 3.4x
+ * ramp does that without shouting. Flattening the top of the ramp (several
+ * large tiles now share the ceiling) is the point, not a side effect.
  */
-export const LABEL_FONT_MAX = 48;
+export const LABEL_FONT_MAX = 34;
 
 /**
  * Glyph width for this sans-serif stack (Inter), as a fraction of font-size.
@@ -110,15 +118,64 @@ export const LABEL_FONT_MAX = 48;
 export const AVG_CHAR_W = 0.66;
 
 /**
+ * Tracking (letter-spacing) in em, as a function of the size a label is set
+ * at. Optical sizing: the same face needs to be pulled together at 34px and
+ * opened up at 10px, or a map whose labels span a 3.4x range reads as if it
+ * were set in two different typefaces. Large type takes negative tracking,
+ * small type positive — the standard rule, applied in three steps rather
+ * than continuously because a label's size is already an integer.
+ *
+ * This is not a paint-time flourish: letter-spacing changes how wide a line
+ * actually is, so it is folded into the width budget (`charAdvance` below).
+ * A budget that ignored it would hand the fit a size whose painted text is
+ * wider than the tile — precisely the failure the budget exists to prevent.
+ */
+export function trackingFor(fontSize: number): number {
+  if (fontSize >= 28) return -0.022;
+  if (fontSize >= 20) return -0.015;
+  if (fontSize >= 14) return -0.005;
+  return 0.005;
+}
+
+/**
+ * Weight follows size the opposite way from tracking. 10px type on a
+ * saturated fill needs the extra stem width to hold together; the same
+ * weight at 34px reads as shouting. Both values are real weights on Inter's
+ * variable axis, which `next/font` loads whole (app/layout.tsx calls
+ * `Inter()` with no `weight`, which is what selects the variable file), so
+ * neither is synthesised.
+ */
+export function weightFor(fontSize: number): number {
+  return fontSize >= 20 ? 550 : 600;
+}
+
+/** Per-character advance in em: the glyph estimate plus this size's tracking. */
+export function charAdvance(fontSize: number): number {
+  return AVG_CHAR_W + trackingFor(fontSize);
+}
+
+/**
+ * The narrowest advance any size can produce. The size search's opening
+ * bounds have to be UPPER bounds to stay sound, so they divide by this
+ * rather than by the advance at some particular size.
+ */
+const TIGHTEST_ADVANCE = AVG_CHAR_W - 0.022;
+
+/**
  * Group headers are uppercased and letter-spaced (0.08em), both of which cost
  * width the mixed-case AVG_CHAR_W does not account for. Sizing a header with
  * AVG_CHAR_W overruns its box by roughly a fifth.
  */
 export const HEADER_CHAR_W = 0.70;
 
-/** Group-header type, floor and ceiling — same fill-your-box rule, smaller range. */
-export const HEADER_FONT_MIN = 9;
-export const HEADER_FONT_MAX = 15;
+/**
+ * Group-header type, floor and ceiling — same fill-your-box rule, smaller
+ * range. The ceiling came down from 15 with the tile ceiling: a header is a
+ * section marker, and at 15px semibold next to a 34px tile label it read as
+ * a competing headline rather than as the thing naming the group.
+ */
+export const HEADER_FONT_MIN = 10;
+export const HEADER_FONT_MAX = 13;
 
 /** Height of the strip `layoutGroups` reserves above each group's children. */
 export const GROUP_HEADER_H = 24;
@@ -129,28 +186,57 @@ export const GROUP_HEADER_H = 24;
  * plus padding on both sides at LABEL_FONT; MIN_LABEL_H is one line of
  * LABEL_FONT text plus padding top and bottom. Both are coupled to
  * LABEL_FONT/LABEL_PAD above — change the font size, recheck these.
- * MIN_LABEL_W = 4*2 + 6*(10*0.66) ≈ 48px; MIN_LABEL_H = 10 + 4*2 = 18px.
+ * MIN_LABEL_W = 4*2 + 6*(10*0.665) ≈ 48px; MIN_LABEL_H = 10 + 4*2 = 18px.
+ * (0.665 is `charAdvance(LABEL_FONT)`: AVG_CHAR_W plus the floor size's
+ * +0.005em tracking, so the threshold measures the type as it is painted.)
  */
-export const MIN_LABEL_W = LABEL_PAD * 2 + 6 * LABEL_FONT * AVG_CHAR_W;
+export const MIN_LABEL_W =
+  LABEL_PAD * 2 + 6 * LABEL_FONT * charAdvance(LABEL_FONT);
 export const MIN_LABEL_H = LABEL_FONT + LABEL_PAD * 2;
 
 /** Truncate `text` to whatever fits `w` px at `fontSize`, ellipsis-safe. */
 export function truncateForWidth(
-  text: string, w: number, fontSize: number, charW: number = AVG_CHAR_W,
+  text: string, w: number, fontSize: number, charW?: number,
 ): string {
-  const maxChars = Math.floor((w - LABEL_PAD * 2) / (fontSize * charW));
+  const maxChars = Math.floor(
+    (w - LABEL_PAD * 2) / (fontSize * (charW ?? charAdvance(fontSize))));
   if (maxChars <= 0) return "";
   if (text.length <= maxChars) return text;
   return `${text.slice(0, Math.max(1, maxChars - 1))}…`;
 }
 
 /**
- * Line advance as a multiple of the font size. 1.25x is the usual compromise
- * between legibility and fitting lines into a small tile. It is a ratio rather
- * than a constant because the font is now per-tile: a 32px label needs a 40px
- * advance, not the 12.5px one a 10px label needs.
+ * Line advance as a multiple of the font size. It is a ratio rather than a
+ * constant because the font is per-tile: a 32px label needs a 38px advance,
+ * not the 12px one a 10px label needs.
+ *
+ * 1.2, tightened from 1.25. A wrapped tile label is a title, not body copy,
+ * and at 1.25 a four-line headline read as four separate captions stacked up
+ * rather than one block. 1.2 is still clear of collision: what a line
+ * actually inks is about 0.75em of ascender and 0.21em of descender in Inter
+ * (0.96em together), so consecutive lines keep roughly a quarter of an em
+ * between them even though the nominal em boxes (1.22em, ASCENT + DESCENT)
+ * now overlap slightly. The fit charges the full 1.22em for the first line
+ * regardless, so the overlap costs nothing in safety.
  */
-export const LINE_RATIO = 1.25;
+export const LINE_RATIO = 1.2;
+
+/**
+ * How many characters a line must be able to hold before a wrap counts as
+ * readable, when the text is that long at all.
+ *
+ * The size search maximises type size. Maximising type size minimises how
+ * many characters fit on a line, and past a point that stops being "big and
+ * legible" and becomes a column of orphans — the live map was setting
+ * "Dollar index slides to a three-week low" as six lines with the word "a"
+ * alone on one of them. Requiring a line to hold at least this many
+ * characters costs a size step or two and buys back the sentence.
+ *
+ * It is a preference, not a constraint: a tile too narrow to hold twelve
+ * characters at any size still gets the largest label that fits, because the
+ * alternative is no label at all. See `fitLabel`.
+ */
+export const MIN_LINE_CHARS = 12;
 
 /**
  * Wrap a headline into a tile at a given size — the FLOOR case, called with
@@ -206,10 +292,35 @@ function budgets(w: number, h: number, fontSize: number, painted = false):
   { maxChars: number; maxLines: number } {
   const firstLine = painted ? fontSize * (ASCENT + DESCENT) : fontSize;
   return {
-    maxChars: Math.floor((w - LABEL_PAD * 2) / (fontSize * AVG_CHAR_W)),
+    maxChars: Math.floor((w - LABEL_PAD * 2) / (fontSize * charAdvance(fontSize))),
     maxLines: 1 + Math.floor(
       (h - LABEL_PAD * 2 - firstLine) / (fontSize * LINE_RATIO)),
   };
+}
+
+/**
+ * Split a word at the seams a reader already expects a break on: after an
+ * internal hyphen or underscore. "three-week" parts as "three-" / "week" and
+ * "net_spec" as "net_" / "spec", both of which keep the word's shape; cutting
+ * the same words mid-run gives "three-w" / "eek" and "net_sp" / "ec", which
+ * do not.
+ *
+ * The delimiter stays on the LEFT piece, which is what makes the break read
+ * as a break rather than as two words. A trailing delimiter is not a seam —
+ * nothing follows it — so this never returns an empty piece. Written as a
+ * scan rather than a lookbehind regex so it needs nothing newer than ES5.
+ */
+function seamSplit(word: string): string[] {
+  const out: string[] = [];
+  let start = 0;
+  for (let i = 0; i < word.length - 1; i += 1) {
+    if (word[i] === "-" || word[i] === "_") {
+      out.push(word.slice(start, i + 1));
+      start = i + 1;
+    }
+  }
+  out.push(word.slice(start));
+  return out;
 }
 
 /**
@@ -265,17 +376,57 @@ function wrapWithin(
     // that does not fit simply means "too big", so `fitLabel` tries a
     // smaller size instead of shattering "bollinger" into "bolling/er".
     if (!breakWords) { complete = false; break; }
-    let rest = word;
-    while (rest.length > maxChars) {
-      if (!push(rest.slice(0, maxChars))) { complete = false; break; }
-      rest = rest.slice(maxChars);
+
+    // Seams first, mid-run cut second. `seamSplit` gives back the pieces a
+    // hyphen or underscore already offers; only a piece with no seam left in
+    // it (or one still longer than a whole line) gets cut mid-run. That is
+    // what turns the live map's "net_sp" / "ec 1d" into "net_" / "spec" /
+    // "1d". A word with no seam at all comes back as a single piece, so the
+    // shattering path below is exactly what it always was.
+    let stopped = false;
+    for (const piece of seamSplit(word)) {
+      if (line && line.length + piece.length > maxChars) {
+        if (!push(line)) { stopped = true; break; }
+        line = "";
+      }
+      let rest = piece;
+      while (rest.length > maxChars) {
+        if (!push(rest.slice(0, maxChars))) { stopped = true; break; }
+        rest = rest.slice(maxChars);
+      }
+      if (stopped) break;
+      line += rest;
     }
-    if (!complete) break;
-    line = rest;
+    if (stopped) { complete = false; break; }
   }
   if (complete && line && !push(line)) complete = false;
 
   return { lines, complete };
+}
+
+/**
+ * Even out a wrap that already fits, without changing how many lines it uses.
+ *
+ * Greedy wrapping fills each line to the brim and leaves whatever is left
+ * over on the last one, which is what turns a headline into a staircase.
+ * Narrowing the line budget as far as it will go WITHOUT needing an extra
+ * line redistributes the words across the lines already paid for: same size,
+ * same line count, same block height, less rag.
+ *
+ * Every candidate it considers is narrower than the wrap it was handed, so
+ * nothing this returns can be wider than something that already fitted — it
+ * cannot break the containment guarantee, only improve the margin.
+ */
+function balanceLines(text: string, lines: string[]): string[] {
+  if (lines.length < 2) return lines;
+  const target = lines.length;
+  let best = lines;
+  for (let cap = Math.max(...lines.map(l => l.length)) - 1; cap >= 1; cap -= 1) {
+    const r = wrapWithin(text, { maxChars: cap, maxLines: target }, false);
+    if (!r.complete || r.lines.length !== target) break;
+    best = r.lines;
+  }
+  return best;
 }
 
 /**
@@ -291,12 +442,25 @@ function wrapWithin(
  * The search starts from a real upper bound rather than from LABEL_FONT_MAX,
  * so it converges in a handful of steps per tile:
  *   - `ah / (ASCENT + DESCENT)`: one painted line can be no taller than the box;
- *   - `aw / AVG_CHAR_W`: a line must hold at least one character;
+ *   - `aw / TIGHTEST_ADVANCE`: a line must hold at least one character;
  *   - the area bound: n characters at font f need about
- *     n * (f*AVG_CHAR_W) * (f*LINE_RATIO) of area, so f is at most
- *     sqrt(area / (n * AVG_CHAR_W * LINE_RATIO)). Wrapping wastes space at
+ *     n * (f*advance) * (f*LINE_RATIO) of area, so f is at most
+ *     sqrt(area / (n * advance * LINE_RATIO)). Wrapping wastes space at
  *     line ends, so the achievable size is at or below this — which is what
- *     makes it a sound starting point rather than a guess.
+ *     makes it a sound starting point rather than a guess. Both bounds
+ *     divide by TIGHTEST_ADVANCE rather than by the advance at f, because a
+ *     starting point is only sound if it is an over-estimate.
+ *
+ * Two answers come out of the one descending pass, because both are monotone
+ * in f (a smaller size fits whenever a larger one does, and a smaller size
+ * always gets MORE characters on a line):
+ *   - `relaxed` — the largest size at which the text fits at all. What this
+ *     function used to return outright.
+ *   - the returned size — the largest that ALSO gives a line room for
+ *     MIN_LINE_CHARS characters, which is what stops a big tile from setting
+ *     a headline one or two words per line. When no size clears that (a tile
+ *     genuinely too narrow), `relaxed` is used instead: a stack of short
+ *     lines still beats no label.
  *
  * Below LABEL_FONT the label is dropped rather than shrunk: MIN_LABEL_W /
  * MIN_LABEL_H are the sizes at which one line of floor-size text fits, and
@@ -313,13 +477,26 @@ export function fitLabel(text: string, w: number, h: number):
 
   const aw = w - LABEL_PAD * 2;
   const ah = h - LABEL_PAD * 2;
-  const areaCap = Math.sqrt((aw * ah) / (chars * AVG_CHAR_W * LINE_RATIO));
+  const areaCap = Math.sqrt((aw * ah) / (chars * TIGHTEST_ADVANCE * LINE_RATIO));
   const start = Math.floor(Math.min(
-    LABEL_FONT_MAX, ah / (ASCENT + DESCENT), aw / AVG_CHAR_W, areaCap));
+    LABEL_FONT_MAX, ah / (ASCENT + DESCENT), aw / TIGHTEST_ADVANCE, areaCap));
+
+  // Text shorter than MIN_LINE_CHARS wants its whole self on one line, not
+  // twelve characters' worth of room it has no words for.
+  const wantChars = Math.min(chars, MIN_LINE_CHARS);
+  let relaxed: { fontSize: number; lines: string[] } | null = null;
 
   for (let f = start; f > LABEL_FONT; f -= 1) {
-    const { lines, complete } = wrapWithin(text, budgets(w, h, f, true), false);
-    if (complete && lines.length) return { fontSize: f, lines };
+    const budget = budgets(w, h, f, true);
+    const { lines, complete } = wrapWithin(text, budget, false);
+    if (!complete || !lines.length) continue;
+    if (relaxed === null) relaxed = { fontSize: f, lines };
+    if (budget.maxChars >= wantChars) {
+      return { fontSize: f, lines: balanceLines(text, lines) };
+    }
+  }
+  if (relaxed) {
+    return { fontSize: relaxed.fontSize, lines: balanceLines(text, relaxed.lines) };
   }
   // Nothing fits whole: fall back to the floor size and let the text
   // ellipsise, exactly as it did before labels were fitted at all.
@@ -332,6 +509,12 @@ export function fitLabel(text: string, w: number, h: number):
  * Shared rather than written out in both maps: the two rendered identical
  * <text> elements, and a header that stayed 9px while the tiles under it
  * grew would look like a mistake on both of them.
+ *
+ * Deliberately still flush LEFT while the tiles below it are centred. A group
+ * header is not a tile: it names the block that starts under it, and setting
+ * it against the block's left edge is what marks where one group ends and the
+ * next begins on a surface that is otherwise wall-to-wall colour. Centring it
+ * would leave it floating over the seam between two of its own children.
  */
 export function MapGroupHeader({ x, y, w, label }: {
   x: number; y: number; w: number; label: string;
@@ -344,7 +527,7 @@ export function MapGroupHeader({ x, y, w, label }: {
     <text x={x + LABEL_PAD}
       y={y + (GROUP_HEADER_H - fontSize * (ASCENT + DESCENT)) / 2 + fontSize * ASCENT}
       fontSize={fontSize} fill="var(--muted-foreground)"
-      style={{ textTransform: "uppercase", letterSpacing: "0.08em" }}>
+      style={{ textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600 }}>
       {truncateForWidth(label, w, fontSize, HEADER_CHAR_W)}
     </text>
   );
@@ -365,21 +548,33 @@ export function MapTile({ x, y, w, h, tone, title, lines,
   tone: Tone; title: string; lines: string[];
   fontSize?: number; dashed?: boolean;
 }) {
-  // The wrapped block is centred vertically rather than pinned to the top.
-  // At the floor size that is barely a change; on a large tile whose label
-  // fits in fewer lines than the box could hold, top-pinned text reads as
-  // having slipped up into a corner.
+  // The wrapped block is centred on BOTH axes.
   //
-  // Centring has to be done against the PAINTED height, not against
-  // `fontSize * lines`: the glyphs of a line span ascent + descent, about
-  // 1.22x the font size in Inter, and a baseline placed with the naive
-  // 0.8 * fontSize rule puts the tallest tiles' ascenders a pixel or two
-  // above their own rectangle. Both ratios are rounded up rather than to
-  // the nearest, since erring high pushes the block INTO the tile.
+  // Vertically, against the PAINTED height rather than `fontSize * lines`:
+  // the glyphs of a line span ascent + descent, about 1.22x the font size in
+  // Inter, and a baseline placed with the naive 0.8 * fontSize rule puts the
+  // tallest tiles' ascenders a pixel or two above their own rectangle. Both
+  // ratios are rounded up rather than to the nearest, since erring high
+  // pushes the block INTO the tile. Measured on the live map, that lands the
+  // actual ink within a tenth of an em of the rect's centre line (mean
+  // -0.006em over 55 labels): Inter's 0.24em of unused room above cap height
+  // and its 0.25em of descent cancel almost exactly, so the em box and the
+  // ink share a centre. Only descender-heavy labels sit low, and by at most
+  // 0.10em — compensating per string would make neighbouring tiles'
+  // baselines jitter for less than a pixel of gain, so they are left alone.
+  //
+  // Horizontally, on the tile's own centre line. This is the half that was
+  // wrong: the label used to start one 4px pad from the left edge whatever
+  // the tile's width, so a label vertically centred to within a pixel could
+  // sit with 4px to its left and 106px to its right. Flush-left is a fine
+  // choice and centred is a fine choice; centred on one axis and flush on
+  // the other is the one combination that reads as broken, because the eye
+  // has a centre line to compare against and the text misses it.
   const lineH = fontSize * LINE_RATIO;
   const blockH = fontSize * (ASCENT + DESCENT)
     + Math.max(0, lines.length - 1) * lineH;
   const top = Math.max(0, Math.min((h - blockH) / 2, h - blockH));
+  const cx = x + w / 2;
 
   return (
     <g>
@@ -397,12 +592,19 @@ export function MapTile({ x, y, w, h, tone, title, lines,
           fill={`url(#${MAP_HATCH_ID})`} pointerEvents="none" />
       )}
       {lines.length > 0 && (
-        <text x={x + LABEL_PAD} y={y + top + fontSize * ASCENT}
-          fontSize={fontSize} fill={TONE_INK[tone]}>
+        <text x={cx} y={y + top + fontSize * ASCENT} textAnchor="middle"
+          fontSize={fontSize} fill={TONE_INK[tone]}
+          style={{
+            fontWeight: weightFor(fontSize),
+            letterSpacing: `${trackingFor(fontSize)}em`,
+          }}>
           {lines.map((line, i) => (
-            // Each tspan repeats x so the line returns to the tile's left
-            // edge; dy advances all but the first.
-            <tspan key={i} x={x + LABEL_PAD} dy={i === 0 ? 0 : lineH}>{line}</tspan>
+            // Each tspan repeats x so the line returns to the tile's centre
+            // line — with text-anchor: middle every line centres on its own,
+            // which is what makes a wrapped block read as a centred block
+            // rather than as a centred first line with a ragged tail. dy
+            // advances all but the first.
+            <tspan key={i} x={cx} dy={i === 0 ? 0 : lineH}>{line}</tspan>
           ))}
         </text>
       )}
