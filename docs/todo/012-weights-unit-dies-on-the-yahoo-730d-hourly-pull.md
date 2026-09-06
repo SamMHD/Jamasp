@@ -442,3 +442,15 @@ cannot serve. The 2 unfitted columns in that scratch run are `gvz` and
 - `net_spec` has 6 observations against `min_observations: 50`, so it will
   report unfitted for roughly another year. That is the CFTC print's weekly
   cadence, not a bug.
+
+## Update 2026-09-06 (retro)
+
+The "never produced a single number" line in Why-it-matters is now stale:
+`weight_fits` holds 88 rows with `fitted_at = 2026-09-05T23:37:55Z` and
+`state/weights.json` exists (technical fit 38 columns, theme fit 6 columns,
+n=233, 24h horizon) — the first successful fit on this host, after #28/#30.
+`bars` holds 11,742 rows through 4 Sep (all four timeframes). todo-009
+(empty tables) is closed pointing here. Items 1–3 of Problem stand: the
+730d 429 has not been explained, the abort chain is unchanged, and nothing
+checks that the three tables keep advancing.
+

@@ -77,7 +77,8 @@ Tuesday into PPI/CPI with a mild downward lean.
 ## Open predictions
 
 Open (27): `58b7daab` `85f08a28` `a1fc647f` (reopen/7 Sep), `81564330`
-`fe35b77d` (6 Sep), `92a5bbb8` `30bad8a0` `b13614a1` `f527c209`
+`fe35b77d` (6 Sep — retro DB sweep 16:00Z clean, no escort suspension;
+7 Sep brief scores at window close), `92a5bbb8` `30bad8a0` `b13614a1` `f527c209`
 `a12de81f` `c2eafbf8` `bd825267` `973a3143` `75160fe7` (7 Sep),
 `71bd8ddb` (8 Sep), `03627b6b` `2b39238a` `302708ab` `c4ef5615` (9 Sep),
 `41aec282` `a2171cad` `a3ad30b1` `746afbe2` (10 Sep), `2d098d6c`
@@ -103,8 +104,13 @@ anchorage; US diesel at a record; Kuwait gold AML tightening (3 Sep).
 
 ## Sourcing health
 
-Calendar feed ends 4 Sep (todo-001). Weekend delta thin (18 items), no
-oil wrap or odds relay until the reopen. Extract mis-serve on a Gulf
-News URL (todo-181) — check the extracted title against the headline.
-`bars` empty (todo-009). Investing.com 403. No Treasury buyback schedule
-ingested.
+Calendar feed rolled over Sunday: covers through 12 Sep, ECB/PPI 10 Sep
+and CPI 11 Sep confirmed as feed rows (retro 16:00Z; todo-001 is the
+horizon item). Weekend delta thin, no oil wrap or odds relay until the
+reopen. Extract mis-serve on a Gulf News URL (todo-181) — check the
+extracted title against the headline. `bars`/signals/weights populated
+(11.7k bars through 4 Sep; todo-009 closed, 012 open for the unit).
+Investing.com 403. No Treasury buyback schedule ingested. Playbook
+rewritten (retro): odds claims across a speaker window cap 0.55; gold
+caps cap 0.5 in this regime — `a3ad30b1` and `a1fc647f` flagged, not
+rewritten.
