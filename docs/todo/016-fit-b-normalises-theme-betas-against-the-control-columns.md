@@ -218,6 +218,67 @@ clamp named in **Related**, which shrinks a column 4× for a defect the spec
 says is about direction scoring. That question is unchanged by this fix and
 still belongs to the retro.
 
+### Blast radius: who actually consumed these numbers
+
+Audited 2026-09-06, code paths and the live artefacts both. The answer is
+narrower than **Why it matters** implies, and worth recording so nobody
+re-opens the question.
+
+**Only two things ever read a theme multiplier.**
+
+1. The panel's fundamental map — `panel/app/page.tsx` →
+   `panel/lib/marketmap.ts#buildThemeMultipliers` → `layoutMap`, where it
+   drove tile **area** and, through `squarify`'s descending sort, the
+   **position of each theme block**. PR #35 removed it from that channel. This
+   was the only rendered consumer and it is gone.
+2. `.claude/skills/retro/SKILL.md` §4.6, which tells the retro to read
+   `state/weights.json`. It reads the whole file, so the multipliers land in
+   the analyst's context — but the skill directs it to the `flags` list and
+   the `coefficients` map's β/se/n, and never names `multiplier`.
+
+**Nothing else.** `/brief`, `/scan`, `/deepdive` and the remaining skills
+contain no reference to `weights.json`, `weight_fits`, `multiplier` or
+`jamasp weights` — the brief and the scan read only `stance.md`,
+`playbook.md`, `watchlist.yaml` and `calendar.yaml`. No Python module reads
+`weights.json` at all. No CLI command prints a multiplier: `jamasp weights
+fit` prints only counts (`f"{r.name}: n={r.n} {len(r.coefficients)} columns"`).
+`jamasp/watchdog.py` touches `weight_fits` for `MAX(fitted_at)` only. The
+panel never queries `weight_fits`.
+
+**The one exposed artefact was not contaminated.** 2026-09-06 was the first
+weekly retro ever to run with a fit present, so §4.6 executed for the first
+time against exactly these numbers. `reports/2026/09/2026-09-06-retro.md`
+contains no occurrence of the string `multipl`, and its §4.6 table header is
+`| Column | β | se | n | fitted |` — no multiplier column. Its verdict is
+explicit non-action: "*Two days of fits on 233 observations is not a
+regression to act on; read again next Sunday.*" Every claim it made — the βs
+being within one SE of zero, `physical_cb`/`etf_flows` being starved — is
+about βs and observation counts and is unaffected by the normalisation.
+
+It also caught the flag pollution and handled it: "*the theme fit's flag list
+also carries sixteen technical columns, which the retro skill says to ignore,
+and which I have.*" That reading is right by coincidence — the skill says to
+ignore the *technical fit's* flags, not technical columns inside the *theme*
+fit's — so the pollution was absorbed rather than detected. This fix removes
+it, so the instruction no longer needs the benefit of the doubt.
+
+The retro's downstream writes are clean too: the rewritten `state/playbook.md`
+contains no theme-weighting, theme-ranking or theme-priority guidance at all
+(no match for `multipl`, `theme`, `physical_cb`, `etf_flows` or `weights.json`
+in either the 23 Aug version or today's rewrite), and all twenty heuristics
+trace to named prediction ids. `state/stance.md` and the drained
+`state/lessons-inbox.md` likewise. The 5 and 6 Sep briefs never open the file.
+
+One trap for a future reader: `stance.md` and the briefs carry a line like
+"weights 25/35/40 base/bearish-rates/kinetic". Those are the analyst's own
+**scenario probabilities**, written by the brief, and have nothing to do with
+fit multipliers. The kinetic/geopolitical scenario carries the *highest* of
+them — the opposite of what acting on a floored geopolitics multiplier would
+have produced.
+
+**Conclusion:** the inverted multipliers reached the fundamental map's area
+channel and nothing else. No analyst reasoning was built on them.
+
 ### The two stored fits
 
 `weight_fits` keeps `2026-09-05T21:33:46Z` and `2026-09-05T23:37:55Z` for both
