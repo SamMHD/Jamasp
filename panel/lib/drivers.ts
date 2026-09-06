@@ -18,19 +18,40 @@ import type { Quote } from "./technicals";
 export type DriverSpec = { symbol: string; label: string; digits: number };
 
 /**
- * Display order: the drivers most causally linked to gold first (dollar,
- * real yield, nominal yield), then the broader risk complex. Shanghai and
- * LBMA prints are deliberately absent: SGE_AU_CNY_G is CNY/gram and turning
- * it into a comparable premium needs a USDCNY cross this database does not
- * store — a fabricated conversion would be worse than no tile.
+ * Display order, and the ONLY place it is expressed: the Drivers card, the
+ * overview's ticker tape and the page's own database reads all iterate this
+ * array, so moving a line here moves the driver everywhere at once. Nothing
+ * downstream hardcodes a position.
+ *
+ * The ordering rule used to be causal proximity to gold — dollar, real
+ * yield, nominal yield, then the broader risk complex. It is now causal
+ * proximity *within what TradingView can quote*, with the one driver it
+ * cannot quote at the end:
+ *
+ *   DXY, US 10y, USD/JPY, S&P 500, BTC   — live TradingView Mini Charts
+ *   US 10y real                          — Jamasp's own reading
+ *
+ * The real yield is not demoted by this; it is gold's dominant driver and
+ * state/watchlist.yaml says so in as many words. It moves because it is the
+ * one tile with no widget behind it (lib/tradingview.ts explains why: FRED's
+ * TIPS constant-maturity series is a class the free embed cannot render, and
+ * substituting a NOMINAL yield would silently corrupt the read). Scattered
+ * through the grid, that tile looked like the one whose embed had failed;
+ * gathered at the end, the card reads "five live, one ours" — which is what
+ * it is.
+ *
+ * Shanghai and LBMA prints are deliberately absent: SGE_AU_CNY_G is CNY/gram
+ * and turning it into a comparable premium needs a USDCNY cross this
+ * database does not store — a fabricated conversion would be worse than no
+ * tile.
  */
 export const DRIVER_SPECS: readonly DriverSpec[] = [
   { symbol: "DX-Y.NYB", label: "DXY", digits: 2 },
-  { symbol: "DFII10", label: "US 10y real", digits: 2 },
   { symbol: "^TNX", label: "US 10y", digits: 2 },
   { symbol: "USDJPY", label: "USD/JPY", digits: 2 },
   { symbol: "^GSPC", label: "S&P 500", digits: 0 },
   { symbol: "BTC-USD", label: "BTC", digits: 0 },
+  { symbol: "DFII10", label: "US 10y real", digits: 2 },
 ] as const;
 
 export type DriverRead = {

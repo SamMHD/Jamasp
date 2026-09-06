@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { PageHeader } from "@/components/page-header";
 import { DriverPanel } from "@/components/driver-panel";
+import { DriverTape } from "@/components/driver-tape";
 import { FundamentalPanel } from "@/components/fundamental-panel";
 import { HorizonStrip } from "@/components/horizon-strip";
 import { MarketMap } from "@/components/market-map";
@@ -163,6 +164,13 @@ export default async function Overview({
   return (
     <div>
       <AutoRefresh />
+      {/* The band before the title, the way a dealing screen carries one:
+          the complex at a glance, above everything that needs thinking
+          about. It reserves a fixed height and renders Jamasp's own readings
+          on the server, so the live tape lands inside the box that is
+          already there — see components/driver-tape.tsx for why this is the
+          one embed on the panel that cannot be lazily gated on the viewport. */}
+      <DriverTape drivers={drivers} />
       <PageHeader title="Overview" subtitle={`as of ${fmtUtc(iso(now))}`} />
 
       <section aria-label="Market map" className="mb-4">
@@ -186,10 +194,19 @@ export default async function Overview({
         {/* 2:1 rather than 3:1. The SVG preserves its aspect ratio — stretching
             would distort tile areas, and area is the encoding — so the viewBox
             ratio decides how much of a screen fullscreen actually fills. 2:1
-            also buys tiles the height that wrapped headlines need. */}
+            also buys tiles the height that wrapped headlines need.
+
+            `importance="pips"` turns on the third channel (see map-tiles.tsx's
+            ImportanceTreatment block). This map needs it and the technical map
+            does not: here AREA is the triage tier, one of five discrete
+            steps, apportioned across whatever else fell in the window — so it
+            ranks stories but cannot be read back as WHICH tier a story is.
+            The technical map has no tier to read back; its area is the
+            multiplier, which its own tile titles state in full. Five fixed
+            pips report `tier` itself, at the same size on every tile. */}
         <MarketMap items={mapItems} width={1200} height={600} range={range}
           coverage={{ scored: mapItems.length, unscored: mapUnscored }}
-          themeMultipliers={themeMultipliers}
+          themeMultipliers={themeMultipliers} importance="pips"
           fittedAt={fittedWeights?.fittedAt ?? null} />
       </section>
 
@@ -230,16 +247,38 @@ export default async function Overview({
           `min-width: auto` on grid items lets that track grow to whichever
           child's content is widest instead of the container's own width —
           exactly the kind of overflow the mobile sweep exists to catch. */}
+      {/* 2/3, not the 3/2 this grid carried while the stance panel was still
+          the left column's ballast. With that panel moved to the foot of the
+          page the split inverted: measured against the production database at
+          1280 and 1440 the left column ran ~500px SHORT of the right, because
+          the Drivers card in a 2-of-5 track is under its @[30rem] container
+          query and stacks all six drivers one-up. Giving Drivers the wider
+          track takes it two-up (three-up from 1600), which halves the card,
+          and the narrower left column grows the two cards that were short.
+          Measured imbalance across 1280/1440/1600/1920/2560 falls from a
+          553px worst case (mean 317) to 256px (mean 136), and the page is
+          shorter at every one of those widths. */}
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-5">
-        <div className="flex flex-col gap-4 lg:col-span-3">
-          <FundamentalPanel stance={stance} watchlist={watchlist} now={now} />
+        <div className="flex flex-col gap-4 lg:col-span-2">
           <HorizonStrip horizon={horizon} now={now} />
           <NewsFlow pulse={pulse} heads={heads} top={top} lastItemTs={lastItemTs} now={now} />
         </div>
-        <div className="flex flex-col gap-4 lg:col-span-2">
+        <div className="flex flex-col gap-4 lg:col-span-3">
           <DriverPanel drivers={drivers} now={now} />
           <PredictionPanel stats={predStats} bins={calibrationBins(preds)} />
         </div>
+      </div>
+
+      {/* Last, and full width, because it is the only block on this page that
+          is READ rather than scanned. Everything above resolves in one look —
+          two treemaps, a status row, price levels, the driver complex, the
+          forecast record — and used to be pushed down the left column by the
+          stance prose and its falsifier rows. Full width rather than back in
+          the 3-column slot: at the bottom there is nothing beside it, and
+          prose that has stopped competing for the fold may as well have the
+          measure. */}
+      <div className="mt-4">
+        <FundamentalPanel stance={stance} watchlist={watchlist} now={now} />
       </div>
 
       <FooterStrip wakeup={pendingWakeups[0]}

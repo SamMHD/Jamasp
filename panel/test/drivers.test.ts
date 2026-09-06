@@ -37,6 +37,25 @@ describe("DRIVER_SPECS", () => {
     const known = new Set(["DX-Y.NYB", "DFII10", "^TNX", "USDJPY", "^GSPC", "BTC-USD"]);
     for (const s of DRIVER_SPECS) expect(known.has(s.symbol)).toBe(true);
   });
+
+  it("still carries the real yield — it is gold's dominant driver", () => {
+    // state/watchlist.yaml's fed-rate-path entry opens "Real yields are
+    // gold's dominant driver". The tile has no live widget behind it and
+    // therefore looked like a failure, and deleting it was floated as the
+    // fix; this pins that the presentation was changed and the driver was
+    // not. A vendor's symbol coverage must not decide what the desk sees.
+    expect(DRIVER_SPECS.map(s => s.symbol)).toContain("DFII10");
+  });
+
+  it("puts the driver with no live widget last", () => {
+    // The whole ordering rule, in one assertion, and the only place it is
+    // enforced: components/driver-panel.tsx and the overview's ticker tape
+    // both just iterate this array. See the comment on DRIVER_SPECS for why
+    // last is the right place for it rather than second.
+    expect(DRIVER_SPECS[DRIVER_SPECS.length - 1].symbol).toBe("DFII10");
+    expect(DRIVER_SPECS.map(s => s.label)).toEqual(
+      ["DXY", "US 10y", "USD/JPY", "S&P 500", "BTC", "US 10y real"]);
+  });
 });
 
 describe("printDelta", () => {
