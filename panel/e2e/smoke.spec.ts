@@ -153,6 +153,23 @@ test("overview renders the market instrument panels", async ({ page }) => {
   await expect(page.getByText("0.00%")).toHaveCount(0);
   await expect(page.getByText("= 0")).toHaveCount(0);
 
+  // Driver tape: the band across the top, in the state this suite runs in —
+  // TradingView blocked, so the widget never arrives. That is exactly the
+  // state it must not be empty in. It carries Jamasp's own readings, which
+  // are server-rendered and therefore present at first paint, and it holds
+  // the height it reserved so the page below it never moves.
+  const tape = page.getByRole("region", { name: "Driver tape" });
+  await expect(tape.getByText("DXY")).toBeVisible();
+  await expect(tape.getByText("103.8")).toBeVisible();
+  const tapeBox = await tape.boundingBox();
+  expect(tapeBox!.height, "the band must hold its reserved height with no widget in it")
+    .toBe(48);
+  // The real yield is not in the band, in EITHER state: a fallback that
+  // listed six readings and dropped to five when the embed landed would make
+  // gold's dominant driver look like something that flickers. It has a
+  // labelled tile in the Drivers card instead, asserted below.
+  await expect(tape.getByText("US 10y real")).toHaveCount(0);
+
   // Drivers: a populated tile (value + honest dash), a single-print tile,
   // and the four symbols with no fixture rows each stating "no data".
   const drivers = page.getByRole("region", { name: "Drivers" });
@@ -160,6 +177,29 @@ test("overview renders the market instrument panels", async ({ page }) => {
   await expect(drivers.getByText("103.8")).toBeVisible();
   await expect(drivers.getByText("4.29")).toBeVisible();
   await expect(drivers.getByText("no data")).toHaveCount(4);
+  // The driver with no TradingView equivalent sorts last and says why. Both
+  // halves matter: last is what stops it reading as the tile whose embed
+  // failed, and the caption is what makes it read as a decision.
+  const labels = await drivers.locator(".text-label").allTextContents();
+  expect(labels[labels.length - 1]).toBe("US 10y real");
+  await expect(drivers.getByText(/Real yield is Jamasp/)).toBeVisible();
+
+  // Reading order: everything that resolves in a glance, then the block that
+  // has to be read. The stance panel moved to the foot of the page for that
+  // reason, and a reorder that quietly undid it would be invisible to every
+  // other assertion in this file.
+  const order = await page.evaluate(() => {
+    const name = (s: string) => document.querySelector(`section[aria-label="${s}"]`);
+    const [tape, drivers, fundamental] =
+      ["Driver tape", "Drivers", "Fundamental"].map(name);
+    if (!tape || !drivers || !fundamental) return null;
+    return {
+      tapeFirst: !!(tape.compareDocumentPosition(drivers) & Node.DOCUMENT_POSITION_FOLLOWING),
+      fundamentalLast:
+        !!(drivers.compareDocumentPosition(fundamental) & Node.DOCUMENT_POSITION_FOLLOWING),
+    };
+  });
+  expect(order).toEqual({ tapeFirst: true, fundamentalLast: true });
 
   // Forecast record: hit rate over the decisive pair, full ledger counts,
   // the matured-unscored amber flag, and the calibration chart.
