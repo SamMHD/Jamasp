@@ -24,6 +24,41 @@ describe("TechnicalMap", () => {
     expect(html).toContain("Trend");
   });
 
+  it("centres every label on its own tile, on both axes", () => {
+    // A label used to start one 4px pad from its tile's left edge however
+    // wide the tile was, while being centred to within a pixel vertically.
+    // Centred on one axis and flush on the other is the one combination that
+    // reads as a mistake, and it is what the desk noticed. The horizontal
+    // half is asserted here because it is the half no other test would
+    // catch: text-anchor plus an x on the rect's centre line, on the <text>
+    // and on every <tspan> under it (a tspan that inherits x would keep
+    // painting from wherever the previous line ended).
+    const html = render([
+      tile({ key: "a@1d", signal: "a" }),
+      tile({ key: "b@1d", signal: "b", family: "trend" }),
+    ]);
+    // Group headers are deliberately NOT centred — see MapGroupHeader — so
+    // exactly the two tile labels carry text-anchor.
+    const anchored = [...html.matchAll(/<text ([^>]*text-anchor[^>]*)>/g)];
+    expect(anchored).toHaveLength(2);
+    for (const [, attrs] of anchored) expect(attrs).toContain('text-anchor="middle"');
+
+    // Each label's x, and every tspan's x under it, must be its rect's
+    // centre rather than its left edge.
+    const tiles = [...html.matchAll(
+      // The optional second <rect> is the hatch overlay a bearish tile
+      // carries; these two are bullish, but the pattern has to allow it.
+      /<rect x="([\d.]+)" y="[\d.]+" width="([\d.]+)"[^>]*><\/rect>(?:<rect[^>]*><\/rect>)?<text x="([\d.]+)"([\s\S]*?)<\/text>/g)];
+    expect(tiles).toHaveLength(2);
+    for (const [, x, w, tx, body] of tiles) {
+      const centre = Number(x) + Number(w) / 2;
+      expect(Number(tx)).toBeCloseTo(centre, 5);
+      const spans = [...body.matchAll(/<tspan x="([\d.]+)"/g)];
+      expect(spans.length).toBeGreaterThan(0);
+      for (const [, sx] of spans) expect(Number(sx)).toBeCloseTo(centre, 5);
+    }
+  });
+
   it("hatches BOTH bearish tones, never just the pole", () => {
     // bear (state -0.9) and bear-mid (state -0.3) must each carry the hatch:
     // bear/bull-mid fails at dE 2.8 for protanopes and bear-mid/bull-mid at
