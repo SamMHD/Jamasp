@@ -199,14 +199,22 @@ export const MIN_LABEL_H = LABEL_FONT + LABEL_PAD * 2;
  * IMPORTANCE — the third channel. Exploratory; "none" is the default.
  * ---------------------------------------------------------------------------
  *
- * The fundamental map already carries two channels: AREA is materiality (tier
- * times the theme's learned multiplier) and COLOUR is direction scaled by
- * conviction. What it does not carry is a *decodable* importance readout.
- * Area is relative, and the theme multiplier scales it, so a tier-3 story in
- * a theme the fit never reached can out-size a tier-5 story in a theme the
- * fit pushed to 0.25 — on the live panel today it does exactly that.
+ * The fundamental map already carries two channels: AREA is materiality —
+ * `tierWeight(tier)` and nothing else — and COLOUR is direction scaled by
+ * conviction. What it does not carry is a *decodable* importance readout,
+ * and putting area back on tier alone did not give it one.
  *
- * Each treatment adds ONE mark reporting `tier`: Jamasp's own importance
+ * Area is a RELATIVE channel, and no arithmetic makes it an absolute one. A
+ * treemap apportions a fixed canvas, so a tile's size is its tier's SHARE of
+ * whatever else happened to land in the window: the same tier-4 story is
+ * large on a quiet day and small on a busy one, and the only yardstick on the
+ * page is the tile next to it. Nor is the eye given a fine ruler — the scale
+ * is the five discrete weights 100/60/30/10/3, so adjacent tiers are 1.7x to
+ * 3.3x apart, spread over rectangles of varying aspect ratio. "Bigger than
+ * that one" survives all of that. "Tier 4, not tier 3" does not, and it is
+ * the reading the desk actually wants when it asks how much a story matters.
+ *
+ * Each treatment adds ONE mark reporting `tier` ABSOLUTELY: Jamasp's own
  * field, the 1-5 materiality call jamasp/flashtext.py asks the triage model
  * for, and the gate config/settings.yaml's flash tiers act on. They are
  * alternatives, not layers — pick one.

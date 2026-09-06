@@ -16,14 +16,18 @@ import {
  * see `lib/marketmap.ts` for why those are two different channels. This
  * component only positions and paints what `layoutMap` already computed.
  *
- * Area is a RELATIVE channel, and `layoutMap` multiplies tier weight by the
- * theme's learned multiplier before squarifying, so a tile's size is not a
- * reading of its tier: with the live fit (rates_dollar/geopolitics/
- * supply_mining/other at 0.25, physical_cb/etf_flows unfitted at 1.0) a
- * tier-4 physical_cb story renders 2.4x the area of the day's only tier-5.
- * The optional `importance` channel exists for exactly that gap — it reports
- * `tier` directly, so importance stops depending on a reader's ability to
- * invert the multiplier by eye. It is off ("none") unless a caller asks.
+ * Area is `tierWeight(tier)` and nothing else. The theme's learned multiplier
+ * rides along on `ThemeBox.multiplier` for a header to report, and is
+ * deliberately not an area term — `lib/marketmap.ts#layoutMap` gives the full
+ * argument, including the day the two-factor area inverted tier order on the
+ * live panel. So a bigger tile is a higher-or-equal tier, always.
+ *
+ * Area is still a RELATIVE channel, though, and that is a different gap: a
+ * tile's size is its tier's share of whatever else landed in the window, and
+ * the five tier weights are only 1.7x-3.3x apart, so "bigger than that one"
+ * reads off the map but "tier 4, not tier 3" does not. The optional
+ * `importance` channel exists for that gap — it reports `tier` absolutely, at
+ * the same size on every tile. It is off ("none") unless a caller asks.
  *
  * A treemap is an all-pairs surface — any two tiles can end up adjacent — so
  * every one of the ramp's ten step-pairs was measured (see the palette
@@ -118,13 +122,14 @@ export function MarketMap({ items, width, height, range, coverage,
 
   const boxes = layoutMap(
     items, { x: 0, y: 0, w: width, h: height }, THEME_HEADER_H, themeMultipliers);
-  // The footer's claim must not rest on fittedAt alone: weights.json's
+  // The footer's fit line must not rest on fittedAt alone: weights.json's
   // fitted_at is one top-level timestamp shared by every fit type, so a
   // caller could pass a truthy fittedAt from a technical-only fit run
-  // alongside empty themeMultipliers. Deriving "weighted" from both inputs
-  // here — rather than trusting a caller to keep them in sync — is what
-  // keeps a second call site, or a future edit to either this file or the
-  // page, from silently reintroducing that exact false claim.
+  // alongside empty themeMultipliers, and the footer would date a theme fit
+  // that has never run. Deriving the claim from both inputs here — rather
+  // than trusting a caller to keep them in sync — is what keeps a second call
+  // site, or a future edit to either this file or the page, from quietly
+  // reintroducing that.
   const hasMultipliers = Object.keys(themeMultipliers ?? {}).length > 0;
 
   return (
@@ -171,9 +176,14 @@ export function MarketMap({ items, width, height, range, coverage,
       <p className="mt-2 text-xs text-muted-foreground">
         {coverage.scored} scored {coverage.scored === 1 ? "story" : "stories"} {WINDOW_LABEL[range]}
         {" "}· {coverage.unscored} unscored not shown
+        {/* Area is the triage tier, full stop — see the header comment. The
+            theme fit is still worth dating here because it is the other
+            number this map is built from and the desk has no other view of
+            its freshness; it is named as NOT an area term so the line cannot
+            be read as the rescale claim it replaced. */}
         {fittedAt && hasMultipliers
-          ? ` · areas weighted by the ${fmtAge(fittedAt, now)} fit`
-          : " · weights not yet fitted"}
+          ? ` · area is the triage tier · theme fit ${fmtAge(fittedAt, now)}, not applied to area`
+          : " · area is the triage tier · theme fit not yet run"}
       </p>
     </section>
   );

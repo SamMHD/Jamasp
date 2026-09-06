@@ -161,10 +161,79 @@ export type ThemeBox = Rect & {
   theme: string;
   items: Cell<ScoredItem>[];
   total: number;
+  /**
+   * The theme's learned multiplier, 1.0 when the fit has not reported one.
+   * Carried on the box rather than folded into `items`' area — see
+   * `layoutMap` for why it is not an area term.
+   */
+  multiplier: number;
 };
 
 export type GroupNode<T> = { group: string; value: number; node: T };
 export type GroupBox<T> = Rect & { group: string; items: Cell<T>[]; total: number };
+
+/**
+ * Passes of the header-reservation fixed point in `reserveHeaders`, and the
+ * relative movement below which it has converged. Two or three passes is
+ * enough on every layout either map produces — the widths stop moving once
+ * the boxes are roughly right — so the cap is headroom, not the normal path.
+ */
+const HEADER_PASSES = 8;
+const HEADER_EPSILON = 1e-4;
+
+/**
+ * Price each group's header into its value, so what squarify apportions is
+ * the area that will be left AFTER the headers are taken out.
+ *
+ * The naive order — size the box by value, then cut a fixed `headerHeight`
+ * strip out of the top — makes px-per-value a function of the box's HEIGHT,
+ * because the strip costs `headerHeight * width` out of `width * height`. On
+ * the desk's own 24h map that ran from a 4% tax on the tallest group to 37%
+ * on the shortest: two stories of identical tier came out at wildly
+ * different sizes purely from which theme they landed in. Area is this
+ * map's importance channel, so that is a lie told in it.
+ *
+ * What we want is `box_i = k * value_i + headerHeight * width_i`, with the
+ * boxes summing to the canvas. That is circular — `width_i` is an output of
+ * the layout that its input decides — so it is solved by iterating: lay out,
+ * read the widths back, re-price, lay out again. The widths barely move
+ * after the first correction, so it settles in a couple of passes.
+ *
+ * If the headers alone would fill the canvas there is nothing to reserve.
+ * The raw values come back and the caller gets the old proportional layout,
+ * rather than a divide-by-zero or a loop that diverges.
+ */
+function reserveHeaders<T>(
+  groups: { value: number; node: T }[], rect: Rect, headerHeight: number,
+): { value: number; node: T }[] {
+  const canvas = rect.w * rect.h;
+  const totalValue = groups.reduce((s, g) => s + g.value, 0);
+  if (headerHeight <= 0 || totalValue <= 0 || canvas <= 0) return groups;
+
+  let priced = groups;
+  for (let pass = 0; pass < HEADER_PASSES; pass++) {
+    // squarify sorts and drops zero-value nodes, so the widths come back in
+    // neither the input order nor the input length: key them by node
+    // identity rather than by position.
+    const widths = new Map<T, number>();
+    for (const cell of squarify(priced, rect)) widths.set(cell.node, cell.w);
+
+    const headerArea = groups.reduce(
+      (s, g) => s + headerHeight * (widths.get(g.node) ?? 0), 0);
+    if (headerArea >= canvas) return groups;
+
+    const perValue = (canvas - headerArea) / totalValue;
+    const next = groups.map(g => ({
+      value: perValue * g.value + headerHeight * (widths.get(g.node) ?? 0),
+      node: g.node,
+    }));
+    const moved = Math.max(...next.map((n, i) =>
+      Math.abs(n.value - priced[i].value) / Math.max(n.value, 1e-9)));
+    priced = next;
+    if (moved < HEADER_EPSILON) break;
+  }
+  return priced;
+}
 
 /**
  * Two-level layout: groups fill the canvas, each group's children fill its
@@ -173,6 +242,12 @@ export type GroupBox<T> = Rect & { group: string; items: Cell<T>[]; total: numbe
  * Generic over the node type because both maps are this same layout over
  * different nodes — stories grouped by theme, signals grouped by family.
  * Duplicating it per map would leave two squarify wrappers to keep in step.
+ *
+ * The header is priced in BEFORE the groups are apportioned (see
+ * `reserveHeaders`), so equal value buys equal area wherever it lands. A
+ * consequence worth stating: a group's own BOX is no longer proportional to
+ * its value — its children's area is, and that is what the eye reads and
+ * what `total` is the honest denominator for.
  *
  * Groups with no positive-value children are absent rather than empty. An
  * empty box would claim area and read as "nothing happened in this channel"
@@ -194,7 +269,7 @@ export function layoutGroups<T>(
     node: { group, kids },
   }));
 
-  return squarify(groups, rect).map(cell => {
+  return squarify(reserveHeaders(groups, rect, headerHeight), rect).map(cell => {
     const inner: Rect = {
       x: cell.x,
       y: cell.y + headerHeight,
@@ -212,29 +287,68 @@ export function layoutGroups<T>(
 }
 
 /**
- * The fundamental map's layout: stories grouped by theme, sized by tier and
- * by the theme's learned multiplier.
+ * The fundamental map's layout: stories grouped by theme, sized by TIER
+ * ALONE. The theme's learned multiplier rides along on the box, for the
+ * header to report, and does not touch area.
  *
- * `multipliers` comes from Fit B via state/weights.json. An absent entry is
- * 1.0, so a deployment whose theme fit has not reached min_rows renders
- * exactly as it did before this existed — a map that quietly rescaled itself
- * on the day a fit first succeeded, with nothing on the page saying so, would
- * be a worse outcome than one that says "provisional" for three weeks.
+ * ## Why the multiplier is not an area term
+ *
+ * It used to be: `area = tierWeight(tier) * multiplier[theme]`, straight out
+ * of the design (docs/superpowers/specs/2026-08-18-market-maps-design.md
+ * §"Area and colour"). On 2026-09-05 the theme fit succeeded for the first
+ * time and the desk's 24h map inverted — the largest tile was a TIER 4 at
+ * 2.3x the area of the day's only TIER 5, because 60 x 1.0 beats 100 x 0.25.
+ *
+ * The mechanism is that the two factors are not on one scale and cannot be:
+ *
+ *  - A *tier* is a per-story materiality judgement the triage model made
+ *    when it read the story. It is the answer to "how big is this".
+ *  - A *multiplier* is a per-theme regression estimate of how much gold has
+ *    historically moved per unit of exposure to that theme over the next 24
+ *    hours. It is the answer to "how much does this channel usually matter",
+ *    which is a claim about a THEME over MONTHS, not about a story today.
+ *
+ * Multiplying them yields an area in units of materiality x sensitivity,
+ * which is not a quantity anyone reads off a treemap; and because the
+ * multiplier's range [0.25, 3.0] is a 12x span while adjacent tiers are only
+ * 1.7x apart, the theme factor does not modulate the tier ordering, it
+ * overrides it. Encoding two different questions in one visual channel is
+ * the defect; nothing about the arithmetic fixes that.
+ *
+ * The fit's own numbers on the day this was found make the point sharper
+ * still. Every one of the six theme coefficients was inside ~1 standard
+ * error of zero (the largest, geopolitics, at 0.80 SE), so the multipliers
+ * carried no information at all — and what area they did drive was ordered
+ * BACKWARDS against the fit: geopolitics had the largest positive beta and
+ * rendered at the 0.25 floor, while physical_cb, with a beta seven times
+ * smaller, rendered at 1.0 because its 16 observations fell short of
+ * `min_observations` and it fell back to neutral. "Not enough data to
+ * measure this theme" was being drawn as "this theme is four times as
+ * important as every theme we can measure".
+ *
+ * So: area is the tier, which is what this module's header has always said
+ * it is, and the multiplier is theme-level information that belongs in the
+ * theme's header alongside the fitted/provisional treatment.
+ *
+ * REVERSING THIS is one line — put `* (multipliers[it.theme] ?? 1)` back on
+ * the value below — plus the tests in test/marketmap.test.ts that name the
+ * decision. It changes what the map means, so it should be a decision
+ * someone makes on purpose rather than a diff nobody noticed.
+ *
+ * `multipliers` comes from Fit B via state/weights.json; an absent entry is
+ * 1.0, so a deployment whose theme fit has not run yet reports neutral.
  */
 export function layoutMap(
   items: ScoredItem[], rect: Rect, headerHeight: number,
   multipliers: Record<string, number> = {},
 ): ThemeBox[] {
   const boxes = layoutGroups(
-    items.map(it => ({
-      group: it.theme,
-      value: tierWeight(it.tier) * (multipliers[it.theme] ?? 1),
-      node: it,
-    })),
+    items.map(it => ({ group: it.theme, value: tierWeight(it.tier), node: it })),
     rect, headerHeight);
   return boxes.map(b => ({
     x: b.x, y: b.y, w: b.w, h: b.h,
     theme: b.group, items: b.items, total: b.total,
+    multiplier: multipliers[b.group] ?? 1,
   }));
 }
 
