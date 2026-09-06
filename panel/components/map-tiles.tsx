@@ -194,6 +194,143 @@ export const MIN_LABEL_W =
   LABEL_PAD * 2 + 6 * LABEL_FONT * charAdvance(LABEL_FONT);
 export const MIN_LABEL_H = LABEL_FONT + LABEL_PAD * 2;
 
+/**
+ * ---------------------------------------------------------------------------
+ * IMPORTANCE — the third channel. Exploratory; "none" is the default.
+ * ---------------------------------------------------------------------------
+ *
+ * The fundamental map already carries two channels: AREA is materiality (tier
+ * times the theme's learned multiplier) and COLOUR is direction scaled by
+ * conviction. What it does not carry is a *decodable* importance readout.
+ * Area is relative, and the theme multiplier scales it, so a tier-3 story in
+ * a theme the fit never reached can out-size a tier-5 story in a theme the
+ * fit pushed to 0.25 — on the live panel today it does exactly that.
+ *
+ * Each treatment adds ONE mark reporting `tier`: Jamasp's own importance
+ * field, the 1-5 materiality call jamasp/flashtext.py asks the triage model
+ * for, and the gate config/settings.yaml's flash tiers act on. They are
+ * alternatives, not layers — pick one.
+ *
+ *   "pips"     five fixed-size marks at the top of the tile, `tier` of them
+ *              filled. Absolute, and comparable BETWEEN tiles — which a bar
+ *              measured as a fraction of the tile's own width is not: a
+ *              tier-4 bar on a wide tile out-runs a tier-5 bar on a narrow
+ *              one, so the reader compares lengths and gets the answer
+ *              backwards. Fixed geometry is what makes the mark a reading.
+ *   "boundary" a stroke keyed to the pipeline's own gates — posted / held /
+ *              never posted. Three states, and it costs the label nothing.
+ *   "meta"     a second, smaller line under the headline reading the tier and
+ *              what the pipeline did with it. The TradingView-heatmap move
+ *              (ticker over % change): a literal readout, but it needs room,
+ *              so only the larger tiles get it.
+ *
+ * All three paint in the tile's own ink (TONE_INK), so the "one ink per
+ * theme" property the ramp was rebuilt for survives; and all three reserve
+ * their band OUT of the label box before `fitLabel` runs, so the zero-overflow
+ * guarantee stays geometric and correct on the first server-rendered paint.
+ */
+export type ImportanceTreatment = "none" | "pips" | "boundary" | "meta";
+
+/** The whole tier scale, so tier/MAX_TIER is a fraction of a full rail. */
+export const MAX_TIER = 5;
+
+/**
+ * The news pipeline's own tier gates, mirroring config/settings.yaml's
+ * `flash.post_tier_min` / `flash.rollup_tier_min` exactly as TIER_WEIGHT
+ * mirrors config/weights.yaml. They are what makes "importance" an
+ * operational fact on this desk rather than a bare number: at or above
+ * `post` a story went to the news channel immediately, at or above `rollup`
+ * it was held for the four-times-daily roundup, below that it never reached
+ * the channel at all. Callers with `loadSettings()` to hand can pass the real
+ * values; these are the fallback, so a drift between the two files shows up
+ * as a mislabelled tile rather than a crash.
+ */
+export const POST_TIER_MIN = 4;
+export const ROLLUP_TIER_MIN = 3;
+
+export type TierGates = { post: number; rollup: number };
+export const DEFAULT_TIER_GATES: TierGates = {
+  post: POST_TIER_MIN, rollup: ROLLUP_TIER_MIN,
+};
+
+/** What the pipeline did with a story at this tier. */
+export type TierFate = "posted" | "held" | "quiet";
+
+export function tierFate(tier: number, gates: TierGates = DEFAULT_TIER_GATES): TierFate {
+  if (tier >= gates.post) return "posted";
+  if (tier >= gates.rollup) return "held";
+  return "quiet";
+}
+
+/**
+ * Pip geometry, in px and FIXED — not a fraction of the tile. The whole point
+ * of the treatment is that five pips look the same on a 60px tile and a 400px
+ * one, so "three filled" reads as tier 3 wherever the eye lands.
+ */
+export const PIP_W = 5;
+export const PIP_H = 3;
+export const PIP_GAP = 2;
+export const PIPS_W = MAX_TIER * PIP_W + (MAX_TIER - 1) * PIP_GAP;
+/** The pip band: the pips themselves plus 3px of air before the label box. */
+export const PIP_BAND = PIP_H + 3;
+
+/**
+ * Below this a tile cannot hold the full run of pips inside its padding, and
+ * a clipped run reads as a lower tier — the one failure this mark must not
+ * have. Too small, and it draws nothing rather than lying.
+ */
+export const PIP_MIN_W = PIPS_W + LABEL_PAD * 2;
+export const PIP_MIN_H = 12;
+
+/**
+ * Meta band: a CONSTANT 20px reserved at the bottom, which is what keeps the
+ * meta line out of the circular dependency it would otherwise have — the
+ * label's size depends on the reserve, so a reserve derived from the label's
+ * size depends on itself. 20px holds the meta ceiling (14px, painted at
+ * ascent + descent = 17.1px) with room to centre it in the band.
+ */
+export const META_BAND = 20;
+export const META_FONT_MIN = 9;
+export const META_FONT_MAX = 14;
+
+/** The widest meta string, which is what the width test has to clear. */
+const META_WIDEST = "T5 · POSTED";
+
+/** The meta line's text for a tier. Already uppercase. */
+export function metaTextFor(tier: number, gates: TierGates = DEFAULT_TIER_GATES): string {
+  const fate = tierFate(tier, gates);
+  return `T${tier} · ${fate === "posted" ? "POSTED" : fate === "held" ? "HELD" : "QUIET"}`;
+}
+
+/**
+ * How much of a tile a treatment takes away from the label box.
+ *
+ * Both the caller (which sizes the label) and `MapTile` (which positions it)
+ * read this, so the two cannot disagree about where the label box is — the
+ * one way a reserved band turns back into an overflow.
+ *
+ * A treatment that cannot fit its own band reserves nothing and draws
+ * nothing, rather than painting over the label. On a map whose tiles run from
+ * a quarter of the canvas down to a few pixels, "sometimes absent" is the
+ * honest behaviour, and it is the cost each option has to own.
+ */
+export function importanceInsets(
+  treatment: ImportanceTreatment, w: number, h: number,
+): { top: number; bottom: number } {
+  if (treatment === "pips") {
+    return (w >= PIP_MIN_W && h >= PIP_MIN_H)
+      ? { top: PIP_BAND, bottom: 0 } : { top: 0, bottom: 0 };
+  }
+  if (treatment === "meta") {
+    const fits = h >= META_BAND + MIN_LABEL_H
+      && w - LABEL_PAD * 2 >= META_WIDEST.length * META_FONT_MIN * HEADER_CHAR_W;
+    return fits ? { top: 0, bottom: META_BAND } : { top: 0, bottom: 0 };
+  }
+  // "boundary" paints inside the tile's own edge and "none" paints nothing,
+  // so neither costs the label a pixel.
+  return { top: 0, bottom: 0 };
+}
+
 /** Truncate `text` to whatever fits `w` px at `fontSize`, ellipsis-safe. */
 export function truncateForWidth(
   text: string, w: number, fontSize: number, charW?: number,
@@ -541,12 +678,21 @@ export function MapGroupHeader({ x, y, w, label }: {
  * dashed means "this is 1.0 for want of a sample", which on a map whose area
  * channel encodes learned importance is the difference between a claim and a
  * placeholder.
+ *
+ * `importance` is the optional third channel (see ImportanceTreatment above).
+ * It defaults to "none", so the technical map — which has no tier — and any
+ * caller that has not opted in render exactly as they did before it existed.
+ * When it is on, the caller MUST have sized `lines`/`fontSize` against
+ * `h - importanceInsets(...).top - .bottom`, which is what keeps the label
+ * inside the box the treatment left it.
  */
 export function MapTile({ x, y, w, h, tone, title, lines,
-  fontSize = LABEL_FONT, dashed = false }: {
+  fontSize = LABEL_FONT, dashed = false,
+  importance = "none", tier, gates = DEFAULT_TIER_GATES }: {
   x: number; y: number; w: number; h: number;
   tone: Tone; title: string; lines: string[];
   fontSize?: number; dashed?: boolean;
+  importance?: ImportanceTreatment; tier?: number; gates?: TierGates;
 }) {
   // The wrapped block is centred on BOTH axes.
   //
@@ -570,11 +716,45 @@ export function MapTile({ x, y, w, h, tone, title, lines,
   // choice and centred is a fine choice; centred on one axis and flush on
   // the other is the one combination that reads as broken, because the eye
   // has a centre line to compare against and the text misses it.
+  // A treatment's band is taken off the top and/or bottom BEFORE the block is
+  // centred, so the label centres in what is left rather than in the whole
+  // tile. `importanceInsets` is the same function the caller sized the label
+  // with, so the two agree by construction.
+  const showImportance = importance !== "none" && tier !== undefined;
+  const inset = showImportance
+    ? importanceInsets(importance, w, h) : { top: 0, bottom: 0 };
+  const boxY = y + inset.top;
+  const boxH = Math.max(0, h - inset.top - inset.bottom);
+
   const lineH = fontSize * LINE_RATIO;
   const blockH = fontSize * (ASCENT + DESCENT)
     + Math.max(0, lines.length - 1) * lineH;
-  const top = Math.max(0, Math.min((h - blockH) / 2, h - blockH));
+  const top = Math.max(0, Math.min((boxH - blockH) / 2, boxH - blockH));
   const cx = x + w / 2;
+
+  // --- pips: five fixed marks, `tier` of them filled ---
+  const pipsOn = showImportance && importance === "pips" && inset.top > 0;
+  const pipX0 = cx - PIPS_W / 2;
+  const pipY = y + (PIP_BAND - PIP_H) / 2;
+
+  // --- boundary: a stroke on the pipeline's own gates, inset so it paints
+  // inside the tile rather than over the 1px separator its neighbour shares.
+  const fate = showImportance ? tierFate(tier!, gates) : "quiet";
+  const boundaryOn = showImportance && importance === "boundary"
+    && fate !== "quiet" && w > 6 && h > 6;
+  const boundaryW = fate === "posted" ? 2 : 1.5;
+
+  // --- meta: the tier readout, sized off the headline it sits under so the
+  // two read as one block rather than as two unrelated labels.
+  const metaOn = showImportance && importance === "meta" && inset.bottom > 0;
+  const metaFont = Math.max(META_FONT_MIN,
+    Math.min(META_FONT_MAX, Math.round(fontSize * 0.5)));
+  const metaText = metaOn ? metaTextFor(tier!, gates) : "";
+  // Uppercase and letter-spaced, so it is measured with HEADER_CHAR_W for the
+  // same reason MapGroupHeader is. A meta line that does not fit is dropped,
+  // never truncated: "T5 · POST…" is a worse readout than no readout.
+  const metaFits = metaOn
+    && metaText.length * metaFont * HEADER_CHAR_W <= w - LABEL_PAD * 2;
 
   return (
     <g>
@@ -591,8 +771,41 @@ export function MapTile({ x, y, w, h, tone, title, lines,
         <rect x={x} y={y} width={w} height={h}
           fill={`url(#${MAP_HATCH_ID})`} pointerEvents="none" />
       )}
+      {boundaryOn && (
+        // strokeWidth straddles the path, so the rect is inset by half of it
+        // and the whole stroke lands inside the tile. fill="none" keeps the
+        // hatch and the fill below visible through it.
+        <rect x={x + boundaryW / 2} y={y + boundaryW / 2}
+          width={Math.max(0, w - boundaryW)} height={Math.max(0, h - boundaryW)}
+          fill="none" stroke={TONE_INK[tone]} strokeWidth={boundaryW}
+          strokeOpacity={fate === "posted" ? 0.9 : 0.45}
+          strokeDasharray={fate === "held" ? "4 3" : undefined}
+          pointerEvents="none" />
+      )}
+      {pipsOn && (
+        // The empty pips are drawn too, not just the filled ones: without the
+        // run's full length on screen there is no denominator, and "three
+        // marks" stops meaning "three out of five".
+        <g pointerEvents="none">
+          {Array.from({ length: MAX_TIER }, (_, i) => (
+            <rect key={i} x={pipX0 + i * (PIP_W + PIP_GAP)} y={pipY}
+              width={PIP_W} height={PIP_H} rx={PIP_H / 2}
+              fill={TONE_INK[tone]}
+              fillOpacity={i < (tier ?? 0) ? 0.95 : 0.22} />
+          ))}
+        </g>
+      )}
+      {metaFits && (
+        <text x={cx} y={y + h - inset.bottom
+          + (META_BAND - metaFont * (ASCENT + DESCENT)) / 2 + metaFont * ASCENT}
+          textAnchor="middle" fontSize={metaFont} fill={TONE_INK[tone]}
+          fillOpacity={0.72} pointerEvents="none"
+          style={{ fontWeight: 600, letterSpacing: "0.06em" }}>
+          {metaText}
+        </text>
+      )}
       {lines.length > 0 && (
-        <text x={cx} y={y + top + fontSize * ASCENT} textAnchor="middle"
+        <text x={cx} y={boxY + top + fontSize * ASCENT} textAnchor="middle"
           fontSize={fontSize} fill={TONE_INK[tone]}
           style={{
             fontWeight: weightFor(fontSize),
@@ -620,7 +833,60 @@ const LEGEND_STEPS: { tone: Tone; label: string }[] = [
   { tone: "bull", label: "bullish" },
 ];
 
-export function MapLegend() {
+/**
+ * The importance key, appended to the legend when a treatment is on.
+ *
+ * A third channel nobody can name is not a channel, it is decoration — so a
+ * treatment that ships has to ship its key with it. Drawn with CSS rather
+ * than SVG for the same reason the hatch key is: this markup must not emit
+ * a url(#map-hatch) reference, which the compliance test reads as "a bearish
+ * tile".
+ */
+function ImportanceKey({ treatment }: { treatment: ImportanceTreatment }) {
+  if (treatment === "none") return null;
+  if (treatment === "pips") {
+    return (
+      <span className="flex items-center gap-1">
+        <span aria-hidden className="flex items-center gap-[2px]">
+          {Array.from({ length: MAX_TIER }, (_, i) => (
+            <span key={i} className="h-[3px] w-[5px] rounded-full"
+              style={{
+                background: "var(--muted-foreground)",
+                opacity: i < 3 ? 0.95 : 0.22,
+              }} />
+          ))}
+        </span>
+        filled pips = tier (of {MAX_TIER})
+      </span>
+    );
+  }
+  if (treatment === "boundary") {
+    return (
+      <>
+        <span className="flex items-center gap-1">
+          <span aria-hidden className="h-2.5 w-2.5 rounded-[2px]"
+            style={{ border: "2px solid var(--foreground)" }} />
+          posted now (tier {POST_TIER_MIN}+)
+        </span>
+        <span className="flex items-center gap-1">
+          <span aria-hidden className="h-2.5 w-2.5 rounded-[2px]"
+            style={{ border: "1.5px dashed var(--muted-foreground)" }} />
+          held for the rollup (tier {ROLLUP_TIER_MIN})
+        </span>
+      </>
+    );
+  }
+  return (
+    <span className="flex items-center gap-1">
+      <span aria-hidden className="font-semibold tracking-wider">T1–T5</span>
+      = tier · POSTED / HELD / QUIET = what the news channel did with it
+    </span>
+  );
+}
+
+export function MapLegend({ importance = "none" }: {
+  importance?: ImportanceTreatment;
+}) {
   return (
     <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-meta text-muted-foreground">
       {LEGEND_STEPS.map(s => (
@@ -643,6 +909,7 @@ export function MapLegend() {
           }} />
         hatched = bearish
       </span>
+      <ImportanceKey treatment={importance} />
     </div>
   );
 }

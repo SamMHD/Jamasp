@@ -4,7 +4,8 @@ import { describe, expect, it } from "vitest";
 import {
   advancedChartConfig, DRIVER_TV_EMBEDS, liveGoldSymbol, JAMASP_TV_SYMBOL,
   TV_LIVE_SYMBOL, TV_MINI_CHART_SCRIPT, TV_PALETTE_ROLES, TV_SCRIPT_SRC,
-  TV_THEME_TOKENS, tvEmbedFor,
+  TV_THEME_TOKENS, TV_TICKER_TAPE_HEIGHT, TV_TICKER_TAPE_SCRIPT,
+  tickerTapeAttributes, tickerTapeSymbols, tvEmbedFor,
 } from "../lib/tradingview";
 import { DRIVER_SPECS } from "../lib/drivers";
 
@@ -35,6 +36,16 @@ describe("tvEmbedFor", () => {
   it("returns null for a symbol that is not a driver at all", () => {
     expect(tvEmbedFor("GC")).toBeNull();
     expect(tvEmbedFor("")).toBeNull();
+  });
+
+  it("leaves the drivers card sorted live-first, ours-last", () => {
+    // Not a cosmetic ordering. Scattered through the grid, a tile with no
+    // widget reads as the one whose embed failed; gathered at the end, the
+    // card reads "five live, one ours". The invariant is that the mapped
+    // drivers form a PREFIX of DRIVER_SPECS — no unmapped driver may sit
+    // between two mapped ones.
+    const mapped = DRIVER_SPECS.map(s => tvEmbedFor(s.symbol) !== null);
+    expect(mapped.indexOf(false)).toBe(mapped.lastIndexOf(true) + 1);
   });
 
   it("only maps symbols the drivers card actually renders", () => {
@@ -145,10 +156,75 @@ describe("advancedChartConfig", () => {
   });
 });
 
+describe("tickerTapeSymbols", () => {
+  it("is the drivers card's own line-up, in the card's own order", () => {
+    // Membership and order are DERIVED from DRIVER_SPECS rather than listed
+    // again, so the band across the top of the overview and the grid further
+    // down can never disagree about what the complex is or how it reads.
+    const tape = tickerTapeSymbols(DRIVER_SPECS.map(s => s.symbol));
+    const expected = DRIVER_SPECS
+      .map(s => tvEmbedFor(s.symbol)?.symbol)
+      .filter((s): s is string => s !== undefined);
+    expect(tape).toEqual(expected);
+    expect(tape).toEqual(
+      ["PEPPERSTONE:USDX", "PYTH:US10Y", "FX:USDJPY", "SPREADEX:SPX", "BITSTAMP:BTCUSD"]);
+  });
+
+  it("drops the real yield with no special case of its own", () => {
+    // The tape carries no DFII10 rule; it inherits the null that keeps a
+    // nominal yield out of the Drivers grid. One guarantee, one implementation.
+    expect(tickerTapeSymbols(["DFII10"])).toEqual([]);
+    expect(tickerTapeSymbols(DRIVER_SPECS.map(s => s.symbol))).toHaveLength(5);
+  });
+
+  it("ignores symbols that are not drivers at all", () => {
+    expect(tickerTapeSymbols(["GC", "", "DX-Y.NYB"])).toEqual(["PEPPERSTONE:USDX"]);
+    expect(tickerTapeSymbols([])).toEqual([]);
+  });
+});
+
+describe("tickerTapeAttributes", () => {
+  it("passes symbols comma-separated, which is the converter the widget installs", () => {
+    // A JSON array here does not fail loudly — it parses as one long nonsense
+    // ticker and the band renders empty. Pin the shape.
+    const attrs = tickerTapeAttributes(["FX:USDJPY", "PYTH:US10Y"]);
+    expect(attrs.symbols).toBe("FX:USDJPY,PYTH:US10Y");
+    expect(attrs.symbols).not.toContain("[");
+  });
+
+  it("asks for the compact row the reserved band is sized for", () => {
+    // The strip reserves TV_TICKER_TAPE_HEIGHT from the server render onward,
+    // and the widget's own row height at this item size is what that number
+    // IS. Asking for a different size would make the band clip or gap.
+    expect(tickerTapeAttributes([])["item-size"]).toBe("compact");
+    expect(tickerTapeAttributes([]).direction).toBe("horizontal");
+    expect(TV_TICKER_TAPE_HEIGHT).toBe(48);
+  });
+
+  it("leaves the theme to the mounting component", () => {
+    // `theme` is the one attribute that changes after mount (the appearance
+    // toggle), so it belongs to the component that owns the theme bridge — a
+    // value baked in here would go stale on the reader's first toggle.
+    expect(tickerTapeAttributes(["FX:USDJPY"])).not.toHaveProperty("theme");
+  });
+
+  it("lets the panel's own surface show through", () => {
+    expect(tickerTapeAttributes([])).toHaveProperty("transparent");
+  });
+});
+
 describe("loaders", () => {
   it("loads each widget from TradingView's own host over https", () => {
     expect(TV_MINI_CHART_SCRIPT).toMatch(/^https:\/\/widgets\.tradingview-widget\.com\//);
+    expect(TV_TICKER_TAPE_SCRIPT).toMatch(/^https:\/\/widgets\.tradingview-widget\.com\//);
     expect(TV_SCRIPT_SRC).toMatch(/^https:\/\/s3\.tradingview\.com\//);
+  });
+
+  it("keeps the two web components on separate modules", () => {
+    // One script per element: components/tv-widget.tsx keys its loader
+    // singleton on the src, so two tags sharing a URL would leave the second
+    // waiting forever on a definition the first module never registers.
+    expect(TV_TICKER_TAPE_SCRIPT).not.toBe(TV_MINI_CHART_SCRIPT);
   });
 });
 

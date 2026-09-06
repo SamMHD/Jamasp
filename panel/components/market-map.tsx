@@ -3,6 +3,7 @@ import { layoutMap, tone, type MapRange, type ScoredItem } from "@/lib/marketmap
 import { FullscreenButton } from "@/components/fullscreen-button";
 import {
   MapGroupHeader, MapHatchDefs, MapLegend, MapTile, GROUP_HEADER_H, fitLabel,
+  importanceInsets, tierFate, type ImportanceTreatment, type TierGates,
 } from "@/components/map-tiles";
 
 /**
@@ -14,6 +15,15 @@ import {
  * AREA is materiality (tier), COLOUR is direction scaled by conviction —
  * see `lib/marketmap.ts` for why those are two different channels. This
  * component only positions and paints what `layoutMap` already computed.
+ *
+ * Area is a RELATIVE channel, and `layoutMap` multiplies tier weight by the
+ * theme's learned multiplier before squarifying, so a tile's size is not a
+ * reading of its tier: with the live fit (rates_dollar/geopolitics/
+ * supply_mining/other at 0.25, physical_cb/etf_flows unfitted at 1.0) a
+ * tier-4 physical_cb story renders 2.4x the area of the day's only tier-5.
+ * The optional `importance` channel exists for exactly that gap — it reports
+ * `tier` directly, so importance stops depending on a reader's ability to
+ * invert the multiplier by eye. It is off ("none") unless a caller asks.
  *
  * A treemap is an all-pairs surface — any two tiles can end up adjacent — so
  * every one of the ramp's ten step-pairs was measured (see the palette
@@ -58,15 +68,29 @@ const WINDOW_LABEL: Record<MapRange, string> = {
 };
 
 
-function tileTitle(item: ScoredItem, now: Date): string {
+const FATE_WORD = {
+  posted: "posted to the channel",
+  held: "held for the rollup",
+  quiet: "not sent to the channel",
+} as const;
+
+function tileTitle(item: ScoredItem, now: Date, gates?: TierGates): string {
   const dirWord = item.direction > 0 ? "bullish" : item.direction < 0 ? "bearish" : "neutral";
   const sign = item.direction > 0 ? "+" : "";
-  return `${item.headline} — tier ${item.tier}, ${dirWord} ${sign}${item.direction} `
+  return `${item.headline} — tier ${item.tier} (${FATE_WORD[tierFate(item.tier, gates)]}), `
+    + `${dirWord} ${sign}${item.direction} `
     + `(conviction ${item.conviction.toFixed(2)}), ${item.source}, ${fmtAge(item.publishedAt, now)}`;
 }
 
+/**
+ * `importance` selects the third channel — see map-tiles.tsx's
+ * ImportanceTreatment block for what each one draws and what it costs.
+ * "none" is the default and is byte-for-byte the map as it shipped, so the
+ * option is opt-in at the call site rather than something a reader has to
+ * turn off.
+ */
 export function MarketMap({ items, width, height, range, coverage,
-  themeMultipliers, fittedAt }: {
+  themeMultipliers, fittedAt, importance = "none", tierGates }: {
   items: ScoredItem[];
   width: number;
   height: number;
@@ -74,6 +98,8 @@ export function MarketMap({ items, width, height, range, coverage,
   coverage: { scored: number; unscored: number };
   themeMultipliers?: Record<string, number>;
   fittedAt?: string | null;
+  importance?: ImportanceTreatment;
+  tierGates?: TierGates;
 }) {
   const now = new Date();
 
@@ -122,19 +148,26 @@ export function MarketMap({ items, width, height, range, coverage,
             {box.items.map(cell => {
               const t = tone(cell.node.direction, cell.node.conviction);
               // The headline is sized to its own tile rather than to one
-              // map-wide constant — see map-tiles.tsx#fitLabel.
-              const label = fitLabel(cell.node.headline, cell.w, cell.h);
+              // map-wide constant — see map-tiles.tsx#fitLabel. When an
+              // importance treatment reserves a band, the label is fitted to
+              // what is LEFT of the tile, not to the whole of it: fitting it
+              // to the whole tile and then sliding it down is exactly how a
+              // reserved band turns into an overflow at the other edge.
+              const inset = importanceInsets(importance, cell.w, cell.h);
+              const label = fitLabel(cell.node.headline, cell.w,
+                cell.h - inset.top - inset.bottom);
               return (
                 <MapTile key={cell.node.itemId}
                   x={cell.x} y={cell.y} w={cell.w} h={cell.h}
-                  tone={t} title={tileTitle(cell.node, now)}
-                  lines={label.lines} fontSize={label.fontSize} />
+                  tone={t} title={tileTitle(cell.node, now, tierGates)}
+                  lines={label.lines} fontSize={label.fontSize}
+                  importance={importance} tier={cell.node.tier} gates={tierGates} />
               );
             })}
           </g>
         ))}
       </svg>
-      <MapLegend />
+      <MapLegend importance={importance} />
       <p className="mt-2 text-xs text-muted-foreground">
         {coverage.scored} scored {coverage.scored === 1 ? "story" : "stories"} {WINDOW_LABEL[range]}
         {" "}· {coverage.unscored} unscored not shown
