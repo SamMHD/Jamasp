@@ -198,12 +198,12 @@ export default async function Overview({
 
             `importance="pips"` turns on the third channel (see map-tiles.tsx's
             ImportanceTreatment block). This map needs it and the technical map
-            does not: `layoutMap` multiplies tier weight by the theme's learned
-            multiplier before squarifying, so AREA here is materiality-after-
-            fit and cannot be read back as tier — on the live fit a tier-4
-            story in an unfitted theme out-sizes the day's only tier-5. Five
-            fixed pips report `tier` itself, at the same size on every tile, so
-            the reading does not depend on inverting the multiplier by eye. */}
+            does not: here AREA is the triage tier, one of five discrete
+            steps, apportioned across whatever else fell in the window — so it
+            ranks stories but cannot be read back as WHICH tier a story is.
+            The technical map has no tier to read back; its area is the
+            multiplier, which its own tile titles state in full. Five fixed
+            pips report `tier` itself, at the same size on every tile. */}
         <MarketMap items={mapItems} width={1200} height={600} range={range}
           coverage={{ scored: mapItems.length, unscored: mapUnscored }}
           themeMultipliers={themeMultipliers} importance="pips"

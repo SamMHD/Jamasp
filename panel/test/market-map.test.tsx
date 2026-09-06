@@ -148,33 +148,60 @@ describe("MarketMap", () => {
     expect(html.toLowerCase()).toContain("no scored");
   });
 
-  it("states in the footer whether the areas are learned or provisional", () => {
-    // A map that quietly rescaled itself the day a fit first succeeded, with
-    // nothing on the page saying so, would be worse than one that reads
-    // "provisional" for three weeks.
+  it("tells the footer's reader that area is the tier, in every fit state", () => {
+    // The one claim that is true whatever the fit has or has not done. It is
+    // unconditional on purpose: the footer used to describe area only in the
+    // fitted branch, and described it wrongly.
+    const states: Parameters<typeof render>[1][] = [
+      {},
+      { themeMultipliers: {}, fittedAt: null },
+      { themeMultipliers: { rates_dollar: 1.6 }, fittedAt: "2026-08-20T04:17:00Z" },
+    ];
+    // The apostrophe-free wording is deliberate: this string is asserted
+    // against rendered HTML here and by getByText in the e2e smoke test, and
+    // an apostrophe arrives as &#x27; in one of those and not the other.
+    for (const props of states) {
+      expect(render([item()], props)).toContain("area is the triage tier");
+    }
+  });
+
+  it("never says area is weighted by the fit, because it is not", () => {
+    // The regression this pins. Until 2026-09-06 area was
+    // `tierWeight(tier) * multiplier[theme]` and the footer said so; area is
+    // now tier alone, and a footer still claiming a rescale would be a lie
+    // about the map's primary channel.
+    const html = render([item()], {
+      themeMultipliers: { rates_dollar: 1.6 },
+      fittedAt: "2026-08-20T04:17:00Z",
+    });
+    expect(html).not.toContain("areas weighted");
+    expect(html).toContain("not applied to area");
+  });
+
+  it("dates the theme fit when there is one, and says so when there is not", () => {
     expect(render([item()], { themeMultipliers: {}, fittedAt: null }))
-      .toContain("weights not yet fitted");
+      .toContain("theme fit not yet run");
 
     expect(render([item()], {
       themeMultipliers: { rates_dollar: 1.6 },
       fittedAt: "2026-08-20T04:17:00Z",
-    })).not.toContain("weights not yet fitted");
+    })).not.toContain("theme fit not yet run");
   });
 
-  it("defaults to the provisional footer when no weights are passed at all", () => {
-    expect(render([item()])).toContain("weights not yet fitted");
+  it("defaults to the unfitted footer when no weights are passed at all", () => {
+    expect(render([item()])).toContain("theme fit not yet run");
   });
 
-  it("never claims the areas are weighted when the multiplier map is empty, even with a fittedAt", () => {
+  it("never dates a theme fit from a technical-only run's timestamp", () => {
     // The bug this guards: weights.json's fitted_at is one top-level
     // timestamp shared by every fit type. A caller could pass a truthy
     // fittedAt from a technical-only fit run alongside empty
     // themeMultipliers (exactly page.tsx's state during a deployment's
     // first ~2 weeks, before the theme fit reaches min_rows) and, if the
-    // component trusted fittedAt alone, the footer would falsely announce
-    // a rescale that never happened. The component must derive the claim
+    // component trusted fittedAt alone, the footer would put an age on a
+    // theme fit that has never run. The component must derive the claim
     // from both inputs so no caller can produce that mismatch.
     expect(render([item()], { themeMultipliers: {}, fittedAt: "2026-08-20T04:17:00Z" }))
-      .toContain("weights not yet fitted");
+      .toContain("theme fit not yet run");
   });
 });
