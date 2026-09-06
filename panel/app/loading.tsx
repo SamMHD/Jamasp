@@ -60,17 +60,19 @@ export default function Loading() {
 
       <SkeletonPanel className="mt-4" lines={6} />
 
-      {/* Same grid as the page: 1 column below lg, 3/2 split above it.
-          Left: horizon, news flow. Right: drivers, forecast record. The
-          stance panel is NOT here any more — it moved to the foot of the
-          page, and so must its placeholder, or the loading state promises a
-          layout the real page no longer has. */}
+      {/* Same grid as the page: 1 column below lg, 2/3 split above it.
+          Left (narrow): horizon, news flow. Right (wide): drivers, forecast
+          record — the Drivers card is the one that needs the width, because
+          its column count is a container query. The stance panel is NOT here
+          any more — it moved to the foot of the page, and so must its
+          placeholder, or the loading state promises a layout the real page no
+          longer has. */}
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-5">
-        <div className="flex flex-col gap-4 lg:col-span-3">
+        <div className="flex flex-col gap-4 lg:col-span-2">
           <SkeletonPanel lines={3} />
           <SkeletonPanel lines={6} />
         </div>
-        <div className="flex flex-col gap-4 lg:col-span-2">
+        <div className="flex flex-col gap-4 lg:col-span-3">
           <SkeletonPanel lines={6} />
           <SkeletonPanel lines={5} />
         </div>

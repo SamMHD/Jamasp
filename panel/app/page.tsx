@@ -194,10 +194,19 @@ export default async function Overview({
         {/* 2:1 rather than 3:1. The SVG preserves its aspect ratio — stretching
             would distort tile areas, and area is the encoding — so the viewBox
             ratio decides how much of a screen fullscreen actually fills. 2:1
-            also buys tiles the height that wrapped headlines need. */}
+            also buys tiles the height that wrapped headlines need.
+
+            `importance="pips"` turns on the third channel (see map-tiles.tsx's
+            ImportanceTreatment block). This map needs it and the technical map
+            does not: `layoutMap` multiplies tier weight by the theme's learned
+            multiplier before squarifying, so AREA here is materiality-after-
+            fit and cannot be read back as tier — on the live fit a tier-4
+            story in an unfitted theme out-sizes the day's only tier-5. Five
+            fixed pips report `tier` itself, at the same size on every tile, so
+            the reading does not depend on inverting the multiplier by eye. */}
         <MarketMap items={mapItems} width={1200} height={600} range={range}
           coverage={{ scored: mapItems.length, unscored: mapUnscored }}
-          themeMultipliers={themeMultipliers}
+          themeMultipliers={themeMultipliers} importance="pips"
           fittedAt={fittedWeights?.fittedAt ?? null} />
       </section>
 
@@ -238,12 +247,23 @@ export default async function Overview({
           `min-width: auto` on grid items lets that track grow to whichever
           child's content is widest instead of the container's own width —
           exactly the kind of overflow the mobile sweep exists to catch. */}
+      {/* 2/3, not the 3/2 this grid carried while the stance panel was still
+          the left column's ballast. With that panel moved to the foot of the
+          page the split inverted: measured against the production database at
+          1280 and 1440 the left column ran ~500px SHORT of the right, because
+          the Drivers card in a 2-of-5 track is under its @[30rem] container
+          query and stacks all six drivers one-up. Giving Drivers the wider
+          track takes it two-up (three-up from 1600), which halves the card,
+          and the narrower left column grows the two cards that were short.
+          Measured imbalance across 1280/1440/1600/1920/2560 falls from a
+          553px worst case (mean 317) to 256px (mean 136), and the page is
+          shorter at every one of those widths. */}
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-5">
-        <div className="flex flex-col gap-4 lg:col-span-3">
+        <div className="flex flex-col gap-4 lg:col-span-2">
           <HorizonStrip horizon={horizon} now={now} />
           <NewsFlow pulse={pulse} heads={heads} top={top} lastItemTs={lastItemTs} now={now} />
         </div>
-        <div className="flex flex-col gap-4 lg:col-span-2">
+        <div className="flex flex-col gap-4 lg:col-span-3">
           <DriverPanel drivers={drivers} now={now} />
           <PredictionPanel stats={predStats} bins={calibrationBins(preds)} />
         </div>
