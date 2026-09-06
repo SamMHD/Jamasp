@@ -42,6 +42,24 @@ const MINI_CHART_MODULE = `
   customElements.define("tv-mini-chart", StubMiniChart);
 `;
 
+/**
+ * Defines <tv-ticker-tape>, the overview's band. A separate module from the
+ * Mini Chart's on purpose — that is how TradingView ships them, and
+ * components/tv-widget.tsx keys its loader singleton on the script URL, so a
+ * shared stub would hide a real failure mode: two tags served by one module
+ * where only the first is ever defined.
+ */
+const TICKER_TAPE_MODULE = `
+  class StubTickerTape extends HTMLElement {
+    connectedCallback() {
+      this.style.display = "block";
+      this.dataset.stub = "ticker-tape";
+      this.textContent = this.getAttribute("symbols") ?? "";
+    }
+  }
+  customElements.define("tv-ticker-tape", StubTickerTape);
+`;
+
 /** Injects the iframe the Advanced Chart embed script injects. */
 const ADVANCED_CHART_SCRIPT = `
   (function () {
@@ -85,6 +103,9 @@ test.beforeEach(async ({ page }) => {
   await page.route(
     "**://widgets.tradingview-widget.com/w/en/tv-mini-chart.js",
     route => route.fulfill({ contentType: "text/javascript", body: MINI_CHART_MODULE }));
+  await page.route(
+    "**://widgets.tradingview-widget.com/w/en/tv-ticker-tape.js",
+    route => route.fulfill({ contentType: "text/javascript", body: TICKER_TAPE_MODULE }));
   await page.route(
     "**://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js",
     route => route.fulfill({ contentType: "text/javascript", body: ADVANCED_CHART_SCRIPT }));
@@ -136,4 +157,36 @@ test("the driver tiles upgrade to live mini charts, except the real yield", asyn
   // 24h move and the provenance line the card was built around stay on
   // screen. DXY is the driver the fixture has data for.
   await expect(drivers.getByText(/jamasp 103\.8/)).toBeVisible();
+});
+
+test("the ticker tape upgrades in place, without moving the page", async ({ page }) => {
+  await page.goto("/");
+  const tape = page.getByRole("region", { name: "Driver tape" });
+
+  // The band is the one embed on this panel that is on screen at first paint,
+  // so it is gated on the main thread going quiet rather than on the viewport
+  // — no scroll here, on purpose. It must arrive anyway.
+  const widget = tape.locator("tv-ticker-tape");
+  await expect(widget).toHaveCount(1);
+
+  // Five symbols, comma-separated: the attribute shape the widget's own
+  // converter expects (a JSON array parses as one nonsense ticker and renders
+  // an empty band), and the drivers card's line-up in the drivers card's
+  // order. The real yield is absent here for the same reason it has no Mini
+  // Chart, and a regression substituting a nominal yield would show up as a
+  // sixth entry.
+  const symbols = (await widget.textContent())!.split(",");
+  expect(symbols).toEqual(
+    ["PEPPERSTONE:USDX", "PYTH:US10Y", "FX:USDJPY", "SPREADEX:SPX", "BITSTAMP:BTCUSD"]);
+
+  // The reason this test exists at all: the band is ABOVE the fold, so an
+  // embed that added height rather than landing in the reserved box would
+  // shove the entire overview down under the reader. Its height is the same
+  // 48px it holds in smoke.spec.ts, where the widget never arrives.
+  expect((await tape.boundingBox())!.height).toBe(48);
+
+  // Jamasp's own readings are still in the DOM underneath, hidden rather than
+  // unmounted, so the box stays reserved and a later failure has something to
+  // fall back to.
+  await expect(tape.getByText("103.8")).toBeHidden();
 });

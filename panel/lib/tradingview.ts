@@ -5,10 +5,10 @@
  * theme bridge are all unit-testable and the client components stay thin
  * mounting shells.
  *
- * TWO WIDGETS, ON PURPOSE
- * -----------------------
- * The panel embeds two different TradingView products, because they answer
- * two different questions:
+ * THREE WIDGETS, ON PURPOSE
+ * -------------------------
+ * The panel embeds three different TradingView products, because they answer
+ * three different questions:
  *
  *   - the **Advanced Chart** (components/live-chart.tsx) fills the technical
  *     panel's chart slot on Technical -> prices. One instrument, full
@@ -16,13 +16,18 @@
  *   - the **Mini Chart** (components/tradingview-mini-chart.tsx) fills the
  *     overview Drivers card. One card per symbol — logo, name, price, daily
  *     change, area chart — dropped into an existing 3x2 grid cell.
+ *   - the **Ticker Tape** (components/ticker-tape.tsx) is the band across the
+ *     top of the overview. The same driver complex again, but as a glance
+ *     rather than a read: one scrolling line the desk can take in without
+ *     stopping, above everything that needs thinking about.
  *
  * They are also different widget *generations*: the Advanced Chart is the
- * classic `external-embedding` script that reads a JSON config payload, the
- * Mini Chart is a modern web component (`<tv-mini-chart>`) that reads HTML
- * attributes and CSS custom properties. Neither can do the other's job — the
- * Advanced Chart cannot be tiled six-up, and the Mini Chart draws no candles
- * — so both stay, and this module is what keeps their symbol and colour
+ * classic `external-embedding` script that reads a JSON config payload, while
+ * the Mini Chart (`<tv-mini-chart>`) and the Ticker Tape (`<tv-ticker-tape>`)
+ * are modern web components that read HTML attributes and CSS custom
+ * properties. None can do another's job — the Advanced Chart cannot be tiled
+ * six-up, the Mini Chart draws no candles, the tape shows no history at all
+ * — so all three stay, and this module is what keeps their symbol and colour
  * decisions from drifting apart.
  *
  * WHY A LIVE WIDGET AT ALL
@@ -182,6 +187,54 @@ export function tvEmbedFor(jamaspSymbol: string): TvEmbed | null {
   return DRIVER_TV_EMBEDS[jamaspSymbol] ?? null;
 }
 
+/**
+ * The tape's line-up, derived from the Drivers card rather than listed again.
+ *
+ * Membership AND order both come from the caller's driver symbols
+ * (lib/drivers.ts#DRIVER_SPECS), so the band across the top of the overview
+ * and the grid further down are the same complex read the same way round —
+ * a second hand-kept list would be one retune away from disagreeing with
+ * the card it is supposed to summarise.
+ *
+ * The real-yield driver drops out here for free: it is the one driver
+ * DRIVER_TV_EMBEDS deliberately maps to null (see the note there), and the
+ * same null that keeps a nominal yield out of the Drivers grid keeps one out
+ * of the tape. Nothing about the exception is restated; it just holds.
+ */
+export function tickerTapeSymbols(jamaspSymbols: readonly string[]): string[] {
+  return jamaspSymbols
+    .map(tvEmbedFor)
+    .filter((e): e is TvEmbed => e !== null)
+    .map(e => e.symbol);
+}
+
+/**
+ * The Ticker Tape web component's attributes.
+ *
+ * `symbols` is comma-separated because that is the converter the widget
+ * actually installs for array-typed properties — a JSON array here parses as
+ * one long nonsense ticker rather than failing loudly.
+ *
+ * `item-size="compact"` is the 48px row: a band, not a second Drivers card.
+ * It keeps the tape's claim on above-the-fold space to about a line of text,
+ * which is the most a glance-only strip has earned.
+ *
+ * `transparent` for the same reason the Mini Chart carries it — the panel's
+ * own surface shows through, so the tape reads as part of the page rather
+ * than as a rectangle someone else painted.
+ *
+ * `theme` is deliberately NOT here: it is the one attribute that changes
+ * after mount (the appearance toggle), so the mounting component owns it.
+ */
+export function tickerTapeAttributes(symbols: readonly string[]): Record<string, string> {
+  return {
+    symbols: symbols.join(","),
+    direction: "horizontal",
+    "item-size": "compact",
+    transparent: "",
+  };
+}
+
 /* ------------------------------------------------------------------ *
  * Loaders
  * ------------------------------------------------------------------ */
@@ -200,6 +253,30 @@ export const TV_MINI_CHART_SCRIPT =
   "https://widgets.tradingview-widget.com/w/en/tv-mini-chart.js";
 
 export const TV_MINI_CHART_TAG = "tv-mini-chart";
+
+/**
+ * The Ticker Tape's loader, same generation and same host as the Mini
+ * Chart's — the two share their chunks, so the tape's script is the only
+ * additional bytes the overview pays for it.
+ */
+export const TV_TICKER_TAPE_SCRIPT =
+  "https://widgets.tradingview-widget.com/w/en/tv-ticker-tape.js";
+
+export const TV_TICKER_TAPE_TAG = "tv-ticker-tape";
+
+/**
+ * The tape's rendered height, in pixels, at `item-size="compact"`.
+ *
+ * Not a guess and not a preference: the widget sizes its own row from a
+ * fixed table keyed on direction and item size (horizontal+compact = 48px,
+ * horizontal+normal = 74px) and then fills its container. The panel has to
+ * know that number because the band sits ABOVE THE FOLD — the one place on
+ * this page where a box that grows when the embed arrives would shove the
+ * whole overview down under the reader. So the strip reserves exactly this
+ * height from the server render onward and the widget lands inside it,
+ * shifting nothing.
+ */
+export const TV_TICKER_TAPE_HEIGHT = 48;
 
 /* ------------------------------------------------------------------ *
  * Theming

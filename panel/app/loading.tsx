@@ -26,6 +26,12 @@ import {
 export default function Loading() {
   return (
     <SkeletonPage label="Overview">
+      {/* The ticker band, first and fixed-height. Its 48px is the same
+          reservation the real strip makes (lib/tradingview.ts
+          #TV_TICKER_TAPE_HEIGHT), so the page does not step down by a band's
+          worth when the fallback swaps in. */}
+      <Skeleton className="mb-4 h-12 w-full" />
+
       <SkeletonPageHeader />
 
       {/* Market map: heading row + window toggle, then the 2:1 treemap box.
@@ -54,10 +60,13 @@ export default function Loading() {
 
       <SkeletonPanel className="mt-4" lines={6} />
 
-      {/* Same grid as the page: 1 column below lg, 3/2 split above it. */}
+      {/* Same grid as the page: 1 column below lg, 3/2 split above it.
+          Left: horizon, news flow. Right: drivers, forecast record. The
+          stance panel is NOT here any more — it moved to the foot of the
+          page, and so must its placeholder, or the loading state promises a
+          layout the real page no longer has. */}
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-5">
         <div className="flex flex-col gap-4 lg:col-span-3">
-          <SkeletonPanel lines={8} />
           <SkeletonPanel lines={3} />
           <SkeletonPanel lines={6} />
         </div>
@@ -66,6 +75,9 @@ export default function Loading() {
           <SkeletonPanel lines={5} />
         </div>
       </div>
+
+      {/* Fundamental: full width, at the foot, the longest block on the page. */}
+      <SkeletonPanel className="mt-4" lines={8} />
 
       <Skeleton className="mt-4 h-8 w-full" />
     </SkeletonPage>

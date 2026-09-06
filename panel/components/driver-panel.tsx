@@ -22,6 +22,16 @@ import { fmtAge } from "@/lib/format";
  * quietly substituted for it. That tile stays Jamasp's. See lib/tradingview.ts
  * for the full symbol resolution and why the mixed card is the correct outcome.
  *
+ * That exception is now stated three ways instead of being left to look like
+ * a failure. It sorts LAST (lib/drivers.ts#DRIVER_SPECS puts the quotable
+ * drivers first), it carries the same "jamasp" provenance line the live tiles
+ * grew underneath their widgets, and the card captions it. Before, it sat
+ * second in the grid with neither logo nor chart while its neighbours had
+ * both, which read as the tile whose embed had failed — a bad enough
+ * impression that removing gold's dominant driver from the dashboard got
+ * considered as the fix. The driver was never the problem; its presentation
+ * was.
+ *
  * This stays a server component: only the thin overlay wrapper is a client
  * component, so QuoteTile and the sparkline never reach the browser bundle.
  */
@@ -51,12 +61,18 @@ export function DriverPanel({ drivers, now }: { drivers: DriverRead[]; now: Date
           rather show two tiles with sparklines than three without. */}
       <div className="grid grid-cols-1 gap-3 [grid-auto-rows:9.5rem] @[30rem]:grid-cols-2 @[42rem]:grid-cols-3">
         {drivers.map(d => {
+          const embed = tvEmbedFor(d.symbol);
           const tile = (
             <QuoteTile className="h-full" label={d.label} value={d.quote?.value ?? null}
               digits={d.digits} ts={d.quote?.ts ?? null} delta={d.delta24h}
+              // A source line on the tiles that have no widget, so they read
+              // as attributed rather than as unfinished. It is the same word
+              // the live tiles print under their embeds, in the same slot, so
+              // the card is one family with one provenance convention rather
+              // than five upgraded tiles and a leftover.
+              note={embed === null ? "jamasp" : undefined}
               series={d.series} now={now} />
           );
-          const embed = tvEmbedFor(d.symbol);
           if (embed === null) return <div key={d.symbol} className="h-full">{tile}</div>;
           return (
             <DriverLiveTile key={d.symbol} embed={embed} reading={jamaspReading(d, now)}>
@@ -65,6 +81,17 @@ export function DriverPanel({ drivers, now }: { drivers: DriverRead[]; now: Date
           );
         })}
       </div>
+      {/* Derived, not written down: the caption exists exactly when some
+          driver has no TradingView equivalent, so removing the last such
+          driver removes the sentence too rather than leaving it explaining
+          an absence that is no longer there. It names no ticker on purpose —
+          the tile beside it already does. */}
+      {drivers.some(d => tvEmbedFor(d.symbol) === null) && (
+        <p className="mt-3 text-meta text-ink-dim">
+          Real yield is Jamasp&rsquo;s own reading: TradingView&rsquo;s free embed cannot
+          render a TIPS series, and a nominal yield is not a substitute for one.
+        </p>
+      )}
     </section>
   );
 }
