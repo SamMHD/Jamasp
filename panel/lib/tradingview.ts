@@ -5,10 +5,10 @@
  * theme bridge are all unit-testable and the client components stay thin
  * mounting shells.
  *
- * TWO WIDGETS, ON PURPOSE
- * -----------------------
- * The panel embeds two different TradingView products, because they answer
- * two different questions:
+ * SEVERAL WIDGETS, ON PURPOSE
+ * ---------------------------
+ * The panel embeds several different TradingView products, because they
+ * answer different questions. Two are woven INTO Jamasp's own analysis:
  *
  *   - the **Advanced Chart** (components/live-chart.tsx) fills the technical
  *     panel's chart slot on Technical -> prices. One instrument, full
@@ -17,11 +17,19 @@
  *     overview Drivers card. One card per symbol — logo, name, price, daily
  *     change, area chart — dropped into an existing 3x2 grid cell.
  *
- * They are also different widget *generations*: the Advanced Chart is the
- * classic `external-embedding` script that reads a JSON config payload, the
- * Mini Chart is a modern web component (`<tv-mini-chart>`) that reads HTML
- * attributes and CSS custom properties. Neither can do the other's job — the
- * Advanced Chart cannot be tiled six-up, and the Mini Chart draws no candles
+ * The rest are the **reference desk** (app/markets/page.tsx, plus the
+ * economic calendar under Jamasp's own on app/calendar/page.tsx). Those are
+ * third-party reference data and are labelled as such everywhere they appear
+ * — see "The reference desk" at the foot of this file, which also records
+ * which requested widgets were refused and why.
+ *
+ * They are also different widget *generations*: the Advanced Chart and every
+ * reference widget are the classic `external-embedding` scripts that read a
+ * JSON config payload, while the Mini Chart is a modern web component
+ * (`<tv-mini-chart>`) that reads HTML attributes and CSS custom properties.
+ * Neither generation can do the other's job — the Advanced Chart cannot be
+ * tiled six-up, the Mini Chart draws no candles, and the watchlist, market
+ * summary, heatmap, screener, news and calendar exist ONLY as classic embeds
  * — so both stay, and this module is what keeps their symbol and colour
  * decisions from drifting apart.
  *
@@ -40,13 +48,20 @@
  * These are keyless embeds, and TradingView gates data by plan. Symbol
  * search happily returns tickers the free widget then refuses with
  * "Permission denied — only available on TradingView": every CME-group
- * futures symbol (COMEX:GC1!, COMEX_MINI:GC1!, CME:GC1!, NYMEX:GC1!) and
- * all of TVC:*, SP:SPX, CBOE:SPX. Others resolve but cannot draw
- * ("Unsupported interval" — INDEX:DXY at every range but 6M, and the whole
- * FRED "economic" class). So every symbol below is what the free widget can
- * actually *render*, verified by mounting it, not what the desk would pick
- * given an entitlement. docs/todo/014 records what a paid plan would buy and
- * the exact symbols to repoint.
+ * futures symbol (COMEX:GC1!, COMEX_MINI:GC1!, CME:GC1!, NYMEX:GC1!), plus
+ * SP:SPX, CBOE:SPX, CBOE:GVZ and the ECONOMICS:* class. Others resolve but
+ * cannot draw ("Unsupported interval" — INDEX:DXY at every range but 6M, and
+ * the whole FRED "economic" class). So every symbol below is what the free
+ * widget can actually *render*, verified by mounting it, not what the desk
+ * would pick given an entitlement. docs/todo/014 records what a paid plan
+ * would buy and the exact symbols to repoint.
+ *
+ * Entitlement is PER SYMBOL, not per namespace, and it is easy to
+ * over-generalise from a couple of refusals. docs/todo/014 recorded "all of
+ * TVC:*" as denied; re-probed on 2026-09-06 while building the reference
+ * desk, TVC:GOLD and TVC:UKOIL both render live prices while TVC:DXY and
+ * TVC:VIX stay denied. So a prefix is never evidence either way — mount the
+ * symbol and look at it.
  */
 
 /* ------------------------------------------------------------------ *
@@ -201,6 +216,81 @@ export const TV_MINI_CHART_SCRIPT =
 
 export const TV_MINI_CHART_TAG = "tv-mini-chart";
 
+/**
+ * The classic embed loader for any *other* TradingView widget, by its
+ * documented widget name.
+ *
+ * The Advanced Chart's own constant above stays spelled out rather than
+ * being expressed through this helper: it is the one embed whose exact URL
+ * a test pins, and a helper call there would make that assertion a
+ * restatement of this function rather than a check on it.
+ *
+ * Every widget the /markets page mounts is this generation. That is not a
+ * preference — the modern web-component generation
+ * (widgets.tradingview-widget.com) publishes only a handful of small tiles,
+ * of which the panel already uses the one it needs (Mini Chart). The
+ * watchlist, market summary, heatmap, screener, news and calendar exist
+ * ONLY as classic embeds, so lib and components carry both generations
+ * permanently.
+ */
+export function tvEmbedScript(widget: string): string {
+  return `https://s3.tradingview.com/external-embedding/embed-widget-${widget}.js`;
+}
+
+/* ------------------------------------------------------------------ *
+ * Widgets this panel refuses to embed
+ * ------------------------------------------------------------------ */
+
+/**
+ * TradingView widgets that were asked for, verified, and deliberately NOT
+ * shipped. Recorded here — with the reason — because the failure mode is
+ * someone adding one back in good faith six months from now, and the
+ * argument against it is not obvious from the widget's name.
+ *
+ * `technical-analysis` is the load-bearing entry. Mounted keyless on
+ * 2026-09-06 for FX_IDC:XAUUSD it renders a speedometer reading
+ * "Strong sell / Sell / Neutral / Buy / Strong buy" with an oscillator and
+ * moving-average tally beneath it. That is precisely the aggregate verdict
+ * this project refuses in two other places already:
+ *
+ *   - config/sources.yaml#tv_gc_technicals stores 17 raw indicator series
+ *     and explicitly does NOT store Recommend.All / Recommend.MA /
+ *     Recommend.Other, because "technicals annotate the macro read, they
+ *     must not originate calls";
+ *   - advancedChartConfig() below is pinned by a test asserting its JSON
+ *     never contains "recommend", "buy", "sell" or "technicals".
+ *
+ * And CLAUDE.md's hard rule 6 is "No trading instructions. You advise on
+ * market conditions; humans decide trades." A dial that says STRONG BUY on
+ * the desk's own control panel is a trading instruction wearing a gauge.
+ * The panel already draws Jamasp's own technical read — ridge-fitted signal
+ * tiles over 38 columns, components/technical-map.tsx — which is a weighted
+ * description of state, not a verdict.
+ *
+ * Note that the refusal covers BOTH generations. TradingView has since
+ * rebuilt this one as a `<tv-technical-analysis>` web component whose
+ * `ratings-display-mode` offers "gauge", "breakdown" or both — a breakdown
+ * of verdicts is still verdicts, so the newer widget is refused on exactly
+ * the same grounds and there is no version of it this panel wants.
+ *
+ * The three `seasonal*` entries are a different kind of entry: those SCRIPT
+ * NAMES do not exist. All three 404 at s3.tradingview.com, verified
+ * 2026-09-06. The seasonal chart itself is very much real — it is a web
+ * component, `<tv-seasonal-chart>`, and the reference desk ships it (see
+ * seasonalChartComponent below). These names are kept here so the next
+ * person to reach for the classic spelling gets the answer rather than the
+ * 404, because "the widget does not exist" was the wrong conclusion drawn
+ * from exactly that evidence once already.
+ */
+export const TV_REFUSED_WIDGETS: Readonly<Record<string, string>> = {
+  "technical-analysis":
+    "renders an aggregate buy/sell verdict gauge; config/sources.yaml and " +
+    "CLAUDE.md rule 6 both refuse aggregate calls",
+  seasonals: "no such script — use the <tv-seasonal-chart> web component",
+  seasonality: "no such script — use the <tv-seasonal-chart> web component",
+  "seasonal-chart": "no such script — use the <tv-seasonal-chart> web component",
+};
+
 /* ------------------------------------------------------------------ *
  * Theming
  * ------------------------------------------------------------------ */
@@ -302,5 +392,482 @@ export function advancedChartConfig(symbol: string, look: ChartAppearance) {
     details: false,
     calendar: false,
     support_host: "https://www.tradingview.com",
+  };
+}
+
+/* ------------------------------------------------------------------ *
+ * The reference desk (/markets)
+ * ------------------------------------------------------------------ */
+
+/**
+ * Everything below builds the third-party REFERENCE surface, and the word
+ * matters: none of it is Jamasp's analysis, and the page says so out loud.
+ *
+ * The distinction is the whole design. Jamasp already scores news for gold
+ * impact, fits its own technical weights and keeps its own event horizon; a
+ * TradingView widget that quietly sat next to one of those would leave a
+ * reader unable to tell whose read they were looking at. So the widgets that
+ * overlap Jamasp's own work are either refused outright
+ * (TV_REFUSED_WIDGETS), or given a job Jamasp demonstrably does NOT do —
+ * breadth, an outside view, or a horizon Jamasp's own feed cannot reach.
+ *
+ * Names to be careful with: four of these widgets are not fetched from the
+ * URL their product name suggests. The economic calendar is
+ * `embed-widget-events.js`, the news timeline is `embed-widget-timeline.js`.
+ * tvEmbedScript() takes the SCRIPT name, so every call below passes the
+ * former, not the latter.
+ */
+
+/** Appearance a reference widget needs: just which way the panel is painted. */
+export type TvTheme = "light" | "dark";
+
+/**
+ * `isTransparent: FALSE` on every classic reference widget — the opposite of
+ * what the Mini Chart does, and arrived at the hard way.
+ *
+ * Transparency is the obvious choice here: it is what TV_THEME_TOKENS sets
+ * for the web-component generation, and it is what makes a widget and the
+ * card around it read as one object. It was tried first, and on these iframe
+ * embeds it is actively broken. Mounted dark on a dark page, 2026-09-06:
+ *
+ *   screener       ignores `colorTheme` completely and renders its LIGHT
+ *                  skin — a white table in the middle of a dark page.
+ *                  Reordering the config keys changes nothing.
+ *   timeline       renders, but drops its text to a low opacity meant to sit
+ *                  over a chart, so every headline is grey-on-grey.
+ *   events         same washed-out text.
+ *   stock-heatmap  the only one that survives it, because it paints its own
+ *                  opaque canvas regardless.
+ *
+ * Opaque is therefore the honest setting, and it costs something real: these
+ * are iframes, so TV_THEME_TOKENS cannot reach inside them, `colorTheme`
+ * offers exactly two values, and the surface TradingView paints is its own
+ * neutral rather than the panel's `--card`. The widgets sit in the right
+ * theme but not the exact ramp. app/markets/page.tsx does not pretend
+ * otherwise, and the three widgets that DO take the palette are the
+ * web-component ones above.
+ *
+ * The theme itself comes from the live <html> class on every rebuild
+ * (components/tradingview-embed.tsx), never a guess — a `colorTheme` that
+ * disagrees with the surface under it is exactly the failure above.
+ */
+const REFERENCE_BASE = (theme: TvTheme) => ({
+  colorTheme: theme,
+  isTransparent: false,
+  locale: "en",
+  width: "100%",
+  height: "100%",
+});
+
+export type WatchlistGroup = {
+  /** Tab label. Jamasp's own vocabulary, not TradingView's. */
+  name: string;
+  /**
+   * Where the group comes from in Jamasp's config — printed under the widget
+   * so a reader can trace any row back to something the agent actually reads.
+   */
+  provenance: string;
+  symbols: readonly { name: string; displayName: string }[];
+};
+
+/**
+ * "Gold plus everything that drives it" — derived from what Jamasp reads, not
+ * from a generic macro list.
+ *
+ * The five groups ARE Jamasp's own taxonomy. Four of the names are theme
+ * slugs from config/weights.yaml#themes (rates_dollar, physical_cb,
+ * etf_flows + supply_mining, geopolitics) — the same list the fundamental
+ * map's ridge fit indexes its feature columns by; the fifth is the instrument
+ * itself. Grouping this way means the watchlist and the market map answer the
+ * same question in two registers: the map says which theme the NEWS is
+ * moving, this says what the PRICES in that theme are doing. Two unrelated
+ * lists sharing a page would have been the easy version and a worse one.
+ *
+ * Every symbol below was mounted keyless and screenshotted on 2026-09-06.
+ * Symbol search is not evidence — it returns tickers the widgets then refuse
+ * — so nothing is here that was not seen to paint a real number.
+ *
+ * Traceability, row by row:
+ *
+ *   Gold complex
+ *     FX_IDC:XAUUSD    the panel's own chart symbol (TV_LIVE_SYMBOL)
+ *     BITFINEX:XAUTUSD jamasp/ingest/bars.py's deep-history fallback — the
+ *                      XAUT/GC ratio is re-checked at fetch time (todo 015)
+ *     XAG / XPT        the rest of the precious complex the desk quotes
+ *
+ *   Rates & dollar   -> theme `rates_dollar`
+ *     PEPPERSTONE:USDX config/sources.yaml#dxy_intraday (DX-Y.NYB)
+ *     PYTH:US10Y       config/sources.yaml#yield_10y_nominal (^TNX)
+ *     PYTH:US02Y       the policy-path leg of state/watchlist.yaml's
+ *                      `fed-rate-path` theme. Jamasp stores no 2y series, so
+ *                      this row is breadth, not a mirror
+ *     FX:USDJPY        config/sources.yaml#usdjpy (JPY=X)
+ *     FX_IDC:EURUSD    the dollar index's dominant leg
+ *
+ *   Physical & CB    -> theme `physical_cb`
+ *     FX_IDC:USDCNY    the cross config/sources.yaml#sge_benchmark's CNY/gram
+ *                      print must be converted through before an
+ *                      SGE-vs-London premium means anything
+ *     FX_IDC:USDINR    India physical demand — the other half of the
+ *                      east-of-Dubai bid this desk trades into
+ *
+ *   ETF & mining     -> themes `etf_flows` + `supply_mining`
+ *     GLD, IAU         the ETF-flow bellwethers
+ *     GDX, GDXJ, NEM   the equity read on mine supply, which is what
+ *                      mining.com / Mining Weekly / Northern Miner
+ *                      (config/sources.yaml) feed the map as news
+ *
+ *   Geopolitics & risk -> theme `geopolitics`, plus lib/drivers.ts's
+ *                      "broader risk complex"
+ *     TVC:UKOIL        Brent. gcaptain and Maritime Executive were added to
+ *                      config/sources.yaml precisely because corridor
+ *                      incidents move Brent >8% intraday and the general
+ *                      feeds missed them; this is that theme's price
+ *     CAPITALCOM:VIX   the risk-off gate
+ *     SPREADEX:SPX     DRIVER_SPECS ^GSPC (a CFD — see DRIVER_TV_EMBEDS)
+ *     BITSTAMP:BTCUSD  DRIVER_SPECS BTC-USD (one venue, not the aggregate)
+ *
+ * Two instruments the desk reads have NO row here, and their absence is
+ * load-bearing rather than an oversight:
+ *
+ *   - the 10-year REAL yield (FRED:DFII10). The same wall DRIVER_TV_EMBEDS
+ *     documents: the FRED "economic" class cannot render, and every quotable
+ *     10y symbol is NOMINAL. ECONOMICS:USINTR was probed too and is
+ *     permission-denied, so there is no policy-rate row either.
+ *   - gold implied vol (^GVZ, config/sources.yaml#gold_vol). CBOE:GVZ is
+ *     permission-denied keyless, verified 2026-09-06.
+ *
+ * Substituting a near-miss for either would put the wrong number under a
+ * label the desk trusts — the exact failure the DFII10 test in
+ * test/tradingview.test.ts exists to prevent. They stay missing, and
+ * app/markets/page.tsx names them as missing.
+ *
+ * One more absence, for a different reason: NYSE:GOLD renders, but that
+ * ticker is Barrick's old listing and is no longer an unambiguous name for
+ * the company. A miner row that might be quoting a different issuer than its
+ * label says is worse than four miner rows, so it was dropped.
+ */
+export const JAMASP_WATCHLIST: readonly WatchlistGroup[] = [
+  {
+    name: "Gold complex",
+    provenance:
+      "the instrument — spot, Jamasp's XAUT history fallback, and the precious complex",
+    symbols: [
+      { name: TV_LIVE_SYMBOL, displayName: "Gold spot" },
+      { name: "BITFINEX:XAUTUSD", displayName: "Tether Gold" },
+      { name: "FX_IDC:XAGUSD", displayName: "Silver" },
+      { name: "FX_IDC:XPTUSD", displayName: "Platinum" },
+    ],
+  },
+  {
+    name: "Rates & dollar",
+    provenance:
+      "map theme rates_dollar · config/sources.yaml dxy_intraday, yield_10y_nominal, usdjpy",
+    symbols: [
+      { name: "PEPPERSTONE:USDX", displayName: "Dollar index" },
+      { name: "PYTH:US02Y", displayName: "US 2y" },
+      { name: "PYTH:US10Y", displayName: "US 10y" },
+      { name: "FX:USDJPY", displayName: "USD/JPY" },
+      { name: "FX_IDC:EURUSD", displayName: "EUR/USD" },
+    ],
+  },
+  {
+    name: "Physical & CB",
+    provenance:
+      "map theme physical_cb · the CNY cross the SGE premium needs, plus the India bid",
+    symbols: [
+      { name: "FX_IDC:USDCNY", displayName: "USD/CNY" },
+      { name: "FX_IDC:USDINR", displayName: "USD/INR" },
+    ],
+  },
+  {
+    name: "ETF & mining",
+    provenance:
+      "map themes etf_flows + supply_mining · the equity read on flows and mine supply",
+    symbols: [
+      { name: "AMEX:GLD", displayName: "SPDR Gold" },
+      { name: "AMEX:IAU", displayName: "iShares Gold" },
+      { name: "AMEX:GDX", displayName: "Gold miners" },
+      { name: "AMEX:GDXJ", displayName: "Junior miners" },
+      { name: "NYSE:NEM", displayName: "Newmont" },
+    ],
+  },
+  {
+    name: "Geopolitics & risk",
+    provenance:
+      "map theme geopolitics + lib/drivers.ts risk complex · Brent, VIX, SPX, BTC",
+    symbols: [
+      { name: "TVC:UKOIL", displayName: "Brent" },
+      { name: "CAPITALCOM:VIX", displayName: "VIX" },
+      { name: "SPREADEX:SPX", displayName: "S&P 500" },
+      { name: "BITSTAMP:BTCUSD", displayName: "Bitcoin" },
+    ],
+  },
+];
+
+/** Every symbol the reference desk mounts, deduplicated. */
+export function watchlistSymbols(): string[] {
+  return [...new Set(JAMASP_WATCHLIST.flatMap(g => g.symbols.map(s => s.name)))];
+}
+
+/* ---- the web-component half of the reference desk ---- */
+
+/**
+ * A modern web-component embed: a custom element and the attributes to set
+ * on it.
+ *
+ * Three of the six reference widgets exist in BOTH generations, and they use
+ * the new one on purpose rather than by preference:
+ *
+ *   - **weight.** Web components share one ES-module loader and one data
+ *     connection across every instance on the page. Three of them cost one
+ *     script and one socket; three classic embeds cost three full iframe
+ *     document loads. On a page whose entire budget is third-party frames
+ *     that is the difference that matters.
+ *   - **theme.** Only this generation reads TV_THEME_TOKENS. Custom
+ *     properties inherit through a shadow boundary even a closed one, which
+ *     is why components/driver-panel.tsx can hand the Mini Charts the panel's
+ *     own palette — and why the classic embeds below cannot be given
+ *     anything but `colorTheme: "light" | "dark"`.
+ *   - it is the generation TradingView currently documents; the classic
+ *     `market-quotes` / `market-overview` scripts still serve but their doc
+ *     pages are gone.
+ *
+ * The other three (heatmap, screener, news) plus the calendar have no
+ * web-component version at all, so the panel carries both shells.
+ *
+ * Attribute names are kebab-case of TradingView's camelCase options, which
+ * is their documented converter rule and not a guess. `true` means a bare
+ * boolean attribute.
+ */
+export type TvComponentSpec = {
+  tag: string;
+  attrs: Readonly<Record<string, string | true>>;
+};
+
+/** Loader URL for a web component. Locale is a PATH segment, not an attribute. */
+export function tvComponentScript(tag: string, locale = "en"): string {
+  return `https://widgets.tradingview-widget.com/w/${locale}/${tag}.js`;
+}
+
+/**
+ * Watchlist — `<tv-market-data>`, sectioned by Jamasp's own map themes.
+ *
+ * The page's centrepiece, and the one widget here with no Jamasp equivalent
+ * at all: the overview's Drivers card carries six tiles because six is what
+ * fits the grid, and every one of them is a stored reading. This is twenty
+ * live rows with open/high/low, under the same theme headings the market map
+ * groups news by.
+ *
+ * One honest loss against the retired classic widget, which took a
+ * `displayName` per row: `symbolSectors` carries section names and bare
+ * symbols only, so the ROWS are labelled in TradingView's vocabulary
+ * ("UNITED STATES 2 YEAR GO…") rather than the desk's ("US 2y"). The
+ * SECTIONS still carry Jamasp's taxonomy, which is the load-bearing half —
+ * and the page prints the provenance line for each group underneath, so a
+ * row can still be traced back to a source. Worth it for one shared socket
+ * instead of a second iframe.
+ */
+export function watchlistComponent(): TvComponentSpec {
+  return {
+    tag: "tv-market-data",
+    attrs: {
+      view: "overview",
+      "symbol-sectors": JSON.stringify(
+        JAMASP_WATCHLIST.map(g => ({
+          sectionName: g.name,
+          symbols: g.symbols.map(s => s.name),
+        })),
+      ),
+    },
+  };
+}
+
+/**
+ * World market summary — `<tv-world-market-summary>`.
+ *
+ * Genuinely a different widget from anything else here: country-level equity
+ * index performance, on a choropleth the reader can flip to a ranked list.
+ * Its job on a gold desk is the risk map — where the selling actually is —
+ * and it is the only thing on the panel that answers that geographically.
+ *
+ * `sort: "performance"` rather than alphabetical because the question is
+ * always "who moved", never "how do I find Belgium". The view toggle is left
+ * on: map and list answer the same question at different resolutions and
+ * neither is right for every reader.
+ */
+export function worldMarketSummaryComponent(): TvComponentSpec {
+  return {
+    tag: "tv-world-market-summary",
+    attrs: { view: "map", sort: "performance" },
+  };
+}
+
+/**
+ * Seasonal chart — `<tv-seasonal-chart>`, on gold spot.
+ *
+ * Nearly written off. The classic generation has no such widget —
+ * embed-widget-seasonals.js, -seasonality.js and -seasonal-chart.js all 404,
+ * which is why TV_REFUSED_WIDGETS still lists those three names — but it
+ * exists as a web component and renders five years of gold overlaid on a
+ * calendar-month axis with an average line. The lesson is worth keeping:
+ * "no such widget" was true of the generation probed and false of the
+ * product.
+ *
+ * It earns its place because gold's seasonality is a real physical-demand
+ * phenomenon rather than a chart artefact — the Indian wedding and festival
+ * buying that config/sources.yaml tracks through Gulf and regional feeds,
+ * and Chinese New Year restocking behind the SGE benchmark. This is the only
+ * surface on the panel that shows the shape of a year, and Jamasp's own
+ * stored bars do not go back far enough to draw it.
+ *
+ * `show-average` is the whole point — a single year's line is an anecdote.
+ */
+export function seasonalChartComponent(symbol = TV_LIVE_SYMBOL): TvComponentSpec {
+  return {
+    tag: "tv-seasonal-chart",
+    attrs: { symbol, "show-average": true },
+  };
+}
+
+/**
+ * Stock heatmap — the equity market's risk temperature in one picture.
+ *
+ * Framed as a RISK read, not a gold instrument, because that is honestly all
+ * it is: lib/drivers.ts carries ^GSPC as a single number in the "broader risk
+ * complex", and this is that number decomposed. On a day when gold and
+ * equities move together, the decomposition is what says which story it was.
+ *
+ * The S&P is the default because AllUSA renders thousands of unreadable
+ * micro-cap tiles. Unlike the gold chart, the top bar is LEFT ON: nothing
+ * else on the panel quotes this widget, so a reader retuning it to another
+ * market breaks no caption — where the Advanced Chart's symbol lock exists
+ * precisely because its caption promises an instrument.
+ */
+export function heatmapConfig(theme: TvTheme) {
+  return {
+    ...REFERENCE_BASE(theme),
+    dataSource: "SPX500",
+    blockSize: "market_cap_basic",
+    blockColor: "change",
+    grouping: "sector",
+    hasTopBar: true,
+    isDataSetEnabled: true,
+    isZoomEnabled: true,
+    hasSymbolTooltip: true,
+    isMonoSize: false,
+    symbolUrl: "",
+  };
+}
+
+/**
+ * Screener — pointed at FOREX, not at stocks, and that is a deliberate
+ * departure from what was asked for.
+ *
+ * Two things drove it. First, relevance: `market: "america"` cannot be scoped
+ * to gold miners by any option the widget exposes, so a stock screener on
+ * this panel is nine thousand tickers of noise for a desk that trades one
+ * metal. Second, and decisive: the `overview` column set renders a
+ * **"Technical Rating: Strong Sell / Sell / Buy"** column — the aggregate
+ * verdict TV_REFUSED_WIDGETS explains this project refuses. Verified by
+ * mounting, 2026-09-06.
+ *
+ * `defaultColumn: "performance"` carries no rating column, and forex gives 49
+ * rows of majors and minors across seven horizons — real breadth Jamasp does
+ * not have, since config/sources.yaml stores exactly one FX cross (JPY=X) and
+ * one dollar index. Gold is a dollar trade; how the dollar is doing against
+ * everything else is context available nowhere else on this panel.
+ *
+ * `defaultScreen: "general"` rather than a ranked preset: TradingView
+ * disables most_capitalized, volume_leaders, unusual_volume,
+ * high_dividend and earnings_this_week in forex mode, and a screen the widget
+ * has disabled is a silently empty panel waiting to happen.
+ */
+export function screenerConfig(theme: TvTheme) {
+  return {
+    ...REFERENCE_BASE(theme),
+    market: "forex",
+    defaultColumn: "performance",
+    defaultScreen: "general",
+    showToolbar: true,
+  };
+}
+
+/**
+ * News — TradingView's "timeline" widget, scoped to the gold symbol.
+ *
+ * This is the widget with the strongest case against it, and what saved it is
+ * what it turned out to BE. Jamasp runs ~20 RSS sources through dedupe,
+ * five-tier triage and a gold-impact score; a raw wire beside that would
+ * shadow the product and muddle provenance.
+ *
+ * But `feedMode: "symbol"` on FX_IDC:XAUUSD is not a wire. Mounted on
+ * 2026-09-06 it carried a dozen items reaching back over three months —
+ * TradingView's own editorial gold notes, two to four a month, the newest
+ * several days old. It cannot compete with the inbox on volume or recency
+ * and will never be mistaken for it. What it offers is an OUTSIDE view:
+ * somebody else's framing of the same tape, useful exactly when Jamasp's
+ * stance has gone unchallenged for a while.
+ *
+ * `feedMode: "market"` was tried first and there is no commodity feed — the
+ * documented markets are crypto, forex, stock, index, futures and cfd, and
+ * `market: "commodity"` renders "Oops! Something went wrong". The symbol feed
+ * is the only one that reaches this instrument. `market` is deliberately
+ * absent from the payload rather than set and ignored: TradingView's own
+ * generator deletes whichever of market/symbol does not match feedMode.
+ *
+ * `displayMode: "adaptive"` switches between the roomy and compact layouts on
+ * container width, which is what a card that has to survive 390px needs.
+ */
+export function newsConfig(theme: TvTheme) {
+  return {
+    ...REFERENCE_BASE(theme),
+    feedMode: "symbol",
+    symbol: TV_LIVE_SYMBOL,
+    displayMode: "adaptive",
+  };
+}
+
+/**
+ * Countries the calendar filters to, and why each one is on the list.
+ *
+ * Not a generic G10 set — every entry traces to something Jamasp reads:
+ *
+ *   us  config/sources.yaml fed_press, bls_latest, treasury_press
+ *   eu  ecb_press
+ *   gb  boe_news
+ *   jp  usdjpy — the carry leg the desk watches through JPY=X
+ *   cn  sge_benchmark — Shanghai physical demand
+ *   in  the India physical bid this desk trades into
+ *
+ * These are ISO 3166-1 alpha-2 country codes (plus `eu` for the union), not
+ * currency codes, and the widget silently shows nothing for a code it does
+ * not know — so the list is pinned by a test.
+ */
+export const TV_CALENDAR_COUNTRIES = ["us", "eu", "gb", "jp", "cn", "in"] as const;
+
+/**
+ * Economic calendar — TradingView's "events" widget.
+ *
+ * The only reference widget that does NOT live on /markets. It belongs beside
+ * Jamasp's own calendar, because the two answer adjacent questions and the
+ * comparison is the point: /calendar's list is what Jamasp is WATCHING, drawn
+ * from the ff_calendar source, and docs/todo/001 records that this source
+ * ships one week at a time — so Jamasp's horizon runs out at the end of the
+ * current week, every week. This widget sees past that edge. It is reference
+ * data, under Jamasp's list, labelled as reference, and it is the closest
+ * thing on the panel to an answer to todo 001.
+ *
+ * `importanceFilter: "0,1"` is medium and high only — the same tiers
+ * `jamasp calendar` prints. The grammar is a comma-separated set of -1 (low),
+ * 0 (medium) and 1 (high); "-1,0,1" is TradingView's default and was tried,
+ * whereupon the widget filled with New Zealand reserve totals and Vietnamese
+ * motorbike sales. That is how a calendar stops being read.
+ */
+export function economicCalendarConfig(theme: TvTheme) {
+  return {
+    ...REFERENCE_BASE(theme),
+    importanceFilter: "0,1",
+    countryFilter: TV_CALENDAR_COUNTRIES.join(","),
   };
 }

@@ -20,6 +20,7 @@ const ROUTES: [string, string][] = [
   ["/", "Overview"], ["/inbox", "Inbox"], ["/crawl", "Crawl"], ["/briefs", "Briefs"],
   ["/schedule", "Schedule"], ["/calendar", "Calendar"], ["/alerts", "Alerts"],
   ["/state", "State"], ["/predictions", "Predictions"], ["/prices", "Prices"],
+  ["/markets", "Markets"],
 ];
 
 for (const [path, title] of ROUTES) {
