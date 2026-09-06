@@ -1,10 +1,10 @@
 ---
 id: 016
 title: Fit B normalises theme multipliers against the control columns, so they land 17x too low and in the wrong order
-status: open
+status: done
 opened: 2026-09-06
 owner: unassigned
-closed:
+closed: 2026-09-06
 ---
 
 ## Problem
@@ -151,3 +151,149 @@ a regression here is expensive to notice.
   themes are currently negative, so that rule is what most of the map ran on.
   Worth resolving alongside this.
 - `docs/todo/012` — why there was no fit at all before 2026-09-05.
+
+## Resolution
+
+Fixed in `jamasp/fit.py`. `to_multipliers` takes a new `report` argument — the
+positions the caller will publish — and takes both the normalising mean and
+the `negative:` flags over those columns only. `run_fit` computes `keep`
+before the call and passes the matching indices. `report=None` (Fit A) keeps
+the old population exactly, so Fit A is untouched by construction.
+
+### Re-derived independently before fixing
+
+Against a read-only copy of `/home/jamasp/Jamasp/state/jamasp.db` (20.4 MB,
+copied 2026-09-06, `integrity_check` ok) and the host's `state/weights.json`
+(`fitted_at 2026-09-05T23:37:55Z`). Every number in **Evidence** above
+reproduces: 44 columns (6 themes + 38 controls), n=233, β̄ over all columns
+`0.197015`, β̄ over theme columns `0.011758`, ratio **16.7553×**, largest
+control |β| `fib50@4h` = 0.853719.
+
+Two corrections to **Evidence**, neither changing the conclusion:
+
+- The `theme-only` column's `physical_cb 0.2500` is the *pre-gate* normalised
+  value. `physical_cb` has 16 observations against `min_observations: 50`, so
+  `run_fit` overrides it with the unfitted neutral **1.0** whatever the
+  normalisation does. After the fix it still ships **1.00**, not 0.25. The
+  **Done when** ordering criterion is still met — geopolitics 1.7597 > 1.00 —
+  but by geopolitics rising, not by physical_cb falling.
+- Fit A was confirmed unaffected by running it through `run_fit` both before
+  and after the fix: 38 coefficients, max |Δmultiplier| vs the shipped file
+  **5.78e-12**, max |Δβ| **2.83e-11**, identical flag list. (Comparing against
+  `to_multipliers` directly shows a spurious 0.75 gap on `net_spec@1d`, which
+  has 0 observations and is gated to 1.0 by `run_fit`, not by the
+  normalisation.)
+
+### Corrected multipliers on the production snapshot
+
+| theme | β | obs | fitted | was | now |
+|---|---|---|---|---|---|
+| rates_dollar | −0.010628 | 211 | yes | 0.25 | 0.2500 |
+| geopolitics | +0.020691 | 202 | yes | 0.25 | **1.7597** |
+| physical_cb | +0.002825 | 16 | no | 1.00 | 1.0000 |
+| etf_flows | −0.004961 | 3 | no | 1.00 | 1.0000 |
+| supply_mining | −0.015962 | 67 | yes | 0.25 | 0.2500 |
+| other | −0.002437 | 146 | yes | 0.25 | 0.2500 |
+
+The theme fit's `flags` list drops from 20 entries to 4 — the four genuine
+theme negatives — with all 16 technical control columns gone. That closes the
+second half of the **Fix** section: `.claude/skills/retro/SKILL.md` tells the
+retro to "walk the **`theme`** fit's `flags`", and that instruction is now
+unambiguous without editing the skill.
+
+### `min_observations` default: left at 1.0, deliberately
+
+An unfitted column still renders 1.0. That is not a leftover — after the fix
+it is the *correct* neutral, because the reported positive multipliers average
+exactly 1.0 before clamping, so 1.0 is the centre of the measured population.
+It looked wrong only because the broken normalisation compressed every fitted
+theme onto the 0.25 floor, leaving 1.0 four times the largest measurement.
+Changing it would also change Fit A, where 1.0 already sits correctly inside a
+0.25–3.0 spread (`net_spec@1d`, 0 observations). Recorded as a comment in
+`run_fit` so the coupling between the two is not rediscovered by accident.
+
+The residue — an unfitted theme at 1.0 outranking four *measured* themes at
+0.25 — is not caused by `min_observations`. It is the negative-coefficient
+clamp named in **Related**, which shrinks a column 4× for a defect the spec
+says is about direction scoring. That question is unchanged by this fix and
+still belongs to the retro.
+
+### Blast radius: who actually consumed these numbers
+
+Audited 2026-09-06, code paths and the live artefacts both. The answer is
+narrower than **Why it matters** implies, and worth recording so nobody
+re-opens the question.
+
+**Only two things ever read a theme multiplier.**
+
+1. The panel's fundamental map — `panel/app/page.tsx` →
+   `panel/lib/marketmap.ts#buildThemeMultipliers` → `layoutMap`, where it
+   drove tile **area** and, through `squarify`'s descending sort, the
+   **position of each theme block**. PR #35 removed it from that channel. This
+   was the only rendered consumer and it is gone.
+2. `.claude/skills/retro/SKILL.md` §4.6, which tells the retro to read
+   `state/weights.json`. It reads the whole file, so the multipliers land in
+   the analyst's context — but the skill directs it to the `flags` list and
+   the `coefficients` map's β/se/n, and never names `multiplier`.
+
+**Nothing else.** `/brief`, `/scan`, `/deepdive` and the remaining skills
+contain no reference to `weights.json`, `weight_fits`, `multiplier` or
+`jamasp weights` — the brief and the scan read only `stance.md`,
+`playbook.md`, `watchlist.yaml` and `calendar.yaml`. No Python module reads
+`weights.json` at all. No CLI command prints a multiplier: `jamasp weights
+fit` prints only counts (`f"{r.name}: n={r.n} {len(r.coefficients)} columns"`).
+`jamasp/watchdog.py` touches `weight_fits` for `MAX(fitted_at)` only. The
+panel never queries `weight_fits`.
+
+**The one exposed artefact was not contaminated.** 2026-09-06 was the first
+weekly retro ever to run with a fit present, so §4.6 executed for the first
+time against exactly these numbers. `reports/2026/09/2026-09-06-retro.md`
+contains no occurrence of the string `multipl`, and its §4.6 table header is
+`| Column | β | se | n | fitted |` — no multiplier column. Its verdict is
+explicit non-action: "*Two days of fits on 233 observations is not a
+regression to act on; read again next Sunday.*" Every claim it made — the βs
+being within one SE of zero, `physical_cb`/`etf_flows` being starved — is
+about βs and observation counts and is unaffected by the normalisation.
+
+It also caught the flag pollution and handled it: "*the theme fit's flag list
+also carries sixteen technical columns, which the retro skill says to ignore,
+and which I have.*" That reading is right by coincidence — the skill says to
+ignore the *technical fit's* flags, not technical columns inside the *theme*
+fit's — so the pollution was absorbed rather than detected. This fix removes
+it, so the instruction no longer needs the benefit of the doubt.
+
+The retro's downstream writes are clean too: the rewritten `state/playbook.md`
+contains no theme-weighting, theme-ranking or theme-priority guidance at all
+(no match for `multipl`, `theme`, `physical_cb`, `etf_flows` or `weights.json`
+in either the 23 Aug version or today's rewrite), and all twenty heuristics
+trace to named prediction ids. `state/stance.md` and the drained
+`state/lessons-inbox.md` likewise. The 5 and 6 Sep briefs never open the file.
+
+One trap for a future reader: `stance.md` and the briefs carry a line like
+"weights 25/35/40 base/bearish-rates/kinetic". Those are the analyst's own
+**scenario probabilities**, written by the brief, and have nothing to do with
+fit multipliers. The kinetic/geopolitical scenario carries the *highest* of
+them — the opposite of what acting on a floored geopolitics multiplier would
+have produced.
+
+**Conclusion:** the inverted multipliers reached the fundamental map's area
+channel and nothing else. No analyst reasoning was built on them.
+
+### The two stored fits
+
+`weight_fits` keeps `2026-09-05T21:33:46Z` and `2026-09-05T23:37:55Z` for both
+`technical` and `theme`. The **theme** rows of those two stamps are the only
+ones ever written under the old normalisation; the technical rows are correct.
+They were left in place — `weight_fits` is the trajectory table, and deleting
+rows would leave a future reader with multipliers that jumped for no recorded
+reason. `state/weights.json`, which is the only file anything reads, was
+corrected by re-running the fit after deploy.
+
+### Done when — checked
+
+- Published theme positives average 1.0 before clamping: covered by
+  `test_the_normalising_mean_ignores_columns_the_fit_will_not_report`, whose
+  synthetic matrix carries a control 60× the reported columns.
+- Production snapshot puts geopolitics (1.7597) above physical_cb (1.0000).
+- Fit A unchanged on the same snapshot: 38 coefficients, max |Δ| 5.78e-12.
+- Full suite: 504 passed, 4 skipped.
