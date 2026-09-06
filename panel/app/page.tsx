@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { PageHeader } from "@/components/page-header";
 import { DriverPanel } from "@/components/driver-panel";
+import { DriverTape } from "@/components/driver-tape";
 import { FundamentalPanel } from "@/components/fundamental-panel";
 import { HorizonStrip } from "@/components/horizon-strip";
 import { MarketMap } from "@/components/market-map";
@@ -163,6 +164,13 @@ export default async function Overview({
   return (
     <div>
       <AutoRefresh />
+      {/* The band before the title, the way a dealing screen carries one:
+          the complex at a glance, above everything that needs thinking
+          about. It reserves a fixed height and renders Jamasp's own readings
+          on the server, so the live tape lands inside the box that is
+          already there — see components/driver-tape.tsx for why this is the
+          one embed on the panel that cannot be lazily gated on the viewport. */}
+      <DriverTape drivers={drivers} />
       <PageHeader title="Overview" subtitle={`as of ${fmtUtc(iso(now))}`} />
 
       <section aria-label="Market map" className="mb-4">
@@ -232,7 +240,6 @@ export default async function Overview({
           exactly the kind of overflow the mobile sweep exists to catch. */}
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-5">
         <div className="flex flex-col gap-4 lg:col-span-3">
-          <FundamentalPanel stance={stance} watchlist={watchlist} now={now} />
           <HorizonStrip horizon={horizon} now={now} />
           <NewsFlow pulse={pulse} heads={heads} top={top} lastItemTs={lastItemTs} now={now} />
         </div>
@@ -240,6 +247,18 @@ export default async function Overview({
           <DriverPanel drivers={drivers} now={now} />
           <PredictionPanel stats={predStats} bins={calibrationBins(preds)} />
         </div>
+      </div>
+
+      {/* Last, and full width, because it is the only block on this page that
+          is READ rather than scanned. Everything above resolves in one look —
+          two treemaps, a status row, price levels, the driver complex, the
+          forecast record — and used to be pushed down the left column by the
+          stance prose and its falsifier rows. Full width rather than back in
+          the 3-column slot: at the bottom there is nothing beside it, and
+          prose that has stopped competing for the fold may as well have the
+          measure. */}
+      <div className="mt-4">
+        <FundamentalPanel stance={stance} watchlist={watchlist} now={now} />
       </div>
 
       <FooterStrip wakeup={pendingWakeups[0]}
