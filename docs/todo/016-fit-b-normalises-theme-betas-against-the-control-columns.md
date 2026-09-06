@@ -42,13 +42,13 @@ times smaller and ships at 1.0, because its 16 observations fall short of
 contaminated scale, is four times the largest measured value. So "we could
 not measure this theme" outranks "this is the strongest theme we measured".
 
-That inversion reached the desk. Until PR #34 the fundamental map multiplied
+That inversion reached the desk. Until PR #35 the fundamental map multiplied
 tile area by this number, and on 2026-09-06 the largest tile on the 24h map
-was a **tier 4** at 2.33× the area of the day's only **tier 5**. PR #34 took
+was a **tier 4** at 2.33× the area of the day's only **tier 5**. PR #35 took
 the multiplier out of the area channel, so nothing currently renders from
 these values — which is why this is a todo and not an incident. It becomes
 live again the moment anything displays or acts on a theme multiplier,
-including the theme-header treatment PR #34 leaves as follow-up, and
+including the theme-header treatment PR #35 leaves as follow-up, and
 including the retro reading these numbers to decide a pin.
 
 ## Evidence
@@ -141,7 +141,7 @@ a regression here is expensive to notice.
 
 ## Related
 
-- Found while fixing the map inversion in PR #34 (`panel/lib/marketmap.ts`).
+- Found while fixing the map inversion in PR #35 (`panel/lib/marketmap.ts`).
 - `docs/superpowers/specs/2026-08-20-market-maps-learning-loop-design.md`,
   §"From coefficients to multipliers" — the invariant this violates.
 - `docs/superpowers/specs/2026-08-18-market-maps-design.md`, §"Negative

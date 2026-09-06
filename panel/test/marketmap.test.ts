@@ -222,30 +222,61 @@ describe("layoutGroups", () => {
   });
 });
 
-describe("layoutMap with learned theme multipliers", () => {
+describe("layoutMap area encoding", () => {
   const rect = { x: 0, y: 0, w: 400, h: 300 };
-  const item = (id: string, theme: string) => ({
-    itemId: id, tier: 5, direction: 2, conviction: 0.8, theme,
+  const item = (id: string, theme: string, tier = 5) => ({
+    itemId: id, tier, direction: 2, conviction: 0.8, theme,
     headline: "h", source: "s", url: `u${id}`,
     publishedAt: "2026-08-20T00:00:00Z",
   });
 
-  it("scales a theme's area by its multiplier", () => {
+  /**
+   * The production inversion this encoding exists to prevent, with the
+   * multipliers the 2026-09-05 fit actually published: four themes at the
+   * 0.25 floor, `physical_cb` and `etf_flows` absent because the fit had 16
+   * and 3 observations and declined to report them. Under the old
+   * `tierWeight x multiplier` area the tier-4 story rendered 2.3x the
+   * tier-5 one, because 60 x 1.0 beats 100 x 0.25.
+   */
+  const PRODUCTION_MULTIPLIERS = {
+    rates_dollar: 0.25, geopolitics: 0.25, supply_mining: 0.25, other: 0.25,
+  };
+
+  it("never sizes a lower tier above a higher one, whatever the multipliers", () => {
+    const boxes = layoutMap([
+      item("t5", "geopolitics", 5),
+      item("t4", "physical_cb", 4),
+    ], rect, 0, PRODUCTION_MULTIPLIERS);
+    const area = (id: string) => {
+      const cell = boxes.flatMap(b => b.items).find(c => c.node.itemId === id)!;
+      return cell.w * cell.h;
+    };
+    expect(area("t5")).toBeGreaterThan(area("t4"));
+    expect(area("t5") / area("t4")).toBeCloseTo(100 / 60, 2);
+  });
+
+  it("does not scale a theme's area by its multiplier", () => {
+    // Area is materiality — the triage call's tier. The theme multiplier
+    // answers a different question (how much this theme has historically
+    // moved gold per unit of exposure), so it must not enter this channel.
     const items = [item("1", "rates_dollar"), item("2", "geopolitics")];
     const boxes = layoutMap(items, rect, 0, { rates_dollar: 3, geopolitics: 1 });
     const rates = boxes.find(b => b.theme === "rates_dollar")!;
     const geo = boxes.find(b => b.theme === "geopolitics")!;
-    // Same tier, so the multiplier is the only thing separating them.
-    expect((rates.w * rates.h) / (geo.w * geo.h)).toBeCloseTo(3, 2);
+    expect((rates.w * rates.h) / (geo.w * geo.h)).toBeCloseTo(1, 2);
   });
 
-  it("treats an absent multiplier as neutral", () => {
-    // Before Fit B has enough rows there are no theme multipliers at all, and
-    // the map must render exactly as it did before this feature existed.
+  it("reports each theme's multiplier on the box for the header to show", () => {
+    const boxes = layoutMap([item("1", "rates_dollar"), item("2", "geopolitics")],
+      rect, 0, { rates_dollar: 3 });
+    expect(boxes.find(b => b.theme === "rates_dollar")!.multiplier).toBe(3);
+    // Absent from the fit -> neutral, the same default layoutMap always used.
+    expect(boxes.find(b => b.theme === "geopolitics")!.multiplier).toBe(1);
+  });
+
+  it("lays out identically with no multipliers and with an empty map", () => {
     const items = [item("1", "rates_dollar"), item("2", "geopolitics")];
-    const withNone = layoutMap(items, rect, 0);
-    const withEmpty = layoutMap(items, rect, 0, {});
-    expect(withEmpty).toEqual(withNone);
+    expect(layoutMap(items, rect, 0, {})).toEqual(layoutMap(items, rect, 0));
   });
 
   it("ignores a multiplier for a theme with no stories", () => {
@@ -260,6 +291,66 @@ describe("layoutMap with learned theme multipliers", () => {
     const total = boxes.reduce((s, b) => s + b.w * b.h, 0);
     // Ratio, not absolute area — see the technical map's equivalent test.
     expect(total / (400 * 300)).toBeCloseTo(1, 6);
+  });
+});
+
+describe("layoutGroups header reservation", () => {
+  const rect = { x: 0, y: 0, w: 1200, h: 600 };
+
+  /** px each unit of value bought, inside the group's children. */
+  const perValue = (boxes: { items: { w: number; h: number }[]; total: number }[]) =>
+    boxes.map(b => b.items.reduce((s, c) => s + c.w * c.h, 0) / b.total);
+
+  it("buys the same area per unit of value in every group", () => {
+    // Lopsided totals are what makes the tax uneven: a big group's box is
+    // tall and loses a small fraction to its 24px header, a small group's is
+    // short and loses most of it. Equal value must still mean equal area.
+    const boxes = layoutGroups([
+      { group: "big", value: 1000, node: "b1" },
+      { group: "mid", value: 120, node: "m1" },
+      { group: "small", value: 30, node: "s1" },
+      { group: "tiny", value: 10, node: "t1" },
+    ], rect, 24);
+    const pv = perValue(boxes);
+    const spread = Math.max(...pv) / Math.min(...pv) - 1;
+    expect(spread).toBeLessThan(0.02);
+  });
+
+  it("holds equal area per value across a wide range of group mixes", () => {
+    // One shape converging is luck; the compensation has to be stable over
+    // the mixes a real map produces.
+    let worst = 0;
+    for (let seed = 1; seed <= 40; seed++) {
+      let x = seed * 7919;
+      const rand = () => (x = (x * 1103515245 + 12345) % 2147483648) / 2147483648;
+      const n = 2 + Math.floor(rand() * 5);
+      const nodes = Array.from({ length: n }, (_, i) => ({
+        group: `g${i}`, value: 3 + Math.floor(rand() * 900), node: `n${i}`,
+      }));
+      const pv = perValue(layoutGroups(nodes, rect, 24));
+      worst = Math.max(worst, Math.max(...pv) / Math.min(...pv) - 1);
+    }
+    expect(worst).toBeLessThan(0.05);
+  });
+
+  it("still tiles the canvas exactly", () => {
+    const boxes = layoutGroups([
+      { group: "big", value: 1000, node: "b1" },
+      { group: "small", value: 30, node: "s1" },
+      { group: "tiny", value: 10, node: "t1" },
+    ], rect, 24);
+    const total = boxes.reduce((s, b) => s + b.w * b.h, 0);
+    expect(total / (rect.w * rect.h)).toBeCloseTo(1, 6);
+  });
+
+  it("degrades to plain proportional sizing when headers exceed the canvas", () => {
+    // Nothing can be reserved when the headers alone are bigger than the
+    // rectangle; the layout must still return boxes rather than diverge.
+    const boxes = layoutGroups(
+      Array.from({ length: 6 }, (_, i) => ({ group: `g${i}`, value: 10, node: `n${i}` })),
+      { x: 0, y: 0, w: 200, h: 40 }, 24);
+    expect(boxes).toHaveLength(6);
+    for (const b of boxes) expect(Number.isFinite(b.w * b.h)).toBe(true);
   });
 });
 
