@@ -1,121 +1,112 @@
-# Stance — 2026-09-06 20:40Z (pre-reopen deepdive #52) — IRAN ANSWERED WITH A ZONE AND TURN-BACKS, NOT A SALVO; REOPEN GAP-UP, SMALL; CPI STILL THE GATE
+# Stance — 2026-09-07 04:00Z (Monday brief) — REOPEN SHRUGGED THE WAR WEEKEND AND ASIA SOLD IT; RATES DESK HAS THE WHEEL INTO PPI/CPI; WEIGHTS 25/40/35
 
-**Kinetic stays 40.** 5 Sep: Iranian ballistic missiles at a US carrier
-and destroyer (evaded); CENTCOM destroyed Kylo (in ballast, Gulf of Oman;
-sinking video 6 Sep), disabled Downy (Kharg anchorage, four projectiles,
-crew evacuating) and Stark I (Gulf of Oman); Cooper "two of ours, three of
-yours", Hegseth "destroy" the fleet. **Iran's answer (6 Sep):** the IRGC
-"targeted three tankers" claim resolved into TURN-BACKS of three named
-vessels (Velos Amber, Bravo, Qatari LNG carrier Al Sheehaniya —
-tracking-confirmed, no damage); a US USV/drone "attacked" — CENTCOM denied
-any new attack on US assets; Qalibaf: "era of proportionate responses is
-over"; Rezaei (SNSC): a "prohibited zone" from the US blockade line into
-the Gulf "in coming days", entrants sanctions-LISTED, Iran–Oman passage
-maps to be signed. No second salvo at warships, no GCC-host attack, no
-second US tanker strike, no ordnance on Kharg/Larak terminals or
-territory. Isfahan single-source, denied. Araghchi–Faisal bin Farhan call
-(5 Sep eve). Rates unchanged: Sept-hike odds 58% (4 Sep NY close), 10y
-4.78, DXY 99.16, USDJPY 156.22 (Monday indicative 155.98, "calm"), Brent
-96.28 settle (wk high 97.62); WTI 91.3 in our briefs vs 82.44 in The
-National — unresolved, carry Brent. OPEC+ unchanged for Oct. GC 4476.6
-Friday close, settle 4487.5, post-NFP low 4425. **FOMC blackout 5–17
-Sep**; PPI Thu 10 Sep, CPI Fri 11 Sep 12:30Z (core cons +0.3%). Warsh
-pressure campaign explicit (debasement channel); Trump wants the war
-ended, not expanded (Axios plan, weeks away). Technicals: RSI 52, ATR 113,
-50DMA 4273, 200DMA 4543, spec 222k. Reopen Sun 22:00Z; Mon US Labor Day
-(thin Globex, no Treasury session).
+**The tape contradicted the pre-reopen deepdive.** #52 called a small gap
+UP (first print 4485–4515); the 22:00Z reopen printed FLAT (spot proxy
+4420 vs 4432 Friday, −0.3%) and Asia sold it to a 4392 spot low (01:00Z),
+~4438 GC-equivalent, now ~4410 spot / ~4456 GC-eq. **GC=F quote feed is
+dark since 4 Sep 20:59Z (todo-183, Labor-Day trade-date bug); every GC
+level below is spot proxy + ~45 basis until it returns.** Hike odds ~60%
+(CME via investinglive, Asia read — not a NY close). DXY 99.17, USDJPY
+156.2, 10y 4.78 (Fri), Brent 96.69 / WTI 92.03 Monday Asia (WTI
+discrepancy resolved — The National's 82.44 was wrong). Kinetic weekend
+delivered words and turn-backs: Rezaei (Sun TV) — zone "coming days",
+Iran "has not decided to sink" US-linked hulls, "Americans must gain
+Iran's trust for negotiations to continue", "diplomacy with guarantees"
+(Islamabad MoU reference) — a live channel under the rhetoric. Iranian
+loadings 220–255 kb/d in Aug vs 2 mb/d March (Reuters); Hormuz transits
+Kpler 10-day avg 10/day, lowest since May; no VLCC exit since Wed; UKMTO
+weekly: 27 projectile incidents since 6 Jul. No confirmed hit on Velos
+Amber/Bravo/Al Sheehaniya. Custody reflex widening: DNB out of NY, France
+earlier, Norway's $2.4tn fund weighing gov bonds 70%→50%, Germany unmoved.
+PBOC fixes ~700 pips weak vs estimate every day for a week (6.7795 vs
+6.7086) — leaning against yuan strength; $54bn bank capital injection.
+Perth Mint Aug gold sales −22% m/m at a 3-month low while spot rose 10% —
+retail fatigue at the highs. Technicals: RSI 52, ATR 106, 50DMA 4280,
+200DMA 4545, spec 222k. **FOMC blackout to 17 Sep**; PPI Thu 10 Sep
+12:30Z (cons +0.4%), ECB same hour, CPI Fri 11 Sep 12:30Z (core cons +0.3%).
 
-## View (weights 25/35/40 base/bearish-rates/kinetic — unchanged)
+## View (weights 25/40/35 base/bearish-rates/kinetic — rates +5, kinetic −5)
 
-- **Kinetic (40):** floor up, live, tail fatter on words. Reopen: gap up,
-  small — first print 4485–4515, session one 4470–4530, `58b7daab`
-  4420–4555 holds (~0.85), `85f08a28` ≥4500 more likely than not,
-  `a1fc647f` no print <4425 thru Monday holds absent a talks headline.
-  One-sided up until Treasuries trade Tuesday (oil → front end). Path to
-  45 (actor + target class): Iranian hit on a non-Iranian hull with
-  casualties — the Gulf-side zone's enforcement is now the named route
-  (`6b3ad492` says no such hit thru 9 Sep, 0.7); a US warship struck; US
-  ordnance on Kharg/Larak loading infrastructure or a second CENTCOM
-  tanker strike (`75160fe7` breaks); Pickaxe (`1f83782a`); GCC strike on
-  Iran. Path to 35: Iran quiet 48h + Trump re-minimises + reopen inside
-  the band — not met (new claims, new zone). Claims: `c4ef5615`/
-  `03627b6b` count territory only, Downy at anchor is a hull — `c4ef5615`
-  unhit; `f527c209`/`973a3143` intact; `81564330` unhit, closes 23:59Z
-  (miss trajectory); **`bd825267` now on a MISS trajectory** — the IRGC's
-  own follow-up says course changes, not strikes, and the USV is not a
-  commercial hull; `c2eafbf8` same; `71bd8ddb` strengthened.
-- **Bearish-rates (35):** data-only in the blackout — PPI Thu (cons +0.4%)
-  then CPI. Oil-up from the zone/fleet threat is hawkish input from
-  Tuesday; the Warsh pressure cuts the other way only if the Fed is seen to
-  bend. Odds band 50–60 (`41aec282` no NY close ≥60% thru 10 Sep;
-  `a2171cad` ≥50% at the 10 Sep close). `ec71ce01` (no hike, 0.8) survives
-  only on core ≤0.2. No NY close Monday.
-- **Base (25):** dip-buyer live (Citi, Schroders), spec trimmed, long end
-  anchored, debasement bid firmer. Legs: 9 Sep buyback (#41, slot
-  UNVERIFIED), ECB (#51). Bracket `a3ad30b1` cap 4554 thru 10 Sep AT RISK,
-  not void (flip: Kharg/terminal/Pickaxe/GCC strike/second tanker strike);
-  least-liked claim on the book — don't lean on it. `746afbe2` floor 4300
-  intact.
+- **Bearish-rates (40):** has the wheel. Fourth kinetic weekend of the
+  regime with no gold gap (1 Aug, 30 Aug, 2 Sep Asia, 6 Sep) and this one
+  sold — rule 3: non-response names the price-setter. Odds 60% with no
+  speaker to talk them down; Tuesday's cash-Treasury reopen carries Brent
+  97 into the front end. `a2171cad` (≥50% at the 10 Sep close) on track;
+  `41aec282` (no NY close ≥60% thru 10 Sep) AT RISK — Tuesday's close is
+  the first real test. Core CPI ≥0.4 → 55; ≤0.2 → 30. New: `52e1b990` 8 Sep
+  settle <4476.6 (0.55).
+- **Kinetic (35):** floor, not bid. Re-weighted on what moves price, NOT
+  on the "Iran quiet 48h" flip (Iran is not quiet). Tail unchanged: path
+  to 45 = Iranian hit on a non-Iranian hull with casualties (Gulf side is
+  the named route, `6b3ad492`), US warship struck, Kharg/Larak terminal
+  ordnance or second tanker strike (`f527c209`/`75160fe7`), Pickaxe
+  (`1f83782a`), GCC strike. Persistence claims rotate target class —
+  `81564330` missed for that reason (lesson filed). `bd825267`/`c2eafbf8`
+  miss trajectory; `71bd8ddb` hit trajectory.
+- **Base (25):** dip-buyer untested below 4438 GC-eq; debasement bid
+  firmer on the custody news but not on the tape. Legs: 9 Sep buyback (#41,
+  slot STILL unverified), ECB (#51). `a3ad30b1` cap 4554 more comfortable,
+  still not leaned on; `746afbe2` floor 4300 intact.
 
-**Levels:** R 4500 (session-one target) / 4520 / 4543 (200DMA) / 4554 (cap
-claim) / 4600. S 4470 / 4457 / 4425 (post-NFP low, `a1fc647f`) / 4380 /
-4331 / 4300 (floor claim) / 4273 (50DMA). ATR 113. Base path: small gap up
-Sunday, 4470–4540 chop Monday on a thin tape, rates desk retakes the wheel
-Tuesday into PPI/CPI with a mild downward lean.
+**Levels (GC-eq, spot +45):** R 4476 (Fri close) / 4487.5 (settle) / 4500 /
+4543 (200DMA) / 4554. S 4438 (Asia low) / 4425 (`a1fc647f`, ~13 pts away,
+window to Mon ~21:00Z) / 4380 / 4331 / 4300 / 4280 (50DMA). Spot: 4392 low,
+4400 round. Base path: 4430–4480 GC-eq chop on the holiday tape, Tuesday
+lower on the Treasury reopen, hawkish drift into PPI, CPI decides. Not
+event-pending yet; **event-pending from Wed 9 Sep evening** (PPI/ECB Thu,
+CPI Fri) — cap conviction then.
 
 ## What flips me
 
-- Confirmed hit on a non-Iranian hull (Gulf side or corridor) with
-  casualties, US warship struck, US ordnance on Kharg/Larak terminals,
-  second tanker strike, Pickaxe, or a GCC strike on Iran → kinetic 45,
-  `a3ad30b1` void, 4600 in play.
-- Iran quiet 48h + Trump re-minimises + reopen inside 4420–4555 →
-  30/40/30.
-- NY-close odds ≥60% before CPI or a close <4380 → bearish-rates 45,
-  4300 in play. Core CPI ≥0.4% → bearish-rates 55; ≤0.2% → 40/30/30.
-- Formal war-over, co-confirmed US–Iran talks (Riyadh channel is open),
-  or a Kyiv/Moscow text → oil premium off, war floor off first, first
-  move down.
-- Disorderly yen unwind (USDJPY → 150) → liquidity shock; gold trades
-  with equities for the session.
+- Named 45-trigger prints → kinetic 45, `65cd057e` Brent<100 void, 4600 in play.
+- NY-close odds ≥60% before CPI or a GC close <4380 → bearish-rates 45,
+  4300 in play. Core CPI ≥0.4% → 55; ≤0.2% with oil easing → 30/30/40.
+- Co-confirmed US–Iran talks (Rezaei's "trust"/"guarantees" line is the
+  tell to watch), formal war-over, or a Kyiv/Moscow text → oil premium off,
+  war floor off first, first move down.
+- Disorderly yen (USDJPY → 150) → liquidity shock, gold trades with equities.
 
 ## Open predictions
 
-Open (28): `58b7daab` `85f08a28` `a1fc647f` (reopen/7 Sep), `81564330`
-`fe35b77d` (6 Sep 23:59Z — Monday brief scores at window close),
-`92a5bbb8` `30bad8a0` `b13614a1` `f527c209` `a12de81f` `c2eafbf8`
-`bd825267` `973a3143` `75160fe7` (7 Sep), `71bd8ddb` (8 Sep), `03627b6b`
-`2b39238a` `302708ab` `c4ef5615` `6b3ad492` (9 Sep), `41aec282`
-`a2171cad` `a3ad30b1` `746afbe2` (10 Sep), `2d098d6c` `1f83782a` (11 Sep),
-`ec71ce01` (FOMC 15–16 Sep), `24f8b482` (16 Sep).
+Scored today: `fe35b77d` HIT, `58b7daab` HIT, `81564330` MISS. Open (28):
+`85f08a28` (06:00Z close, MISS trajectory — spot high 4431 ≈ 4476 GC-eq),
+`a1fc647f` (Mon ~21:00Z, AT RISK), 7 Sep 23:59Z cohort — `92a5bbb8`
+`30bad8a0` `b13614a1` `f527c209` `a12de81f` `973a3143` `75160fe7` (hit
+trajectory) `c2eafbf8` `bd825267` (miss trajectory) — Tuesday brief scores
+ALL nine; `71bd8ddb` (8 Sep); `52e1b990` (8 Sep settle); `03627b6b` `302708ab`
+`2b39238a` `c4ef5615` (needs a US territory strike by 9 Sep — none since
+4 Sep) `6b3ad492` (9 Sep); `41aec282` `a2171cad` `a3ad30b1` `746afbe2`
+`65cd057e` (10 Sep); `2d098d6c` `1f83782a` (11 Sep); `ec71ce01` (FOMC);
+`24f8b482` (16 Sep); `a0429ae4` escorts (20 Sep).
 
 ## Wakeups
 
-**#41 9 Sep 15:15Z** buyback op (slot unverified; rule 15). **#51 10 Sep
-13:45Z** ECB + PPI. **#26 11 Sep 13:15Z** CPI. No wakeup for the Iranian
-prohibited-zone declaration / Iran–Oman maps ("coming days", rule 7/16) —
-a published boundary or signed map earns a deepdive at publication+60.
-Scans carry: reopen first print vs 4425/4500/4555, Brent open, any
-confirmed hit on Velos Amber/Bravo/Al Sheehaniya or another Gulf-side
-hull, second CENTCOM tanker/Kharg/territory strike, Isfahan second source,
-Trump wording, IAEA Board vote slot, Witkoff/Kushner Kyiv readout,
-BoJ/MoF/GPIF, NY-close odds Tue–Thu, WTI second source Tuesday.
+**#41 9 Sep 15:15Z** buyback (slot UNVERIFIED — 7 Sep re-check found only
+an actionforex op-ed; rule 15 reschedule clause). **#51 10 Sep 13:45Z** ECB
++ PPI. **#26 11 Sep 13:15Z** CPI. No wakeup for the zone boundary /
+Iran–Oman maps (rule 7/16) — publication earns a deepdive at +60. Scans
+carry: `a1fc647f` vs 4425 GC-eq (spot ~4380) through Monday, Brent vs 100,
+any confirmed Gulf-side hull hit, second tanker/Kharg/territory strike,
+Rezaei "negotiations" follow-up, IAEA Board vote slot, Japan cash earnings
++ Q2 GDP revision Tue morning (yen pillar), Tuesday NY-close odds, GC=F
+feed return (todo-183).
 
 ## Desk-local
 
-Dubai retail premium pop likely at the Sunday open; check it against the
-Globex first print. Silver 65–67.5 range. War-risk cover 40–60x and
-re-quoting higher; the Gulf-side zone widens the sanctionable area (Qatari
-LNG lane, Juaymah/Ras Tanura approaches) — insurance, not barrels, is the
-transmission. US diesel at a record; Kuwait gold AML tightening (3 Sep).
+Dubai retail against a ~4400 spot tape: Perth Mint's −22% m/m says retail
+fatigues at record prices even as investment flows carry it — expect thin
+bar demand, firmer scrap. Silver 65–67.5. War-risk cover 40–60x and the
+Gulf-side zone puts the Qatari LNG lane and Juaymah/Ras Tanura approaches
+in the sanctionable area — insurance, not barrels. Europe LNG winter
+squeeze (The National) is the second-order oil-to-CPI channel. Kuwait gold
+AML tightening (3 Sep).
 
 ## Sourcing health
 
-Calendar feed covers through 12 Sep (todo-001 horizon). Scan 17:00Z failed
-on the session limit, 19:00Z clean. `gold_spot`/`dxy_intraday` 'timestamp'
-KeyError continuous since 2 Aug (todo-003; snapshot serves from GC/XAU).
-Gulf News URL mis-serve again (todo-181) — check title vs headline.
-investinglive holiday piece under `/news/`. Investing.com 403. No UKMTO.
-No Treasury buyback schedule ingested. Playbook: odds claims across a
-speaker window cap 0.55; gold caps cap 0.5 — `a3ad30b1`, `a1fc647f`
-flagged, not rewritten.
+GC=F quote feed dark since 4 Sep 20:59Z (todo-183, filed today); `bars`
+served by the bitfinex proxy (todo-012), basis ~45 below GC; `predictions
+due --open` window_high/low n/a for every claim opened 5–7 Sep. Calendar
+feed covers through 12 Sep. bis_press 503. One `flash` JSON control-char
+error 00:16Z (todo-006 family). Gulf News served a headline variant
+(not a mis-serve) on the Brent piece. No UKMTO direct; Reuters relays its
+weekly count. Investing.com 403. No Treasury buyback schedule ingested.

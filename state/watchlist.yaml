@@ -6,7 +6,9 @@ watchlist:
       close: August payrolls (+162k, AHE +0.3% in line) removed the labour
       alibi for a hold without arming wages, so the case now rides oil into
       CPI. FOMC blackout from 5 Sep to the 15–16 Sep meeting — only data, oil
-      and Treasury reprice it. Gates: PPI 10 Sep, CPI 11 Sep (consensus core
+      and Treasury reprice it. 7 Sep: CME ~60% on the Asia read (not a NY
+      close); Goldman says inflation data, not jobs, decides; Asia sold
+      gold's reopen with odds there. Gates: PPI 10 Sep, CPI 11 Sep (consensus core
       +0.3%, so a 0.2 print is the downside surprise — a lower benign bar than
       the stance's ≤0.2 gate implies). Kills the hike: core ≤0.2 with oil
       easing. Seals it: core ≥0.4, or passthrough the Fed reads as broadening
@@ -20,7 +22,10 @@ watchlist:
       Treasuries as the flow-side twin (China's UST holdings lowest since
       2008). The custody reflex is spreading — the Dutch central bank moved
       86t from US/Canadian custody to London citing geopolitical unrest, a
-      vote on where reserves sit rather than new demand. Counter-signal:
+      vote on where reserves sit rather than new demand; France moved
+      earlier, Norway's $2.4tn fund is weighing cutting government bonds
+      from 70% to 50% of the portfolio (7 Sep), and Germany (a third of
+      its reserves in NY) has not moved. Counter-signal:
       Russia, once the top buyer, is now a steady seller. Confirms: WGC
       monthlies showing net buying through this drawdown, and the floor
       showing in the tape near 4300. Kills it: two consecutive months of net
@@ -58,9 +63,15 @@ watchlist:
       and destroyer (evaded), and CENTCOM answered on the tanker fleet - Kylo
       destroyed in ballast, Downy disabled off Kharg, Stark 1 off Jask - with
       Cooper/Hegseth on record to 'destroy (and sink)' the fleet if fired on
-      again. The IRGC's reply (6 Sep) was a nameless claim on six commercial
-      hulls using 'unauthorised' routes plus a 'more severe' warning, no
-      independent confirmation. The regime is now ship-for-ship on both sides,
+      again. The IRGC's reply (6 Sep) resolved into TURN-BACKS of three named
+      hulls (Velos Amber, Bravo, Al Sheehaniya), a Gulf-side 'prohibited
+      zone' enforced by sanctions-listing (Rezaei, 'coming days') and
+      Qalibaf's 'proportionate era over'; Rezaei also says Iran 'has not
+      decided to sink' US-linked hulls and wants 'diplomacy with
+      guarantees' - a live channel under the rhetoric. Gold SOLD the 7 Sep
+      reopen: the war is a floor, not a bid. Transits at a Kpler 10-day
+      average of 10/day (lowest since May), Iranian loadings 220-255 kb/d
+      vs 2 mb/d in March (Reuters). The regime is now ship-for-ship on both sides,
       with US ordnance a hull's length from Kharg's terminals (50+ Iranian
       tankers in the Gulf/Gulf of Oman, ~20 laden and stuck near Kharg; crews
       warned 10 min ahead - casualty discipline held). Beyond-baseline arms
@@ -99,7 +110,8 @@ watchlist:
   - theme: energy-pce-passthrough
     why: >
       The bridge from the war to the Fed: oil into CPI is the live hike-odds
-      channel. Crude ended the week at three-month highs (WTI 91.3, Brent ~96)
+      channel. Crude ended the week at three-month highs (Brent 96.69 / WTI 92.03
+      Monday Asia 7 Sep; The National's 82.44 WTI print was wrong)
       with US diesel at a record - driven by blockade barrels (Iranian exports
       1.7 mb/d to ~260 kb/d) and war-risk insurance, not by strikes. The 5 Sep
       US strikes on Iranian tankers (one off Kharg) add a proximity premium,
@@ -115,32 +127,6 @@ watchlist:
       The premium is fragile to de-escalation talk (dipped to $89 on one Trump
       line); a Russia-Ukraine text (Witkoff/Kushner Moscow 5 Sep, Kyiv 6 Sep,
       three-day capital truce) takes the Black Sea/Ust-Luga floor off it.
-    since: 2026-07-31
-
-  - theme: india-gold-formalisation
-    why: >
-      The duty hike diverts flow to the grey market (6–8% smuggling margins)
-      and pulls physical through Dubai at a provenance premium; NSE's
-      Electronic Gold Receipts are the formalising counter-move. Ambiguous for
-      the desk: less smuggled volume, but a larger documented market, and
-      documentation is Dubai's edge. July imports doubled on the WGC's read —
-      the physical leg firmed at record prices, formalisation not yet visible
-      in the flow data. Watch EGR volumes and grey-market share; that share
-      sets the provenance premium.
-    since: 2026-07-31
-
-  - theme: metals-financialization
-    why: >
-      Thesis: leveraged crypto-adjacent money — metals perps, then Binance
-      gold and silver options — would amplify gold's moves. Not yet: the July
-      momentum crash and forced liquidation showed that money is not in gold,
-      and the crowding sits in futures, with net spec positioning stale. The
-      structural leg is real — Tether holds ~146t / $18.8bn, the largest
-      private holder outside central banks and sovereigns, and has taken 14%
-      of Metalla: a price-insensitive standing bid, neither official nor ETF,
-      now extending up the supply chain. Confirms the thesis: perps money
-      visibly rotating into gold rather than BTC on the same debasement tape.
-      Until then it explains part of the floor, not the volatility.
     since: 2026-07-31
 
   - theme: us-fiscal-dominance
