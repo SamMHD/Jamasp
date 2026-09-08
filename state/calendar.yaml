@@ -275,16 +275,27 @@ events:
     time_dubai: "through 18 Sep"
     title: BOJ meeting (17–18 Sep) — the September convergence window
     why: >
-      Yen back at ~159.5 two weeks after coordinated US/Japan
-      intervention failed to hold; investinglive recap and Goldman both
-      point at the BOJ meeting as the credible lever, days after the
-      15–16 Sep FOMC (ec71ce01). A BOJ move or miss feeds the debasement
-      underbid limb directly; weak US data into the window could trigger
-      fresh intervention first.
+      REWRITTEN 8 Sep. The hike is now close to fully priced (~25bp to
+      1.25%): July cash earnings +4.7% y/y (consensus 3.9%, strongest since
+      1997), Q2 GDP revised up to +1.4%, and Takaichi adviser Aida —
+      previously read as a dove — expecting a September move (investinglive
+      wrap 7 Sep). USDJPY 160.4 (3 Sep) → 153.3 (8 Sep Asia), a six-month
+      low, −4% on the week, with August's intervention now visible as a
+      record $80bn reserve drop (CNBC). For gold the meeting is two-sided:
+      a delivered hike with a hawkish path narrows the differential and
+      unwinds carry (dollar-down, gold-up near term, debasement pillar
+      eroded structurally); a hold or a dovish hike after this repricing
+      snaps the yen back and the dollar up. The tail before the meeting is
+      a disorderly unwind (USDJPY <150 in days with equities down) — the
+      liquidity regime that sells gold with everything else. Original
+      framing (yen ~159.5, intervention lever) is obsolete.
     action: >
-      covered by scans; the 11 Sep CPI deepdive (wakeup #26) reads
-      into it — add a dedicated wakeup only if the FOMC/BOJ week opens
-      with the hike case revived (core PCE ~28 Aug the gate).
+      No wakeup yet — decision/presser slot to be re-verified against a
+      fresh source ≤7 days before (Saturday 12 Sep brief, rule 16), then
+      anchor a deepdive at presser+60. Scans carry: MoF/BoJ rate-check or
+      verbal defence, Aida/Takaichi follow-ups, USDJPY vs 152/150, Nikkei
+      and BTC as liquidity tells. Claim recorded 8 Sep: no USDJPY print
+      below 150.00 through 10 Sep 23:59Z (0.55).
 
   - date: 2026-08-26
     time_dubai: "16:30 (12:30Z) — DATE CORRECTED 22 Aug (was 28 Aug; WF week-ahead + actionforex table both say Wednesday; same slot: Q2 GDP prelim + durable goods)"
@@ -526,6 +537,9 @@ events:
       rule-15 clause; the 9 Sep brief re-checks before it fires. 7 Sep
       re-check: STILL unverified — only an actionforex op-ed (1 Sep, 'The
       Futility of Bessent's Long-Term Treasury Buybacks'), no schedule row.
+      8 Sep re-check: STILL unverified — no item matching 'buyback' in the
+      DB since; #41 stands provisional, rule-15 clause; the 9 Sep brief is
+      the last check before it fires.
 
   - date: 2026-08-26
     time_dubai: "window open-ended (Iranian response unscheduled)"
@@ -728,3 +742,31 @@ events:
       a published boundary/coordinates or a signed Iran–Oman map earns a
       deepdive at publication+60 (read the boundary against Kharg, the
       Juaymah/Ras Tanura approaches and the Qatari LNG lane).
+
+  - date: 2026-09-08
+    time_dubai: "unscheduled (Houthi strikes reported overnight 7–8 Sep; Yanbu tripwire open-ended)"
+    title: Houthi–Saudi front reopened — Jizan / Khamis Mushait / Abha; Yanbu is the gold-relevant target
+    why: >
+      Monday 7 Sep: reports of Houthi hits on Aramco infrastructure near
+      the Yemen border (Jizan refinery, "second time in a month" per Gulf
+      News; MarketWatch and fxempire relays) lifted Brent to a 98.06 high
+      and a 97.31 settle; overnight Fars reported Yemeni ballistic missiles
+      on Khamis Mushait and drones on Abha airport (Asir), and the 8 Sep
+      futures reopen added $1 (investinglive extract). Mehr carries the
+      Houthi framing as retaliation for "Saudi aggression". No Aramco or
+      SPA confirmation reached the feed (Al Arabiya/Arab News 403). This is
+      Houthi-on-Saudi — NOT an Iranian act on a GCC host and NOT a hit on
+      Yanbu/Fujairah — so no named kinetic-45 trigger fired (rule 2, actor
+      and target class). It matters because the 6 Sep "Houthis toward Bab
+      al-Mandab" warning became ordnance on Saudi soil inside 48 hours, and
+      Yanbu — the Red Sea export terminal that bypasses Hormuz (~5.5 mb/d
+      with Fujairah) — is the named Iranian pre-midterm target (3 Nov
+      entry). A Houthi hit on Yanbu is now a named kinetic-45 path; a
+      Saudi kinetic reply on Yemen is not a trigger (only a Saudi strike on
+      Iran is, 2b39238a).
+    action: >
+      No wakeup (unscheduled). 2-hourly scans carry: Jizan, Khamis Mushait,
+      Abha, Asir, Yanbu, Aramco, SPA, Saudi MoD, Houthi/Ansarallah, Bab
+      al-Mandab, Red Sea. Aramco/SPA confirmation of damage at Jizan or a
+      Houthi hit on Yanbu earns a deepdive at confirmation+60 (read Brent
+      vs 100 / 65cd057e, gold's first hour, kinetic re-weight).
