@@ -1,4 +1,4 @@
-# Stance — 2026-09-09 04:00Z (Wednesday brief) — THE WAR REACHES GOLD AS A HIKE AND A MARGIN CALL; KINETIC-45 NOW NEEDS THE TAPE; WEIGHTS 20/50/30; EVENT-PENDING FROM TONIGHT
+# Stance — 2026-09-09 15:25Z (buyback deepdive #41) — THE BUYBACK PRINTED SMALL: "UP TO $6BN", 30Y BACK AT THE 5.31 TRIGGER, GOLD FELL ON IT; WEIGHTS 15/55/30; EVENT-PENDING INTO PPI/ECB/CPI
 
 **Tuesday: the named trigger printed and gold fell through it.** CENTCOM
 destroyed five IRGC tankers (Kaviz, Charminar, Horizon 1, Riesco in the
@@ -21,12 +21,23 @@ weak week), SGE +2.1% w/w. No NY-close hike-odds relay for a third day
 FOMC blackout to 17 Sep; PPI Thu 12:30Z (cons +0.4), ECB 12:15Z, CPI Fri
 12:30Z (core cons +0.3).
 
-## View (weights 20/50/30 base/bearish-rates/kinetic — changed from 25/40/35)
+**Wednesday 15:03Z: the buyback printed and it was small.** First long-end
+operation announced at "up to $6bn" — above the 19 Aug "at least $4bn"
+floor, under the $10–12bn whisper, and a cap. 30y +4bp to a 5.309% day high
+(the 17 Aug 5.31% level that triggered the upsizing); GC 4465 → 4432 in 15
+minutes after a 1.45% yen/euro-led rally (DXY 98.65 two-week low). Results
+(accepted vs cap, cover, tail, CUSIPs) and the operation date unreachable —
+Treasury pages don't extract (todo-185); #53 reads them tomorrow.
 
-- **Bearish-rates (50, from 40):** four sessions (2, 6, 7, 8 Sep) of
-  escalation reaching gold via oil→hike odds and via forced selling of a
-  222k spec long; the 2y at cycle highs into PPI/CPI with no speaker; 100DMA
-  lost. `41aec282` (no NY close ≥60% thru 10 Sep) and `a2171cad` (≥50% at
+## View (weights 15/55/30 base/bearish-rates/kinetic — changed from 20/50/30 on the buyback print)
+
+- **Bearish-rates (55, from 50):** four sessions (2, 6, 7, 8 Sep) of
+  escalation reaching gold via oil→hike odds and forced selling of a 222k
+  spec long; the 2y at cycle highs into PPI/CPI with no speaker; 100DMA
+  lost; and now the long end joins — the official bid for the 30y is
+  smaller than hoped and gold answered a fiscal print in minutes after
+  ignoring war for four sessions (rule 3: the fiscal/rates desk sets price,
+  impulse against gold). `41aec282` (no NY close ≥60% thru 10 Sep) and `a2171cad` (≥50% at
   the 10 Sep close) both unread for lack of a relay. Core CPI ≥0.4 → 60;
   ≤0.2 with oil easing → 30.
 - **Kinetic (30, from 35):** the 8 Sep flip ("named 45-trigger → kinetic
@@ -37,9 +48,11 @@ FOMC blackout to 17 Sep; PPI Thu 12:30Z (cons +0.4), ECB 12:15Z, CPI Fri
   a warship actually struck, Gulf-side non-Iranian hull hit with
   casualties, Pickaxe, GCC strike on Iran, Iranian "in kind" on GCC energy.
   The floor is real (4300 untested since 2 Sep) but it is a floor.
-- **Base (20, from 25):** official bid (China Aug, UBS) and an orderly yen
-  dollar-leg have bought nothing above 4440 this week. Legs: #41 buyback
-  today (slot UNVERIFIED, day ten), ECB (#51). `a3ad30b1` cap 4554 and
+- **Base (15, from 20):** official bid (China Aug, UBS) and an orderly yen
+  dollar-leg have bought nothing above 4440 this week; the buyback flow leg
+  is now confirmed SMALL (capped $6bn, bill-financed), the debasement-
+  rotation leg with it. Dollar weakness is BoJ/ECB-driven, not buyback-
+  driven (`09cb81a7`). Legs left: ECB (#53), buyback results (#53). `a3ad30b1` cap 4554 and
   `746afbe2` floor 4300 both comfortable; `5c6b2df3` USDJPY ≥150 intact.
 
 **Levels (GC=F, real):** R 4432/4444 (Tue Europe range) / 4476.6 (4 Sep
@@ -53,6 +66,10 @@ directional gold claims into CPI.**
 ## What flips me
 
 - Tape clause prints (trigger + GC close ≥+1%) → kinetic 40, `65cd057e` void.
+- Buyback results: full $6bn accepted, no tail, AND a 30y close <5.25 →
+  base 20. A 30y close ≥5.31 → bearish-rates 60 same run; a Bessent cap
+  raise/emergency op (`52db03df` falsified) → read as debasement first,
+  rates second.
 - GC daily close <4300 → bearish-rates 60, 4177 in scope. PPI ≥0.6 → 4313/4287
   in play same day; PPI ≤0.1 → 4476–4500 back before CPI.
 - NY-close odds relay <45% before CPI, or a GC close >4500 → base 30.
@@ -71,19 +88,21 @@ marginal (instrument 4.806 vs relay 4.792). Closing tonight 23:59Z:
 Open: `41aec282` `a2171cad` `a3ad30b1` `746afbe2` `65cd057e` `5c6b2df3`
 (10 Sep); `2d098d6c` `1f83782a` (11 Sep); new today: `110d5daa` Saudi non-kinetic
 on Iran (13 Sep, 0.7), `f04926f1` no Yanbu hit (12 Sep, 0.6), `2fbc22dd` no
-Kharg/Larak infrastructure ordnance (12 Sep, 0.65); `ec71ce01` (FOMC); `24f8b482`
-(16 Sep); `a0429ae4` escorts (20 Sep).
+Kharg/Larak infrastructure ordnance (12 Sep, 0.65); `52db03df` no buyback cap
+raise/extra op (18 Sep, 0.7); `09cb81a7` no DXY close ≥100 (16 Sep, 0.6);
+`ec71ce01` (FOMC); `24f8b482` (16 Sep); `a0429ae4` escorts (20 Sep).
 
 ## Wakeups
 
-**#41 9 Sep 15:15Z** buyback (slot UNVERIFIED, rule-15 reschedule clause,
-must not exit empty). **#51 10 Sep 13:45Z** ECB + PPI + odds. **#26 11 Sep
+**#41 fired** 15:15Z (this rewrite). **#53 10 Sep 13:45Z** ECB + PPI + odds
++ buyback RESULTS and operation date (#51 cancelled/re-added). **#26 11 Sep
 13:15Z** CPI. No wakeup for Lagarde 17:00Z today, the zone maps, the Saudi
 "response", IAEA vote, BoJ 17–18 Sep or FOMC (rule 7/16; Saturday brief
 re-verifies). Scans carry: Kuwaiti/Bahraini port incidents, Yanbu, Kharg/
 Larak infrastructure vs anchorage, a warship actually struck, Aramco/SPA,
 zone maps, Brent vs 100, USDJPY vs 152/150, any NY-close odds relay, a
-Bessent supply-shock line, buyback results.
+Bessent supply-shock or cap-raise/emergency-op line, buyback results, 30y
+vs 5.31.
 
 ## Desk-local
 
@@ -99,6 +118,7 @@ one carrying the premium. Kuwait gold AML tightening (3 Sep).
 
 GC=F back (todo-183 self-resolved; `gold_spot` `'timestamp'` warning still
 fires each poll). window_high/low populated on every open claim. No CME
-odds relay ingested (Investing.com 403). No buyback schedule. No Aramco/SPA
+odds relay ingested (Investing.com 403). Treasury buyback pages and the
+FiscalData API do not extract (todo-185). No Aramco/SPA
 source. `^TNX` last row 18:20Z, not a cash close. bis_press 503. Calendar
 feed through 12 Sep.

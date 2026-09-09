@@ -540,6 +540,31 @@ events:
       8 Sep re-check: STILL unverified — no item matching 'buyback' in the
       DB since; #41 stands provisional, rule-15 clause; the 9 Sep brief is
       the last check before it fires.
+    outcome: >
+      FIRED 9 Sep 15:15Z (#41). Treasury announced the first operation at
+      "up to $6bn" (investinglive 15:03Z) — above the 19 Aug "at least $4bn"
+      floor, below the $10–12bn whisper, and a cap. 30y +4bp to 5.309% day
+      high (CNBC US30Y), the 17 Aug 5.31% trigger level; GC 4465 → 4432 in
+      15 min. Operation RESULTS (accepted amount, cover, tail, CUSIPs) and
+      the operation date NOT reachable (treasurydirect/home.treasury.gov/
+      fiscaldata do not extract — todo-185). Weights 20/50/30 → 15/55/30.
+      Results read folded into #51 (10 Sep 13:45Z); no separate wakeup
+      (date unverified, rule 16). Claims: no cap raise/extra op through
+      18 Sep (0.7); no DXY close ≥100 through 16 Sep (0.6).
+
+  - date: 2026-09-10
+    time_dubai: "unscheduled — results of the first $6bn operation"
+    title: Treasury buyback operation RESULTS (first op, cap $6bn)
+    why: >
+      The announcement was undersized; the execution decides whether the
+      fiscal-hedge flow leg is merely small or also failing. Full $6bn
+      accepted, no tail, 30y back <5.25 → base 15→20; undersubscribed, a
+      tail, or a 30y close ≥5.31 → confirms 15/55/30 and puts a Bessent
+      upsize/emergency op on the scan list. Read via investinglive/
+      actionforex/CNBC/MarketWatch relays only.
+    action: >
+      folded into #51 (10 Sep 13:45Z); 2-hourly scans carry "buyback
+      results" and any Bessent cap-raise line. todo-185 for a real source.
 
   - date: 2026-08-26
     time_dubai: "window open-ended (Iranian response unscheduled)"
