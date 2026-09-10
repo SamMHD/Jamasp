@@ -3,21 +3,21 @@ watchlist:
     why: >
       Real yields are gold's dominant driver, and this Fed is debating a HIKE,
       not a cut. Sept-hike odds ran from ~35% mid-August to 58% at the 4 Sep
-      close and ~60% on the 7 Sep Asia read; NO NY-close relay has been
-      ingested since (Investing.com 403, the wraps omit it), so the 8 Sep
-      close is unread. August payrolls (+162k, AHE +0.3%) removed the labour
-      alibi for a hold, so the case rides oil into CPI. FOMC blackout from
-      5 Sep to the 15–16 Sep meeting — only data, oil and Treasury reprice
-      it. 8 Sep, first close with Treasuries open: 2y 4.396 (+1.7bp, cycle
-      highs), 10y 4.79–4.81, 30y 5.25, 3y auction 4.474%; NY Fed survey
-      unemployment expectations highest since Apr 2020; RBA (Hauser) and BoE
-      (energy inflation) hawkish — G10 cover for a Warsh hike. Gold traded
-      the yield leg AND a deleveraging leg (down with oil down and equities
-      down), closing below the 100DMA — the rates desk is price-setter for a
-      sixth session and the marginal seller is a leveraged long. Gates: PPI
-      10 Sep (cons +0.4), CPI 11 Sep (core cons +0.3; 0.2 is the downside
-      surprise). Kills the hike: core ≤0.2 with oil easing. Seals it: core
-      ≥0.4, or passthrough the Fed reads as broadening beyond energy.
+      close and ~60% on the 7 Sep Asia read; NO CME number has been ingested
+      since (Investing.com 403, the wraps omit it) — investinglive 9 Sep says
+      only "markets are leaning toward a rate hike at next week's meeting,
+      though the outcome is not seen as settled". August payrolls (+162k)
+      removed the labour alibi; Brent's 101.21 settle (9 Sep) loads the
+      oil->CPI leg into the two prints. 9 Sep cash close: 2y 4.4316 (+3.4bp,
+      cycle highs), 10y 4.8427 (highest since Nov 2023), 30y 5.2899; the
+      $39bn 10y auction stopped 1.5bp through. FOMC blackout 5 Sep to the
+      15-16 Sep meeting — only data, oil and Treasury reprice it. Gates: PPI
+      10 Sep (cons +0.4), CPI 11 Sep (core cons 0.2 per the wrap, 0.3 per
+      WF/calendar — a 0.3 is hawkish against one and in-line against the
+      other). Kills the hike: core <=0.2 with oil easing. Seals it: core
+      >=0.4, or passthrough the Fed reads as broadening beyond energy. Tape
+      note: gold closed +1.15% on 9 Sep WITH yields at highs — one session
+      in which the rates desk's impulse did not set gold's price.
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -26,17 +26,15 @@ watchlist:
       inflows resuming beside it, and reserve diversification out of
       Treasuries as the flow-side twin (China's UST holdings lowest since
       2008). China's reserves rose again in August (investinglive, 7 Sep);
-      UBS (9 Sep) keeps its long-game bullish call on that buying — the
-      official bid persists through the drawdown but has not lifted the
-      dollar price above 4440 this week. The custody reflex is spreading —
-      the Dutch central bank moved 86t from US/Canadian custody to London
-      citing geopolitical unrest; France moved earlier; Norway's $2.4tn fund
-      is weighing cutting government bonds from 70% to 50% (7 Sep); Germany
-      (a third of its reserves in NY) has not moved. Counter-signal: Russia,
-      once the top buyer, is now a steady seller. Confirms: WGC monthlies
-      showing net buying through this drawdown, and the floor showing in the
-      tape near 4300 (untested since 2 Sep). Kills it: two consecutive
-      months of net official selling.
+      UBS (9 Sep) keeps its long-game bullish call on that buying. The
+      custody reflex is spreading — the Dutch central bank moved 86t from
+      US/Canadian custody to London citing geopolitical unrest; France moved
+      earlier; Norway's $2.4tn fund is weighing cutting government bonds
+      from 70% to 50% (7 Sep). Counter-signal: Russia, once the top buyer,
+      is now a steady seller. The floor showed again 8-9 Sep: the 4388 low
+      was bought within hours and 4300 is untested since 2 Sep. Confirms:
+      WGC monthlies showing net buying through this drawdown. Kills it: two
+      consecutive months of net official selling.
     since: 2026-07-31
 
   - theme: warsh-credibility
@@ -44,145 +42,156 @@ watchlist:
       The debasement channel - the best explanation for gold holding above
       $4,000 against a positive real yield. Warsh chairs a Fed whose
       independence is openly contested while the long end prices distrust:
-      30y 5.25 near its mid-2007 high, TLT at 2004 lows, foreign UST
-      liquidation. The pressure went explicit and broad in the week to 5 Sep
-      (CNBC): the President, VP, Bessent and Navarro all publicly opposed a
-      hike; Trump tied tariffs to Fed policy; Navarro called the FOMC
-      'clowns'; Warsh says none of it touches decisions. Three July dissents
-      for a hike (Hammack, Kashkari, Logan) and Warsh's own Jackson Hole line
-      (54% of PCE components >3%) are the counterweight. A hike delivered
-      through this pressure is credibility-positive and bearish gold via real
-      yields; a hold that looks coerced is the debasement case. Breadth is
-      the tell - weak PBOC fixes (third week, 6.7769 vs 6.7042 on 9 Sep),
-      BTC holding 78–79k, a tightening periphery (RBA, BoE, ECB) circling an
-      immovable core. Confirms: gold rallying WITH yields. Kills it: a
-      delivered hike that pulls the long end down, or a visible re-anchoring
-      of independence. Blackout means no Fed reply until 16 Sep. The yen limb
-      tracks separately under boj-yen-pillar.
+      10y 4.84 (highest since Nov 2023), 30y 5.29 near its mid-2007 high,
+      TLT at 2004 lows, foreign UST liquidation, and on 9 Sep a tripled
+      Treasury buyback that FAILED to bring yields down — investinglive's
+      read: investors "demanding compensation for fiscal and supply concerns
+      that a liquidity operation cannot fix". Political pressure explicit
+      and broad (President, VP, Bessent, Navarro all against a hike; Trump
+      tied tariffs to Fed policy); three July dissents for a hike and
+      Warsh's Jackson Hole line (54% of PCE components >3%) are the
+      counterweight. A hike delivered through this pressure is
+      credibility-positive and bearish gold via real yields; a hold that
+      looks coerced is the debasement case. Breadth is the tell: weak PBOC
+      fixes, BTC 78k, a tightening periphery (RBA, BoE, ECB, and now a BoJ
+      with JGB 10y >3%) circling an immovable core. Confirms: gold rallying
+      WITH yields — printed 9 Sep (+1.15% against a 10y at 4.84). Kills it:
+      a delivered hike that pulls the long end down, or a visible
+      re-anchoring of independence. Blackout means no Fed reply until 16 Sep.
     since: 2026-07-31
 
   - theme: middle-east-risk-premium
     why: >
       Two regimes: IRGC control of Hormuz transit against a US blockade
       (Operation Economic Outcast), with open kinetic exchange since 30-31
-      Aug. 5 Sep crossed two lines (Iranian missiles at a carrier and
-      destroyer; CENTCOM on the tanker fleet - Kylo sunk, Downy, Stark 1).
-      8 Sep crossed the next: IRGC ballistic missiles at a US warship twice
-      in two days (evaded, no injuries) and CENTCOM's second wave - Kaviz,
-      Charminar, Horizon 1, Riesco in the Gulf of Oman, Derya AT THE KHARG
-      ANCHORAGE - eight hulls since 5 Sep, crews ordered off first (gcaptain
-      9 Sep extract). Iran fired 20 ballistic missiles at Jordan (JAF: 18
-      intercepted, no casualties) - the target-class rotation the 7 Sep
-      lesson predicted (warships drew the counter, bases next). The IRGC
-      threatened ships in Kuwaiti and Bahraini ports hosting US forces and
-      told crews to evacuate; the Gulf-side zone maps promised 6 Sep are
-      still unpublished; UKMTO advisory on an unnamed vessel 'subject to
-      interaction', no damage. Houthi-Saudi front: 73 injured in coordinated
-      strikes on southern Saudi cities and energy sites, Riyadh 'dangerous
-      escalation' and a pledged response, Jeddah flights suspended, Ansarallah
-      'unforgettable'; Yanbu untouched; no Aramco/SPA source reachable. Iran:
-      tanker attacks 'to receive military response' (Mehr), Khatam al-Anbiya
-      'US interests targeted if tankers struck'; Pezeshkian to BRICS India;
-      Iran-Russia nuclear plant. GOLD FELL 1.5% THROUGH ALL OF IT (see
-      kinetic-transmission-inverted). Ladder steps that change the barrel
-      count, each a named trigger: US ordnance on Kharg/Larak INFRASTRUCTURE
-      (claim 9 Sep, 0.65), a vessel hit in a Kuwaiti/Bahraini port, a US
-      warship actually struck, Yanbu (claim 0.6), Pickaxe, a GCC strike on
-      Iran (Saudi non-kinetic claim 0.7 to 13 Sep). Transits ~10/day (Kpler),
-      Iranian loadings 220-255 kb/d - the premium is insurance-priced, not
-      barrel-priced, so a real supply event transmits convexly. Diplomacy is
-      a vacuum (24f8b482); Rezaei's 'diplomacy with guarantees' is the only
-      live channel. Markers: zone maps, Saudi response, IAEA vote slot
-      (unpublished), escort status, CENTCOM statements.
+      Aug. 9 Sep crossed the enforcement line: the IRGC said it attacked two
+      US vessels, eight tankers and ten "non-compliant" vessels; UKMTO said
+      "several" vessels in the Gulf of Oman and the Gulf were "subject to
+      disabling fire" (AFP via Gulf News) — the primary feed confirming FIRE
+      on transiting non-Iranian hulls, hits/names/positions unconfirmed and
+      the maritime press silent so far. The Guards added parts of the GULF
+      OF OMAN AND THE ARABIAN SEA to the prohibited zone for the first time
+      (coordinates "later", entrants sanctioned) — the Fujairah approaches
+      are now inside a declared zone. Three Iranian salvos at US warships
+      (6, 8, 8-9 Sep; new Qasem Basir anti-ship missile per WANA) all
+      repulsed; US counters stayed on hulls (eight since 5 Sep; Derya at the
+      Kharg anchorage); Rubio: more tankers "again today". Same day the IAEA
+      Board referred Iran to the UNSC 23-3 (June 2025 precedent: strikes one
+      day after the noncompliance finding), CNN/CSIS published a Pickaxe
+      construction surge, Trump said "activity seen... don't get cute", and
+      CNN reported a next-generation penetrator in development because the
+      current MOP is not thought to reach the site. Trump 9 Sep: "not
+      looking for a deal", the war "will end immediately after the
+      election"; WSJ: aides warn it could last his full term. IRGC's price
+      for ending it: Israel out of Lebanon, Yemen blockade lifted, $24bn
+      released, no interference in nuclear/missile programmes. Houthi-Saudi
+      front: 73 injured 7-8 Sep, Riyadh's response still unexecuted, Yanbu
+      untouched. Ladder steps, each a named trigger: Kharg/Larak
+      INFRASTRUCTURE (2fbc22dd, 12 Sep), a Kuwaiti/Bahraini port or a
+      Fujairah-approach hull hit, a warship actually struck, Yanbu
+      (f04926f1), Pickaxe (1f83782a, 11 Sep), a GCC strike on Iran
+      (110d5daa, 13 Sep), a US strike on Iranian territory (e1e9ba8f, 13
+      Sep). The premium is insurance-priced and it re-rated 4% on Wednesday's
+      enforcement change alone — barrels did not move. Markers: zone
+      coordinates, named hulls/damage from the 9 Sep fire, CENTCOM
+      statements, UNSC follow-through, escorts (a0429ae4).
     since: 2026-07-31
 
   - theme: kinetic-transmission-inverted
     why: >
       The war reaches gold as a Fed hike and a margin call, not as a haven
-      bid. Four sessions of evidence: 2 Sep (systematic deleveraging), the
-      6 Sep reopen (flat then sold on carrier salvo + tanker strikes), 7 Sep
-      (oil up, Bunds up, gold down) and 8 Sep (second tanker wave, missiles
-      at a warship, 20 at Jordan, 73 injured in Saudi - GC 4487 to 4396,
-      spot -1.55% below the 100DMA, with the sharp leg 18-20Z coming as oil
-      GAVE BACK gains and the Dow fell 1.2%). Mechanism: escalation lifts
+      bid. Four sessions of evidence (2, 6, 7, 8 Sep): escalation lifts
       Brent, Brent lifts the 2y and hike odds inside a blackout with CPI
       ahead, and a 222k spec long gets sold with equities on the same
-      headlines. The 8 Sep stance flip (named trigger -> kinetic 45, 4600 in
-      play) FIRED and was wrong on mechanism; the kinetic re-weight now
-      carries a tape clause (trigger AND GC daily close >=+1% in the session
-      it prints). Confirms: another escalation session closing red; gold
-      down on oil-up AND oil-down days. Kills it: the tape clause printing,
-      or a supply event (Kharg/Larak infrastructure, Yanbu, a Gulf port hit)
-      that the market trades as stagflation rather than as the Fed - or
-      hike odds falling on soft CPI, which removes the channel entirely.
+      headlines; 8 Sep GC 4487 -> 4396 with the sharp leg as oil GAVE BACK
+      gains and the Dow fell 1.2%. COUNTER-SESSION 9 Sep: Brent settled
+      101.21 (+3.8%), yields rose to 2023 highs, stocks fell a third day —
+      and GC settled +1.15%, spot +1%, back above the 100DMA, with fxempire
+      titling the day "gold rebounds as traders focus on bond buybacks". The
+      escalation was priced through oil into rates AND gold rose: the
+      debasement channel, not deleveraging, set Wednesday's close. One
+      session against four; the theme stands but its "kills it" clause has
+      a first data point. The kinetic re-weight carries a tape clause
+      (named trigger AND GC daily close >=+1% in the session it prints) —
+      9 Sep printed the tape half only (warships missed, hulls fired on
+      not confirmed hit). Confirms: another escalation session closing red;
+      gold down on oil-up AND oil-down days. Kills it: a second consecutive
+      gold-up/yields-up session, the tape clause printing, a supply event
+      the market trades as stagflation, or hike odds falling on soft CPI.
     since: 2026-09-09
 
   - theme: boj-yen-pillar
     why: >
-      The yen was a pillar of the debasement bid: USDJPY pinned at 159–160
+      The yen was a pillar of the debasement bid: USDJPY pinned at 159-160
       after August's failed intervention (Japan's FX reserves fell a record
-      $80bn in August, CNBC 7 Sep) meant carry and fiscal absorption
-      outweighed BoJ normalisation, and gold's floor leaned on it. That broke
-      3 Sep — 160.4 to 155.34 in a session — and again 7-8 Sep: 154.33 at the
-      NY close, 153.31 in Asia, −4% on the week, on July cash earnings +4.7%
-      y/y, Q2 GDP revised to +1.4%, and Takaichi adviser Aida expecting a
-      September hike; ~25bp to 1.25% is close to fully priced. 8-9 Sep was
-      ORDERLY: 153.34–154.34, Tankan at a five-year high, no MoF/BoJ
-      rate-check talk, BTC flat 78-79k — the disorderly tell (USDJPY <150
-      with Nikkei and BTC down together) has not printed, but Tuesday's gold
-      tape (down with equities) rehearsed the liquidity regime without the
-      yen. Two-sided for gold: orderly yen-up is dollar-down and gold-up near
-      term (it bought nothing above 4440 this week), a BoJ that can genuinely
-      tighten erodes the pillar structurally, and the tail is a disorderly
-      unwind of the ~$103bn yen short. Gates: MoF/BoJ rate-check or verbal
-      defence, PPI 10 Sep (US leg), the BoJ 17–18 Sep (slot to re-verify
-      Saturday, rule 16). Recorded 8 Sep: no USDJPY print below 150 through
-      10 Sep (0.55).
+      $80bn in August) meant carry and fiscal absorption outweighed BoJ
+      normalisation, and gold's floor leaned on it. That broke 3 Sep (160.4
+      to 155.34) and 7-8 Sep (153.3), on July cash earnings +4.7% y/y, Q2 GDP
+      +1.4%, Aida expecting a September hike. 9-10 Sep: JGB 10y ABOVE 3% for
+      the first time since September 1996; the yen was the strongest major
+      on 9 Sep; BoJ's Masu (10 Sep): "further hikes are needed to avoid
+      being forced into rapid tightening later"; USDJPY 153.5 ORDERLY, no
+      MoF/BoJ rate-check talk, BTC 78k, Tankan five-year high. The
+      disorderly tell (USDJPY <150 with Nikkei and BTC down together) has
+      not printed. Two-sided for gold: orderly yen-up is dollar-down and
+      gold-up near term (the foreign-CB dollar leg is the base case's only
+      leg that has bought gold this week — 09cb81a7), a BoJ that can
+      genuinely tighten erodes the pillar structurally, and the tail is a
+      disorderly unwind of the ~$103bn yen short. Gates: US PPI 10 Sep, CPI
+      11 Sep, the BoJ 17-18 Sep (slot to re-verify Saturday, rule 16).
+      Claims: 5c6b2df3 (no print <150 through 10 Sep, 0.55) and successor
+      6ddbe426 (through 16 Sep, 0.55).
     since: 2026-09-03
 
   - theme: energy-pce-passthrough
     why: >
       The bridge from the war to the Fed: oil into CPI is the live hike-odds
-      channel. Brent settled 97.31 on 7 Sep and topped $99 intraday on 8 Sep
-      (Investing.com 19:31Z), 'near $98' late (Gulf News), 'nears $100' in
-      Asia 9 Sep; WTI round-tripped 94.72 -> 91.82 -> 94.03; Murban 110.80 -
-      the Gulf's own barrel carries the premium. US gasoline ~$4.15 and diesel
-      at a record; refining bottlenecks the next problem (MarketWatch). The
-      barrels are blockade barrels (Iranian exports 1.7 mb/d to ~250 kb/d),
-      Hormuz transits at a May low and war-risk cover - not lost supply;
-      Goldman/Rystad put $120 in scope if shipping attacks intensify. China's
-      August PPI is now surging on energy with CPI 0.8% in line - the
-      passthrough is visible upstream there too. August US CPI on 11 Sep is
-      the test: consensus headline +0.4% m/m and 3.4% y/y, core +0.3% and
-      2.5% (Wells Fargo 0.40 / 0.23); PPI 10 Sep cons +0.4. Energy is the
-      whole headline story; CORE decides the hike; the ECB's read (energy is
-      90% of the 2026 episode, no core spillover yet) is the benign case;
+      channel. Brent SETTLED 101.21 on 9 Sep (AFP; investinglive 101.60,
+      +3.76%), WTI 96.70, diesel nearing $6/gal — 65cd057e (no settle >=100)
+      scored MISS with ~1% of room. The move was enforcement-driven, not
+      barrel-driven: UKMTO-confirmed fire on transiting vessels, the zone
+      widened into the Gulf of Oman/Arabian Sea, Trump "oil won't come down
+      until after the midterms" (no policy put before November), HSBC
+      "tighter for longer" and a raised Brent forecast; the private inventory
+      survey showed a smaller-than-expected draw (demand side softening).
+      The barrels are still blockade barrels (Iranian exports ~250 kb/d,
+      Hormuz transits ~10/day) — the premium is insurance-priced, which is
+      why it re-rates 4% on an enforcement change. China's August PPI is
+      surging on energy with CPI 0.8% in line. August US CPI on 11 Sep is
+      the test: consensus headline +0.4% m/m and 3.4% y/y, core 0.2 (wrap)
+      to 0.3 (WF 0.23); PPI 10 Sep cons +0.4 after 0.0. Energy is the whole
+      headline story; CORE decides the hike; the ECB's read (energy is 90%
+      of the 2026 episode, no core spillover yet) is the benign case;
       Bessent's line (no hike in a supply shock until second-order effects)
-      is the administration's version. The premium is fragile to
-      de-escalation talk; a Russia-Ukraine text takes the Black Sea floor
-      off it. Falsifiable: 65cd057e, no Brent settle >=100 through 10 Sep
-      (0.55) - ~1% of room left.
+      is the administration's version. Fragile to de-escalation talk; a
+      Russia-Ukraine text takes the Black Sea floor off it. Brent 100 is now
+      support, not resistance; no successor cap written (lesson filed).
     since: 2026-07-31
 
   - theme: us-fiscal-dominance
     why: >
       Treasury's expanded long-dated buybacks (19 Aug) are de facto
       yield-curve control, and the market read them as debasement — gold
-      flipped into a trend regime as US debt passed $40tn. The tool then
-      failed: the rout restarted within a day and the 30y returned to its
-      mid-2007 high (5.25 on 8 Sep). That failure STRENGTHENS the theme —
-      conventional tools visibly struggling is the point — and it undercuts
-      Warsh's authority over rate policy. The regime signature is gold
-      rallying WITH yields, and it has printed repeatedly; Druckenmiller and
-      Barkin are on record. Counter-tells are winning this week: price
-      targets converged (Citi 4,800, Goldman ~4,900, JPM 5k, UBS 5,400) —
-      crowding, not information; Goldman's 'buy zone' moved DOWN to $4,000
-      (7 Sep), now 8% below spot; 2 Sep and 8 Sep both saw gold sold in a
-      deleveraging rather than bid as a haven. Mechanism test TODAY: the
-      first buyback operation 9 Sep (Bessent 24 Aug), slot still unverified
-      in any ingested source on day ten (#41 fires 15:15Z with its
-      reschedule clause). Watch the 3y auction tail (4.474%), 10y vs 4.80,
-      DXY at 100, the 30y and TLT.
+      flipped into a trend regime as US debt passed $40tn. The tool has now
+      been tried and FAILED IN PUBLIC: the first operation printed "up to
+      $6bn" on 9 Sep (tripled from $2bn, under the $10-12bn whisper), and
+      yields rose anyway across the curve — 10y 4.84 (highest since Nov
+      2023), 30y 5.29 (day high 5.309, the 17 Aug trigger); investinglive:
+      "a reaction some observers see as a sign the intervention is
+      backfiring", deficit >$2tn, AI issuance competing for the same
+      buyers; MarketWatch: "the bull market's biggest enemy could be
+      Bessent's interventions". Counter-tell: the $39bn 10y auction stopped
+      1.5bp through the WI — demand exists at 4.83%. Operation RESULTS
+      (accepted vs cap, tail) still unreachable (todo-185; #53 reads
+      relays). The regime signature is gold rallying WITH yields and it
+      printed 9 Sep (+1.15%, fxempire "gold rebounds as traders focus on
+      bond buybacks"). Trump 9 Sep tied $5,000 payments to a Republican
+      sweep (fiscal, pre-midterm). Counter-tells earlier this week: price
+      targets crowded (Citi 4,800 to UBS 5,400), Goldman's buy zone moved
+      DOWN to $4,000, 2 and 8 Sep deleveraging days. Claims: 52db03df (no
+      cap raise/emergency op through 18 Sep, 0.7), 09cb81a7 (no DXY close
+      >=100 through 16 Sep, 0.6). Watch the 30y vs 5.31, TLT, the 20y
+      auction, any Bessent line on the operation.
     since: 2026-08-20
 
   - theme: us-canada-trade-war
@@ -192,14 +201,14 @@ watchlist:
       second protectionism front beside the Iran siege economy, feeding the
       de-globalisation and debasement mix that already sets gold's price.
       Passthrough versus growth is resolving toward the growth hit on the
-      Canadian side — August employment −41.7k against +15k consensus — which
-      hands the BoC a cut argument. 7 Sep: Trump threatened US sales of
-      Bombardier aircraft; 8 Sep: Trump BANNED Canadian autos, dairy and
-      alcohol and ordered GSA to purge Canadian goods from agency lists —
-      escalation by sector, and USD/CAD did not blink (CAD actually gained
-      Tuesday; actionforex 9 Sep). Still no haven flow into gold from it.
-      Watch retaliation scope (energy and USMCA carve-outs), US
-      inflation-passthrough chatter, and whether haven flow shows in gold
-      rather than only the dollar. Promote it out of tripwire status only if
-      US CPI or a Fed speaker names tariffs as a driver.
+      Canadian side — August employment -41.7k against +15k consensus —
+      which hands the BoC a cut argument. 8 Sep: Trump BANNED Canadian
+      autos, dairy and alcohol and ordered GSA to purge Canadian goods; 9-10
+      Sep: a further US response to Canada's counter-tariffs (actionforex),
+      Crown Royal carved out; USD/CAD did not blink (CAD gained Tuesday, USD
+      +0.17% vs CAD Wednesday). Still no haven flow into gold from it. Watch
+      retaliation scope (energy and USMCA carve-outs), US inflation-
+      passthrough chatter, and whether haven flow shows in gold rather than
+      only the dollar. Promote it out of tripwire status only if US CPI or a
+      Fed speaker names tariffs as a driver.
     since: 2026-08-24

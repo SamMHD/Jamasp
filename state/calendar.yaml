@@ -709,6 +709,18 @@ events:
       'IAEA', 'Board of Governors', 'referral', 'Grossi' keywords; a
       published vote slot earns a deepdive wakeup at vote+60. Pickaxe
       claim recorded 5 Sep (no US strike thru 11 Sep, 0.7).
+    outcome: >
+      RESOLVED 9 Sep (10 Sep brief): the Board adopted the E3+US resolution
+      referring Iran to the UNSC 23-3 with eight abstentions (Russia, China,
+      Niger against) — AFP via Gulf News extract. Iran (dep FM, Mehr): "no
+      basis and will not bring any results". Same day: CNN/CSIS Pickaxe
+      construction surge, Trump "activity seen... don't get cute", and CNN
+      reporting a next-generation penetrator in development because the
+      current MOP is not thought to reach the site. The June 2025 precedent
+      (strikes one day after the noncompliance finding) is the named risk to
+      1f83782a and to the 10 Sep successor claim e1e9ba8f (no US strike on
+      Iranian territory through 13 Sep, 0.6); UNSC action is veto-blocked.
+      Scans carry UNSC follow-through and Pickaxe strike chatter beyond Trump.
 
   - date: 2026-09-10
     time_dubai: "16:30 (12:30Z) — 15 min after the ECB decision, before the presser"
@@ -823,3 +835,29 @@ events:
       A confirmed port hit, infrastructure strike or warship hit earns a
       deepdive at confirmation+60 that reads gold's first session against
       the tape clause before touching the kinetic weight.
+
+  - date: 2026-09-16
+    time_dubai: "15-16 Sep meeting; decision ~18:00Z (22:00 Dubai) / presser ~18:30Z — SLOT UNVERIFIED (convention), re-verify Sat 12 Sep (rule 16)"
+    title: FOMC 15-16 Sep — the hike-or-hold meeting; ec71ce01 (no Sept hike, 0.8) scores here
+    why: >
+      Added 10 Sep. The market is "leaning toward a rate hike" (investinglive
+      9 Sep) with no CME number relayed since ~60% on 7 Sep; the 2y is at
+      cycle highs (4.43), the 10y at a Nov-2023 high (4.84), Brent settled
+      101.21 and the blackout bars any speaker until the statement. CPI 11
+      Sep is the last data gate. For gold the meeting is the credibility
+      test the warsh-credibility theme is built on: a hike delivered through
+      open political pressure is bearish via real yields (and could pull the
+      long end DOWN — the "kills it" for debasement); a hold that reads as
+      coerced with Brent >100 is the debasement case and bullish. The BoJ
+      follows 17-18 Sep, so the two-day window is the FOMC-BoJ convergence
+      the yen theme has flagged since August.
+    action: >
+      NO wakeup yet — decision/presser slot to be verified against a fresh
+      source (calendar feed row once it extends past 12 Sep, or an
+      actionforex/WF week-ahead) in the Saturday 12 Sep brief, then anchor a
+      deepdive at statement+45 and read the presser in the 2-hourly scan
+      that follows. Event-pending from the Monday 14 Sep brief. Claims riding
+      on it: ec71ce01 (no hike), 52db03df (no buyback cap raise, 18 Sep),
+      09cb81a7 (no DXY close >=100, 16 Sep), 24f8b482 (no co-confirmed
+      talks, 16 Sep), 6ddbe426 (USDJPY >=150, 16 Sep).
+
