@@ -1,105 +1,100 @@
-# Stance — 2026-09-10 03:45Z (brief) — BRENT SETTLED 101, THE BUYBACK MISFIRED, THE 10Y IS AT A 2023 HIGH — AND GOLD CLOSED +1.15%; WEIGHTS BACK TO 20/50/30; EVENT-PENDING INTO PPI/ECB (TODAY) AND CPI (FRI)
+# Stance — 2026-09-10 13:50Z (deepdive #53) — ECB HAWKISH WITH NO PATH, PPI IN LINE BUT ODDS 64%, 30y THROUGH 5.31 INTRADAY, GOLD BELOW THE 100DMA CLUSTER: 15/55/30; EVENT-PENDING INTO CPI (FRI 12:30Z)
 
-**Wednesday's tape contradicted Tuesday's.** IRGC fire on transiting vessels
-(UKMTO: "several" vessels in the Gulf of Oman and the Gulf "subject to
-disabling fire"; hits/names unconfirmed), a prohibited-zone expansion into
-the Gulf of Oman/Arabian Sea (Fujairah approaches; coordinates pending),
-Trump's "oil won't come down until after the midterms / not looking for a
-deal / war ends after the election" and WSJ's "could last his full term"
-put Brent at a **101.21 settle** (`65cd057e` MISS). Treasury's first long-end
-buyback printed "up to $6bn" and **yields rose anyway** — 10y 4.84 (highest
-since Nov 2023), 2y 4.43, 30y 5.29 (below the 5.31 trigger) — though the
-$39bn 10y auction stopped 1.5bp through. Stocks fell a third day; the dollar
-was only marginally lower (JPY strongest, JGB 10y >3% first time since
-1996). **GC: 4474 high → 4432 on the buyback → settle 4446.7 (+1.15%) →
-4458 Asia; spot +1%, back above the 100DMA.** Gold rallied WITH yields —
-the fiscal-dominance signature, one session. IAEA referred Iran to the UNSC
-23–3; CNN/CSIS Pickaxe construction surge, Trump "don't get cute", Pentagon
-building a penetrator it does not yet have. Three Iranian salvos at US
-warships (6, 8, 8–9 Sep) all repulsed; Rubio: more tankers "again today".
-No CME odds number for a fourth day ("leaning toward a hike"). PPI 12:30Z
-(cons +0.4), ECB 12:15Z (+25bp priced), CPI Fri 12:30Z (core cons 0.2–0.3,
-sources split). FOMC blackout to 17 Sep.
+**Thursday's tape answered Wednesday's.** ECB +25bp to 2.50% (unanimous, "no
+brainer"), core projections revised UP for 2027–28 (2.6/2.3), growth up, "not
+pre-committing", "did not debate the path" — and the euro FELL: DXY +0.4% to
+99.06, dollar up against every major (yen, Aussie too). PPI +0.4 m/m in line,
+5.4% y/y (cons 5.3), core m/m +0.2 (cons 0.3) — energy-led, services soft —
+yet with WTI >100 on the eighth day up the tape priced the hike: **fed funds
+futures 64% Sept hike** (investinglive 12:45Z, first relay in five days). 2y
+4.51, 10y 4.92 (highest since Oct 2023), **30y 5.349 (day high 5.354) —
+through the 5.31 trigger intraday, close pending**. GC 4412 pre-PPI → 4383.5
+sampled low (spot low 4324 ⇒ a GC print ~4350) → 4403 at 13:36Z, −1.4% vs
+the 4446.7 settle; spot below the 4356 cluster (100DMA/trendline). Gold fell
+WITH the 10y at a new high — the debasement bid of Wednesday did not return.
+Houthis seized Mocha (Yemeni govt sources/Reuters), attacking Hanish; Brent
+>105; Yanbu loadings 3.7 mb/d (Sept) are the exposed Saudi bypass; Hormuz 7
+transits Wed. Buyback results/date still unrelayed (todo-185). CPI Fri
+12:30Z (cons headline +0.4/3.4, core +0.3 or 0.2). FOMC blackout to 17 Sep.
 
-## View (weights 20/50/30 base/bearish-rates/kinetic — reverted from 15/55/30)
+## View (weights 15/55/30 base/bearish-rates/kinetic — from 20/50/30)
 
-- **Bearish-rates (50, from 55):** the 55 was set on the buyback print's
-  first fifteen minutes; the full session reversed it. Still 50: Brent
-  101 into PPI/CPI is read as a hike first (stance line honoured), the 2y
-  at 4.43 with a "leaning hike" tape and no speaker, a 222k long. Core CPI
-  ≥0.4 → 60; ≤0.2 with oil easing → 30. `41aec282`/`a2171cad` close
-  tonight unread unless #53 finds a relay.
-- **Kinetic (30):** enforcement moved from turn-backs to live fire; the
-  zone covers Fujairah's approaches; referral + Pickaxe on one day; Rubio
-  promising more hulls. Tape clause half-printed (close ≥+1%, no named
-  trigger — warships missed, hulls fired on not confirmed hit). Triggers
-  unchanged: Kharg/Larak infrastructure ordnance, Yanbu, a Kuwaiti/
-  Bahraini port or Fujairah-approach hit, a warship actually struck, a
-  Gulf-side non-Iranian hull hit with casualties, Pickaxe, GCC strike on
-  Iran, Iranian "in kind" on GCC energy. Trigger AND GC close ≥+1% → 40.
-- **Base (20, from 15):** gold up with the 10y at a three-year high is the
-  debasement channel answering a failed fiscal tool (rule 6's third
-  channel); the official bid and a JGB-led dollar leg (`09cb81a7` intact)
-  are the legs that have actually bought gold this week. Buyback flow leg
-  small and unconfirmed (results unrelayed, todo-185); `52db03df` (no cap
-  raise) is the claim that a bigger tool is NOT coming.
+- **Bearish-rates (55, from 50):** the rates desk is the price-setter and its
+  impulse is against gold into CPI: odds ≥60% intraday, 2y at a cycle high,
+  30y through the trigger, DXY reasserting on a hawkish-ECB day, GC below the
+  100DMA cluster. Hike is the market's base; house view moved (claim below).
+  **60** on a 30y NY close ≥5.31 (CNBC US30Y, brief reads) or core CPI ≥0.3
+  with headline ≥0.4; **45** on core ≤0.2 with oil easing.
+- **Kinetic (30):** Mocha/Hanish is a real second-chokepoint move and Saudi-
+  relevant (Yanbu bypass), but gold ignored it — inverted transmission (oil →
+  yields → dollar → gold down) held a fourth session. Tape clause unprinted.
+  Triggers: Kharg/Larak infrastructure, Yanbu, a Kuwaiti/Bahraini port or
+  Fujairah-approach hit, a warship actually struck, a Gulf-side non-Iranian
+  hull hit with casualties, Pickaxe, GCC strike on Iran, Iranian "in kind" on
+  GCC energy, **a Houthi hit with damage on a Saudi-linked/Yanbu-loading hull
+  in Bab el-Mandeb/Red Sea or Aramco suspending Red Sea shipments**. Trigger
+  AND GC close ≥+1% → 40; trigger with gold down → rates takes the weight.
+- **Base (15, from 20):** the debasement channel failed the second-session
+  test; the official bid and the yen leg (`09cb81a7`, now 0.95% from its line)
+  are the only legs that bought gold this week; buyback flow leg unconfirmed.
 
-**Levels (GC=F):** R 4474 (Wed high) / 4487 (Tue high) / 4500 / 4548
-(200DMA). S 4432 (buyback low) / 4388 (Tue low) / 4353 (proxy low) / 4320
-(BB lower) / 4300 / 4296 (50DMA) / 4177 (fib S1). Base path 4400–4480 chop
-through CPI; PPI ≥0.6 or core ≥0.4 → 4353/4320; PPI ≤0.1 or core ≤0.2 with
-oil easing → 4500/4548. **EVENT-PENDING: conviction capped, no fresh
-directional gold claims into CPI.**
+**Levels (GC=F):** R 4432 (Wed buyback low, now resistance) / 4447 (Wed settle)
+/ 4474 / 4500 / 4548 (200DMA). S 4383.5 (today's sampled low) / 4353 (Tue proxy
+low) / 4317 (BB lower) / 4300 / 4296 (50DMA) / 4177 (fib S1). Path: 4300–4440
+into CPI; core ≥0.3 + headline ≥0.4 → 4300/4296 tested, 4177 in scope on a
+close below; core ≤0.2 with oil easing → 4432/4474. **EVENT-PENDING: no fresh
+directional gold claim into CPI.**
 
 ## What flips me
 
-- Second consecutive session GC up ≥0.5% with the 10y up → base 30.
-- 30y close ≥5.31 → bearish-rates 60 same run. Bessent cap raise/emergency
-  op (`52db03df` void) → read as debasement first, rates second.
-- GC close <4300 → bearish-rates 60, 4177 in scope. NY-close odds <45% or a
-  GC close >4500 → base 30.
-- Tape clause prints → kinetic 40. A named vessel confirmed HIT with damage
-  on the Gulf side or the Fujairah approaches → kinetic 35 even without the
-  tape (mechanism change, not just a claim).
+- Core CPI ≤0.2 AND a GC close >4432 → bearish-rates 45, base 25.
+- 30y close ≥5.31 → bearish-rates 60 same run. GC close <4300 → 60, 4177 in
+  scope. Bessent cap raise/emergency op (`52db03df` void) → debasement first.
+- NY-close odds <50% (relay) → base 25; a GC close >4500 → base 30.
+- Tape clause prints → kinetic 40; a named vessel confirmed HIT with damage on
+  the Gulf side, the Fujairah approaches or the Red Sea (Saudi-linked) → 35.
 - USDJPY <150 with Nikkei/BTC down → liquidity regime, cut base and kinetic.
-- Co-confirmed US–Iran talks / formal war-over → floor off first, rates
-  second; reassess same run.
+- Co-confirmed US–Iran talks / formal war-over → floor off first, rates second.
+- DXY daily close ≥100 (`09cb81a7` miss) → the dollar leg is US-factor, not
+  foreign-CB: base 10.
 
 ## Open predictions
 
-Scored today (6): `2b39238a` `03627b6b` `302708ab` HIT (right-reason);
-`c4ef5615` MISS (US stayed on hulls); `65cd057e` MISS (Brent 101.21 settle);
-`6b3ad492` UNCLEAR (UKMTO fire, no confirmed hit/position). Closing tonight
-23:59Z: `41aec282` `a2171cad` (odds, relay needed), `a3ad30b1` (cap 4554,
-whi 4487), `746afbe2` (floor 4300, wlo 4388), `5c6b2df3` (USDJPY ≥150).
-11 Sep: `2d098d6c` `1f83782a`. 12 Sep: `f04926f1` `2fbc22dd`. 13 Sep:
-`110d5daa` `e1e9ba8f` (no US strike on Iranian territory, 0.6). 16 Sep:
-`24f8b482` `09cb81a7` `6ddbe426` (USDJPY ≥150 into the BoJ, 0.55). 18 Sep:
-`52db03df`. 20 Sep: `a0429ae4`. FOMC: `ec71ce01`.
+Closing tonight 23:59Z / NY close: `41aec282` (no close ≥60% — on course to
+MISS at 64%), `a2171cad` (≥50% — on course to HIT), `a3ad30b1` (cap 4554, whi
+4487), `746afbe2` (floor 4300, wlo 4383.5), `5c6b2df3` (USDJPY ≥150; 154.3).
+Brief reads the NY-close odds from the investinglive US wrap/CNBC. 11 Sep:
+`2d098d6c` `1f83782a` + new floor `4300 ×2 sessions` (0.55). 12 Sep: `f04926f1`
+(Yanbu — Mocha raises its risk) `2fbc22dd`. 13 Sep: `110d5daa` `e1e9ba8f`.
+16 Sep: `24f8b482` `09cb81a7` `6ddbe426`. 18 Sep: `52db03df`. FOMC: `ec71ce01`
+(0.8 no-hike, grounds dead since 4 Sep, scored on its own terms) vs new
+**Sept hike 0.55**.
 
 ## Wakeups
 
-**#53 10 Sep 13:45Z** ECB + PPI + odds relay + buyback RESULTS. **#26 11 Sep
-13:15Z** CPI. No wakeup for the PBoC briefing (07:00Z, scan), Lagarde
-Fri/Sat, FOMC 15–16 or BoJ 17–18 (slots unverified — Saturday brief, rule
-16). Scans carry: zone coordinates / Fujairah approaches, named hulls from
-Wednesday's fire, buyback results, Bessent cap-raise line, 30y vs 5.31,
-Rubio's "again today", a warship actually struck, Kharg/Larak
-infrastructure, Yanbu, Saudi response, UNSC follow-through, Pickaxe, any
-NY-close odds relay, Brent vs 100 (now support), USDJPY vs 152/150.
+**#26 11 Sep 13:15Z** CPI deepdive — also reads the 30y close, the NY-close
+odds relay, buyback results/date if relayed. No other wakeup. Saturday brief
+re-verifies FOMC 15–16 / BoJ 17–18 slots (rule 16) and the next ECB date.
+Scans carry: buyback results + operation date, Bessent upsize/emergency-op
+line, 30y vs 5.31 at the close, Mocha/Hanish/Dhubab and any Red Sea hull hit,
+Yanbu, zone coordinates/Fujairah approaches, named hulls from Wed's fire,
+Rubio "again today", a warship struck, Kharg/Larak infrastructure, Saudi
+response, Pickaxe, Brent vs 105, DXY vs 100, USDJPY vs 152/150.
 
 ## Desk-local
 
-Fujairah approaches inside a declared Iranian zone (coordinates pending):
-war-risk on Fujairah calls reprices before ordnance does; watch UAE bypass
-loadings. Dubai retail vs a ~4400–4460 spot tape back above the 100DMA:
-bar demand showed on the 4360–4400 dip, scrap eases on recovery. Jeddah
-airspace, Red Sea, and now the Omani-side lane in the war-risk set.
+Red Sea now a two-ended risk: Mocha/Hanish at the southern gate, Jeddah/Yanbu
+in Houthi range — war-risk on Red Sea calls reprices before ordnance; Fujairah
+approaches still inside the declared Iranian zone (coordinates pending).
+Dubai retail vs a ~4330–4400 spot tape below the 100DMA: expect bar demand on
+the dip as in the 4360–4400 pattern, scrap slows; a CPI-driven break of 4300
+GC (~4250 spot) is the level where the retail bid last showed in size.
 
 ## Sourcing health
 
-GC=F live. `gold_spot`/`gold_vol`/`yield_10y_nominal` source errors in the
-last 24h (intermittent; rows still landed). No CME odds relay (4th day).
-Treasury results unreachable (todo-185). No `sqlite3` CLI on host (use
-Python). gcaptain/MarEx silent on the 9 Sep UKMTO fire. Calendar feed to
-12 Sep; FOMC/BoJ slots unverified.
+GC=F live (15-min rows). `gold_vol` source error in the last 24h (no rows).
+Odds relay: investinglive PPI post carried fed funds futures; CME itself
+unreachable. Treasury results unreachable (todo-185). actionforex `?s=` 403s;
+investinglive `?s=`/front page extract no headlines — use the items table. ECB
+statement pages extract; press index cookie-walled. No `sqlite3` CLI (Python).
+gcaptain silent on Mocha; calendar feed to 12 Sep; FOMC/BoJ slots unverified.
