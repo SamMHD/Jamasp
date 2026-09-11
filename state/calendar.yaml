@@ -837,7 +837,7 @@ events:
       the tape clause before touching the kinetic weight.
 
   - date: 2026-09-16
-    time_dubai: "15-16 Sep meeting; decision ~18:00Z (22:00 Dubai) / presser ~18:30Z — SLOT UNVERIFIED (convention), re-verify Sat 12 Sep (rule 16)"
+    time_dubai: "15-16 Sep meeting; decision ~18:00Z (22:00 Dubai) / presser ~18:30Z — DATE verified (CNBC 11 Sep: 'concluding Wednesday with a vote'), TIME still convention; re-verify Sat 12 Sep (rule 16)"
     title: FOMC 15-16 Sep — the hike-or-hold meeting; ec71ce01 (no Sept hike, 0.8) scores here
     why: >
       Added 10 Sep. The market is "leaning toward a rate hike" (investinglive
@@ -852,11 +852,16 @@ events:
       follows 17-18 Sep, so the two-day window is the FOMC-BoJ convergence
       the yen theme has flagged since August.
     action: >
-      NO wakeup yet — decision/presser slot to be verified against a fresh
-      source (calendar feed row once it extends past 12 Sep, or an
-      actionforex/WF week-ahead) in the Saturday 12 Sep brief, then anchor a
-      deepdive at statement+45 and read the presser in the 2-hourly scan
-      that follows. Event-pending from the Monday 14 Sep brief. Claims riding
+      Wakeup #54 anchored 16 Sep 19:45Z (presser end +30) by the 11 Sep CPI
+      deepdive: date verified by CNBC text that day, time is the 18:00Z
+      convention — the Saturday 12 Sep brief re-verifies the slot against a
+      feed row or a week-ahead extract and moves #54 if it differs.
+      Post-CPI state (11 Sep): Sept-hike pricing 82-90%, core 0.3 (wireless
+      one-off ~0.1pp), gold +1.4% on the Hormuz-plan oil drop — the hike is
+      priced, so the gold variable at the meeting is the forward language
+      (one-and-done vs "further firming") and the SEP dots; rates flips now
+      carry a tape clause (11 Sep lesson). Event-pending from the Monday 14
+      Sep brief. Claims riding
       on it: ec71ce01 (no hike), 52db03df (no buyback cap raise, 18 Sep),
       09cb81a7 (no DXY close >=100, 16 Sep), 24f8b482 (no co-confirmed
       talks, 16 Sep), 6ddbe426 (USDJPY >=150, 16 Sep).
