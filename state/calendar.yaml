@@ -271,8 +271,8 @@ events:
       scores 71096269 alongside 8f491cb0 (Jizan) — same run closes both
       verification windows.
 
-  - date: 2026-09-17
-    time_dubai: "through 18 Sep"
+  - date: 2026-09-18
+    time_dubai: "17–18 Sep meeting; decision Fri 18 Sep 05:30Z (09:30 Dubai), presser 06:30Z (10:30 Dubai) — VERIFIED 12 Sep (actionforex weekly calendar row; cons 1.25% from 1.00%)"
     title: BOJ meeting (17–18 Sep) — the September convergence window
     why: >
       REWRITTEN 8 Sep. The hike is now close to fully priced (~25bp to
@@ -290,9 +290,11 @@ events:
       liquidity regime that sells gold with everything else. Original
       framing (yen ~159.5, intervention lever) is obsolete.
     action: >
-      No wakeup yet — decision/presser slot to be re-verified against a
-      fresh source ≤7 days before (Saturday 12 Sep brief, rule 16), then
-      anchor a deepdive at presser+60. Scans carry: MoF/BoJ rate-check or
+      Wakeup #56 anchored 18 Sep 07:30Z (presser+60) by the 12 Sep brief
+      after slot verification (actionforex calendar: 05:30Z decision,
+      06:30Z presser; Wells Fargo expects +25bp to 1.25% and calls market
+      pricing "too rapid"). Two days after the FOMC — #56 reads both
+      decisions together. Scans carry: MoF/BoJ rate-check or
       verbal defence, Aida/Takaichi follow-ups, USDJPY vs 152/150, Nikkei
       and BTC as liquidity tells. Claim recorded 8 Sep: no USDJPY print
       below 150.00 through 10 Sep 23:59Z (0.55).
@@ -836,8 +838,36 @@ events:
       deepdive at confirmation+60 that reads gold's first session against
       the tape clause before touching the kinetic weight.
 
+  - date: 2026-09-14
+    time_dubai: "Mon 14 Sep, time not published; wakeup #55 at 19:00 Dubai (15:00Z)"
+    title: Oman FM meeting — Gulf littoral states + Iraq + Iran on Hormuz "safe routes"
+    why: >
+      Added 12 Sep. Iran MFA (Baghaei, Mehr 11 Sep) announced it; Reuters
+      (via gcaptain 11 Sep) carries Iran's confirmation that its
+      representatives, Iraq's and the Gulf Arab states' meet in Oman on
+      Monday to "resume discussions on safe commercial shipping routes in
+      Hormuz"; the FT reported the plan first. There is still NO on-record
+      Gulf-side (Omani MoFA/ONA, GCC secretariat, Saudi/UAE MoFA)
+      confirmation — the source question the stance has carried since the
+      11 Sep 13:00Z Hormuz-plan tape, which took $3 off crude and lifted
+      gold 1.4% through the oil→30y chain. With the East-West pipeline
+      shut (confirmed 11 Sep) and Saudi supply at 6 mb/d, this meeting is
+      the single scheduled repricer of oil before the FOMC — and oil is
+      gold's price-setter in this regime: an on-record corridor text is
+      gold UP first (peace sign rewritten 11 Sep); nothing on record with
+      Brent >108 is gold DOWN via the front end.
+    action: >
+      Wakeup #55 (15:00Z) reads ON-RECORD readouts only and scores
+      6c6ed87f (meeting materializes, flat 0.6). Claims riding on the
+      outcome: b3adcf1e (WTI >=92 settle Mon/Tue, 0.6 — an on-record
+      arrangement with Iranian assent is its first breaker), 66db8e8e
+      (GC 4300 floor Mon/Tue, 0.55), e694f252 (hike pricing >=70%),
+      24f8b482 (Gulf–Iran is NOT US–Iran; does not score it). Flip lines:
+      on-record confirmation + Brent <95 → bearish-rates 45 / base 25;
+      no text + Brent >108 + 30y >=5.40 → bearish-rates 65.
+
   - date: 2026-09-16
-    time_dubai: "15-16 Sep meeting; decision ~18:00Z (22:00 Dubai) / presser ~18:30Z — DATE verified (CNBC 11 Sep: 'concluding Wednesday with a vote'), TIME still convention; re-verify Sat 12 Sep (rule 16)"
+    time_dubai: "15-16 Sep meeting; decision 18:00Z (22:00 Dubai) / presser 18:30Z (22:30 Dubai) — DATE and TIME VERIFIED 12 Sep (actionforex weekly calendar row; CNBC 11 Sep for the date)"
     title: FOMC 15-16 Sep — the hike-or-hold meeting; ec71ce01 (no Sept hike, 0.8) scores here
     why: >
       Added 10 Sep. The market is "leaning toward a rate hike" (investinglive
@@ -853,9 +883,10 @@ events:
       the yen theme has flagged since August.
     action: >
       Wakeup #54 anchored 16 Sep 19:45Z (presser end +30) by the 11 Sep CPI
-      deepdive: date verified by CNBC text that day, time is the 18:00Z
-      convention — the Saturday 12 Sep brief re-verifies the slot against a
-      feed row or a week-ahead extract and moves #54 if it differs.
+      deepdive: date verified by CNBC text 11 Sep; slot re-verified 12 Sep
+      against the actionforex calendar row (18:00Z / 18:30Z) — #54 stands.
+      11 Sep NY close: hike pricing ~90%, 2y 4.6275 (cycle high), 30y
+      5.3576; JPM calls Sept + Dec, WF Sept + a 4.125 median dot.
       Post-CPI state (11 Sep): Sept-hike pricing 82-90%, core 0.3 (wireless
       one-off ~0.1pp), gold +1.4% on the Hormuz-plan oil drop — the hike is
       priced, so the gold variable at the meeting is the forward language
