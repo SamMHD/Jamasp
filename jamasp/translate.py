@@ -10,6 +10,7 @@ the daily agent-run cap.
 """
 from __future__ import annotations
 
+import contextlib
 import json
 import shutil
 import sqlite3
@@ -119,6 +120,33 @@ def _translate_batch(
     return translatetext.parse_rows_response(payload, len(rows), fields)
 
 
+# What a row-level failure is allowed to be. sqlite3.OperationalError is in
+# here because contention runs both ways: this job is not the only writer, and
+# a `database is locked` raised by one row's UPDATE must degrade into a
+# recorded failure — the next tick retries the row — rather than ending the run
+# with a traceback and half the backlog untried.
+ROW_FAILURES = (modelrun.ModelError, translatetext.ParseError,
+                sqlite3.OperationalError)
+
+
+def _commit(conn, action) -> bool:
+    """Run one write and commit it. False when the database was locked.
+
+    The commit is the point. SQLite has a single write lock, `jamasp.db` sets
+    busy_timeout to 5s and runs without WAL, so a transaction left open across
+    a model call (`timeout_seconds: 180`) locks out ingest, flash, the brief
+    and `predictions add` for as long as the call takes.
+    """
+    try:
+        action()
+        conn.commit()
+        return True
+    except sqlite3.OperationalError:
+        with contextlib.suppress(sqlite3.Error):
+            conn.rollback()
+        return False
+
+
 def _batch_with_fallback(
     conn, rows, fields, glossary, run, now, write, fail
 ) -> tuple[int, int]:
@@ -130,36 +158,58 @@ def _batch_with_fallback(
     for attempt in (1, 2):
         try:
             answers = _translate_batch(rows, fields, glossary, run)
-        except (modelrun.ModelError, translatetext.ParseError):
+        except ROW_FAILURES:
             if attempt == 2:
                 break
             continue
+        # One transaction for the batch, and no model call inside it: the
+        # answers are already in hand, so the write lock is held for the
+        # length of the writes and nothing else.
         translated = 0
-        for position, row in enumerate(rows):
-            entry = answers.get(position)
-            if entry:
-                write(conn, row["id"], entry, now)
-                translated += 1
-            else:
-                fail(conn, row["id"], "model omitted this entry")
-        conn.commit()
+        try:
+            for position, row in enumerate(rows):
+                entry = answers.get(position)
+                if entry:
+                    write(conn, row["id"], entry, now)
+                    translated += 1
+                else:
+                    fail(conn, row["id"], "model omitted this entry")
+            conn.commit()
+        except sqlite3.OperationalError:
+            with contextlib.suppress(sqlite3.Error):
+                conn.rollback()
+            return 0, len(rows)   # nothing written; the next tick retries
         return translated, len(rows) - translated
 
-    translated = 0
+    translated = failed = 0
     for row in rows:
         try:
             answers = _translate_batch([row], fields, glossary, run)
-        except (modelrun.ModelError, translatetext.ParseError) as exc:
-            fail(conn, row["id"], str(exc))
+        except ROW_FAILURES as exc:
+            _record(conn, fail, row["id"], str(exc))
+            failed += 1
             continue
         entry = answers.get(0)
-        if entry:
-            write(conn, row["id"], entry, now)
+        if not entry:
+            _record(conn, fail, row["id"], "model omitted this entry")
+            failed += 1
+            continue
+        # Committed here, before the next iteration's model call — see _commit.
+        if _commit(conn, lambda: write(conn, row["id"], entry, now)):
             translated += 1
         else:
-            fail(conn, row["id"], "model omitted this entry")
-    conn.commit()
-    return translated, len(rows) - translated
+            failed += 1
+    return translated, failed
+
+
+def _record(conn, fail, row_id: str, error: str) -> None:
+    """Record a row failure, best effort. Swallows a locked database.
+
+    The failure record is itself a write, so the one thing it cannot do is
+    raise the same error it exists to absorb. A row whose attempt could not be
+    counted simply keeps its old count and is retried next tick.
+    """
+    _commit(conn, lambda: fail(conn, row_id, error))
 
 
 def translate_rows(

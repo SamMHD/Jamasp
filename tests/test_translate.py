@@ -1,3 +1,4 @@
+import sqlite3
 from datetime import datetime, timedelta, timezone
 
 from jamasp import db, translate
@@ -187,6 +188,61 @@ def test_a_failing_batch_retries_once_then_falls_back_to_singles(tmp_path):
     assert stats["translated"] == 2
     heads = {r["headline_fa"] for r in conn.execute("SELECT headline_fa FROM items")}
     assert heads == {"FA-single"}
+
+
+def test_the_singles_loop_never_holds_the_write_lock_across_a_model_call(tmp_path):
+    """The singles fallback makes one model call per row, each of which can take
+    `timeout_seconds` (180) to return. A transaction spanning those calls holds
+    SQLite's single write lock for up to 19 x 180s, and every other writer —
+    ingest, flash, a brief, `predictions add` — fails with `database is locked`
+    (busy_timeout is 5000ms and there is no WAL). So the loop must commit each
+    row before it makes the next call."""
+    path = tmp_path / "t.db"
+    conn = db.connect(path)
+    seed(conn, [("One", 1), ("Two", 2)])
+
+    other = db.connect(path)
+    # Short, so a held lock fails this test in 200ms instead of five seconds.
+    other.execute("PRAGMA busy_timeout = 200")
+    probes = []
+
+    def run(prompt, schema):
+        if prompt.count("headline:") > 1:      # the batch, either attempt
+            raise modelrun.ModelError("batch failed")
+        try:                                    # a single: another writer tries
+            db.set_meta(other, f"probe.{len(probes)}", "ok")
+            probes.append(True)
+        except sqlite3.OperationalError as exc:
+            probes.append(str(exc))
+        return {"1": {"headline": "FA-single"}}
+
+    translate.translate_rows(conn, CFG, GLOSSARY, run)
+    assert probes == [True, True], probes
+
+
+def test_a_locked_database_degrades_instead_of_crashing_the_run(tmp_path):
+    """Contention in the other direction: another writer holds the lock when
+    the singles loop tries to write. sqlite3.OperationalError must be recorded
+    like any other row failure, not raise out of the run as a traceback."""
+    path = tmp_path / "t.db"
+    conn = db.connect(path)
+    seed(conn, [("One", 1)])
+
+    other = db.connect(path)
+    other.execute("UPDATE items SET topic = 'held'")   # opens a write txn
+
+    conn.execute("PRAGMA busy_timeout = 100")
+
+    def run(prompt, schema):
+        return {"1": {"headline": "FA1"}}
+
+    stats = translate.translate_rows(conn, CFG, GLOSSARY, run)
+    assert stats["failed"] == 1
+    assert stats["translated"] == 0
+
+    other.rollback()
+    row = conn.execute("SELECT headline_fa FROM items").fetchone()
+    assert row["headline_fa"] is None
 
 
 def test_a_row_that_fails_alone_records_attempt_and_error(tmp_path):
