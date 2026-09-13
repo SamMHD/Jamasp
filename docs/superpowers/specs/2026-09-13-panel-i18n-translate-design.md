@@ -180,9 +180,24 @@ Passes run in this order, and the order is load-bearing:
    an orphaned row means something went wrong with that story's publication and
    it should earn its translation through the normal path.
 
-   Every top- and middle-tier story is already Persian before codex is asked
-   anything. This pass must run first or the rows pass pays for work already
-   done.
+   **What this actually covers, against the schema:** only items that were
+   POSTED to the channel in their own right. The join is `flashes.id =
+   items.id`, and a `flashes` row exists only where `_run_pass` published that
+   story — so a middle-tier item held for a rollup has no `flashes` row at all
+   (`_rollup_pass` records it with `flash_id = None` and writes a `rollups`
+   row), and a duplicate's `flash_items` row points at *another* story's flash
+   id. Top-tier posted items are therefore the whole of the free population;
+   held middle-tier stories and folded duplicates pay the model like anything
+   else. The pass must still run first, or the rows pass pays twice for the
+   items it does cover.
+
+   *Option, not implemented here:* joining through `flash_items.flash_id`
+   would widen the free set to duplicates, which inherit the Persian of the
+   story they were folded into. It would not reach held middle-tier items —
+   their Persian lives in the rollup's single `text_fa` blob, not per-story —
+   and it trades exactness for coverage, since a duplicate's headline is not
+   the headline that was translated. Worth revisiting once the measured
+   volume in Risks says how much it would save.
 
 2. **Rows.** Remaining untranslated items inside the selection window, in
    batches, one model call per batch.

@@ -28,10 +28,16 @@ from jamasp.db import set_meta, utcnow
 def reuse_flash_persian(conn: sqlite3.Connection, now: str | None = None) -> int:
     """Copy Persian from delivered flashes into `items`. No model calls.
 
-    Runs before the model pass, and the order is load-bearing: every top- and
-    middle-tier story already has Persian written for the news channel, and a
-    rows pass that ran first would pay to translate it a second time — and
+    Runs before the model pass, and the order is load-bearing: a rows pass
+    that ran first would pay to translate what the channel already wrote — and
     produce a second, different Persian headline for the same story.
+
+    The join is `flashes.id = items.id`, so what this covers is items POSTED
+    to the channel in their own right. A middle-tier story held for a rollup
+    has no `flashes` row (`_rollup_pass` records it with `flash_id = None`),
+    and a duplicate's `flash_items` row points at another story's flash id —
+    both pay the model like anything else. The design spec's reuse section
+    carries the same correction and the option that would widen it.
 
     `'sent'` only. A flash marked `'orphaned'` lost its channel message, which
     means something went wrong with that story's publication; it earns its
