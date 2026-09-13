@@ -10,7 +10,10 @@ import fcntl
 import sqlite3
 import subprocess
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import Callable
+
+import yaml
 
 from jamasp import config as config_mod
 from jamasp import extract as extract_mod
@@ -93,6 +96,27 @@ def log_error(conn: sqlite3.Connection, exc: object) -> None:
         (utcnow(), str(exc)[:500]),
     )
     conn.commit()
+
+
+DEFAULT_CONFIG_DIR = Path("config")
+
+
+def _glossary(conn: sqlite3.Connection, config_dir: Path) -> dict[str, str]:
+    """The shared glossary, or an empty one if it cannot be read.
+
+    Two things this fixes. It reads from the SAME directory the settings came
+    from, so `--config-dir` means one thing rather than two. And it degrades:
+    the glossary became a hard runtime dependency of flash when it was wired
+    into the channel prompts, and a missing file raises — straight into
+    run_flash's blanket except, which would log it to `source_errors` and
+    silently stop the live Telegram pipeline. Unglossed Persian is a wording
+    regression; no flashes at all is an outage.
+    """
+    try:
+        return config_mod.load_glossary(Path(config_dir) / "glossary.fa.yaml")
+    except (OSError, yaml.YAMLError) as exc:
+        log_error(conn, f"glossary unreadable, continuing without it: {exc}")
+        return {}
 
 
 def record(
@@ -420,6 +444,7 @@ def run_flash(
     run_model: Callable[[list[str], str], str] | None = None,
     emit: Callable[[str], None] | None = None,
     dry_run: bool = False,
+    config_dir: Path = DEFAULT_CONFIG_DIR,
 ) -> dict[str, int]:
     """One flash pass. Never raises; every failure is counted and logged."""
     stats = {"posted": 0, "dup": 0, "not_gold": 0, "unreadable": 0, "stale": 0,
@@ -430,13 +455,13 @@ def run_flash(
         # block the operator from rendering one.
         if dry_run:
             return _run_pass(conn, settings, sources, post, run_model, emit,
-                             dry_run, stats)
+                             dry_run, stats, config_dir)
         with pass_lock(conn) as acquired:
             if not acquired:
                 stats["skipped_locked"] = 1
                 return stats
             return _run_pass(conn, settings, sources, post, run_model, emit,
-                             dry_run, stats)
+                             dry_run, stats, config_dir)
     except Exception as exc:
         # Last line of defence: ingest finishes whatever happens in here. The
         # per-step handlers below cover the expected failures; this covers a
@@ -449,7 +474,8 @@ def run_flash(
         return stats
 
 
-def _run_pass(conn, settings, sources, post, run_model, emit, dry_run, stats):
+def _run_pass(conn, settings, sources, post, run_model, emit, dry_run, stats,
+              config_dir=DEFAULT_CONFIG_DIR):
     """The pass itself. Mutates and returns stats; run_flash owns the guard."""
     cfg = settings.get("flash") or {}
     if not cfg.get("enabled"):
@@ -457,7 +483,7 @@ def _run_pass(conn, settings, sources, post, run_model, emit, dry_run, stats):
     # Loaded once per pass, same as `themes` below: the channel and the panel
     # read the same file so they never settle on two different Persian words
     # for the same term.
-    glossary = config_mod.load_glossary()
+    glossary = _glossary(conn, config_dir)
     missing = [key for key in REQUIRED_CFG_KEYS if key not in cfg]
     if missing:
         log_error(conn, f"flash config missing keys: {', '.join(missing)}")
@@ -478,7 +504,8 @@ def _run_pass(conn, settings, sources, post, run_model, emit, dry_run, stats):
         return stats
 
     known = {row["id"]: row for row in posted_flashes(conn)}
-    themes = config_mod.themes(config_mod.load_weights())
+    themes = config_mod.themes(
+        config_mod.load_weights(Path(config_dir) / "weights.yaml"))
     try:
         verdicts = flashtext.parse_decide_response(
             run_model(cfg["decide_cmd"], flashtext.build_decide_prompt(
@@ -614,6 +641,7 @@ def run_rollup(
     run_model: Callable[[list[str], str], str] | None = None,
     emit: Callable[[str], None] | None = None,
     dry_run: bool = False,
+    config_dir: Path = DEFAULT_CONFIG_DIR,
 ) -> dict[str, int]:
     """Send one periodic roundup of held (middle-tier) stories.
 
@@ -628,13 +656,13 @@ def run_rollup(
         # racing a flash could send lines for a story the flash is posting.
         if dry_run:
             return _rollup_pass(conn, settings, post, run_model, emit, dry_run,
-                                stats)
+                                stats, config_dir)
         with pass_lock(conn) as acquired:
             if not acquired:
                 stats["skipped_locked"] = 1
                 return stats
             return _rollup_pass(conn, settings, post, run_model, emit, dry_run,
-                                stats)
+                                stats, config_dir)
     except Exception as exc:
         stats["errors"] += 1
         try:
@@ -644,13 +672,14 @@ def run_rollup(
         return stats
 
 
-def _rollup_pass(conn, settings, post, run_model, emit, dry_run, stats):
+def _rollup_pass(conn, settings, post, run_model, emit, dry_run, stats,
+                 config_dir=DEFAULT_CONFIG_DIR):
     cfg = settings.get("flash") or {}
     if not cfg.get("enabled"):
         return stats
     # Same file as _run_pass's write prompt, so the rollup and the per-story
     # flash never drift onto two different Persian words for the same term.
-    glossary = config_mod.load_glossary()
+    glossary = _glossary(conn, config_dir)
     run_model = run_model or _run_model
     total_held = held_count(conn)
     cap = cfg.get("rollup_max_items", DEFAULT_ROLLUP_MAX_ITEMS)

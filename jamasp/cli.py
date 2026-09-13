@@ -116,7 +116,8 @@ def ingest(no_digest, no_flash, db_path, config_dir):
     db_mod.set_meta(conn, "last_ingest_at", db_mod.utcnow())
     flashes = {}
     if not no_flash:
-        flashes = flash_mod.run_flash(conn, settings, sources)
+        flashes = flash_mod.run_flash(conn, settings, sources,
+                                      config_dir=Path(config_dir))
     click.echo(
         f"ingest: {new_items} new items ({joined} clustered), "
         f"{prices_n} price snapshots, {events_n} events, {ledes} ledes, "
@@ -185,7 +186,8 @@ def flash(dry_run, db_path, config_dir):
     """Publish new gold items to the Telegram news channel (one pass)."""
     conn, sources, settings = _common(db_path, config_dir)
     stats = flash_mod.run_flash(
-        conn, settings, sources, emit=click.echo, dry_run=dry_run
+        conn, settings, sources, emit=click.echo, dry_run=dry_run,
+        config_dir=Path(config_dir),
     )
     click.echo(_flash_line(stats))
 
@@ -202,7 +204,8 @@ def flash_rollup(dry_run, db_path, config_dir):
     """
     conn, _, settings = _common(db_path, config_dir)
     stats = flash_mod.run_rollup(
-        conn, settings, emit=click.echo, dry_run=dry_run
+        conn, settings, emit=click.echo, dry_run=dry_run,
+        config_dir=Path(config_dir),
     )
     click.echo(
         f"rollup: {stats['items']} items, {stats['sent']} sent, "

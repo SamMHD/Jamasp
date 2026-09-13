@@ -1,5 +1,6 @@
 import sqlite3
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 from jamasp import db, flash
 from jamasp.ingest import rss
@@ -1229,3 +1230,70 @@ def test_run_flash_glosses_the_write_prompt(tmp_path, monkeypatch):
     write_prompts = [p for cmd, p in seen if cmd == ["fake-write"]]
     assert write_prompts, "the write model was never called"
     assert any("فدرال رزرو" in p for p in write_prompts)
+
+
+def _config_dir(tmp_path, glossary: str | None):
+    """A config directory holding everything the flash pass reads except,
+    optionally, the glossary."""
+    cfg = tmp_path / "config"
+    cfg.mkdir(exist_ok=True)
+    (cfg / "weights.yaml").write_text(
+        Path("config/weights.yaml").read_text(encoding="utf-8"),
+        encoding="utf-8")
+    if glossary is not None:
+        (cfg / "glossary.fa.yaml").write_text(glossary, encoding="utf-8")
+    return cfg
+
+
+def test_flash_reads_the_glossary_from_the_config_dir(tmp_path, monkeypatch):
+    """The glossary must come from the same --config-dir as the settings, not
+    from whatever is next to the process's working directory."""
+    no_extract(monkeypatch)
+    conn = db.connect(tmp_path / "t.db")
+    (one,) = seed(conn, [("reuters", "Gold hits record", 1)])
+    prompts = []
+
+    def capture(cmd, prompt):
+        prompts.append(prompt)
+        return model({one: {"gold": True, "dup_of": None}})(cmd, prompt)
+
+    flash.run_flash(
+        conn, SETTINGS, SOURCES, post=FakePoster(), run_model=capture,
+        config_dir=_config_dir(tmp_path, "Chartreuse: سبزآبی\n"),
+    )
+    assert any("سبزآبی" in p for p in prompts)
+
+
+def test_flash_survives_a_missing_glossary(tmp_path, monkeypatch):
+    """The glossary became a hard runtime dependency of flash on this branch,
+    and run_flash's blanket except would have swallowed the read error into
+    source_errors — silently disabling the live Telegram pipeline."""
+    no_extract(monkeypatch)
+    conn = db.connect(tmp_path / "t.db")
+    (one,) = seed(conn, [("reuters", "Gold hits record", 1)])
+    poster = FakePoster()
+
+    stats = flash.run_flash(
+        conn, SETTINGS, SOURCES, post=poster,
+        run_model=model({one: {"gold": True, "dup_of": None}}),
+        config_dir=_config_dir(tmp_path, None),
+    )
+    assert stats["posted"] == 1
+    assert [c[0] for c in poster.calls] == ["send"]
+    # degraded, and it says so where an operator can find it
+    assert conn.execute(
+        "SELECT COUNT(*) c FROM source_errors WHERE error LIKE '%glossary%'"
+    ).fetchone()["c"] == 1
+
+
+def test_rollup_survives_a_missing_glossary(tmp_path, monkeypatch):
+    conn = db.connect(tmp_path / "t.db")
+    ids = seed(conn, [("reuters", "A", 1), ("cnbc", "B", 2),
+                      ("reuters", "C", 3)])
+    _hold(conn, ids)
+    poster = FakePoster()
+    stats = flash.run_rollup(
+        conn, SETTINGS, post=poster, run_model=rollup_model(),
+        config_dir=_config_dir(tmp_path, None),
+    )
+    assert stats["sent"] == 1
