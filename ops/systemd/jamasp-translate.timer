@@ -1,0 +1,11 @@
+[Unit]
+Description=Run the Jamasp translate pass every 10 minutes
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=10min
+# OnUnitActiveSec rather than OnCalendar so a slow pass cannot stack against
+# the next tick: the interval is measured from the end of the last run.
+
+[Install]
+WantedBy=timers.target

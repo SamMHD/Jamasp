@@ -24,9 +24,10 @@ from jamasp import predictions as predictions_mod
 from jamasp import pricesummary as pricesummary_mod
 from jamasp import runner as runner_mod
 from jamasp import signals as signals_mod
+from jamasp import translate as translate_mod
 from jamasp import wakeup as wakeup_mod
 from jamasp import watchdog as watchdog_mod
-from jamasp.config import load_settings, load_sources, load_weights
+from jamasp.config import load_glossary, load_settings, load_sources, load_weights
 from jamasp.ingest import bars as bars_mod
 from jamasp.ingest import calendar as calendar_mod
 from jamasp.ingest import prices as prices_mod
@@ -115,7 +116,8 @@ def ingest(no_digest, no_flash, db_path, config_dir):
     db_mod.set_meta(conn, "last_ingest_at", db_mod.utcnow())
     flashes = {}
     if not no_flash:
-        flashes = flash_mod.run_flash(conn, settings, sources)
+        flashes = flash_mod.run_flash(conn, settings, sources,
+                                      config_dir=Path(config_dir))
     click.echo(
         f"ingest: {new_items} new items ({joined} clustered), "
         f"{prices_n} price snapshots, {events_n} events, {ledes} ledes, "
@@ -184,7 +186,8 @@ def flash(dry_run, db_path, config_dir):
     """Publish new gold items to the Telegram news channel (one pass)."""
     conn, sources, settings = _common(db_path, config_dir)
     stats = flash_mod.run_flash(
-        conn, settings, sources, emit=click.echo, dry_run=dry_run
+        conn, settings, sources, emit=click.echo, dry_run=dry_run,
+        config_dir=Path(config_dir),
     )
     click.echo(_flash_line(stats))
 
@@ -201,7 +204,8 @@ def flash_rollup(dry_run, db_path, config_dir):
     """
     conn, _, settings = _common(db_path, config_dir)
     stats = flash_mod.run_rollup(
-        conn, settings, emit=click.echo, dry_run=dry_run
+        conn, settings, emit=click.echo, dry_run=dry_run,
+        config_dir=Path(config_dir),
     )
     click.echo(
         f"rollup: {stats['items']} items, {stats['sent']} sent, "
@@ -210,6 +214,60 @@ def flash_rollup(dry_run, db_path, config_dir):
         f"{stats.get('skipped_locked', 0)} skipped (locked), "
         f"{stats['errors']} errors"
     )
+
+
+def _translate_line(stats: dict) -> str:
+    """One-line summary of a translate pass."""
+    if stats.get("dry_run"):
+        return (f"dry run: {stats['pending_rows']} rows,"
+                f" {stats['pending_events']} events,"
+                f" {stats['pending_reports']} reports pending")
+    rows, events, docs = stats["rows"], stats["events"], stats["docs"]
+    return (
+        f"reused {stats['reused']}; "
+        f"rows {rows.get('translated', 0)}/{rows.get('failed', 0)} in"
+        f" {rows.get('batches', 0)} batches; "
+        f"events {events.get('translated', 0)}/{events.get('failed', 0)}; "
+        f"docs {docs.get('translated', 0)}/{docs.get('failed', 0)}"
+        + (f" ({docs['skipped']} deferred to the next tick)"
+           if docs.get("skipped") else "")
+    )
+
+
+@main.command()
+@click.option("--dry-run", is_flag=True, help="report what would be translated")
+@click.option("--force", is_flag=True,
+              help="re-translate in-window rows, events and documents even"
+                   " when unchanged, and re-arm rows the attempt cap"
+                   " abandoned (Persian copied from a flash is left alone;"
+                   " the per-run document ceiling does not apply, so this"
+                   " does the whole tree in one run and can be slow)")
+@click.option("--only", type=click.Choice(["rows", "events", "docs"]),
+              help="run one track (rows always includes the flash reuse pass)")
+@click.option("--check", "check_only", is_flag=True,
+              help="verify the translator is installed and configured")
+@db_opt
+@cfg_opt
+def translate(dry_run, force, only, check_only, db_path, config_dir):
+    """Fill Persian renderings of everything the panel renders."""
+    conn, _, settings = _common(db_path, config_dir)
+    problem = translate_mod.check(settings["translate"])
+    if check_only:
+        if problem:
+            raise click.ClickException(problem)
+        click.echo("translate: ok")
+        return
+    if problem and not dry_run:
+        raise click.ClickException(problem)
+    stats = translate_mod.run_translate(
+        conn,
+        settings,
+        glossary=load_glossary(Path(config_dir) / "glossary.fa.yaml"),
+        dry_run=dry_run,
+        force=force,
+        only=only,
+    )
+    click.echo(_translate_line(stats))
 
 
 @main.command()

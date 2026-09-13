@@ -6,8 +6,9 @@ import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from jamasp import runner
+from jamasp import runner, translate as translate_mod
 from jamasp.db import get_meta, utcnow
+from jamasp.translate import _since
 
 DUBAI = timezone(timedelta(hours=4))
 INGEST_STALE_MINUTES = 60
@@ -50,6 +51,16 @@ WEIGHT_FIT_STALE_DAYS = 3
 # What to do about it, appended to every weights-pipeline violation — same
 # reasoning as _REAUTH below.
 _WEIGHTS = "check jamasp-weights.service"
+
+# Within the translate window, a row that has been untranslated this long after
+# publication means the 10-minute translate timer is not doing its job. Six
+# ticks of slack: a backlog drains newest-first, so a burst of news can
+# legitimately leave an older row waiting for a few ticks. Only rows inside the
+# window are checked; rows older than window_days are never revisited by design
+# and do not trigger this probe (see the abandoned probe below for rows that
+# permanently failed).
+TRANSLATE_BACKLOG_MINUTES = 45
+_TRANSLATE = "check jamasp-translate.service and `jamasp translate --check`"
 
 # What to do about it, appended to every credentials violation. An alert that
 # names the fix ends the incident; one that does not costs days (docs/todo/007).
@@ -129,6 +140,7 @@ def check(
     reports_dir: Path,
     now: str | None = None,
     credentials_path: Path | None = None,
+    translate_window_days: int | None = None,
 ) -> list[str]:
     now_dt = _parse(now or utcnow())
     violations: list[str] = []
@@ -188,6 +200,51 @@ def check(
         if violation:
             violations.append(violation)
 
+    # Both translate probes gate on evidence that the job has actually RUN on
+    # this host, not on it being configured. `config/settings.yaml` carries the
+    # `translate:` block from the day the job shipped while
+    # jamasp-translate.timer stays deliberately disabled until host volume is
+    # measured (the design spec's Risks section), so a config-gated probe
+    # alerts the desk daily about a backlog for a job nobody has asked to run.
+    # `jamasp translate` stamps meta.last_translate_at on every completed run,
+    # the same shape as last_ingest_at above.
+    translate_has_run = get_meta(conn, "last_translate_at") is not None
+
+    # A translate run whose every batch fails still exits zero, so the unit's
+    # OnFailure alert cannot see it. Backlog is the signal that can. Only check
+    # rows inside the translate window; rows older than window_days are never
+    # revisited by design and do not trigger this probe.
+    if translate_has_run and translate_window_days is not None:
+        threshold = (now_dt - timedelta(minutes=TRANSLATE_BACKLOG_MINUTES)).strftime(
+            "%Y-%m-%dT%H:%M:%SZ")
+        window_bound = _since(translate_window_days, now)
+        backlog = conn.execute(
+            "SELECT COUNT(*) FROM items"
+            " WHERE headline_fa IS NULL AND fa_attempts < ? AND published_at < ?"
+            " AND published_at >= ?",
+            (translate_mod.MAX_ATTEMPTS, threshold, window_bound),
+        ).fetchone()[0]
+        if backlog:
+            violations.append(
+                f"translate backlog: {backlog} items untranslated"
+                f" > {TRANSLATE_BACKLOG_MINUTES} min after publication; {_TRANSLATE}")
+
+    # A row at the attempt cap is abandoned regardless of the window, so this
+    # is checked whether or not window_days was supplied — but still only once
+    # the job has run: rows cannot have been abandoned by a job that has never
+    # attempted them.
+    abandoned = 0
+    if translate_has_run:
+        abandoned = conn.execute(
+            "SELECT COUNT(*) FROM items"
+            " WHERE headline_fa IS NULL AND fa_attempts >= ?",
+            (translate_mod.MAX_ATTEMPTS,),
+        ).fetchone()[0]
+    if abandoned:
+        violations.append(
+            f"translate gave up on {abandoned} items after"
+            f" {translate_mod.MAX_ATTEMPTS} attempts; {_TRANSLATE}")
+
     return violations
 
 
@@ -198,8 +255,10 @@ def run(
     now: str | None = None,
     credentials_path: Path | None = None,
 ) -> list[str]:
+    translate_window = settings.get("translate", {}).get("window_days")
     violations = check(
-        conn, reports_dir, now=now, credentials_path=credentials_path
+        conn, reports_dir, now=now, credentials_path=credentials_path,
+        translate_window_days=translate_window
     )
     if violations:
         runner._notify_safe(

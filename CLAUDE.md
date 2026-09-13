@@ -36,6 +36,7 @@ for the sage-advisor of the Shahnameh: measured, far-sighted, never breathless.
 | `uv run jamasp ingest` | refresh sources (only if inbox seems stale) |
 | `uv run jamasp flash [--dry-run]` | publish top-tier gold items to the Telegram news channel (runs automatically inside `ingest`) |
 | `uv run jamasp flash-rollup [--dry-run]` | send one Persian roundup of held middle-tier items (own timer, 4x/day) |
+| `uv run jamasp translate` | fill Persian renderings for the panel (own timer, 10-min) |
 | `uv run jamasp calendar` | upcoming economic events (UTC + Dubai), high/medium impact |
 | `uv run jamasp bars backfill` | refresh OHLC bars (idempotent; also the daily refresh) |
 | `uv run jamasp signals refresh` | recompute current technical signal states |
@@ -52,10 +53,10 @@ for the sage-advisor of the Shahnameh: measured, far-sighted, never breathless.
 
 ## Deployment
 
-Jamasp runs on an always-on Linux host: eight systemd timers — 15-minute
+Jamasp runs on an always-on Linux host: nine systemd timers — 15-minute
 ingest, 5-minute dispatcher, daily brief + daily watchdog, 2-hourly scan,
-weekly retro, the 4x-daily news-channel rollup, and a daily weights refit —
-drive `jamasp` CLI commands, with every agent run
+weekly retro, the 4x-daily news-channel rollup, a daily weights refit, and
+the 10-minute translate pass — drive `jamasp` CLI commands, with every agent run
 (fixed timers and dispatched wakeups alike) wrapped by `jamasp run`, which
 enforces the daily run cap, retry-with-one-retry, and per-run-type
 timeouts. The full runbook — including the two things that will bite you
@@ -81,6 +82,14 @@ reach the channel while staying in the DB for `inbox`, the brief and the scan. T
 stage, not an agent run: it consumes no agent-run budget and needs no
 supervision. The desk chat stays reserved for briefs, scan alerts, and failure
 notices.
+
+A separate 10-minute `translate` timer fills the Persian the panel renders:
+`_fa` columns on `items` and `events`, and `.fa` sidecars beside the documents
+agent runs write. It reuses the Persian the flash pass already produced before
+calling a model, translates through `codex` rather than Claude so it never
+competes for the agent-run budget, and — like flash — is a deterministic
+pipeline stage needing no supervision. Reports and state files stay English:
+translation is presentation only, and no analysis run ever reads Persian.
 
 ## Working on Jamasp itself
 

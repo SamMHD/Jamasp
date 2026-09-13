@@ -209,6 +209,28 @@ ADDED_COLUMNS = (
     ("signal_states", "source", "TEXT NOT NULL DEFAULT 'bars'"),
     # bars shipped without `source` too; same reason, same fix.
     ("bars", "source", "TEXT NOT NULL DEFAULT 'yahoo'"),
+    # Panel i18n. Filled by `jamasp translate`; read by the panel from PR 2.
+    # fa_source distinguishes Persian copied from a flash (editorial, written
+    # for the news channel) from Persian a model translated (faithful to the
+    # headline). An audit that cannot tell them apart cannot act on a report
+    # that the channel and the panel read differently.
+    ("items", "headline_fa", "TEXT"),
+    ("items", "lede_fa", "TEXT"),
+    ("items", "fa_source", "TEXT"),
+    ("items", "fa_at", "TEXT"),
+    ("items", "fa_attempts", "INTEGER NOT NULL DEFAULT 0"),
+    ("items", "fa_error", "TEXT"),
+    # When the last attempt FAILED, which is a different fact from fa_at
+    # ("when Persian was written") and is what the translate job's retry
+    # backoff is keyed off. A separate column rather than overloading fa_at:
+    # the panel reads fa_at as the age of a translation, and a row whose
+    # fa_at moved without any Persian behind it would read as fresh.
+    ("items", "fa_failed_at", "TEXT"),
+    ("events", "title_fa", "TEXT"),
+    ("events", "fa_at", "TEXT"),
+    ("events", "fa_attempts", "INTEGER NOT NULL DEFAULT 0"),
+    ("events", "fa_error", "TEXT"),
+    ("events", "fa_failed_at", "TEXT"),
 )
 
 

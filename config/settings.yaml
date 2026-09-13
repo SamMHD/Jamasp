@@ -52,3 +52,32 @@ flash:
   # at the head of the next window.
   rollup_max_items: 20
   rollup_cmd: ["claude", "-p", "--model", "sonnet"]
+translate:
+  # Panel i18n. Deterministic pipeline stage on its own 10-minute timer:
+  # consumes no agent-run budget, and never wrapped by `jamasp run`.
+  #
+  # codex rather than claude because translation is the highest-volume model
+  # consumer in the system and must not compete with the agent-run cap or the
+  # flash pass for Claude quota. `protocol` picks how the answer is read:
+  # 'codex' uses --output-schema/-o files, 'stdout' parses stdout (claude -p).
+  cmd: ["codex", "exec", "--ephemeral", "--skip-git-repo-check",
+        "--ignore-user-config", "-s", "read-only"]
+  protocol: codex
+  timeout_seconds: 180
+  # Cost knobs. window_days matches the map's widest window; everything older
+  # renders English-with-marker in the panel. max_batches_per_run bounds one
+  # tick — a larger backlog drains over subsequent ticks, newest first.
+  window_days: 7
+  batch_size: 20
+  max_batches_per_run: 6
+  # The same kind of ceiling for the document pass, counted across the whole
+  # of it (stance sections, playbook, watchlist entries, prediction lines and
+  # reports together). Without one, a document the translator always refuses
+  # costs a call every tick forever, and the first run after a deploy makes
+  # one serial call per historical prediction line. 10 covers a brief that
+  # rewrote every stance section plus its report in a single tick; anything
+  # left over is picked up ten minutes later. Keep this consistent with
+  # TimeoutStartSec in ops/systemd/jamasp-translate.service.
+  max_doc_calls_per_run: 10
+  # Spec decision 18: new reports only. Set to the date this shipped.
+  reports_since: "2026-09-13"

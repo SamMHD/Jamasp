@@ -2,10 +2,12 @@ import json
 import sys
 from pathlib import Path
 
+import yaml
 from click.testing import CliRunner
 
-from jamasp import db
+from jamasp import cli, db
 from jamasp.cli import main
+from jamasp.db import utcnow
 from jamasp.ingest import rss
 from jamasp.models import Item
 
@@ -684,3 +686,105 @@ def test_weights_fit_reports_when_there_is_not_enough_history(tmp_path):
     # No file, rather than an empty one: a weights.json full of nothing is
     # indistinguishable to the panel from a fit that produced neutral weights.
     assert not (tmp_path / "w.json").exists()
+
+
+def test_translate_dry_run_reports_pending_and_writes_nothing(tmp_path, monkeypatch):
+    db_path = tmp_path / "t.db"
+    conn = db.connect(db_path)
+    conn.execute(
+        "INSERT INTO items (id, source, published_at, headline, url, topic,"
+        " fetched_at) VALUES ('i1','a',?,'Gold climbs','https://e/1','gold',?)",
+        (utcnow(), utcnow()),
+    )
+    conn.commit()
+    conn.close()
+
+    result = CliRunner().invoke(
+        cli.main,
+        ["translate", "--dry-run", "--db", str(db_path), "--config-dir", "config"],
+    )
+    assert result.exit_code == 0, result.output
+    assert "1 row" in result.output
+
+    conn = db.connect(db_path)
+    assert conn.execute("SELECT headline_fa FROM items").fetchone()[0] is None
+
+
+def test_translate_check_reports_a_broken_translator(tmp_path):
+    cfgdir = tmp_path / "config"
+    cfgdir.mkdir()
+    (cfgdir / "sources.yaml").write_text(
+        Path("config/sources.yaml").read_text(encoding="utf-8"), encoding="utf-8")
+    (cfgdir / "glossary.fa.yaml").write_text("Fed: فدرال رزرو\n", encoding="utf-8")
+    settings = yaml.safe_load(Path("config/settings.yaml").read_text(encoding="utf-8"))
+    settings["translate"]["cmd"] = ["not-a-real-binary-7z1"]
+    (cfgdir / "settings.yaml").write_text(
+        yaml.safe_dump(settings, allow_unicode=True), encoding="utf-8")
+
+    result = CliRunner().invoke(
+        cli.main,
+        ["translate", "--check", "--db", str(tmp_path / "t.db"),
+         "--config-dir", str(cfgdir)],
+    )
+    assert result.exit_code != 0
+    assert "not-a-real-binary-7z1" in result.output
+
+
+def test_translate_dry_run_survives_a_broken_translator(tmp_path):
+    """The other half of the --check test above: --dry-run must not raise
+    even when check() finds a problem — this is the guard (`if problem and
+    not dry_run:`) that lets an operator inspect the translation backlog on a
+    fresh host where codex isn't authenticated yet. Built against a config
+    directory with a nonexistent translator binary rather than the real
+    config/settings.yaml, so the assertion holds regardless of whether codex
+    happens to be installed on the machine running the test.
+    """
+    cfgdir = tmp_path / "config"
+    cfgdir.mkdir()
+    (cfgdir / "sources.yaml").write_text(
+        Path("config/sources.yaml").read_text(encoding="utf-8"), encoding="utf-8")
+    (cfgdir / "glossary.fa.yaml").write_text("Fed: فدرال رزرو\n", encoding="utf-8")
+    settings = yaml.safe_load(Path("config/settings.yaml").read_text(encoding="utf-8"))
+    settings["translate"]["cmd"] = ["not-a-real-binary-7z1"]
+    (cfgdir / "settings.yaml").write_text(
+        yaml.safe_dump(settings, allow_unicode=True), encoding="utf-8")
+
+    db_path = tmp_path / "t.db"
+    conn = db.connect(db_path)
+    conn.execute(
+        "INSERT INTO items (id, source, published_at, headline, url, topic,"
+        " fetched_at) VALUES ('i1','a',?,'Gold climbs','https://e/1','gold',?)",
+        (utcnow(), utcnow()),
+    )
+    conn.commit()
+    conn.close()
+
+    dry = CliRunner().invoke(
+        cli.main,
+        ["translate", "--dry-run", "--db", str(db_path), "--config-dir", str(cfgdir)],
+    )
+    assert dry.exit_code == 0, dry.output
+    assert "1 row" in dry.output
+
+    conn = db.connect(db_path)
+    assert conn.execute("SELECT headline_fa FROM items").fetchone()[0] is None
+    conn.close()
+
+    # Pinned side by side: the same broken config, without --dry-run,
+    # still refuses via --check.
+    check = CliRunner().invoke(
+        cli.main,
+        ["translate", "--check", "--db", str(db_path), "--config-dir", str(cfgdir)],
+    )
+    assert check.exit_code != 0
+    assert "not-a-real-binary-7z1" in check.output
+
+
+def test_the_translate_line_only_claims_a_deferral_when_there_was_one():
+    """--force has no document ceiling, so it defers nothing and must not tell
+    the operator that some of their tree is queued for a later tick."""
+    base = {"reused": 0, "rows": {}, "events": {}}
+    assert "deferred" not in cli._translate_line(
+        {**base, "docs": {"translated": 7, "failed": 0, "skipped": 0}})
+    assert "4 deferred" in cli._translate_line(
+        {**base, "docs": {"translated": 3, "failed": 0, "skipped": 4}})

@@ -428,3 +428,36 @@ def test_parse_decide_response_absent_theme_falls_back_to_other():
     out = flashtext.parse_decide_response(
         '{"a": {"gold": true, "tier": 3}}', THEMES)
     assert out["a"]["theme"] == "other"
+
+
+def test_write_prompt_carries_the_glossary_when_given():
+    prompt = flashtext.build_write_prompt(
+        "Fed holds rates", "Reuters", "2026-09-13T10:00:00Z", "Body.",
+        glossary={"Fed": "فدرال رزرو"},
+    )
+    assert "فدرال رزرو" in prompt
+
+
+def test_write_prompt_without_a_glossary_is_unchanged():
+    args = ("Fed holds rates", "Reuters", "2026-09-13T10:00:00Z", "Body.")
+    assert flashtext.build_write_prompt(*args) == flashtext.build_write_prompt(
+        *args, glossary=None)
+
+
+def test_write_prompt_keeps_the_glossary_outside_the_article_fence():
+    """Our instructions must never sit inside the untrusted-text fence."""
+    prompt = flashtext.build_write_prompt(
+        "H", "S", "2026-09-13T10:00:00Z", "Body.",
+        glossary={"Fed": "فدرال رزرو"},
+    )
+    fence_start = prompt.index(flashtext.ARTICLE_OPEN)
+    assert prompt.index("فدرال رزرو") < fence_start
+
+
+def test_rollup_prompt_carries_the_glossary():
+    # ROLLUP_ITEMS' shape: build_rollup_prompt reads id/source/headline/lede,
+    # not title_fa/url — there is no rendered-Persian shape at this layer.
+    items = [{"id": "a", "source": "Reuters", "headline": "Fed holds rates",
+              "lede": "The Fed held rates steady."}]
+    prompt = flashtext.build_rollup_prompt(items, glossary={"Fed": "فدرال رزرو"})
+    assert "فدرال رزرو" in prompt
