@@ -1289,3 +1289,85 @@ def test_the_ordinary_tick_still_stops_at_the_ceiling_and_converges(tmp_path):
     assert translate.translate_docs(
         tmp_path, cfg, GLOSSARY, counting_doc_run(after))["skipped"] == 0
     assert after == []
+
+
+def test_a_stance_sidecar_holding_english_does_not_match_the_source(tmp_path):
+    """A section that fails with no previous Persian lands in the sidecar as
+    its ENGLISH body under an empty per-section hash. The whole-file hash in
+    the front matter must therefore NOT match stance.md: PR 2's readStanceFa
+    treats a mismatch as no sidecar and falls back to English wholesale with
+    the EN marker, whereas a matching hash would render English as Persian
+    with no marker at all. It self-heals on the next successful tick — but not
+    before the panel has shown the wrong thing without saying so."""
+    src = tmp_path / "stance.md"
+    src.write_text(STANCE_MD, encoding="utf-8")
+    side = tmp_path / "stance.fa.md"
+
+    def one_section_fails(prompt, schema):
+        if "CPI" in prompt:
+            raise modelrun.ModelError("flips boom")
+        return {"text": "FA:" + prompt.split("---\n", 1)[1]}
+
+    stats = translate.translate_stance(src, side, GLOSSARY, one_section_fails)
+    assert stats == {"translated": 2, "failed": 1}
+
+    text = side.read_text(encoding="utf-8")
+    assert "- A hot CPI print." in text          # the English body really is there
+    meta, _ = tt.parse_front_matter(text)
+    assert meta["src_hash"] != tt.src_hash(STANCE_MD)
+
+    # And the healthy case still stamps the real hash, so the Persian stance
+    # renders at all — the whole point of writing it in the first place.
+    stats = translate.translate_stance(src, side, GLOSSARY, doc_run())
+    assert stats == {"translated": 1, "failed": 0}
+    meta, _ = tt.parse_front_matter(side.read_text(encoding="utf-8"))
+    assert meta["src_hash"] == tt.src_hash(STANCE_MD)
+
+
+def test_a_budget_deferred_stance_section_does_not_match_the_source(tmp_path):
+    """Same degraded state by the other route: an ordinary tick that runs out
+    of document calls before it reaches a section with no Persian yet."""
+    src = tmp_path / "stance.md"
+    src.write_text(STANCE_MD, encoding="utf-8")
+    side = tmp_path / "stance.fa.md"
+
+    stats = translate.translate_stance(src, side, GLOSSARY, doc_run(),
+                                       budget=translate.DocBudget(1))
+    assert stats == {"translated": 1, "failed": 0}
+    meta, _ = tt.parse_front_matter(side.read_text(encoding="utf-8"))
+    assert meta["src_hash"] != tt.src_hash(STANCE_MD)
+
+    translate.translate_stance(src, side, GLOSSARY, doc_run(),
+                               budget=translate.DocBudget(5))
+    meta, _ = tt.parse_front_matter(side.read_text(encoding="utf-8"))
+    assert meta["src_hash"] == tt.src_hash(STANCE_MD)
+
+
+def test_a_stance_sidecar_of_stale_persian_still_matches_the_source(tmp_path):
+    """The line between the two degraded states, and it is deliberate. A
+    failed section that HAS previous Persian keeps it, under its old
+    per-section hash; the sidecar's sections still match the source in count
+    and order, so the panel renders Persian with one stale section rather than
+    dropping the whole Stance panel to English. Only an English body — an
+    empty per-section hash — breaks the top-level hash."""
+    src = tmp_path / "stance.md"
+    src.write_text(STANCE_MD, encoding="utf-8")
+    side = tmp_path / "stance.fa.md"
+    translate.translate_stance(src, side, GLOSSARY, doc_run("OLD:"))
+
+    changed = STANCE_MD.replace(
+        "Gold is bid.", "Gold is offered."
+    ).replace("- A hot CPI print.", "- A cooling CPI print.")
+    src.write_text(changed, encoding="utf-8")
+
+    def flips_fails(prompt, schema):
+        if "cooling" in prompt:
+            raise modelrun.ModelError("flips boom")
+        return {"text": "NEW:" + prompt.split("---\n", 1)[1]}
+
+    assert translate.translate_stance(
+        src, side, GLOSSARY, flips_fails) == {"translated": 1, "failed": 1}
+    text = side.read_text(encoding="utf-8")
+    assert "OLD:" in text                       # stale Persian, not English
+    meta, _ = tt.parse_front_matter(text)
+    assert meta["src_hash"] == tt.src_hash(changed)

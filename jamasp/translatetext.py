@@ -209,6 +209,8 @@ def render_stance_sidecar(
     rather than defaulted because the panel compares the front-matter hash
     against `stance.md` and treats a mismatch as no sidecar at all — an empty
     one mismatches every time, which is a Persian stance that never renders.
+    That is also why a caller with a section still in its English fallback
+    passes the empty hash on purpose: see `translate.translate_stance`.
     """
     out = [render_front_matter(source_hash, translated_at, translator)]
     for heading, section_hash, body in sections:

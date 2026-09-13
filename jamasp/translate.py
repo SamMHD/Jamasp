@@ -432,7 +432,10 @@ def translate_stance(
 
     A section that fails keeps whatever Persian it already had, and the sidecar
     is rewritten only when something actually changed — so a total failure
-    leaves the previous file byte-identical rather than half-updated.
+    leaves the previous file byte-identical rather than half-updated. A section
+    that has no Persian to keep falls back to its English body, and the
+    front-matter hash then deliberately does not match the source; see the
+    comment above the write.
     """
     if not source.exists():
         return {"translated": 0, "failed": 0}
@@ -485,6 +488,22 @@ def translate_stance(
             ))
             failed += 1
 
+    # The whole-file hash goes in the front matter only when every section
+    # actually carries Persian. A section that failed or was deferred with no
+    # previous translation is written out as its ENGLISH body under an empty
+    # per-section hash (the two paths above) — and an empty per-section hash is
+    # the only way one occurs, since sha256 of even an empty body is not empty.
+    # Stamping the real hash over that would tell the panel the sidecar is
+    # current, and PR 2's reader would render English text as Persian with no
+    # EN marker. A non-matching hash makes the reader fall back to English
+    # wholesale, marker and all, until the next tick fills the section in.
+    #
+    # Stale PERSIAN is the other degraded state and it keeps the real hash on
+    # purpose: the sections still match the source in count and order, so one
+    # stale section is better than dropping the whole panel, and its preserved
+    # per-section hash keeps it queued. Do not conflate the two.
+    stamp = "" if any(not h for _, h, _ in out) else whole
+
     # Written when the computed sidecar differs from the one on disk, NOT when
     # something was translated. A stance edit that merely empties a section, or
     # drops one while leaving the rest byte-identical, translates nothing — and
@@ -499,11 +518,11 @@ def translate_stance(
     # stamping it with this source's hash would present stale Persian as
     # current. A partial failure does rewrite — the succeeded sections are
     # worth having — and the failed section keeps its old hash, so it retries.
-    if out != prior or (not failed and prior_meta.get("src_hash") != whole):
+    if out != prior or (not failed and prior_meta.get("src_hash") != stamp):
         translatetext.write_atomic(
             sidecar,
             translatetext.render_stance_sidecar(
-                out, now or utcnow(), translator, whole),
+                out, now or utcnow(), translator, stamp),
         )
     return {"translated": translated, "failed": failed}
 
