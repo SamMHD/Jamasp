@@ -678,3 +678,79 @@ def test_translate_docs_is_idempotent(tmp_path):
         raise AssertionError("should not have been called")
 
     assert translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY, boom)["translated"] == 0
+
+
+FULL_CFG = {
+    "cmd": ["true"], "protocol": "codex", "timeout_seconds": 30,
+    "window_days": 7, "batch_size": 20, "max_batches_per_run": 6,
+    "reports_since": "2026-09-01",
+}
+
+
+def test_check_reports_a_missing_config_key():
+    assert "batch_size" in translate.check({k: v for k, v in FULL_CFG.items()
+                                            if k != "batch_size"})
+
+
+def test_check_reports_an_unknown_protocol():
+    assert "protocol" in translate.check({**FULL_CFG, "protocol": "smoke"})
+
+
+def test_check_reports_a_missing_binary():
+    assert "not-a-real-binary-7z1" in translate.check(
+        {**FULL_CFG, "cmd": ["not-a-real-binary-7z1"]})
+
+
+def test_check_passes_on_a_good_config():
+    assert translate.check(FULL_CFG) is None
+
+
+def test_run_translate_dry_run_calls_no_model(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    seed(conn, [("One", 1)])
+    build_state(tmp_path)
+
+    def boom(prompt, schema):
+        raise AssertionError("dry run must not call a model")
+
+    stats = translate.run_translate(
+        conn, {"translate": {**FULL_CFG, "reports_since": "2026-09-01"}},
+        root=tmp_path, glossary=GLOSSARY, run=boom, dry_run=True)
+    assert stats["pending_rows"] == 1
+    assert conn.execute("SELECT headline_fa FROM items").fetchone()[0] is None
+    assert not (tmp_path / "state" / "stance.fa.md").exists()
+
+
+def test_run_translate_only_rows_skips_documents(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    seed(conn, [("One", 1)])
+    build_state(tmp_path)
+    translate.run_translate(
+        conn, {"translate": {**FULL_CFG, "reports_since": "2026-09-01"}},
+        root=tmp_path, glossary=GLOSSARY, run=fake_run(), only="rows")
+    assert conn.execute("SELECT headline_fa FROM items").fetchone()[0] is not None
+    assert not (tmp_path / "state" / "stance.fa.md").exists()
+
+
+def test_run_translate_only_rows_still_runs_the_reuse_pass(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    (one,) = seed(conn, [("One", 1)])
+    add_flash(conn, one)
+    calls = []
+    translate.run_translate(
+        conn, {"translate": {**FULL_CFG, "reports_since": "2026-09-01"}},
+        root=tmp_path, glossary=GLOSSARY,
+        run=fake_run(calls=calls), only="rows")
+    assert calls == []   # the flash Persian covered it; no model call
+    assert conn.execute("SELECT fa_source FROM items").fetchone()[0] == "flash"
+
+
+def test_run_translate_reports_every_pass(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    seed(conn, [("One", 1)])
+    build_state(tmp_path)
+    stats = translate.run_translate(
+        conn, {"translate": {**FULL_CFG, "reports_since": "2026-09-01"}},
+        root=tmp_path, glossary=GLOSSARY, run=fake_run())
+    for key in ("reused", "rows", "events", "docs"):
+        assert key in stats

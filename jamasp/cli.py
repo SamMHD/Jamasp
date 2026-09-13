@@ -24,9 +24,10 @@ from jamasp import predictions as predictions_mod
 from jamasp import pricesummary as pricesummary_mod
 from jamasp import runner as runner_mod
 from jamasp import signals as signals_mod
+from jamasp import translate as translate_mod
 from jamasp import wakeup as wakeup_mod
 from jamasp import watchdog as watchdog_mod
-from jamasp.config import load_settings, load_sources, load_weights
+from jamasp.config import load_glossary, load_settings, load_sources, load_weights
 from jamasp.ingest import bars as bars_mod
 from jamasp.ingest import calendar as calendar_mod
 from jamasp.ingest import prices as prices_mod
@@ -210,6 +211,53 @@ def flash_rollup(dry_run, db_path, config_dir):
         f"{stats.get('skipped_locked', 0)} skipped (locked), "
         f"{stats['errors']} errors"
     )
+
+
+def _translate_line(stats: dict) -> str:
+    """One-line summary of a translate pass."""
+    if stats.get("dry_run"):
+        return (f"dry run: {stats['pending_rows']} rows,"
+                f" {stats['pending_events']} events,"
+                f" {stats['pending_reports']} reports pending")
+    rows, events, docs = stats["rows"], stats["events"], stats["docs"]
+    return (
+        f"reused {stats['reused']}; "
+        f"rows {rows.get('translated', 0)}/{rows.get('failed', 0)} in"
+        f" {rows.get('batches', 0)} batches; "
+        f"events {events.get('translated', 0)}/{events.get('failed', 0)}; "
+        f"docs {docs.get('translated', 0)}/{docs.get('failed', 0)}"
+    )
+
+
+@main.command()
+@click.option("--dry-run", is_flag=True, help="report what would be translated")
+@click.option("--force", is_flag=True, help="retranslate even when unchanged")
+@click.option("--only", type=click.Choice(["rows", "events", "docs"]),
+              help="run one track (rows always includes the flash reuse pass)")
+@click.option("--check", "check_only", is_flag=True,
+              help="verify the translator is installed and configured")
+@db_opt
+@cfg_opt
+def translate(dry_run, force, only, check_only, db_path, config_dir):
+    """Fill Persian renderings of everything the panel renders."""
+    conn, _, settings = _common(db_path, config_dir)
+    problem = translate_mod.check(settings["translate"])
+    if check_only:
+        if problem:
+            raise click.ClickException(problem)
+        click.echo("translate: ok")
+        return
+    if problem and not dry_run:
+        raise click.ClickException(problem)
+    stats = translate_mod.run_translate(
+        conn,
+        settings,
+        glossary=load_glossary(Path(config_dir) / "glossary.fa.yaml"),
+        dry_run=dry_run,
+        force=force,
+        only=only,
+    )
+    click.echo(_translate_line(stats))
 
 
 @main.command()

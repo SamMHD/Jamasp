@@ -11,6 +11,7 @@ the daily agent-run cap.
 from __future__ import annotations
 
 import json
+import shutil
 import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -18,6 +19,7 @@ from typing import Callable, Sequence
 
 import yaml
 
+from jamasp import config as config_mod
 from jamasp import modelrun, translatetext
 from jamasp.db import utcnow
 
@@ -505,3 +507,72 @@ def translate_docs(
             report, report.with_name(report.name[:-3] + ".fa.md"),
             glossary, run, now, force=force))
     return totals
+
+
+REQUIRED_CFG_KEYS = (
+    "cmd", "protocol", "timeout_seconds",
+    "window_days", "batch_size", "max_batches_per_run", "reports_since",
+)
+
+
+def check(cfg: dict) -> str | None:
+    """Preflight: config complete, protocol known, binary present.
+
+    The codex analogue of the Claude credentials trap in CLAUDE.md. A run whose
+    auth has lapsed fails every batch identically while still exiting zero, so
+    an operator needs a way to ask "is this even wired up?" that does not
+    involve reading the journal.
+    """
+    missing = [k for k in REQUIRED_CFG_KEYS if k not in cfg]
+    if missing:
+        return f"settings.yaml translate: missing {', '.join(missing)}"
+    if cfg["protocol"] not in modelrun.PROTOCOLS:
+        return (f"settings.yaml translate.protocol {cfg['protocol']!r} unknown;"
+                f" expected one of {modelrun.PROTOCOLS}")
+    binary = (cfg["cmd"] or [""])[0]
+    if not binary or shutil.which(binary) is None:
+        return (f"translator {binary!r} is not on PATH —"
+                " install it, or point translate.cmd elsewhere")
+    return None
+
+
+def run_translate(
+    conn: sqlite3.Connection, settings: dict, root: Path = Path("."),
+    glossary: dict | None = None, run=None, now: str | None = None,
+    dry_run: bool = False, force: bool = False, only: str | None = None,
+) -> dict:
+    """One full pass. Returns per-pass counts for the CLI to print."""
+    cfg = settings["translate"]
+    if glossary is None:
+        glossary = config_mod.load_glossary()
+    if run is None:
+        def run(prompt, schema):
+            return modelrun.run_json(
+                cfg["cmd"], cfg["protocol"], prompt, schema,
+                cfg["timeout_seconds"])
+
+    want_rows = only in (None, "rows")
+    want_events = only in (None, "events")
+    want_docs = only in (None, "docs")
+
+    if dry_run:
+        return {
+            "dry_run": True,
+            "pending_rows": len(pending_rows(
+                conn, cfg["window_days"], cfg["batch_size"] * cfg["max_batches_per_run"], now)),
+            "pending_events": len(pending_events(
+                conn, cfg["window_days"], cfg["batch_size"] * cfg["max_batches_per_run"], now)),
+            "pending_reports": len(new_reports(root / "reports", cfg["reports_since"])),
+        }
+
+    stats: dict = {"reused": 0, "rows": {}, "events": {}, "docs": {}}
+    if want_rows:
+        # Always before the model pass, and not separately selectable: a rows
+        # pass that ran first would pay to translate what flash already wrote.
+        stats["reused"] = reuse_flash_persian(conn, now)
+        stats["rows"] = translate_rows(conn, cfg, glossary, run, now)
+    if want_events:
+        stats["events"] = translate_events(conn, cfg, glossary, run, now)
+    if want_docs:
+        stats["docs"] = translate_docs(root, cfg, glossary, run, now, force)
+    return stats
