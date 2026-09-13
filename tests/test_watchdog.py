@@ -277,3 +277,55 @@ def test_fires_on_the_real_2026_09_05_production_state(tmp_path):
     assert "unfitted priors" in joined
     # and it names what to look at
     assert "jamasp-weights" in joined
+
+def test_translate_backlog_violation_when_rows_sit_untranslated(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    stamp = "2026-09-13T12:00:00Z"
+    conn.execute(
+        "INSERT INTO items (id, source, published_at, headline, url, topic,"
+        " fetched_at) VALUES ('i1','a','2026-09-13T10:00:00Z','H',"
+        " 'https://e/1','gold','2026-09-13T10:00:00Z')"
+    )
+    conn.commit()
+    violations = watchdog.check(conn, tmp_path, now=stamp,
+                                credentials_path=tmp_path / "none.json")
+    assert any("translate backlog" in v for v in violations)
+
+
+def test_no_translate_violation_for_a_freshly_arrived_row(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    conn.execute(
+        "INSERT INTO items (id, source, published_at, headline, url, topic,"
+        " fetched_at) VALUES ('i1','a','2026-09-13T11:50:00Z','H',"
+        " 'https://e/1','gold','2026-09-13T11:50:00Z')"
+    )
+    conn.commit()
+    violations = watchdog.check(conn, tmp_path, now="2026-09-13T12:00:00Z",
+                                credentials_path=tmp_path / "none.json")
+    assert not any("translate backlog" in v for v in violations)
+
+
+def test_no_translate_violation_when_the_row_is_translated(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    conn.execute(
+        "INSERT INTO items (id, source, published_at, headline, headline_fa,"
+        " url, topic, fetched_at) VALUES ('i1','a','2026-09-13T10:00:00Z','H',"
+        " 'تیتر','https://e/1','gold','2026-09-13T10:00:00Z')"
+    )
+    conn.commit()
+    violations = watchdog.check(conn, tmp_path, now="2026-09-13T12:00:00Z",
+                                credentials_path=tmp_path / "none.json")
+    assert not any("translate backlog" in v for v in violations)
+
+
+def test_abandoned_rows_are_reported_separately(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    conn.execute(
+        "INSERT INTO items (id, source, published_at, headline, url, topic,"
+        " fetched_at, fa_attempts) VALUES ('i1','a','2026-09-13T11:55:00Z','H',"
+        " 'https://e/1','gold','2026-09-13T11:55:00Z', 3)"
+    )
+    conn.commit()
+    violations = watchdog.check(conn, tmp_path, now="2026-09-13T12:00:00Z",
+                                credentials_path=tmp_path / "none.json")
+    assert any("gave up" in v for v in violations)

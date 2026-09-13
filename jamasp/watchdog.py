@@ -6,7 +6,7 @@ import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from jamasp import runner
+from jamasp import runner, translate as translate_mod
 from jamasp.db import get_meta, utcnow
 
 DUBAI = timezone(timedelta(hours=4))
@@ -50,6 +50,13 @@ WEIGHT_FIT_STALE_DAYS = 3
 # What to do about it, appended to every weights-pipeline violation — same
 # reasoning as _REAUTH below.
 _WEIGHTS = "check jamasp-weights.service"
+
+# A row inside the panel's window that is still untranslated this long after
+# publication means the 10-minute translate timer is not doing its job. Six
+# ticks of slack: a backlog drains newest-first, so a burst of news can
+# legitimately leave an older row waiting for a few ticks.
+TRANSLATE_BACKLOG_MINUTES = 45
+_TRANSLATE = "check jamasp-translate.service and `jamasp translate --check`"
 
 # What to do about it, appended to every credentials violation. An alert that
 # names the fix ends the incident; one that does not costs days (docs/todo/007).
@@ -187,6 +194,30 @@ def check(
     ):
         if violation:
             violations.append(violation)
+
+    # A translate run whose every batch fails still exits zero, so the unit's
+    # OnFailure alert cannot see it. Backlog is the signal that can.
+    threshold = (now_dt - timedelta(minutes=TRANSLATE_BACKLOG_MINUTES)).strftime(
+        "%Y-%m-%dT%H:%M:%SZ")
+    backlog = conn.execute(
+        "SELECT COUNT(*) FROM items"
+        " WHERE headline_fa IS NULL AND fa_attempts < ? AND published_at < ?",
+        (translate_mod.MAX_ATTEMPTS, threshold),
+    ).fetchone()[0]
+    if backlog:
+        violations.append(
+            f"translate backlog: {backlog} items untranslated"
+            f" > {TRANSLATE_BACKLOG_MINUTES} min after publication; {_TRANSLATE}")
+
+    abandoned = conn.execute(
+        "SELECT COUNT(*) FROM items"
+        " WHERE headline_fa IS NULL AND fa_attempts >= ?",
+        (translate_mod.MAX_ATTEMPTS,),
+    ).fetchone()[0]
+    if abandoned:
+        violations.append(
+            f"translate gave up on {abandoned} items after"
+            f" {translate_mod.MAX_ATTEMPTS} attempts; {_TRANSLATE}")
 
     return violations
 
