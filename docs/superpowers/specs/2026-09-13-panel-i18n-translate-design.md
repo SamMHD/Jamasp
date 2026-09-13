@@ -171,8 +171,14 @@ Passes run in this order, and the order is load-bearing:
                     fa_at       = :now
    WHERE headline_fa IS NULL
      AND EXISTS (SELECT 1 FROM flashes f
-                 WHERE f.id = items.id AND f.status = 'delivered');
+                 WHERE f.id = items.id AND f.status = 'sent');
    ```
+
+   `'sent'` is the literal `flash.py` writes on a successful publish; a flash
+   whose message later vanished is marked `'orphaned'`, and its Persian is
+   still perfectly good text, but the narrower condition is the safer default —
+   an orphaned row means something went wrong with that story's publication and
+   it should earn its translation through the normal path.
 
    Every top- and middle-tier story is already Persian before codex is asked
    anything. This pass must run first or the rows pass pays for work already
