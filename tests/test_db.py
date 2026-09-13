@@ -209,3 +209,39 @@ def test_weight_fits_table_exists(tmp_path):
     conn = db.connect(tmp_path / "j.db")
     cols = {r[1] for r in conn.execute("PRAGMA table_info(weight_fits)")}
     assert cols == {"id", "fitted_at", "fit", "key", "beta", "se", "multiplier", "n"}
+
+
+def test_translation_columns_added_to_existing_database(tmp_path):
+    """A database created before this feature gains the columns on connect."""
+    path = tmp_path / "old.db"
+    conn = sqlite3.connect(path)
+    conn.executescript(
+        "CREATE TABLE items (id TEXT PRIMARY KEY, source TEXT NOT NULL,"
+        " published_at TEXT NOT NULL, headline TEXT NOT NULL, lede TEXT,"
+        " url TEXT NOT NULL, topic TEXT NOT NULL, cluster_id TEXT,"
+        " fetched_at TEXT NOT NULL, read_at TEXT);"
+        "CREATE TABLE events (id TEXT PRIMARY KEY, source TEXT NOT NULL,"
+        " title TEXT NOT NULL, country TEXT, impact TEXT,"
+        " starts_at TEXT NOT NULL, fetched_at TEXT NOT NULL);"
+    )
+    conn.commit()
+    conn.close()
+
+    conn = db.connect(path)
+    items = {r[1] for r in conn.execute("PRAGMA table_info(items)")}
+    events = {r[1] for r in conn.execute("PRAGMA table_info(events)")}
+    assert {"headline_fa", "lede_fa", "fa_source", "fa_at",
+            "fa_attempts", "fa_error"} <= items
+    assert {"title_fa", "fa_at", "fa_attempts", "fa_error"} <= events
+
+
+def test_fa_attempts_defaults_to_zero(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    conn.execute(
+        "INSERT INTO items (id, source, published_at, headline, url, topic,"
+        " fetched_at) VALUES ('i1','a','2026-09-13T00:00:00Z','H',"
+        " 'https://e/1','gold','2026-09-13T00:00:00Z')"
+    )
+    row = conn.execute("SELECT fa_attempts, headline_fa FROM items").fetchone()
+    assert row["fa_attempts"] == 0
+    assert row["headline_fa"] is None
