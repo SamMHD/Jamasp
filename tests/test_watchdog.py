@@ -288,7 +288,8 @@ def test_translate_backlog_violation_when_rows_sit_untranslated(tmp_path):
     )
     conn.commit()
     violations = watchdog.check(conn, tmp_path, now=stamp,
-                                credentials_path=tmp_path / "none.json")
+                                credentials_path=tmp_path / "none.json",
+                                translate_window_days=7)
     assert any("translate backlog" in v for v in violations)
 
 
@@ -329,3 +330,100 @@ def test_abandoned_rows_are_reported_separately(tmp_path):
     violations = watchdog.check(conn, tmp_path, now="2026-09-13T12:00:00Z",
                                 credentials_path=tmp_path / "none.json")
     assert any("gave up" in v for v in violations)
+
+
+def test_row_outside_translate_window_does_not_violate_when_window_supplied(tmp_path):
+    """Regression test for Critical: row 30 days old should not trigger backlog.
+
+    The probe should only report untranslated rows inside translate's window
+    (7 days by default). A row older than that is never revisited by design.
+    """
+    conn = db.connect(tmp_path / "t.db")
+    conn.execute(
+        "INSERT INTO items (id, source, published_at, headline, url, topic,"
+        " fetched_at) VALUES ('i1','a','2026-08-14T12:00:00Z','H',"
+        " 'https://e/1','gold','2026-08-14T12:00:00Z')"
+    )
+    conn.commit()
+    # Now is 2026-09-13T12:00:00Z, so 2026-08-14 is 30 days old.
+    # With translate_window_days=7, this row is far outside the window.
+    violations = watchdog.check(conn, tmp_path, now="2026-09-13T12:00:00Z",
+                                credentials_path=tmp_path / "none.json",
+                                translate_window_days=7)
+    assert not any("translate backlog" in v for v in violations)
+
+
+def test_row_inside_window_and_old_does_violate_when_window_supplied(tmp_path):
+    """Inside the 7-day window and older than 45 minutes: backlog violation."""
+    conn = db.connect(tmp_path / "t.db")
+    conn.execute(
+        "INSERT INTO items (id, source, published_at, headline, url, topic,"
+        " fetched_at) VALUES ('i1','a','2026-09-13T10:00:00Z','H',"
+        " 'https://e/1','gold','2026-09-13T10:00:00Z')"
+    )
+    conn.commit()
+    violations = watchdog.check(conn, tmp_path, now="2026-09-13T12:00:00Z",
+                                credentials_path=tmp_path / "none.json",
+                                translate_window_days=7)
+    assert any("translate backlog" in v for v in violations)
+
+
+def test_no_backlog_violation_when_window_days_is_none(tmp_path):
+    """When translate_window_days is None, skip backlog probe entirely."""
+    conn = db.connect(tmp_path / "t.db")
+    conn.execute(
+        "INSERT INTO items (id, source, published_at, headline, url, topic,"
+        " fetched_at) VALUES ('i1','a','2026-09-13T10:00:00Z','H',"
+        " 'https://e/1','gold','2026-09-13T10:00:00Z')"
+    )
+    conn.commit()
+    violations = watchdog.check(conn, tmp_path, now="2026-09-13T12:00:00Z",
+                                credentials_path=tmp_path / "none.json",
+                                translate_window_days=None)
+    assert not any("translate backlog" in v for v in violations)
+
+
+def test_abandoned_violation_still_fires_when_window_days_is_none(tmp_path):
+    """Abandoned rows violate regardless of whether window_days is provided."""
+    conn = db.connect(tmp_path / "t.db")
+    conn.execute(
+        "INSERT INTO items (id, source, published_at, headline, url, topic,"
+        " fetched_at, fa_attempts) VALUES ('i1','a','2026-09-13T11:55:00Z','H',"
+        " 'https://e/1','gold','2026-09-13T11:55:00Z', 3)"
+    )
+    conn.commit()
+    violations = watchdog.check(conn, tmp_path, now="2026-09-13T12:00:00Z",
+                                credentials_path=tmp_path / "none.json",
+                                translate_window_days=None)
+    assert any("gave up" in v for v in violations)
+
+
+def test_translate_backlog_boundary_at_exactly_threshold_minutes(tmp_path):
+    """Row at exactly TRANSLATE_BACKLOG_MINUTES does not violate; one minute older does."""
+    conn = db.connect(tmp_path / "t.db")
+    # Row published exactly 45 minutes ago (at the threshold)
+    conn.execute(
+        "INSERT INTO items (id, source, published_at, headline, url, topic,"
+        " fetched_at) VALUES ('i1','a','2026-09-13T11:15:00Z','H',"
+        " 'https://e/1','gold','2026-09-13T11:15:00Z')"
+    )
+    conn.commit()
+    violations = watchdog.check(conn, tmp_path, now="2026-09-13T12:00:00Z",
+                                credentials_path=tmp_path / "none.json",
+                                translate_window_days=7)
+    assert not any("translate backlog" in v for v in violations), \
+        "Row at exactly 45 minutes should not violate"
+
+    # Now test one minute older (46 minutes ago)
+    conn.execute("DELETE FROM items")
+    conn.execute(
+        "INSERT INTO items (id, source, published_at, headline, url, topic,"
+        " fetched_at) VALUES ('i2','a','2026-09-13T11:14:00Z','H',"
+        " 'https://e/1','gold','2026-09-13T11:14:00Z')"
+    )
+    conn.commit()
+    violations = watchdog.check(conn, tmp_path, now="2026-09-13T12:00:00Z",
+                                credentials_path=tmp_path / "none.json",
+                                translate_window_days=7)
+    assert any("translate backlog" in v for v in violations), \
+        "Row at 46 minutes old should violate"

@@ -8,6 +8,7 @@ from pathlib import Path
 
 from jamasp import runner, translate as translate_mod
 from jamasp.db import get_meta, utcnow
+from jamasp.translate import _since
 
 DUBAI = timezone(timedelta(hours=4))
 INGEST_STALE_MINUTES = 60
@@ -51,10 +52,13 @@ WEIGHT_FIT_STALE_DAYS = 3
 # reasoning as _REAUTH below.
 _WEIGHTS = "check jamasp-weights.service"
 
-# A row inside the panel's window that is still untranslated this long after
+# Within the translate window, a row that has been untranslated this long after
 # publication means the 10-minute translate timer is not doing its job. Six
 # ticks of slack: a backlog drains newest-first, so a burst of news can
-# legitimately leave an older row waiting for a few ticks.
+# legitimately leave an older row waiting for a few ticks. Only rows inside the
+# window are checked; rows older than window_days are never revisited by design
+# and do not trigger this probe (see the abandoned probe below for rows that
+# permanently failed).
 TRANSLATE_BACKLOG_MINUTES = 45
 _TRANSLATE = "check jamasp-translate.service and `jamasp translate --check`"
 
@@ -136,6 +140,7 @@ def check(
     reports_dir: Path,
     now: str | None = None,
     credentials_path: Path | None = None,
+    translate_window_days: int | None = None,
 ) -> list[str]:
     now_dt = _parse(now or utcnow())
     violations: list[str] = []
@@ -196,19 +201,26 @@ def check(
             violations.append(violation)
 
     # A translate run whose every batch fails still exits zero, so the unit's
-    # OnFailure alert cannot see it. Backlog is the signal that can.
-    threshold = (now_dt - timedelta(minutes=TRANSLATE_BACKLOG_MINUTES)).strftime(
-        "%Y-%m-%dT%H:%M:%SZ")
-    backlog = conn.execute(
-        "SELECT COUNT(*) FROM items"
-        " WHERE headline_fa IS NULL AND fa_attempts < ? AND published_at < ?",
-        (translate_mod.MAX_ATTEMPTS, threshold),
-    ).fetchone()[0]
-    if backlog:
-        violations.append(
-            f"translate backlog: {backlog} items untranslated"
-            f" > {TRANSLATE_BACKLOG_MINUTES} min after publication; {_TRANSLATE}")
+    # OnFailure alert cannot see it. Backlog is the signal that can. Only check
+    # rows inside the translate window; rows older than window_days are never
+    # revisited by design and do not trigger this probe.
+    if translate_window_days is not None:
+        threshold = (now_dt - timedelta(minutes=TRANSLATE_BACKLOG_MINUTES)).strftime(
+            "%Y-%m-%dT%H:%M:%SZ")
+        window_bound = _since(translate_window_days, now)
+        backlog = conn.execute(
+            "SELECT COUNT(*) FROM items"
+            " WHERE headline_fa IS NULL AND fa_attempts < ? AND published_at < ?"
+            " AND published_at >= ?",
+            (translate_mod.MAX_ATTEMPTS, threshold, window_bound),
+        ).fetchone()[0]
+        if backlog:
+            violations.append(
+                f"translate backlog: {backlog} items untranslated"
+                f" > {TRANSLATE_BACKLOG_MINUTES} min after publication; {_TRANSLATE}")
 
+    # A row at the attempt cap is abandoned regardless of whether the job is
+    # running or configured. This is always checked.
     abandoned = conn.execute(
         "SELECT COUNT(*) FROM items"
         " WHERE headline_fa IS NULL AND fa_attempts >= ?",
@@ -229,8 +241,10 @@ def run(
     now: str | None = None,
     credentials_path: Path | None = None,
 ) -> list[str]:
+    translate_window = settings.get("translate", {}).get("window_days")
     violations = check(
-        conn, reports_dir, now=now, credentials_path=credentials_path
+        conn, reports_dir, now=now, credentials_path=credentials_path,
+        translate_window_days=translate_window
     )
     if violations:
         runner._notify_safe(
