@@ -437,14 +437,13 @@ def translate_stance(
     # this is what decides whether the Persian stance renders at all.
     whole = translatetext.src_hash(text)
 
-    existing = {}
+    prior: list[tuple[str, str, str]] = []
+    prior_meta: dict[str, str] = {}
     if sidecar.exists():
-        existing = {
-            heading: (section_hash, body)
-            for heading, section_hash, body
-            in translatetext.parse_stance_sidecar(
-                sidecar.read_text(encoding="utf-8"))
-        }
+        raw = sidecar.read_text(encoding="utf-8")
+        prior_meta, _ = translatetext.parse_front_matter(raw)
+        prior = translatetext.parse_stance_sidecar(raw)
+    existing = {heading: (h, body) for heading, h, body in prior}
 
     translated = failed = 0
     out: list[tuple[str, str, str]] = []
@@ -479,7 +478,21 @@ def translate_stance(
             ))
             failed += 1
 
-    if translated:
+    # Written when the computed sidecar differs from the one on disk, NOT when
+    # something was translated. A stance edit that merely empties a section, or
+    # drops one while leaving the rest byte-identical, translates nothing — and
+    # would otherwise leave the sidecar with a stale body and a stale section
+    # COUNT. The panel matches sidecar bodies to source sections by order, so a
+    # count mismatch degrades the whole Stance panel to English.
+    #
+    # The second clause restamps the front matter when the sections are already
+    # current but the whole-file hash on disk is not. It is guarded on `not
+    # failed` so a run where EVERY section failed still leaves the previous
+    # file byte-identical: that sidecar does not reflect this source, and
+    # stamping it with this source's hash would present stale Persian as
+    # current. A partial failure does rewrite — the succeeded sections are
+    # worth having — and the failed section keeps its old hash, so it retries.
+    if out != prior or (not failed and prior_meta.get("src_hash") != whole):
         translatetext.write_atomic(
             sidecar,
             translatetext.render_stance_sidecar(
@@ -572,12 +585,14 @@ def translate_watchlist(
                 out.append(previous)
             failed += 1
 
-    if translated:
-        translatetext.write_atomic(
-            sidecar,
-            yaml.safe_dump({"watchlist": out}, allow_unicode=True,
-                           sort_keys=False),
-        )
+    # Same rule as stance: compare the computed file with the one on disk, so
+    # a theme removed from watchlist.yaml is removed here too. A run where
+    # everything failed reproduces the previous file exactly and writes
+    # nothing.
+    text = yaml.safe_dump({"watchlist": out}, allow_unicode=True,
+                          sort_keys=False)
+    if not sidecar.exists() or sidecar.read_text(encoding="utf-8") != text:
+        translatetext.write_atomic(sidecar, text)
     return {"translated": translated, "failed": failed}
 
 
@@ -634,11 +649,9 @@ def translate_predictions(
                 out.append(previous)
             failed += 1
 
-    if translated:
-        translatetext.write_atomic(
-            sidecar,
-            "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in out),
-        )
+    text = "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in out)
+    if not sidecar.exists() or sidecar.read_text(encoding="utf-8") != text:
+        translatetext.write_atomic(sidecar, text)
     return {"translated": translated, "failed": failed}
 
 

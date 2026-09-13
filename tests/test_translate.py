@@ -1083,3 +1083,138 @@ def test_a_rewritten_stance_restamps_the_whole_source_hash(tmp_path):
 
     meta, _ = tt.parse_front_matter(side.read_text(encoding="utf-8"))
     assert meta["src_hash"] == tt.src_hash(changed)
+
+
+def test_an_emptied_stance_section_still_rewrites_the_sidecar(tmp_path):
+    """`if translated:` skipped the rewrite on a structural-only change. A
+    brief that empties a section translates nothing, so the sidecar kept a
+    stale body — and, when a section is dropped, a stale section COUNT. The
+    panel matches sidecar bodies to source sections by ORDER, so a count
+    mismatch degrades the whole Stance panel to English."""
+    src = tmp_path / "stance.md"
+    src.write_text(STANCE_MD, encoding="utf-8")
+    side = tmp_path / "stance.fa.md"
+    translate.translate_stance(src, side, GLOSSARY, doc_run("OLD:"))
+    before = side.read_text(encoding="utf-8")
+
+    emptied = STANCE_MD.replace("- A hot CPI print.\n", "")
+    src.write_text(emptied, encoding="utf-8")
+    stats = translate.translate_stance(src, side, GLOSSARY, doc_run())
+
+    assert stats == {"translated": 0, "failed": 0}
+    after = side.read_text(encoding="utf-8")
+    assert after != before
+    sections = tt.parse_stance_sidecar(after)
+    assert [h for h, _, _ in sections] == ["", "## View", "## What flips me"]
+    assert sections[2][2].strip() == ""          # the emptied body followed
+    meta, _ = tt.parse_front_matter(after)
+    assert meta["src_hash"] == tt.src_hash(emptied)
+
+
+def test_a_dropped_stance_section_shrinks_the_sidecar(tmp_path):
+    src = tmp_path / "stance.md"
+    src.write_text(STANCE_MD, encoding="utf-8")
+    side = tmp_path / "stance.fa.md"
+    translate.translate_stance(src, side, GLOSSARY, doc_run("OLD:"))
+
+    shorter = STANCE_MD.split("## What flips me")[0]
+    src.write_text(shorter, encoding="utf-8")
+    stats = translate.translate_stance(src, side, GLOSSARY, doc_run())
+
+    assert stats["translated"] == 0              # every surviving body is current
+    sections = tt.parse_stance_sidecar(side.read_text(encoding="utf-8"))
+    assert [h for h, _, _ in sections] == ["", "## View"]
+
+
+def test_a_stance_sidecar_missing_its_source_hash_is_restamped(tmp_path):
+    """A sidecar written before the front-matter hash was filled in is
+    otherwise current, so nothing would ever translate — and nothing would
+    ever correct the hash either."""
+    src = tmp_path / "stance.md"
+    src.write_text(STANCE_MD, encoding="utf-8")
+    side = tmp_path / "stance.fa.md"
+    translate.translate_stance(src, side, GLOSSARY, doc_run())
+    body = side.read_text(encoding="utf-8")
+    side.write_text(body.replace(f"src_hash: {tt.src_hash(STANCE_MD)}",
+                                 "src_hash: ", 1), encoding="utf-8")
+
+    calls = []
+    stats = translate.translate_stance(
+        src, side, GLOSSARY, counting_doc_run(calls))
+    assert stats["translated"] == 0 and calls == []
+    meta, _ = tt.parse_front_matter(side.read_text(encoding="utf-8"))
+    assert meta["src_hash"] == tt.src_hash(STANCE_MD)
+
+
+def test_a_removed_watchlist_theme_leaves_the_sidecar(tmp_path):
+    src = tmp_path / "watchlist.yaml"
+    entries = [{"theme": "a", "why": "One.", "since": "2026-08-01"},
+               {"theme": "b", "why": "Two.", "since": "2026-08-01"}]
+    src.write_text(yaml.safe_dump({"watchlist": entries}), encoding="utf-8")
+    side = tmp_path / "watchlist.fa.yaml"
+    translate.translate_watchlist(src, side, GLOSSARY, doc_run())
+
+    src.write_text(yaml.safe_dump({"watchlist": entries[:1]}), encoding="utf-8")
+    stats = translate.translate_watchlist(src, side, GLOSSARY, doc_run())
+
+    assert stats["translated"] == 0
+    themes = [e["theme"] for e in
+              yaml.safe_load(side.read_text(encoding="utf-8"))["watchlist"]]
+    assert themes == ["a"]
+
+
+def test_translate_watchlist_leaves_the_sidecar_alone_when_everything_fails(tmp_path):
+    src = tmp_path / "watchlist.yaml"
+    src.write_text(yaml.safe_dump({"watchlist": [
+        {"theme": "a", "why": "One.", "since": "2026-08-01"}]}),
+        encoding="utf-8")
+    side = tmp_path / "watchlist.fa.yaml"
+    translate.translate_watchlist(src, side, GLOSSARY, doc_run("OLD:"))
+    before = side.read_text(encoding="utf-8")
+
+    src.write_text(yaml.safe_dump({"watchlist": [
+        {"theme": "a", "why": "One changed.", "since": "2026-08-01"}]}),
+        encoding="utf-8")
+
+    def failing(prompt, schema):
+        raise modelrun.ModelError("nope")
+
+    assert translate.translate_watchlist(
+        src, side, GLOSSARY, failing)["failed"] == 1
+    assert side.read_text(encoding="utf-8") == before
+
+
+def test_a_removed_prediction_leaves_the_sidecar(tmp_path):
+    src = tmp_path / "predictions.jsonl"
+    lines = [json.dumps({"id": "p1", "claim": "One."}),
+             json.dumps({"id": "p2", "claim": "Two."})]
+    src.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    side = tmp_path / "predictions.fa.jsonl"
+    translate.translate_predictions(src, side, GLOSSARY, doc_run())
+
+    src.write_text(lines[0] + "\n", encoding="utf-8")
+    stats = translate.translate_predictions(src, side, GLOSSARY, doc_run())
+
+    assert stats["translated"] == 0
+    ids = [json.loads(l)["id"] for l in
+           side.read_text(encoding="utf-8").splitlines() if l.strip()]
+    assert ids == ["p1"]
+
+
+def test_translate_predictions_leaves_the_sidecar_alone_when_everything_fails(tmp_path):
+    src = tmp_path / "predictions.jsonl"
+    src.write_text(json.dumps({"id": "p1", "claim": "One."}) + "\n",
+                   encoding="utf-8")
+    side = tmp_path / "predictions.fa.jsonl"
+    translate.translate_predictions(src, side, GLOSSARY, doc_run("OLD:"))
+    before = side.read_text(encoding="utf-8")
+
+    src.write_text(json.dumps({"id": "p1", "claim": "One changed."}) + "\n",
+                   encoding="utf-8")
+
+    def failing(prompt, schema):
+        raise modelrun.ModelError("nope")
+
+    assert translate.translate_predictions(
+        src, side, GLOSSARY, failing)["failed"] == 1
+    assert side.read_text(encoding="utf-8") == before
