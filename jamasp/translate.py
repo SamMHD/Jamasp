@@ -430,6 +430,13 @@ def translate_stance(
     if not source.exists():
         return {"translated": 0, "failed": 0}
 
+    text = source.read_text(encoding="utf-8")
+    # The front matter carries the hash of the WHOLE English file; the comment
+    # lines carry the per-section hashes. The panel compares the front-matter
+    # one against stance.md beside it and treats a mismatch as no sidecar, so
+    # this is what decides whether the Persian stance renders at all.
+    whole = translatetext.src_hash(text)
+
     existing = {}
     if sidecar.exists():
         existing = {
@@ -441,9 +448,7 @@ def translate_stance(
 
     translated = failed = 0
     out: list[tuple[str, str, str]] = []
-    for heading, body in translatetext.split_sections(
-        source.read_text(encoding="utf-8")
-    ):
+    for heading, body in translatetext.split_sections(text):
         digest = translatetext.src_hash(body)
         previous = existing.get(heading)
         if not force and previous and previous[0] == digest:
@@ -478,7 +483,7 @@ def translate_stance(
         translatetext.write_atomic(
             sidecar,
             translatetext.render_stance_sidecar(
-                out, now or utcnow(), translator),
+                out, now or utcnow(), translator, whole),
         )
     return {"translated": translated, "failed": failed}
 

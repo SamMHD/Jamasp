@@ -1052,3 +1052,34 @@ def test_no_ceiling_configured_means_no_ceiling(tmp_path):
     translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY,
                              counting_doc_run(calls))
     assert len(calls) > 4
+
+
+def test_the_stance_sidecar_carries_the_whole_source_hash(tmp_path):
+    """The front-matter shape is stated in the spec "exactly so the reader and
+    the writer cannot disagree", and PR 2's readStanceFa returns null when
+    meta.src_hash does not match sha256(stance.md). An empty top-level hash
+    mismatches every time, so the Persian stance would never render at all.
+    The per-section hashes are a different question and stay as they are."""
+    src = tmp_path / "stance.md"
+    src.write_text(STANCE_MD, encoding="utf-8")
+    side = tmp_path / "stance.fa.md"
+
+    translate.translate_stance(src, side, GLOSSARY, doc_run())
+
+    meta, _ = tt.parse_front_matter(side.read_text(encoding="utf-8"))
+    assert meta["src_hash"] == tt.src_hash(STANCE_MD)
+    assert meta["translator"] == "codex"
+
+
+def test_a_rewritten_stance_restamps_the_whole_source_hash(tmp_path):
+    src = tmp_path / "stance.md"
+    src.write_text(STANCE_MD, encoding="utf-8")
+    side = tmp_path / "stance.fa.md"
+    translate.translate_stance(src, side, GLOSSARY, doc_run("OLD:"))
+
+    changed = STANCE_MD.replace("Gold is bid.", "Gold is offered.")
+    src.write_text(changed, encoding="utf-8")
+    translate.translate_stance(src, side, GLOSSARY, doc_run("NEW:"))
+
+    meta, _ = tt.parse_front_matter(side.read_text(encoding="utf-8"))
+    assert meta["src_hash"] == tt.src_hash(changed)

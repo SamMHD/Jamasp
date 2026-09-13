@@ -166,7 +166,8 @@ def test_split_sections_of_a_headingless_document():
 def test_stance_sidecar_round_trips():
     sections = [("## View", "aaa", "طلا خریدار دارد.\n"),
                 ("## What flips me", "bbb", "- یک CPI داغ.\n")]
-    text = tt.render_stance_sidecar(sections, "2026-09-13T06:14:00Z", "codex")
+    text = tt.render_stance_sidecar(
+        sections, "2026-09-13T06:14:00Z", "codex", "whole")
     assert tt.parse_stance_sidecar(text) == sections
 
 
@@ -176,13 +177,14 @@ def test_stance_sidecar_round_trips_a_preamble_section():
     silently dropping the document's opening lines."""
     sections = [("", "phash", "به عنوان امروز.\n"),
                 ("## View", "aaa", "طلا خریدار دارد.\n")]
-    text = tt.render_stance_sidecar(sections, "2026-09-13T06:14:00Z", "codex")
+    text = tt.render_stance_sidecar(
+        sections, "2026-09-13T06:14:00Z", "codex", "whole")
     assert tt.parse_stance_sidecar(text) == sections
 
 
 def test_stance_sidecar_keeps_english_headings_verbatim():
     text = tt.render_stance_sidecar(
-        [("## What flips me", "h", "بدنه\n")], "t", "codex")
+        [("## What flips me", "h", "بدنه\n")], "t", "codex", "whole")
     assert "## What flips me" in text
     assert "بدنه" in text
 
@@ -204,3 +206,15 @@ def test_parse_doc_response_takes_the_text_field():
 def test_parse_doc_response_rejects_a_missing_field():
     with pytest.raises(tt.ParseError):
         tt.parse_doc_response({"nope": "x"})
+
+
+def test_stance_sidecar_front_matter_carries_the_whole_source_hash():
+    """Top-level src_hash is the hash of the WHOLE English source; the
+    per-section comments carry the per-section hashes. The panel compares the
+    top-level one against stance.md and falls back to English on a mismatch,
+    so an empty one is a Persian stance that never renders."""
+    text = tt.render_stance_sidecar(
+        [("## View", "aaa", "بدنه\n")], "t", "codex", "wholefilehash")
+    meta, _ = tt.parse_front_matter(text)
+    assert meta["src_hash"] == "wholefilehash"
+    assert "<!-- src_hash: aaa -->" in text

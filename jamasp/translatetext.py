@@ -194,7 +194,8 @@ def split_sections(markdown: str) -> list[tuple[str, str]]:
 
 
 def render_stance_sidecar(
-    sections: list[tuple[str, str, str]], translated_at: str, translator: str
+    sections: list[tuple[str, str, str]], translated_at: str, translator: str,
+    source_hash: str,
 ) -> str:
     """Sidecar text from [(english_heading, section_hash, persian_body)].
 
@@ -202,8 +203,14 @@ def render_stance_sidecar(
     from its own dictionary because StanceKey is a closed enum. Keeping it
     verbatim means this file splits with the same logic as the source, so
     section matching cannot drift between the two.
+
+    `source_hash` is the hash of the WHOLE English file and belongs in the
+    front matter; the per-section hashes go in the comment lines. Required
+    rather than defaulted because the panel compares the front-matter hash
+    against `stance.md` and treats a mismatch as no sidecar at all — an empty
+    one mismatches every time, which is a Persian stance that never renders.
     """
-    out = [render_front_matter("", translated_at, translator)]
+    out = [render_front_matter(source_hash, translated_at, translator)]
     for heading, section_hash, body in sections:
         if heading:
             out.append(f"{heading}\n")
