@@ -170,3 +170,92 @@ def write_atomic(path: Path, text: str) -> None:
         with contextlib.suppress(OSError):
             os.unlink(tmp)
         raise
+
+
+SECTION_HASH_PREFIX = "<!-- src_hash: "
+
+
+def split_sections(markdown: str) -> list[tuple[str, str]]:
+    """Split a document at its `##` headings into [(heading_line, body)].
+
+    Anything before the first heading is returned under an empty heading, so a
+    document's preamble is never silently dropped.
+    """
+    sections: list[tuple[str, str]] = []
+    heading, body = "", []
+    for line in markdown.splitlines(keepends=True):
+        if line.startswith("## "):
+            sections.append((heading, "".join(body)))
+            heading, body = line.rstrip("\n"), []
+        else:
+            body.append(line)
+    sections.append((heading, "".join(body)))
+    return sections
+
+
+def render_stance_sidecar(
+    sections: list[tuple[str, str, str]], translated_at: str, translator: str
+) -> str:
+    """Sidecar text from [(english_heading, section_hash, persian_body)].
+
+    The English heading is an anchor, never rendered: the panel takes headings
+    from its own dictionary because StanceKey is a closed enum. Keeping it
+    verbatim means this file splits with the same logic as the source, so
+    section matching cannot drift between the two.
+    """
+    out = [render_front_matter("", translated_at, translator)]
+    for heading, section_hash, body in sections:
+        if heading:
+            out.append(f"{heading}\n")
+        out.append(f"{SECTION_HASH_PREFIX}{section_hash} -->\n")
+        out.append(body if body.endswith("\n") or not body else body + "\n")
+    return "".join(out)
+
+
+def parse_stance_sidecar(text: str) -> list[tuple[str, str, str]]:
+    """The inverse of render_stance_sidecar. Malformed input yields []."""
+    _, body = parse_front_matter(text)
+    if not body.strip():
+        return []
+    out: list[tuple[str, str, str]] = []
+    for heading, chunk in split_sections(body):
+        lines = chunk.splitlines(keepends=True)
+        if not lines or not lines[0].startswith(SECTION_HASH_PREFIX):
+            continue
+        section_hash = lines[0][len(SECTION_HASH_PREFIX):].split(" -->")[0].strip()
+        out.append((heading, section_hash, "".join(lines[1:])))
+    return out
+
+
+DOC_RULES = (
+    "Translate the document below into Persian (Farsi).\n"
+    "- Translate faithfully. Do not editorialize, summarise, or reorder.\n"
+    "- Preserve markdown structure exactly: lists stay lists, emphasis stays"
+    " emphasis, and every number, ticker and percentage keeps its Latin form.\n"
+    "- Do not translate headings; they are not included.\n"
+    "- Apply the glossary.\n"
+    '- Return a JSON object: {"text": "<the Persian document>"}.'
+)
+
+
+def build_doc_prompt(text: str, glossary: Mapping[str, str]) -> str:
+    return f"{DOC_RULES}\n\n{glossary_block(glossary)}\n\n---\n{text}"
+
+
+def doc_schema() -> dict:
+    return {
+        "type": "object",
+        "properties": {"text": {"type": "string"}},
+        "required": ["text"],
+    }
+
+
+def parse_doc_response(payload: object) -> str:
+    if isinstance(payload, str):
+        try:
+            payload = json.loads(payload)
+        except json.JSONDecodeError as exc:
+            raise ParseError(f"document response is not JSON: {exc}") from exc
+    if not isinstance(payload, dict) or not isinstance(payload.get("text"), str):
+        raise ParseError("document response has no `text` string")
+    return payload["text"]

@@ -139,3 +139,68 @@ def test_write_atomic_cleans_up_on_replace_failure(tmp_path):
     assert target.read_text(encoding="utf-8") == "original\n"
     # No temp files left behind
     assert list(tmp_path.glob("*.tmp*")) == []
+
+
+STANCE = """As of 2026-09-13.
+
+## View
+Gold is bid. Weights 70/5/25 (base/event-bearish/kinetic).
+
+## What flips me
+- A hot CPI print.
+"""
+
+
+def test_split_sections_keeps_preamble_under_an_empty_heading():
+    sections = tt.split_sections(STANCE)
+    assert sections[0][0] == ""
+    assert "As of 2026-09-13." in sections[0][1]
+    assert sections[1][0] == "## View"
+    assert sections[2][0] == "## What flips me"
+
+
+def test_split_sections_of_a_headingless_document():
+    assert tt.split_sections("just prose\n") == [("", "just prose\n")]
+
+
+def test_stance_sidecar_round_trips():
+    sections = [("## View", "aaa", "طلا خریدار دارد.\n"),
+                ("## What flips me", "bbb", "- یک CPI داغ.\n")]
+    text = tt.render_stance_sidecar(sections, "2026-09-13T06:14:00Z", "codex")
+    assert tt.parse_stance_sidecar(text) == sections
+
+
+def test_stance_sidecar_round_trips_a_preamble_section():
+    """render_stance_sidecar writes no heading line for an empty heading;
+    parse_stance_sidecar must still recover that section rather than
+    silently dropping the document's opening lines."""
+    sections = [("", "phash", "به عنوان امروز.\n"),
+                ("## View", "aaa", "طلا خریدار دارد.\n")]
+    text = tt.render_stance_sidecar(sections, "2026-09-13T06:14:00Z", "codex")
+    assert tt.parse_stance_sidecar(text) == sections
+
+
+def test_stance_sidecar_keeps_english_headings_verbatim():
+    text = tt.render_stance_sidecar(
+        [("## What flips me", "h", "بدنه\n")], "t", "codex")
+    assert "## What flips me" in text
+    assert "بدنه" in text
+
+
+def test_parse_stance_sidecar_of_an_empty_file_is_empty():
+    assert tt.parse_stance_sidecar("") == []
+
+
+def test_doc_prompt_carries_glossary_and_source():
+    prompt = tt.build_doc_prompt("Gold is bid.", GLOSSARY)
+    assert "Gold is bid." in prompt
+    assert "فدرال رزرو" in prompt
+
+
+def test_parse_doc_response_takes_the_text_field():
+    assert tt.parse_doc_response({"text": "متن"}) == "متن"
+
+
+def test_parse_doc_response_rejects_a_missing_field():
+    with pytest.raises(tt.ParseError):
+        tt.parse_doc_response({"nope": "x"})

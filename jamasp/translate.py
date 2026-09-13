@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import sqlite3
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import Callable, Sequence
 
 from jamasp import modelrun, translatetext
@@ -236,3 +237,75 @@ def translate_events(
         failed += bad
         batches += 1
     return {"translated": translated, "failed": failed, "batches": batches}
+
+
+DEFAULT_TRANSLATOR = "codex"
+
+
+def _translate_text(text: str, glossary: dict, run) -> str:
+    """One model call for one document or section."""
+    prompt = translatetext.build_doc_prompt(text, glossary)
+    return translatetext.parse_doc_response(
+        run(prompt, translatetext.doc_schema())
+    )
+
+
+def translate_stance(
+    source: Path, sidecar: Path, glossary: dict, run,
+    now: str | None = None, translator: str = DEFAULT_TRANSLATOR,
+    force: bool = False,
+) -> dict:
+    """Translate stance.md section by section into its sidecar.
+
+    Per-section hashing because a brief run usually rewrites one section and
+    leaves five alone; hashing the whole file would pay for all six every day.
+
+    A section that fails keeps whatever Persian it already had, and the sidecar
+    is rewritten only when something actually changed — so a total failure
+    leaves the previous file byte-identical rather than half-updated.
+    """
+    if not source.exists():
+        return {"translated": 0, "failed": 0}
+
+    existing = {}
+    if sidecar.exists():
+        existing = {
+            heading: (section_hash, body)
+            for heading, section_hash, body
+            in translatetext.parse_stance_sidecar(
+                sidecar.read_text(encoding="utf-8"))
+        }
+
+    translated = failed = 0
+    out: list[tuple[str, str, str]] = []
+    for heading, body in translatetext.split_sections(
+        source.read_text(encoding="utf-8")
+    ):
+        digest = translatetext.src_hash(body)
+        previous = existing.get(heading)
+        if not force and previous and previous[0] == digest:
+            out.append((heading, digest, previous[1]))
+            continue
+        if not body.strip():
+            out.append((heading, digest, body))
+            continue
+        try:
+            out.append((heading, digest, _translate_text(body, glossary, run)))
+            translated += 1
+        except (modelrun.ModelError, translatetext.ParseError):
+            # Keep the previous Persian for this section, and keep its OLD
+            # hash so the next run tries again rather than believing it is done.
+            out.append((
+                heading,
+                previous[0] if previous else "",
+                previous[1] if previous else body,
+            ))
+            failed += 1
+
+    if translated:
+        translatetext.write_atomic(
+            sidecar,
+            translatetext.render_stance_sidecar(
+                out, now or utcnow(), translator),
+        )
+    return {"translated": translated, "failed": failed}

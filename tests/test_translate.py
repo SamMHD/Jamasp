@@ -284,3 +284,117 @@ def test_translate_events_records_failure_on_the_event_row(tmp_path):
     row = conn.execute("SELECT fa_attempts, fa_error FROM events").fetchone()
     assert row["fa_attempts"] == 1
     assert "event boom" in row["fa_error"]
+
+
+from pathlib import Path
+
+from jamasp import translatetext as tt
+
+STANCE_MD = """As of 2026-09-13.
+
+## View
+Gold is bid. Weights 70/5/25 (base/event-bearish/kinetic).
+
+## What flips me
+- A hot CPI print.
+"""
+
+
+def doc_run(prefix="FA:"):
+    def run(prompt, schema):
+        source = prompt.split("---\n", 1)[1]
+        return {"text": prefix + source}
+    return run
+
+
+def test_translate_stance_writes_a_sidecar_per_section(tmp_path):
+    src = tmp_path / "stance.md"
+    src.write_text(STANCE_MD, encoding="utf-8")
+    side = tmp_path / "stance.fa.md"
+
+    stats = translate.translate_stance(src, side, GLOSSARY, doc_run())
+
+    assert stats["translated"] == 3   # preamble + two sections
+    sections = tt.parse_stance_sidecar(side.read_text(encoding="utf-8"))
+    assert [h for h, _, _ in sections] == ["", "## View", "## What flips me"]
+    assert all(body.startswith("FA:") for _, _, body in sections)
+
+
+def test_translate_stance_is_a_noop_when_nothing_changed(tmp_path):
+    src = tmp_path / "stance.md"
+    src.write_text(STANCE_MD, encoding="utf-8")
+    side = tmp_path / "stance.fa.md"
+    translate.translate_stance(src, side, GLOSSARY, doc_run())
+
+    calls = []
+
+    def counting(prompt, schema):
+        calls.append(prompt)
+        return {"text": "unused"}
+
+    stats = translate.translate_stance(src, side, GLOSSARY, counting)
+    assert stats["translated"] == 0
+    assert calls == []
+
+
+def test_a_rewritten_section_retranslates_only_that_section(tmp_path):
+    """The failure mode an empty check cannot see: stance is rewritten daily."""
+    src = tmp_path / "stance.md"
+    src.write_text(STANCE_MD, encoding="utf-8")
+    side = tmp_path / "stance.fa.md"
+    translate.translate_stance(src, side, GLOSSARY, doc_run("OLD:"))
+
+    src.write_text(STANCE_MD.replace("Gold is bid.", "Gold is offered."),
+                   encoding="utf-8")
+    calls = []
+
+    def counting(prompt, schema):
+        calls.append(prompt)
+        return {"text": "NEW:changed"}
+
+    stats = translate.translate_stance(src, side, GLOSSARY, counting)
+    assert stats["translated"] == 1
+    assert len(calls) == 1
+
+    sections = dict(
+        (h, b) for h, _, b in
+        tt.parse_stance_sidecar(side.read_text(encoding="utf-8"))
+    )
+    assert sections["## View"].startswith("NEW:")
+    assert sections["## What flips me"].startswith("OLD:")
+
+
+def test_translate_stance_force_retranslates_everything(tmp_path):
+    src = tmp_path / "stance.md"
+    src.write_text(STANCE_MD, encoding="utf-8")
+    side = tmp_path / "stance.fa.md"
+    translate.translate_stance(src, side, GLOSSARY, doc_run("OLD:"))
+    stats = translate.translate_stance(
+        src, side, GLOSSARY, doc_run("NEW:"), force=True)
+    assert stats["translated"] == 3
+
+
+def test_translate_stance_keeps_the_old_sidecar_when_a_section_fails(tmp_path):
+    src = tmp_path / "stance.md"
+    src.write_text(STANCE_MD, encoding="utf-8")
+    side = tmp_path / "stance.fa.md"
+    translate.translate_stance(src, side, GLOSSARY, doc_run("OLD:"))
+    before = side.read_text(encoding="utf-8")
+
+    src.write_text(STANCE_MD.replace("Gold is bid.", "Gold is offered."),
+                   encoding="utf-8")
+
+    def failing(prompt, schema):
+        raise modelrun.ModelError("doc boom")
+
+    stats = translate.translate_stance(src, side, GLOSSARY, failing)
+    assert stats["failed"] == 1
+    # the unchanged sections survive; the failed one keeps its previous Persian
+    assert "OLD:" in side.read_text(encoding="utf-8")
+    assert side.read_text(encoding="utf-8") == before
+
+
+def test_translate_stance_with_no_source_is_a_noop(tmp_path):
+    stats = translate.translate_stance(
+        tmp_path / "absent.md", tmp_path / "absent.fa.md", GLOSSARY, doc_run())
+    assert stats == {"translated": 0, "failed": 0}
