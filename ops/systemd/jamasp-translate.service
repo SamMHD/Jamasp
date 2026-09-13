@@ -1,0 +1,15 @@
+[Unit]
+Description=Jamasp panel i18n — fill Persian renderings for the panel
+OnFailure=jamasp-alert@%n.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/Jamasp
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+EnvironmentFile=-%h/.config/jamasp/env
+# Deterministic pipeline stage, not an agent run: no `jamasp run` wrapper, so
+# it consumes none of the daily agent-run cap — same as flash and rollup.
+#
+# A run whose every batch fails still exits zero, so this unit's OnFailure
+# alert is not the whole story: `jamasp watchdog` carries the backlog probe.
+ExecStart=%h/.local/bin/uv run jamasp translate

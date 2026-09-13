@@ -190,6 +190,27 @@ headline-only sources.
    - **Desk channel** (briefs, scan alerts, failure notices): get its chat id and put the bot token + this chat id as `JAMASP_TG_TOKEN` and `JAMASP_TG_CHAT` in `~/.config/jamasp/env`. Verify: `set -a && . ~/.config/jamasp/env && set +a && uv run jamasp notify "test"`.
    - **News channel** (per-story gold news flashes): create a second channel, add the same bot as an administrator with **both** "Post Messages" and "Edit Messages of Others" enabled (the flash pipeline edits its own earlier message when a second outlet picks up the same story), get its chat id, and put it as `JAMASP_TG_NEWS_CHAT` in the same env file. If you leave this blank, the flash pass disables itself silently — ingestion, briefs, and scans are unaffected, and `uv run jamasp watchdog` will still print OK. The check that catches it is `uv run jamasp flash --dry-run`: its summary line ends with an error count, and a missing news chat shows up there as `1 errors`.
 
+### codex credentials (for `jamasp translate`)
+
+The translate timer shells out to `codex exec`. Authenticate it **as the
+`jamasp` service user**, not as root:
+
+```bash
+su - jamasp -c 'codex login'
+```
+
+Then verify the whole path before enabling the timer:
+
+```bash
+su - jamasp -c 'cd ~/Jamasp && uv run jamasp translate --check'
+```
+
+Same trap as Claude's credentials: an interactive login as the wrong user
+leaves the service user unauthenticated, and a `codex exec` with lapsed auth
+fails every batch while still exiting zero — so the unit's `OnFailure` alert
+stays silent. `--check` is what catches it; `jamasp watchdog`'s backlog probe
+is what catches it later.
+
 Then run one **supervised brief** (`claude`, type `/brief`) or
 `systemctl start jamasp-brief.service`; confirm a report appeared under
 `reports/`, a commit was made, and the Telegram summary arrived. When happy,
