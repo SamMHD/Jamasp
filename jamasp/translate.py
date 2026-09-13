@@ -70,14 +70,21 @@ def _since(window_days: int, now: str | None = None) -> str:
     return (base - timedelta(days=window_days)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-# How long a row waits after its Nth failure before it is offered again.
+# How long a row waits after its Nth failure before it is offered again — one
+# delay per failure that can still be retried, so the tuple is MAX_ATTEMPTS - 1
+# long. A third delay would be dead code: `pending_rows` filters
+# `fa_attempts < MAX_ATTEMPTS`, so a row that has failed three times is already
+# abandoned and no delay of its own is ever read.
+#
 # Spec decision 12 is "attempt counter + status, backoff" and the cap alone is
 # not backoff: the timer fires every 10 minutes, so three ticks inside half an
-# hour used to walk the same rows straight to MAX_ATTEMPTS. An outage on a
-# Friday evening therefore abandoned the whole window by Monday, and nothing
-# short of editing the database brought it back. With these delays a day-long
-# outage spends at most three attempts, and --force re-arms whatever it did.
-BACKOFF_MINUTES = (15, 60, 240)
+# hour used to walk the same rows straight to MAX_ATTEMPTS — a row was given up
+# 20 minutes into an outage. With these delays the attempts land at t+0, t+20
+# and t+80, so it now survives 80 minutes: long enough to ride out a restart,
+# an ingest storm or a short auth wobble, and NOT long enough to ride out a
+# Friday-evening outage. Anything longer than 80 minutes still abandons the
+# window, and `--force` is what brings it back.
+BACKOFF_MINUTES = (15, 60)
 
 
 def _backoff(now: str) -> tuple[str, list[str]]:
@@ -85,6 +92,12 @@ def _backoff(now: str) -> tuple[str, list[str]]:
 
     `fa_attempts = 0` is exempt: --force resets the counter without clearing
     `fa_failed_at`, and a re-armed row must be eligible immediately.
+
+    The CASE arms are generated from BACKOFF_MINUTES so the two cannot drift.
+    ELSE repeats the longest delay; it is unreachable today, and it is there
+    for the one change that would reach it — raising MAX_ATTEMPTS without
+    extending the tuple, which should back a row off further rather than let it
+    retry on every tick.
     """
     base = datetime.strptime(now, "%Y-%m-%dT%H:%M:%SZ").replace(
         tzinfo=timezone.utc)
@@ -92,11 +105,12 @@ def _backoff(now: str) -> tuple[str, list[str]]:
         (base - timedelta(minutes=m)).strftime("%Y-%m-%dT%H:%M:%SZ")
         for m in BACKOFF_MINUTES
     ]
+    arms = " ".join(f"WHEN {n} THEN ?"
+                    for n in range(1, len(BACKOFF_MINUTES) + 1))
     return (
         " AND (fa_failed_at IS NULL OR fa_attempts = 0"
-        "      OR fa_failed_at <= CASE fa_attempts"
-        "         WHEN 1 THEN ? WHEN 2 THEN ? ELSE ? END)",
-        thresholds,
+        f"      OR fa_failed_at <= CASE fa_attempts {arms} ELSE ? END)",
+        thresholds + thresholds[-1:],
     )
 
 

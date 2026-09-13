@@ -914,6 +914,47 @@ def test_a_row_that_never_failed_is_never_backed_off(tmp_path):
     assert translate.pending_rows(conn, 7, 10, now=clock(0))
 
 
+def test_every_backoff_delay_is_one_a_row_can_actually_reach(tmp_path):
+    """A third delay was carried for a long time and never read: `pending_rows`
+    filters `fa_attempts < MAX_ATTEMPTS`, so the arm that would use it is only
+    reached at `fa_attempts >= 3`, which is already excluded. A tuple with a
+    dead entry makes the backoff look longer than it is, which is exactly what
+    the comment beside it went on to claim."""
+    assert len(translate.BACKOFF_MINUTES) == translate.MAX_ATTEMPTS - 1
+    conn = db.connect(tmp_path / "t.db")
+    (one,) = seed(conn, [("One", 1)])
+    for attempts, delay in enumerate(translate.BACKOFF_MINUTES, start=1):
+        conn.execute(
+            "UPDATE items SET fa_attempts = ?, fa_failed_at = ? WHERE id = ?",
+            (attempts, clock(0), one))
+        conn.commit()
+        assert translate.pending_rows(
+            conn, 7, 10, now=clock(delay - 1)) == [], attempts
+        assert translate.pending_rows(conn, 7, 10, now=clock(delay + 1)), attempts
+
+
+def test_a_total_outage_abandons_a_row_eighty_minutes_in(tmp_path):
+    """The real figure on the real cadence. The timer fires every 10 minutes;
+    with delays of 15 and 60 the three attempts land at t+0, t+20 and t+80, so
+    a row is given up 80 minutes into an outage. That is four times the 20
+    minutes it survived before the backoff existed and nowhere near a weekend:
+    anything longer still needs --force to bring the rows back."""
+    conn = db.connect(tmp_path / "t.db")
+    seed(conn, [("One", 1)])
+    spent = []
+    for minute in range(0, 91, 10):
+        before = conn.execute("SELECT fa_attempts FROM items").fetchone()[0]
+        translate.translate_rows(conn, CFG, GLOSSARY, always_fails,
+                                 now=clock(minute))
+        after = conn.execute("SELECT fa_attempts FROM items").fetchone()[0]
+        if after > before:
+            spent.append(minute)
+    assert spent == [0, 20, 80]
+    assert conn.execute(
+        "SELECT fa_attempts FROM items").fetchone()[0] == translate.MAX_ATTEMPTS
+    assert translate.pending_rows(conn, 7, 10, now=clock(10_000)) == []
+
+
 def test_force_retranslates_a_row_the_model_already_translated(tmp_path):
     conn = db.connect(tmp_path / "t.db")
     (one,) = seed(conn, [("One", 1)])
