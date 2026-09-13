@@ -468,3 +468,213 @@ def test_translate_stance_with_no_source_is_a_noop(tmp_path):
     stats = translate.translate_stance(
         tmp_path / "absent.md", tmp_path / "absent.fa.md", GLOSSARY, doc_run())
     assert stats == {"translated": 0, "failed": 0}
+
+
+import json
+
+import yaml
+
+
+def test_translate_document_writes_front_matter_and_body(tmp_path):
+    src = tmp_path / "playbook.md"
+    src.write_text("Buy dips in an easing cycle.\n", encoding="utf-8")
+    side = tmp_path / "playbook.fa.md"
+
+    assert translate.translate_document(src, side, GLOSSARY, doc_run())["translated"] == 1
+
+    meta, body = tt.parse_front_matter(side.read_text(encoding="utf-8"))
+    assert meta["src_hash"] == tt.src_hash("Buy dips in an easing cycle.\n")
+    assert meta["translator"] == "codex"
+    assert body.startswith("FA:")
+
+
+def test_translate_document_skips_an_unchanged_source(tmp_path):
+    src = tmp_path / "playbook.md"
+    src.write_text("Same.\n", encoding="utf-8")
+    side = tmp_path / "playbook.fa.md"
+    translate.translate_document(src, side, GLOSSARY, doc_run())
+
+    def boom(prompt, schema):
+        raise AssertionError("should not have been called")
+
+    assert translate.translate_document(src, side, GLOSSARY, boom)["translated"] == 0
+
+
+def test_translate_document_retranslates_a_changed_source(tmp_path):
+    src = tmp_path / "playbook.md"
+    src.write_text("First.\n", encoding="utf-8")
+    side = tmp_path / "playbook.fa.md"
+    translate.translate_document(src, side, GLOSSARY, doc_run("OLD:"))
+    src.write_text("Second.\n", encoding="utf-8")
+    translate.translate_document(src, side, GLOSSARY, doc_run("NEW:"))
+    _, body = tt.parse_front_matter(side.read_text(encoding="utf-8"))
+    assert body.startswith("NEW:")
+
+
+def test_translate_document_leaves_the_sidecar_intact_on_failure(tmp_path):
+    src = tmp_path / "playbook.md"
+    src.write_text("First.\n", encoding="utf-8")
+    side = tmp_path / "playbook.fa.md"
+    translate.translate_document(src, side, GLOSSARY, doc_run("OLD:"))
+    before = side.read_text(encoding="utf-8")
+    src.write_text("Second.\n", encoding="utf-8")
+
+    def failing(prompt, schema):
+        raise modelrun.ModelError("nope")
+
+    assert translate.translate_document(src, side, GLOSSARY, failing)["failed"] == 1
+    assert side.read_text(encoding="utf-8") == before
+
+
+def test_translate_watchlist_keys_by_theme_and_hashes_each_why(tmp_path):
+    src = tmp_path / "watchlist.yaml"
+    src.write_text(
+        yaml.safe_dump({"watchlist": [
+            {"theme": "real_yields", "why": "Real yields lead gold.",
+             "since": "2026-08-01"},
+            {"theme": "cb_buying", "why": "Central banks keep buying.",
+             "since": "2026-08-05"},
+        ]}, allow_unicode=True),
+        encoding="utf-8",
+    )
+    side = tmp_path / "watchlist.fa.yaml"
+
+    assert translate.translate_watchlist(src, side, GLOSSARY, doc_run())["translated"] == 2
+
+    doc = yaml.safe_load(side.read_text(encoding="utf-8"))
+    entries = {e["theme"]: e for e in doc["watchlist"]}
+    assert entries["real_yields"]["why_fa"].startswith("FA:")
+    assert entries["real_yields"]["src_hash"] == tt.src_hash("Real yields lead gold.")
+    assert "why" not in entries["real_yields"]   # the sidecar carries only Persian
+
+
+def test_translate_watchlist_only_retranslates_changed_entries(tmp_path):
+    src = tmp_path / "watchlist.yaml"
+    entries = [{"theme": "a", "why": "One.", "since": "2026-08-01"},
+               {"theme": "b", "why": "Two.", "since": "2026-08-01"}]
+    src.write_text(yaml.safe_dump({"watchlist": entries}), encoding="utf-8")
+    side = tmp_path / "watchlist.fa.yaml"
+    translate.translate_watchlist(src, side, GLOSSARY, doc_run("OLD:"))
+
+    entries[0]["why"] = "One changed."
+    src.write_text(yaml.safe_dump({"watchlist": entries}), encoding="utf-8")
+    calls = []
+
+    def counting(prompt, schema):
+        calls.append(prompt)
+        return {"text": "NEW:x"}
+
+    assert translate.translate_watchlist(src, side, GLOSSARY, counting)["translated"] == 1
+    assert len(calls) == 1
+    doc = {e["theme"]: e for e in
+           yaml.safe_load(side.read_text(encoding="utf-8"))["watchlist"]}
+    assert doc["a"]["why_fa"] == "NEW:x"
+    assert doc["b"]["why_fa"].startswith("OLD:")
+
+
+def test_translate_predictions_keys_by_id_and_keeps_jsonl(tmp_path):
+    src = tmp_path / "predictions.jsonl"
+    src.write_text(
+        json.dumps({"id": "p1", "claim": "Gold holds 2600."}) + "\n"
+        + json.dumps({"id": "p2", "claim": "DXY breaks 105."}) + "\n",
+        encoding="utf-8",
+    )
+    side = tmp_path / "predictions.fa.jsonl"
+
+    assert translate.translate_predictions(src, side, GLOSSARY, doc_run())["translated"] == 2
+
+    lines = [json.loads(l) for l in
+             side.read_text(encoding="utf-8").splitlines() if l.strip()]
+    assert {l["id"] for l in lines} == {"p1", "p2"}
+    assert lines[0]["claim_fa"].startswith("FA:")
+    assert lines[0]["src_hash"] == tt.src_hash("Gold holds 2600.")
+
+
+def test_translate_predictions_skips_lines_already_translated(tmp_path):
+    src = tmp_path / "predictions.jsonl"
+    src.write_text(json.dumps({"id": "p1", "claim": "Same."}) + "\n",
+                   encoding="utf-8")
+    side = tmp_path / "predictions.fa.jsonl"
+    translate.translate_predictions(src, side, GLOSSARY, doc_run())
+
+    def boom(prompt, schema):
+        raise AssertionError("should not have been called")
+
+    assert translate.translate_predictions(src, side, GLOSSARY, boom)["translated"] == 0
+
+
+def test_translate_predictions_tolerates_a_malformed_line(tmp_path):
+    src = tmp_path / "predictions.jsonl"
+    src.write_text('{"id": "p1", "claim": "Fine."}\n{not json\n',
+                   encoding="utf-8")
+    side = tmp_path / "predictions.fa.jsonl"
+    assert translate.translate_predictions(src, side, GLOSSARY, doc_run())["translated"] == 1
+
+
+def test_new_reports_finds_only_untranslated_reports(tmp_path):
+    reports = tmp_path / "reports" / "2026" / "09"
+    reports.mkdir(parents=True)
+    (reports / "2026-09-12-brief.md").write_text("A brief.\n", encoding="utf-8")
+    (reports / "2026-09-11-brief.md").write_text("Older.\n", encoding="utf-8")
+    (reports / "2026-09-11-brief.fa.md").write_text("x", encoding="utf-8")
+    found = translate.new_reports(tmp_path / "reports", "2026-09-12")
+    assert [p.name for p in found] == ["2026-09-12-brief.md"]
+
+
+def test_new_reports_ignores_sidecars_themselves(tmp_path):
+    reports = tmp_path / "reports" / "2026" / "09"
+    reports.mkdir(parents=True)
+    (reports / "2026-09-12-brief.fa.md").write_text("x", encoding="utf-8")
+    assert translate.new_reports(tmp_path / "reports", "2026-01-01") == []
+
+
+DOC_CFG = {**CFG, "reports_since": "2026-09-01"}
+
+
+def build_state(root):
+    (root / "state").mkdir(parents=True, exist_ok=True)
+    (root / "state" / "stance.md").write_text(STANCE_MD, encoding="utf-8")
+    (root / "state" / "playbook.md").write_text("Playbook.\n", encoding="utf-8")
+    (root / "state" / "watchlist.yaml").write_text(
+        yaml.safe_dump({"watchlist": [
+            {"theme": "t", "why": "Why.", "since": "2026-08-01"}]}),
+        encoding="utf-8")
+    (root / "state" / "predictions.jsonl").write_text(
+        json.dumps({"id": "p1", "claim": "Claim."}) + "\n", encoding="utf-8")
+    reports = root / "reports" / "2026" / "09"
+    reports.mkdir(parents=True, exist_ok=True)
+    (reports / "2026-09-12-brief.md").write_text("Brief.\n", encoding="utf-8")
+
+
+def test_translate_docs_covers_every_document_type(tmp_path):
+    build_state(tmp_path)
+    stats = translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY, doc_run())
+    assert stats["translated"] >= 6   # 3 stance sections + 3 docs + 1 report
+    for rel in ("state/stance.fa.md", "state/playbook.fa.md",
+                "state/watchlist.fa.yaml", "state/predictions.fa.jsonl",
+                "reports/2026/09/2026-09-12-brief.fa.md"):
+        assert (tmp_path / rel).exists(), rel
+
+
+def test_translate_docs_never_writes_into_an_agent_owned_file(tmp_path):
+    """The rule the whole track exists to honour."""
+    build_state(tmp_path)
+    before = {
+        rel: (tmp_path / rel).read_bytes()
+        for rel in ("state/stance.md", "state/playbook.md",
+                    "state/watchlist.yaml", "state/predictions.jsonl",
+                    "reports/2026/09/2026-09-12-brief.md")
+    }
+    translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY, doc_run())
+    for rel, content in before.items():
+        assert (tmp_path / rel).read_bytes() == content, rel
+
+
+def test_translate_docs_is_idempotent(tmp_path):
+    build_state(tmp_path)
+    translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY, doc_run())
+
+    def boom(prompt, schema):
+        raise AssertionError("should not have been called")
+
+    assert translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY, boom)["translated"] == 0

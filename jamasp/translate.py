@@ -10,10 +10,13 @@ the daily agent-run cap.
 """
 from __future__ import annotations
 
+import json
 import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Callable, Sequence
+
+import yaml
 
 from jamasp import modelrun, translatetext
 from jamasp.db import utcnow
@@ -309,3 +312,196 @@ def translate_stance(
                 out, now or utcnow(), translator),
         )
     return {"translated": translated, "failed": failed}
+
+
+def translate_document(
+    source: Path, sidecar: Path, glossary: dict, run,
+    now: str | None = None, translator: str = DEFAULT_TRANSLATOR,
+    force: bool = False,
+) -> dict:
+    """Whole-document sidecar: playbook and reports.
+
+    Nothing parses these structurally, so unlike stance they translate as one
+    unit, headings included. A failure leaves the existing sidecar byte-
+    identical: a stale Persian document is better than none, and the hash
+    mismatch is what keeps the panel honest about it.
+    """
+    if not source.exists():
+        return {"translated": 0, "failed": 0}
+    text = source.read_text(encoding="utf-8")
+    digest = translatetext.src_hash(text)
+
+    if not force and sidecar.exists():
+        meta, _ = translatetext.parse_front_matter(
+            sidecar.read_text(encoding="utf-8"))
+        if meta.get("src_hash") == digest:
+            return {"translated": 0, "failed": 0}
+
+    try:
+        persian = _translate_text(text, glossary, run)
+    except (modelrun.ModelError, translatetext.ParseError):
+        return {"translated": 0, "failed": 1}
+
+    translatetext.write_atomic(
+        sidecar,
+        translatetext.render_front_matter(digest, now or utcnow(), translator)
+        + persian,
+    )
+    return {"translated": 1, "failed": 0}
+
+
+def translate_watchlist(
+    source: Path, sidecar: Path, glossary: dict, run,
+    now: str | None = None, force: bool = False,
+) -> dict:
+    """Sidecar keyed by theme, carrying only Persian and a hash.
+
+    The English `why` is deliberately not copied across: duplicating it would
+    create a second copy that drifts the moment a brief rewrites the original.
+    """
+    if not source.exists():
+        return {"translated": 0, "failed": 0}
+    entries = (yaml.safe_load(source.read_text(encoding="utf-8")) or {}).get(
+        "watchlist") or []
+
+    existing = {}
+    if sidecar.exists():
+        prior = (yaml.safe_load(sidecar.read_text(encoding="utf-8")) or {}).get(
+            "watchlist") or []
+        existing = {e.get("theme"): e for e in prior}
+
+    translated = failed = 0
+    out = []
+    for entry in entries:
+        theme, why = entry.get("theme", ""), entry.get("why", "")
+        digest = translatetext.src_hash(why)
+        previous = existing.get(theme)
+        if not force and previous and previous.get("src_hash") == digest:
+            out.append(previous)
+            continue
+        try:
+            out.append({"theme": theme,
+                        "why_fa": _translate_text(why, glossary, run),
+                        "src_hash": digest})
+            translated += 1
+        except (modelrun.ModelError, translatetext.ParseError):
+            if previous:
+                out.append(previous)
+            failed += 1
+
+    if translated:
+        translatetext.write_atomic(
+            sidecar,
+            yaml.safe_dump({"watchlist": out}, allow_unicode=True,
+                           sort_keys=False),
+        )
+    return {"translated": translated, "failed": failed}
+
+
+def translate_predictions(
+    source: Path, sidecar: Path, glossary: dict, run,
+    now: str | None = None, force: bool = False,
+) -> dict:
+    """Sidecar keyed by prediction id, one JSON object per line.
+
+    A sidecar rather than a `claim_fa` field in the source because
+    `jamasp predictions add` appends to that file; rewriting it here would race
+    an append and could lose a prediction.
+    """
+    if not source.exists():
+        return {"translated": 0, "failed": 0}
+
+    existing = {}
+    if sidecar.exists():
+        for line in sidecar.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                try:
+                    row = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                existing[row.get("id")] = row
+
+    translated = failed = 0
+    out = []
+    for line in source.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            continue   # an interrupted append; the source reader skips it too
+        pid, claim = row.get("id"), row.get("claim", "")
+        digest = translatetext.src_hash(claim)
+        previous = existing.get(pid)
+        if not force and previous and previous.get("src_hash") == digest:
+            out.append(previous)
+            continue
+        try:
+            out.append({"id": pid,
+                        "claim_fa": _translate_text(claim, glossary, run),
+                        "src_hash": digest})
+            translated += 1
+        except (modelrun.ModelError, translatetext.ParseError):
+            if previous:
+                out.append(previous)
+            failed += 1
+
+    if translated:
+        translatetext.write_atomic(
+            sidecar,
+            "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in out),
+        )
+    return {"translated": translated, "failed": failed}
+
+
+def new_reports(reports_dir: Path, since_iso: str) -> list[Path]:
+    """Reports dated on or after `since_iso` that have no sidecar yet.
+
+    Spec decision 18: new reports only. The archive behind the ship date stays
+    English, which is arguably correct — those briefs were written in English.
+    """
+    if not reports_dir.exists():
+        return []
+    out = []
+    for path in sorted(reports_dir.rglob("*.md")):
+        if path.name.endswith(".fa.md"):
+            continue
+        if path.name[:10] < since_iso[:10]:
+            continue
+        if not path.with_name(path.name[:-3] + ".fa.md").exists():
+            out.append(path)
+    return out
+
+
+def translate_docs(
+    root: Path, cfg: dict, glossary: dict, run,
+    now: str | None = None, force: bool = False,
+) -> dict:
+    """Every document sidecar, in one pass. Returns summed counts.
+
+    `root` rather than hard-coded paths so a test can build a whole state tree
+    in tmp_path — and so a second checkout is never at risk of writing into the
+    live one.
+    """
+    state, reports = root / "state", root / "reports"
+    totals = {"translated": 0, "failed": 0}
+
+    def merge(result):
+        totals["translated"] += result["translated"]
+        totals["failed"] += result["failed"]
+
+    merge(translate_stance(state / "stance.md", state / "stance.fa.md",
+                           glossary, run, now, force=force))
+    merge(translate_document(state / "playbook.md", state / "playbook.fa.md",
+                             glossary, run, now, force=force))
+    merge(translate_watchlist(state / "watchlist.yaml",
+                              state / "watchlist.fa.yaml",
+                              glossary, run, now, force=force))
+    merge(translate_predictions(state / "predictions.jsonl",
+                                state / "predictions.fa.jsonl",
+                                glossary, run, now, force=force))
+    for report in new_reports(reports, cfg["reports_since"]):
+        merge(translate_document(
+            report, report.with_name(report.name[:-3] + ".fa.md"),
+            glossary, run, now, force=force))
+    return totals
