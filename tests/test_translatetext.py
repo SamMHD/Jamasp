@@ -78,3 +78,48 @@ def test_parse_rejects_non_json():
 def test_parse_rejects_a_json_array():
     with pytest.raises(tt.ParseError):
         tt.parse_rows_response("[1, 2, 3]", 1, ("headline",))
+
+
+def test_src_hash_is_stable_and_content_sensitive():
+    assert tt.src_hash("abc") == tt.src_hash("abc")
+    assert tt.src_hash("abc") != tt.src_hash("abd")
+    assert len(tt.src_hash("abc")) == 64
+
+
+def test_src_hash_handles_persian():
+    assert tt.src_hash("طلا") != tt.src_hash("نقره")
+
+
+def test_front_matter_round_trips():
+    fm = tt.render_front_matter("deadbeef", "2026-09-13T06:14:00Z", "codex")
+    meta, body = tt.parse_front_matter(fm + "متن فارسی\n")
+    assert meta["src_hash"] == "deadbeef"
+    assert meta["translated_at"] == "2026-09-13T06:14:00Z"
+    assert meta["translator"] == "codex"
+    assert body == "متن فارسی\n"
+
+
+def test_parse_front_matter_returns_empty_meta_when_absent():
+    meta, body = tt.parse_front_matter("just a document\n")
+    assert meta == {}
+    assert body == "just a document\n"
+
+
+def test_parse_front_matter_tolerates_a_stray_leading_blank_line():
+    fm = tt.render_front_matter("h", "t", "codex")
+    meta, _ = tt.parse_front_matter("\n" + fm + "body")
+    assert meta == {}   # front matter must be the first thing, or it is body
+
+
+def test_write_atomic_leaves_no_partial_file(tmp_path):
+    target = tmp_path / "out.md"
+    tt.write_atomic(target, "first\n")
+    tt.write_atomic(target, "second\n")
+    assert target.read_text(encoding="utf-8") == "second\n"
+    assert list(tmp_path.glob("*.tmp*")) == []
+
+
+def test_write_atomic_creates_parent_directories(tmp_path):
+    target = tmp_path / "2026" / "09" / "brief.fa.md"
+    tt.write_atomic(target, "x")
+    assert target.read_text(encoding="utf-8") == "x"

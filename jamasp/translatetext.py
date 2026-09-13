@@ -5,7 +5,12 @@ function is directly testable — the same split as jamasp/flashtext.py.
 """
 from __future__ import annotations
 
+import contextlib
+import hashlib
 import json
+import os
+import tempfile
+from pathlib import Path
 from typing import Mapping, Sequence
 
 
@@ -100,3 +105,68 @@ def parse_rows_response(
             continue
         out[index] = entry
     return out
+
+
+FRONT_MATTER_FENCE = "---"
+
+
+def src_hash(text: str) -> str:
+    """sha256 of the English source, hex.
+
+    This is what makes the document track correct where an empty check would be
+    wrong: stance.md is rewritten at the end of every run, and "translate it if
+    the sidecar is missing" would serve a months-stale Persian stance.
+    """
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def render_front_matter(
+    source_hash: str, translated_at: str, translator: str
+) -> str:
+    return (
+        f"{FRONT_MATTER_FENCE}\n"
+        f"src_hash: {source_hash}\n"
+        f"translated_at: {translated_at}\n"
+        f"translator: {translator}\n"
+        f"{FRONT_MATTER_FENCE}\n"
+    )
+
+
+def parse_front_matter(text: str) -> tuple[dict[str, str], str]:
+    """Split a sidecar into (meta, body). No front matter yields ({}, text).
+
+    Front matter must open on the very first line. A file that merely contains
+    a `---` somewhere is a body, not a sidecar with metadata, and treating it
+    as one would invent a hash that never matches.
+    """
+    if not text.startswith(f"{FRONT_MATTER_FENCE}\n"):
+        return {}, text
+    end = text.find(f"\n{FRONT_MATTER_FENCE}\n", len(FRONT_MATTER_FENCE))
+    if end == -1:
+        return {}, text
+    block = text[len(FRONT_MATTER_FENCE) + 1:end]
+    meta = {}
+    for line in block.splitlines():
+        key, sep, value = line.partition(":")
+        if sep:
+            meta[key.strip()] = value.strip()
+    return meta, text[end + len(FRONT_MATTER_FENCE) + 2:]
+
+
+def write_atomic(path: Path, text: str) -> None:
+    """Write `text` to `path` via a same-directory temp file and os.replace.
+
+    The panel reads these files on every render, so a half-written document is
+    a rendering bug waiting to happen. Same directory because os.replace is
+    only atomic within a filesystem.
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            fh.write(text)
+        os.replace(tmp, path)
+    except BaseException:
+        with contextlib.suppress(OSError):
+            os.unlink(tmp)
+        raise
