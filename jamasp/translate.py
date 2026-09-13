@@ -11,7 +11,10 @@ the daily agent-run cap.
 from __future__ import annotations
 
 import sqlite3
+from datetime import datetime, timedelta, timezone
+from typing import Callable, Sequence
 
+from jamasp import modelrun, translatetext
 from jamasp.db import utcnow
 
 
@@ -41,3 +44,136 @@ def reuse_flash_persian(conn: sqlite3.Connection, now: str | None = None) -> int
     )
     conn.commit()
     return cur.rowcount
+
+
+MAX_ATTEMPTS = 3
+ROW_FIELDS = ("headline", "lede")
+
+
+def _since(window_days: int, now: str | None = None) -> str:
+    base = datetime.strptime(now or utcnow(), "%Y-%m-%dT%H:%M:%SZ").replace(
+        tzinfo=timezone.utc
+    )
+    return (base - timedelta(days=window_days)).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def pending_rows(
+    conn: sqlite3.Connection, window_days: int, limit: int,
+    now: str | None = None,
+) -> list[sqlite3.Row]:
+    """Untranslated items inside the window, newest first.
+
+    Newest first is the priority order that matters: the freshest headline is
+    the one somebody is looking at, and a backlog larger than a tick's ceiling
+    drains from the top over subsequent ticks.
+
+    The attempt cap is applied here rather than at write time so an abandoned
+    row costs nothing to skip — it never enters a batch again.
+    """
+    return conn.execute(
+        "SELECT id, headline, lede FROM items"
+        " WHERE headline_fa IS NULL AND published_at >= ? AND fa_attempts < ?"
+        " ORDER BY published_at DESC LIMIT ?",
+        (_since(window_days, now), MAX_ATTEMPTS, limit),
+    ).fetchall()
+
+
+def _write_row(conn, item_id: str, entry: dict, now: str) -> None:
+    conn.execute(
+        "UPDATE items SET headline_fa = ?, lede_fa = ?, fa_source = 'model',"
+        " fa_at = ?, fa_error = NULL WHERE id = ?",
+        (entry["headline"], entry.get("lede"), now, item_id),
+    )
+
+
+def _record_failure(conn, item_id: str, error: str) -> None:
+    conn.execute(
+        "UPDATE items SET fa_attempts = fa_attempts + 1, fa_error = ?"
+        " WHERE id = ?",
+        (error[:500], item_id),
+    )
+
+
+def _translate_batch(
+    rows: Sequence[sqlite3.Row], fields: Sequence[str], glossary: dict, run
+) -> dict[int, dict[str, str]]:
+    """One model call for `rows`, returning {position: {field: text}}.
+
+    Raises ModelError or ParseError; the caller decides whether to retry the
+    batch or fall back to singles.
+
+    `rows` are converted to plain dicts here because sqlite3.Row supports
+    `row[key]` but not `row.get(key)`, which build_rows_prompt relies on to
+    skip fields a row doesn't have.
+    """
+    prompt = translatetext.build_rows_prompt(
+        [dict(row) for row in rows], fields, glossary
+    )
+    payload = run(prompt, translatetext.rows_schema(fields))
+    return translatetext.parse_rows_response(payload, len(rows), fields)
+
+
+def _batch_with_fallback(
+    conn, rows, fields, glossary, run, now, write, fail
+) -> tuple[int, int]:
+    """Translate one batch: try it, retry once, then one call per row.
+
+    A malformed or refused response costs the whole batch, so one bad headline
+    must not be allowed to poison nineteen good ones.
+    """
+    for attempt in (1, 2):
+        try:
+            answers = _translate_batch(rows, fields, glossary, run)
+        except (modelrun.ModelError, translatetext.ParseError):
+            if attempt == 2:
+                break
+            continue
+        translated = 0
+        for position, row in enumerate(rows):
+            entry = answers.get(position)
+            if entry:
+                write(conn, row["id"], entry, now)
+                translated += 1
+            else:
+                fail(conn, row["id"], "model omitted this entry")
+        conn.commit()
+        return translated, len(rows) - translated
+
+    translated = 0
+    for row in rows:
+        try:
+            answers = _translate_batch([row], fields, glossary, run)
+        except (modelrun.ModelError, translatetext.ParseError) as exc:
+            fail(conn, row["id"], str(exc))
+            continue
+        entry = answers.get(0)
+        if entry:
+            write(conn, row["id"], entry, now)
+            translated += 1
+        else:
+            fail(conn, row["id"], "model omitted this entry")
+    conn.commit()
+    return translated, len(rows) - translated
+
+
+def translate_rows(
+    conn: sqlite3.Connection, cfg: dict, glossary: dict,
+    run: Callable[[str, dict], object], now: str | None = None,
+) -> dict:
+    """Translate pending items in batches. Returns counts."""
+    stamp = now or utcnow()
+    batch_size = cfg["batch_size"]
+    ceiling = cfg["max_batches_per_run"]
+    rows = pending_rows(conn, cfg["window_days"], batch_size * ceiling, now)
+
+    translated = failed = batches = 0
+    for start in range(0, len(rows), batch_size):
+        chunk = rows[start:start + batch_size]
+        ok, bad = _batch_with_fallback(
+            conn, chunk, ROW_FIELDS, glossary, run, stamp,
+            _write_row, _record_failure,
+        )
+        translated += ok
+        failed += bad
+        batches += 1
+    return {"translated": translated, "failed": failed, "batches": batches}
