@@ -257,7 +257,7 @@ UNREADABLE = object()  # the write model refused: source text was not an article
 
 def _publish(
     conn, item, cfg, display, chat, post, run_model, emit, dry_run, extract_max,
-    tier=None,
+    tier=None, glossary=None,
 ):
     """Post one new story.
 
@@ -272,7 +272,8 @@ def _publish(
     # the cache keeps the full text; only the prompt is cut down to size
     body = body[: cfg["extract_chars"]]
     prompt = flashtext.build_write_prompt(
-        item["headline"], label, item["published_at"], body, item["lede"]
+        item["headline"], label, item["published_at"], body, item["lede"],
+        glossary=glossary,
     )
     try:
         fields = flashtext.parse_write_response(run_model(cfg["write_cmd"], prompt))
@@ -453,6 +454,10 @@ def _run_pass(conn, settings, sources, post, run_model, emit, dry_run, stats):
     cfg = settings.get("flash") or {}
     if not cfg.get("enabled"):
         return stats
+    # Loaded once per pass, same as `themes` below: the channel and the panel
+    # read the same file so they never settle on two different Persian words
+    # for the same term.
+    glossary = config_mod.load_glossary()
     missing = [key for key in REQUIRED_CFG_KEYS if key not in cfg]
     if missing:
         log_error(conn, f"flash config missing keys: {', '.join(missing)}")
@@ -548,7 +553,7 @@ def _run_pass(conn, settings, sources, post, run_model, emit, dry_run, stats):
             continue
         flash_id = _publish(
             conn, item, cfg, display, chat, post, run_model, emit, dry_run,
-            extract_max, tier=tier,
+            extract_max, tier=tier, glossary=glossary,
         )
         if flash_id is UNREADABLE:
             # no message, so it never cost a slot in the per-tick budget
@@ -643,6 +648,9 @@ def _rollup_pass(conn, settings, post, run_model, emit, dry_run, stats):
     cfg = settings.get("flash") or {}
     if not cfg.get("enabled"):
         return stats
+    # Same file as _run_pass's write prompt, so the rollup and the per-story
+    # flash never drift onto two different Persian words for the same term.
+    glossary = config_mod.load_glossary()
     run_model = run_model or _run_model
     total_held = held_count(conn)
     cap = cfg.get("rollup_max_items", DEFAULT_ROLLUP_MAX_ITEMS)
@@ -671,7 +679,7 @@ def _rollup_pass(conn, settings, post, run_model, emit, dry_run, stats):
         groups = flashtext.parse_rollup_response(
             run_model(
                 cfg.get("rollup_cmd") or cfg["write_cmd"],
-                flashtext.build_rollup_prompt(items),
+                flashtext.build_rollup_prompt(items, glossary=glossary),
             )
         )
         text = flashtext.render_rollup(groups, carried=stats["carried"])

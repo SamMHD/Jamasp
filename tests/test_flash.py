@@ -1207,3 +1207,25 @@ def test_run_flash_scores_items_regardless_of_delivery_outcome(tmp_path, monkeyp
         r["item_id"] for r in conn.execute("SELECT item_id FROM item_scores")
     }
     assert scored_ids == {posted, dup, low, held_item}
+
+
+def test_run_flash_glosses_the_write_prompt(tmp_path, monkeypatch):
+    """The channel and the panel must gloss terms the same way."""
+    no_extract(monkeypatch)
+    conn = db.connect(tmp_path / "t.db")
+    (one,) = seed(conn, [("reuters", "Fed holds rates steady", 1)])
+    seen = []
+
+    def capturing(cmd, prompt):
+        seen.append((cmd, prompt))
+        if cmd == ["fake-decide"]:
+            return json.dumps({one: {"gold": True, "dup_of": None}})
+        return json.dumps(
+            {"title_fa": "عنوان", "summary_fa": "خلاصه", "impact_fa": "اثر"})
+
+    flash.run_flash(conn, SETTINGS, SOURCES, post=FakePoster(),
+                    run_model=capturing)
+
+    write_prompts = [p for cmd, p in seen if cmd == ["fake-write"]]
+    assert write_prompts, "the write model was never called"
+    assert any("فدرال رزرو" in p for p in write_prompts)

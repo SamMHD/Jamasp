@@ -9,6 +9,8 @@ import json
 from datetime import datetime, timedelta, timezone
 from typing import Any, Mapping, Sequence
 
+from jamasp.translatetext import glossary_block
+
 # Dubai observes no DST, so a fixed offset is exact — same choice as runner.DUBAI,
 # and it keeps us off a tzdata dependency.
 DUBAI = timezone(timedelta(hours=4))
@@ -243,6 +245,7 @@ def build_write_prompt(
     published_at: str,
     body: str,
     lede: str | None = None,
+    glossary: Mapping[str, str] | None = None,
 ) -> str:
     # The body is whatever page the feed linked to, and this model's output goes
     # verbatim into a channel message — so the untrusted text is fenced and
@@ -255,11 +258,16 @@ def build_write_prompt(
             "Keep summary_fa to two hedged sentences and introduce no specifics.\n"
         )
         fenced = f"LEDE: {lede or '(none)'}"
+    # Outside the fence, with our other instructions: the glossary is ours,
+    # not the article's. Shared with `jamasp translate` so the channel and the
+    # panel cannot settle on two different Persian words for the same term.
+    terms = f"{glossary_block(glossary)}\n\n" if glossary else ""
     return (
         f"{WRITE_HEADER}HEADLINE: {_one_line(headline)}\n"
         f"SOURCE: {_one_line(source_label)}\n"
         f"PUBLISHED: {_one_line(published_at)}\n\n"
         f"{preamble}{SOURCE_CAUTION}\n\n"
+        f"{terms}"
         f"{ARTICLE_OPEN}\n{fenced}\n{ARTICLE_CLOSE}\n"
     )
 
@@ -357,13 +365,18 @@ No other text.
 """
 
 
-def build_rollup_prompt(items: Sequence[Mapping]) -> str:
+def build_rollup_prompt(
+    items: Sequence[Mapping], glossary: Mapping[str, str] | None = None
+) -> str:
     block = "\n".join(
         f"{i['id']}\t{_one_line(i['source'])}\t{_one_line(i['headline'])}"
         f"\t{_one_line(i.get('lede') or '')}"
         for i in items
     )
-    return f"{ROLLUP_HEADER}ITEMS:\n{block}\n"
+    # Same glossary, same reason as build_write_prompt: one Persian rendering
+    # per term across both the rollup and the per-story flash.
+    terms = f"{glossary_block(glossary)}\n\n" if glossary else ""
+    return f"{ROLLUP_HEADER}{terms}ITEMS:\n{block}\n"
 
 
 def parse_rollup_response(text: str) -> list[tuple[str, list[str]]]:
