@@ -728,3 +728,53 @@ def test_translate_check_reports_a_broken_translator(tmp_path):
     )
     assert result.exit_code != 0
     assert "not-a-real-binary-7z1" in result.output
+
+
+def test_translate_dry_run_survives_a_broken_translator(tmp_path):
+    """The other half of the --check test above: --dry-run must not raise
+    even when check() finds a problem — this is the guard (`if problem and
+    not dry_run:`) that lets an operator inspect the translation backlog on a
+    fresh host where codex isn't authenticated yet. Built against a config
+    directory with a nonexistent translator binary rather than the real
+    config/settings.yaml, so the assertion holds regardless of whether codex
+    happens to be installed on the machine running the test.
+    """
+    cfgdir = tmp_path / "config"
+    cfgdir.mkdir()
+    (cfgdir / "sources.yaml").write_text(
+        Path("config/sources.yaml").read_text(encoding="utf-8"), encoding="utf-8")
+    (cfgdir / "glossary.fa.yaml").write_text("Fed: فدرال رزرو\n", encoding="utf-8")
+    settings = yaml.safe_load(Path("config/settings.yaml").read_text(encoding="utf-8"))
+    settings["translate"]["cmd"] = ["not-a-real-binary-7z1"]
+    (cfgdir / "settings.yaml").write_text(
+        yaml.safe_dump(settings, allow_unicode=True), encoding="utf-8")
+
+    db_path = tmp_path / "t.db"
+    conn = db.connect(db_path)
+    conn.execute(
+        "INSERT INTO items (id, source, published_at, headline, url, topic,"
+        " fetched_at) VALUES ('i1','a',?,'Gold climbs','https://e/1','gold',?)",
+        (utcnow(), utcnow()),
+    )
+    conn.commit()
+    conn.close()
+
+    dry = CliRunner().invoke(
+        cli.main,
+        ["translate", "--dry-run", "--db", str(db_path), "--config-dir", str(cfgdir)],
+    )
+    assert dry.exit_code == 0, dry.output
+    assert "1 row" in dry.output
+
+    conn = db.connect(db_path)
+    assert conn.execute("SELECT headline_fa FROM items").fetchone()[0] is None
+    conn.close()
+
+    # Pinned side by side: the same broken config, without --dry-run,
+    # still refuses via --check.
+    check = CliRunner().invoke(
+        cli.main,
+        ["translate", "--check", "--db", str(db_path), "--config-dir", str(cfgdir)],
+    )
+    assert check.exit_code != 0
+    assert "not-a-real-binary-7z1" in check.output
