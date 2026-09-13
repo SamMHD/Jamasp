@@ -123,3 +123,19 @@ def test_write_atomic_creates_parent_directories(tmp_path):
     target = tmp_path / "2026" / "09" / "brief.fa.md"
     tt.write_atomic(target, "x")
     assert target.read_text(encoding="utf-8") == "x"
+
+
+def test_write_atomic_cleans_up_on_replace_failure(tmp_path):
+    from unittest.mock import patch
+
+    target = tmp_path / "test.md"
+    target.write_text("original\n", encoding="utf-8")
+
+    with patch("os.replace", side_effect=OSError("mock failure")):
+        with pytest.raises(OSError, match="mock failure"):
+            tt.write_atomic(target, "new content\n")
+
+    # Original file unchanged
+    assert target.read_text(encoding="utf-8") == "original\n"
+    # No temp files left behind
+    assert list(tmp_path.glob("*.tmp*")) == []
