@@ -394,6 +394,76 @@ def test_translate_stance_keeps_the_old_sidecar_when_a_section_fails(tmp_path):
     assert side.read_text(encoding="utf-8") == before
 
 
+def test_translate_stance_partial_failure_preserves_only_the_failed_hash(tmp_path):
+    """The dangerous case the brief's failure test cannot see: a run where
+    some sections succeed and one fails DOES rewrite the sidecar, so the
+    failed section's OLD hash must survive into the new file. Stamping it
+    with the new source hash instead would mark stale Persian as current and
+    the section would never retranslate again."""
+    src = tmp_path / "stance.md"
+    src.write_text(STANCE_MD, encoding="utf-8")
+    side = tmp_path / "stance.fa.md"
+    translate.translate_stance(src, side, GLOSSARY, doc_run("OLD:"))
+
+    # Change TWO sections so both are eligible for retranslation this run.
+    changed = STANCE_MD.replace(
+        "Gold is bid.", "Gold is offered."
+    ).replace(
+        "- A hot CPI print.", "- A cooling CPI print."
+    )
+    src.write_text(changed, encoding="utf-8")
+
+    before_text = side.read_text(encoding="utf-8")
+    before = dict(
+        (h, (sh, b)) for h, sh, b in tt.parse_stance_sidecar(before_text)
+    )
+
+    def run(prompt, schema):
+        if "offered" in prompt:            # the "## View" change: succeeds
+            return {"text": "NEW:View"}
+        if "cooling" in prompt:            # the "## What flips me" change: fails
+            raise modelrun.ModelError("flips boom")
+        raise AssertionError(f"unexpected prompt: {prompt!r}")
+
+    stats = translate.translate_stance(src, side, GLOSSARY, run)
+    assert stats["translated"] == 1
+    assert stats["failed"] == 1
+
+    after_text = side.read_text(encoding="utf-8")
+    assert after_text != before_text  # the sidecar WAS rewritten (unlike a total failure)
+    after = dict(
+        (h, (sh, b)) for h, sh, b in tt.parse_stance_sidecar(after_text)
+    )
+
+    # The succeeded section got new Persian under a new hash.
+    assert after["## View"][1].startswith("NEW:View")
+    assert after["## View"][0] != before["## View"][0]
+
+    # The load-bearing assertion: the failed section's hash in the rewritten
+    # file is byte-identical to what it was before this run, and its Persian
+    # body is still the old translation — not the English source, not blank.
+    assert after["## What flips me"][0] == before["## What flips me"][0]
+    assert after["## What flips me"][1] == before["## What flips me"][1]
+
+    # A third, fully-succeeding run must retranslate exactly the section that
+    # still carries a stale (OLD) hash — proving the preserved hash actually
+    # re-arms the retry rather than the file merely looking untouched.
+    def run_clean(prompt, schema):
+        source = prompt.split("---\n", 1)[1]
+        return {"text": "FIXED:" + source}
+
+    stats2 = translate.translate_stance(src, side, GLOSSARY, run_clean)
+    assert stats2["translated"] == 1
+    assert stats2["failed"] == 0
+
+    final = dict(
+        (h, b) for h, _, b in
+        tt.parse_stance_sidecar(side.read_text(encoding="utf-8"))
+    )
+    assert final["## What flips me"].startswith("FIXED:")
+    assert final["## View"].startswith("NEW:View")  # untouched: already current
+
+
 def test_translate_stance_with_no_source_is_a_noop(tmp_path):
     stats = translate.translate_stance(
         tmp_path / "absent.md", tmp_path / "absent.fa.md", GLOSSARY, doc_run())
