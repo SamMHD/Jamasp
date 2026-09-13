@@ -4,6 +4,15 @@ OnFailure=jamasp-alert@%n.service
 
 [Service]
 Type=oneshot
+# oneshot units have no start timeout by default (ingest 600, weights 900,
+# alert 90 — every other unit here sets one). Worst case for a healthy tick is
+# the document pass: max_doc_calls_per_run (10) calls at timeout_seconds
+# (180) each is 30 minutes, plus the rows and events passes. 40 minutes is
+# that with slack; past it the run is wedged, not slow, and a
+# wedged `codex exec` must not hold the 10-minute timer down for hours. Safe
+# to kill at any point: the rows pass commits every row as it goes and the
+# document sidecars are written atomically, so the next tick resumes.
+TimeoutStartSec=2400
 WorkingDirectory=%h/Jamasp
 Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
 EnvironmentFile=-%h/.config/jamasp/env

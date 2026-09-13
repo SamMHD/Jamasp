@@ -371,6 +371,40 @@ def translate_events(
 DEFAULT_TRANSLATOR = "codex"
 
 
+class DocBudget:
+    """A per-run ceiling on the model calls the document pass may make.
+
+    Rows and events are bounded by `max_batches_per_run`; documents were
+    bounded by nothing. One document the translator always refuses therefore
+    cost a call every tick — 144 a day, indefinitely — and the first run after
+    a deploy made one serial call per line of the append-only predictions file.
+    With `timeout_seconds: 180` that is hours of a unit that fires every ten
+    minutes.
+
+    The ceiling spans the WHOLE pass — stance sections, playbook, watchlist
+    entries, prediction lines and reports together — because the cost that
+    matters is the tick's, not any one document's. Whatever is left over is
+    simply picked up next tick, exactly like the rows backlog.
+
+    A limit of None is no ceiling, which is what every caller that does not
+    configure one gets.
+    """
+
+    def __init__(self, limit: int | None = None):
+        self.remaining = limit
+        self.skipped = 0
+
+    def take(self) -> bool:
+        """Claim one call. False when this tick has none left."""
+        if self.remaining is None:
+            return True
+        if self.remaining <= 0:
+            self.skipped += 1
+            return False
+        self.remaining -= 1
+        return True
+
+
 def _translate_text(text: str, glossary: dict, run) -> str:
     """One model call for one document or section."""
     prompt = translatetext.build_doc_prompt(text, glossary)
@@ -382,7 +416,7 @@ def _translate_text(text: str, glossary: dict, run) -> str:
 def translate_stance(
     source: Path, sidecar: Path, glossary: dict, run,
     now: str | None = None, translator: str = DEFAULT_TRANSLATOR,
-    force: bool = False,
+    force: bool = False, budget: DocBudget | None = None,
 ) -> dict:
     """Translate stance.md section by section into its sidecar.
 
@@ -418,6 +452,15 @@ def translate_stance(
         if not body.strip():
             out.append((heading, digest, body))
             continue
+        if budget is not None and not budget.take():
+            # Out of calls for this tick. Keep whatever Persian this section
+            # had and — crucially — its OLD hash, so the next tick sees it as
+            # still pending. Same shape as the failure path below, but not a
+            # failure: nothing went wrong, the tick simply ended.
+            out.append((heading,
+                        previous[0] if previous else "",
+                        previous[1] if previous else body))
+            continue
         try:
             out.append((heading, digest, _translate_text(body, glossary, run)))
             translated += 1
@@ -443,7 +486,7 @@ def translate_stance(
 def translate_document(
     source: Path, sidecar: Path, glossary: dict, run,
     now: str | None = None, translator: str = DEFAULT_TRANSLATOR,
-    force: bool = False,
+    force: bool = False, budget: DocBudget | None = None,
 ) -> dict:
     """Whole-document sidecar: playbook and reports.
 
@@ -463,6 +506,10 @@ def translate_document(
         if meta.get("src_hash") == digest:
             return {"translated": 0, "failed": 0}
 
+    # Checked after the hash, so an unchanged document costs no budget.
+    if budget is not None and not budget.take():
+        return {"translated": 0, "failed": 0}
+
     try:
         persian = _translate_text(text, glossary, run)
     except (modelrun.ModelError, translatetext.ParseError):
@@ -479,6 +526,7 @@ def translate_document(
 def translate_watchlist(
     source: Path, sidecar: Path, glossary: dict, run,
     now: str | None = None, force: bool = False,
+    budget: DocBudget | None = None,
 ) -> dict:
     """Sidecar keyed by theme, carrying only Persian and a hash.
 
@@ -505,6 +553,10 @@ def translate_watchlist(
         if not force and previous and previous.get("src_hash") == digest:
             out.append(previous)
             continue
+        if budget is not None and not budget.take():
+            if previous:
+                out.append(previous)      # stale, and still pending next tick
+            continue
         try:
             out.append({"theme": theme,
                         "why_fa": _translate_text(why, glossary, run),
@@ -527,6 +579,7 @@ def translate_watchlist(
 def translate_predictions(
     source: Path, sidecar: Path, glossary: dict, run,
     now: str | None = None, force: bool = False,
+    budget: DocBudget | None = None,
 ) -> dict:
     """Sidecar keyed by prediction id, one JSON object per line.
 
@@ -561,6 +614,10 @@ def translate_predictions(
         previous = existing.get(pid)
         if not force and previous and previous.get("src_hash") == digest:
             out.append(previous)
+            continue
+        if budget is not None and not budget.take():
+            if previous:
+                out.append(previous)
             continue
         try:
             out.append({"id": pid,
@@ -611,25 +668,29 @@ def translate_docs(
     """
     state, reports = root / "state", root / "reports"
     totals = {"translated": 0, "failed": 0}
+    # One budget across every document type: the ceiling that matters is the
+    # tick's total, not any single file's. See DocBudget.
+    budget = DocBudget(cfg.get("max_doc_calls_per_run"))
 
     def merge(result):
         totals["translated"] += result["translated"]
         totals["failed"] += result["failed"]
 
     merge(translate_stance(state / "stance.md", state / "stance.fa.md",
-                           glossary, run, now, force=force))
+                           glossary, run, now, force=force, budget=budget))
     merge(translate_document(state / "playbook.md", state / "playbook.fa.md",
-                             glossary, run, now, force=force))
+                             glossary, run, now, force=force, budget=budget))
     merge(translate_watchlist(state / "watchlist.yaml",
                               state / "watchlist.fa.yaml",
-                              glossary, run, now, force=force))
+                              glossary, run, now, force=force, budget=budget))
     merge(translate_predictions(state / "predictions.jsonl",
                                 state / "predictions.fa.jsonl",
-                                glossary, run, now, force=force))
+                                glossary, run, now, force=force, budget=budget))
     for report in new_reports(reports, cfg["reports_since"]):
         merge(translate_document(
             report, report.with_name(report.name[:-3] + ".fa.md"),
-            glossary, run, now, force=force))
+            glossary, run, now, force=force, budget=budget))
+    totals["skipped"] = budget.skipped
     return totals
 
 

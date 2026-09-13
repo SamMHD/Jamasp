@@ -993,3 +993,62 @@ def test_run_translate_force_reaches_the_rows_pass(tmp_path):
         conn, {"translate": {**FULL_CFG, "reports_since": "2026-09-01"}},
         root=tmp_path, glossary=GLOSSARY, run=fake_run(), force=True)
     assert stats["rows"]["translated"] == 1
+
+
+def counting_doc_run(calls, prefix="FA:"):
+    def run(prompt, schema):
+        calls.append(prompt)
+        return {"text": prefix + prompt.split("---\n", 1)[1]}
+    return run
+
+
+def test_the_docs_pass_stops_at_the_per_run_call_ceiling(tmp_path):
+    """Rows and events have max_batches_per_run; documents had no ceiling at
+    all, so one refused document cost a call every tick forever and the first
+    run after a deploy made one serial call per historical prediction line."""
+    build_state(tmp_path)
+    calls = []
+    stats = translate.translate_docs(
+        tmp_path, {**DOC_CFG, "max_doc_calls_per_run": 2}, GLOSSARY,
+        counting_doc_run(calls))
+    assert len(calls) == 2
+    assert stats["translated"] == 2
+    assert stats["skipped"]
+
+
+def test_the_docs_pass_picks_the_rest_up_on_the_next_tick(tmp_path):
+    build_state(tmp_path)
+    cfg = {**DOC_CFG, "max_doc_calls_per_run": 2}
+    for _ in range(6):
+        translate.translate_docs(tmp_path, cfg, GLOSSARY, doc_run())
+    for rel in ("state/stance.fa.md", "state/playbook.fa.md",
+                "state/watchlist.fa.yaml", "state/predictions.fa.jsonl",
+                "reports/2026/09/2026-09-12-brief.fa.md"):
+        assert (tmp_path / rel).exists(), rel
+    calls = []
+    translate.translate_docs(tmp_path, cfg, GLOSSARY, counting_doc_run(calls))
+    assert calls == []          # everything current: the ceiling costs nothing
+
+
+def test_a_predictions_backlog_cannot_run_away_with_a_tick(tmp_path):
+    """One serial model call per line of an append-only file, with
+    timeout_seconds 180, is how the unit gets pinned for hours."""
+    build_state(tmp_path)
+    (tmp_path / "state" / "predictions.jsonl").write_text(
+        "".join(json.dumps({"id": f"p{i}", "claim": f"Claim {i}."}) + "\n"
+                for i in range(150)),
+        encoding="utf-8")
+    calls = []
+    translate.translate_docs(
+        tmp_path, {**DOC_CFG, "max_doc_calls_per_run": 4}, GLOSSARY,
+        counting_doc_run(calls))
+    assert len(calls) == 4
+
+
+def test_no_ceiling_configured_means_no_ceiling(tmp_path):
+    """The key is optional: a config without it behaves as it did before."""
+    build_state(tmp_path)
+    calls = []
+    translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY,
+                             counting_doc_run(calls))
+    assert len(calls) > 4

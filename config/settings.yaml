@@ -70,5 +70,14 @@ translate:
   window_days: 7
   batch_size: 20
   max_batches_per_run: 6
+  # The same kind of ceiling for the document pass, counted across the whole
+  # of it (stance sections, playbook, watchlist entries, prediction lines and
+  # reports together). Without one, a document the translator always refuses
+  # costs a call every tick forever, and the first run after a deploy makes
+  # one serial call per historical prediction line. 10 covers a brief that
+  # rewrote every stance section plus its report in a single tick; anything
+  # left over is picked up ten minutes later. Keep this consistent with
+  # TimeoutStartSec in ops/systemd/jamasp-translate.service.
+  max_doc_calls_per_run: 10
   # Spec decision 18: new reports only. Set to the date this shipped.
   reports_since: "2026-09-13"

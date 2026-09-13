@@ -226,6 +226,8 @@ def _translate_line(stats: dict) -> str:
         f" {rows.get('batches', 0)} batches; "
         f"events {events.get('translated', 0)}/{events.get('failed', 0)}; "
         f"docs {docs.get('translated', 0)}/{docs.get('failed', 0)}"
+        + (f" ({docs['skipped']} deferred to the next tick)"
+           if docs.get("skipped") else "")
     )
 
 
