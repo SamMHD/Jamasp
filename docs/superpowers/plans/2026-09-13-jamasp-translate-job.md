@@ -1060,6 +1060,23 @@ Expected: FAIL — `AttributeError: module 'jamasp.translate' has no attribute '
 
 - [ ] **Step 3: Write the rows pass**
 
+> **Corrections applied during execution** — the code below is the plan as
+> originally written; the shipped implementation differs in two ways, both
+> deliberate:
+>
+> 1. **`sqlite3.Row` has no `.get()`.** `jamasp/db.py` sets
+>    `conn.row_factory = sqlite3.Row`, so `pending_rows` returns `Row`
+>    objects, while `translatetext.build_rows_prompt` calls
+>    `row.get(field)`. As written below, every real batch would have raised
+>    `AttributeError` — the tests passed only because they never reached a
+>    prompt build with a real row. The fix converts to plain dicts inside
+>    `_translate_batch` (`[dict(row) for row in rows]`), which covers both the
+>    batch path and the singles-fallback path, since `build_rows_prompt` has
+>    exactly one call site.
+> 2. **Dead assignment.** The `except` clause below binds `last = str(exc)`
+>    and never reads it. The shipped version drops the binding and just
+>    `break`s.
+
 Append to `jamasp/translate.py` (and add the imports at the top):
 
 ```python
@@ -2792,6 +2809,25 @@ Expected: FAIL — no violation containing "translate backlog".
 
 - [ ] **Step 3: Add the probe**
 
+> **Correction applied during execution.** The backlog query below has no
+> upper bound on `published_at`, which is a defect. `translate.pending_rows`
+> only ever considers rows inside `translate.window_days`; a row that ages
+> out of that window is never revisited, so an unbounded backlog alert can
+> never clear — and it would fire on the first deploy against the live
+> database, which holds months of pre-feature history with `headline_fa IS
+> NULL`. The spec says "untranslated **in-window** rows", so the query below
+> contradicts it.
+>
+> The shipped version adds `translate_window_days: int | None = None` as the
+> last parameter of `check()`, bounds the backlog query below by
+> `published_at >= _since(translate_window_days, now)` (reusing
+> `translate._since` so it cannot drift from `pending_rows`), and **skips the
+> backlog probe entirely when the parameter is None** rather than guessing a
+> default — a deployment with no `translate` config is not running the job,
+> and inventing a window is how false alerts return. `run()` passes
+> `settings.get("translate", {}).get("window_days")`. The abandoned-rows
+> probe is unaffected and runs either way.
+
 `watchdog.py` imports `jamasp.db` only, and `translate.py` imports `config`, `db`, `modelrun` and `translatetext` — none of which import `watchdog`. So there is no cycle: import the constant rather than duplicating the number.
 
 In `jamasp/watchdog.py`, add `from jamasp import translate as translate_mod` to the imports, then add near the other constants:
@@ -3163,9 +3199,12 @@ Run all of these and paste the output into the PR description:
 uv run pytest -q
 uv run jamasp translate --check
 uv run jamasp translate --dry-run
-git diff --stat main...HEAD -- panel/     # must be EMPTY: panel ships in PR 2
+git diff --stat origin/main...HEAD -- panel/   # must be EMPTY: panel ships in PR 2
 ```
 
 The last command is the one worth being pedantic about. This PR is the job and
 nothing else; a stray panel change here is the seam where "English default
-until the backlog is full" stops meaning anything.
+until the backlog is full" stops meaning anything. It compares against
+`origin/main` deliberately: a stale local `main` reports panel changes that
+are really just commits the branch already has, which reads as a scope
+violation that is not one.
