@@ -231,7 +231,10 @@ def _translate_line(stats: dict) -> str:
 
 @main.command()
 @click.option("--dry-run", is_flag=True, help="report what would be translated")
-@click.option("--force", is_flag=True, help="retranslate even when unchanged")
+@click.option("--force", is_flag=True,
+              help="re-translate in-window rows, events and documents even"
+                   " when unchanged, and re-arm rows the attempt cap"
+                   " abandoned (Persian copied from a flash is left alone)")
 @click.option("--only", type=click.Choice(["rows", "events", "docs"]),
               help="run one track (rows always includes the flash reuse pass)")
 @click.option("--check", "check_only", is_flag=True,

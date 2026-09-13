@@ -64,9 +64,39 @@ def _since(window_days: int, now: str | None = None) -> str:
     return (base - timedelta(days=window_days)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+# How long a row waits after its Nth failure before it is offered again.
+# Spec decision 12 is "attempt counter + status, backoff" and the cap alone is
+# not backoff: the timer fires every 10 minutes, so three ticks inside half an
+# hour used to walk the same rows straight to MAX_ATTEMPTS. An outage on a
+# Friday evening therefore abandoned the whole window by Monday, and nothing
+# short of editing the database brought it back. With these delays a day-long
+# outage spends at most three attempts, and --force re-arms whatever it did.
+BACKOFF_MINUTES = (15, 60, 240)
+
+
+def _backoff(now: str) -> tuple[str, list[str]]:
+    """SQL fragment + params that skip a row still inside its backoff.
+
+    `fa_attempts = 0` is exempt: --force resets the counter without clearing
+    `fa_failed_at`, and a re-armed row must be eligible immediately.
+    """
+    base = datetime.strptime(now, "%Y-%m-%dT%H:%M:%SZ").replace(
+        tzinfo=timezone.utc)
+    thresholds = [
+        (base - timedelta(minutes=m)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        for m in BACKOFF_MINUTES
+    ]
+    return (
+        " AND (fa_failed_at IS NULL OR fa_attempts = 0"
+        "      OR fa_failed_at <= CASE fa_attempts"
+        "         WHEN 1 THEN ? WHEN 2 THEN ? ELSE ? END)",
+        thresholds,
+    )
+
+
 def pending_rows(
     conn: sqlite3.Connection, window_days: int, limit: int,
-    now: str | None = None,
+    now: str | None = None, force: bool = False,
 ) -> list[sqlite3.Row]:
     """Untranslated items inside the window, newest first.
 
@@ -76,13 +106,43 @@ def pending_rows(
 
     The attempt cap is applied here rather than at write time so an abandoned
     row costs nothing to skip — it never enters a batch again.
+
+    Under `force` the filter widens to rows that already have Persian, but only
+    where that Persian came from a model (`fa_source` 'model', or NULL for a
+    row that has none yet). Rows whose `fa_source` is 'flash' are left alone:
+    that Persian is the news channel's own editorial wording, it arrived free
+    from the reuse pass, and re-translating it would both spend a call and give
+    the same story two different Persian headlines. The reuse pass owns those
+    rows.
     """
+    stamp = now or utcnow()
+    clause, thresholds = _backoff(stamp)
+    selector = ("(fa_source IS NULL OR fa_source = 'model')" if force
+                else "headline_fa IS NULL")
     return conn.execute(
-        "SELECT id, headline, lede FROM items"
-        " WHERE headline_fa IS NULL AND published_at >= ? AND fa_attempts < ?"
+        f"SELECT id, headline, lede FROM items"
+        f" WHERE {selector} AND published_at >= ? AND fa_attempts < ?{clause}"
         " ORDER BY published_at DESC LIMIT ?",
-        (_since(window_days, now), MAX_ATTEMPTS, limit),
+        (_since(window_days, stamp), MAX_ATTEMPTS, *thresholds, limit),
     ).fetchall()
+
+
+def rearm(conn: sqlite3.Connection, table: str, column: str,
+          window_days: int, now: str | None = None) -> int:
+    """`--force`'s first half: clear the abandonment state inside the window.
+
+    The spec is explicit that --force does not merely ignore the cap, it
+    resets it — "an operator clearing a known-bad state does not have to edit
+    the database". Scoped to the window because rows outside it are never
+    translated anyway.
+    """
+    cur = conn.execute(
+        f"UPDATE {table} SET fa_attempts = 0, fa_error = NULL"
+        f" WHERE {column} >= ? AND (fa_attempts > 0 OR fa_error IS NOT NULL)",
+        (_since(window_days, now),),
+    )
+    conn.commit()
+    return cur.rowcount
 
 
 def _write_row(conn, item_id: str, entry: dict, now: str) -> None:
@@ -93,11 +153,11 @@ def _write_row(conn, item_id: str, entry: dict, now: str) -> None:
     )
 
 
-def _record_failure(conn, item_id: str, error: str) -> None:
+def _record_failure(conn, item_id: str, error: str, now: str) -> None:
     conn.execute(
-        "UPDATE items SET fa_attempts = fa_attempts + 1, fa_error = ?"
-        " WHERE id = ?",
-        (error[:500], item_id),
+        "UPDATE items SET fa_attempts = fa_attempts + 1, fa_error = ?,"
+        " fa_failed_at = ? WHERE id = ?",
+        (error[:500], now, item_id),
     )
 
 
@@ -173,7 +233,7 @@ def _batch_with_fallback(
                     write(conn, row["id"], entry, now)
                     translated += 1
                 else:
-                    fail(conn, row["id"], "model omitted this entry")
+                    fail(conn, row["id"], "model omitted this entry", now)
             conn.commit()
         except sqlite3.OperationalError:
             with contextlib.suppress(sqlite3.Error):
@@ -186,12 +246,12 @@ def _batch_with_fallback(
         try:
             answers = _translate_batch([row], fields, glossary, run)
         except ROW_FAILURES as exc:
-            _record(conn, fail, row["id"], str(exc))
+            _record(conn, fail, row["id"], str(exc), now)
             failed += 1
             continue
         entry = answers.get(0)
         if not entry:
-            _record(conn, fail, row["id"], "model omitted this entry")
+            _record(conn, fail, row["id"], "model omitted this entry", now)
             failed += 1
             continue
         # Committed here, before the next iteration's model call — see _commit.
@@ -202,25 +262,29 @@ def _batch_with_fallback(
     return translated, failed
 
 
-def _record(conn, fail, row_id: str, error: str) -> None:
+def _record(conn, fail, row_id: str, error: str, now: str) -> None:
     """Record a row failure, best effort. Swallows a locked database.
 
     The failure record is itself a write, so the one thing it cannot do is
     raise the same error it exists to absorb. A row whose attempt could not be
     counted simply keeps its old count and is retried next tick.
     """
-    _commit(conn, lambda: fail(conn, row_id, error))
+    _commit(conn, lambda: fail(conn, row_id, error, now))
 
 
 def translate_rows(
     conn: sqlite3.Connection, cfg: dict, glossary: dict,
     run: Callable[[str, dict], object], now: str | None = None,
+    force: bool = False,
 ) -> dict:
     """Translate pending items in batches. Returns counts."""
     stamp = now or utcnow()
     batch_size = cfg["batch_size"]
     ceiling = cfg["max_batches_per_run"]
-    rows = pending_rows(conn, cfg["window_days"], batch_size * ceiling, now)
+    if force:
+        rearm(conn, "items", "published_at", cfg["window_days"], stamp)
+    rows = pending_rows(
+        conn, cfg["window_days"], batch_size * ceiling, stamp, force)
 
     translated = failed = batches = 0
     for start in range(0, len(rows), batch_size):
@@ -240,19 +304,25 @@ EVENT_FIELDS = ("title",)
 
 def pending_events(
     conn: sqlite3.Connection, window_days: int, limit: int,
-    now: str | None = None,
+    now: str | None = None, force: bool = False,
 ) -> list[sqlite3.Row]:
     """Untranslated events from the recent past forward, soonest first.
 
     No upper bound: the calendar is a forward-looking view, so every future
     event qualifies. The window only bounds how far back a just-passed event
     stays worth translating.
+
+    `force` widens this to every in-window event. Unlike items there is no
+    `fa_source` to protect: nothing but this job ever writes `title_fa`.
     """
+    stamp = now or utcnow()
+    clause, thresholds = _backoff(stamp)
+    selector = "1 = 1" if force else "title_fa IS NULL"
     return conn.execute(
-        "SELECT id, title FROM events"
-        " WHERE title_fa IS NULL AND starts_at >= ? AND fa_attempts < ?"
+        f"SELECT id, title FROM events"
+        f" WHERE {selector} AND starts_at >= ? AND fa_attempts < ?{clause}"
         " ORDER BY starts_at LIMIT ?",
-        (_since(window_days, now), MAX_ATTEMPTS, limit),
+        (_since(window_days, stamp), MAX_ATTEMPTS, *thresholds, limit),
     ).fetchall()
 
 
@@ -263,23 +333,27 @@ def _write_event(conn, event_id: str, entry: dict, now: str) -> None:
     )
 
 
-def _record_event_failure(conn, event_id: str, error: str) -> None:
+def _record_event_failure(conn, event_id: str, error: str, now: str) -> None:
     conn.execute(
-        "UPDATE events SET fa_attempts = fa_attempts + 1, fa_error = ?"
-        " WHERE id = ?",
-        (error[:500], event_id),
+        "UPDATE events SET fa_attempts = fa_attempts + 1, fa_error = ?,"
+        " fa_failed_at = ? WHERE id = ?",
+        (error[:500], now, event_id),
     )
 
 
 def translate_events(
     conn: sqlite3.Connection, cfg: dict, glossary: dict,
     run: Callable[[str, dict], object], now: str | None = None,
+    force: bool = False,
 ) -> dict:
     """Translate pending calendar events in batches. Returns counts."""
     stamp = now or utcnow()
     batch_size = cfg["batch_size"]
     ceiling = cfg["max_batches_per_run"]
-    rows = pending_events(conn, cfg["window_days"], batch_size * ceiling, now)
+    if force:
+        rearm(conn, "events", "starts_at", cfg["window_days"], stamp)
+    rows = pending_events(
+        conn, cfg["window_days"], batch_size * ceiling, stamp, force)
 
     translated = failed = batches = 0
     for start in range(0, len(rows), batch_size):
@@ -609,9 +683,11 @@ def run_translate(
         return {
             "dry_run": True,
             "pending_rows": len(pending_rows(
-                conn, cfg["window_days"], cfg["batch_size"] * cfg["max_batches_per_run"], now)),
+                conn, cfg["window_days"],
+                cfg["batch_size"] * cfg["max_batches_per_run"], now, force)),
             "pending_events": len(pending_events(
-                conn, cfg["window_days"], cfg["batch_size"] * cfg["max_batches_per_run"], now)),
+                conn, cfg["window_days"],
+                cfg["batch_size"] * cfg["max_batches_per_run"], now, force)),
             "pending_reports": len(new_reports(root / "reports", cfg["reports_since"])),
         }
 
@@ -620,9 +696,9 @@ def run_translate(
         # Always before the model pass, and not separately selectable: a rows
         # pass that ran first would pay to translate what flash already wrote.
         stats["reused"] = reuse_flash_persian(conn, now)
-        stats["rows"] = translate_rows(conn, cfg, glossary, run, now)
+        stats["rows"] = translate_rows(conn, cfg, glossary, run, now, force)
     if want_events:
-        stats["events"] = translate_events(conn, cfg, glossary, run, now)
+        stats["events"] = translate_events(conn, cfg, glossary, run, now, force)
     if want_docs:
         stats["docs"] = translate_docs(root, cfg, glossary, run, now, force)
 

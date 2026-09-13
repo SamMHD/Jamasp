@@ -261,16 +261,19 @@ def test_a_row_that_fails_alone_records_attempt_and_error(tmp_path):
 
 
 def test_a_row_reaches_the_cap_after_three_runs_and_is_abandoned(tmp_path):
+    """Three runs the row is ELIGIBLE for — the backoff (see BACKOFF_MINUTES)
+    is what decides which ticks those are, and the clock is stepped past each
+    delay here so this test asks only about the cap."""
     conn = db.connect(tmp_path / "t.db")
     seed(conn, [("One", 1)])
 
     def run(prompt, schema):
         raise modelrun.ModelError("nope")
 
-    for _ in range(3):
-        translate.translate_rows(conn, CFG, GLOSSARY, run)
+    for minutes in (0, 20, 90):
+        translate.translate_rows(conn, CFG, GLOSSARY, run, now=clock(minutes))
     assert conn.execute("SELECT fa_attempts FROM items").fetchone()[0] == 3
-    assert translate.pending_rows(conn, 7, 10) == []
+    assert translate.pending_rows(conn, 7, 10, now=clock(24 * 60)) == []
 
 
 def test_a_row_the_model_omits_counts_as_failed(tmp_path):
@@ -842,3 +845,151 @@ def test_dry_run_does_not_stamp(tmp_path):
         conn, {"translate": {**FULL_CFG, "reports_since": "2026-09-01"}},
         root=tmp_path, glossary=GLOSSARY, run=fake_run(), dry_run=True)
     assert db.get_meta(conn, "last_translate_at") is None
+
+
+def clock(minutes=0):
+    """An ISO stamp `minutes` from now; negative is the past."""
+    dt = datetime.now(timezone.utc) + timedelta(minutes=minutes)
+    return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def always_fails(prompt, schema):
+    raise modelrun.ModelError("auth lapsed")
+
+
+def test_a_failed_row_waits_out_its_backoff_before_being_retried(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    seed(conn, [("One", 1)])
+    translate.translate_rows(conn, CFG, GLOSSARY, always_fails, now=clock(0))
+    assert conn.execute("SELECT fa_attempts FROM items").fetchone()[0] == 1
+
+    calls = []
+
+    def counting(prompt, schema):
+        calls.append(prompt)
+        raise modelrun.ModelError("auth lapsed")
+
+    # Ten minutes on: still inside the first (15 minute) backoff.
+    translate.translate_rows(conn, CFG, GLOSSARY, counting, now=clock(10))
+    assert calls == []
+    assert conn.execute("SELECT fa_attempts FROM items").fetchone()[0] == 1
+
+    # Twenty minutes on: eligible again, and it spends one more attempt.
+    translate.translate_rows(conn, CFG, GLOSSARY, counting, now=clock(20))
+    assert calls
+    assert conn.execute("SELECT fa_attempts FROM items").fetchone()[0] == 2
+
+
+def test_three_ticks_in_thirty_minutes_cannot_exhaust_the_attempt_cap(tmp_path):
+    """The Friday-evening outage the backoff exists for: without it, the ticks
+    at 18:00 / 18:10 / 18:20 each re-selected the same newest rows (nothing
+    translated, so the ORDER BY returns an identical set) and drove every one
+    of them to the cap inside half an hour."""
+    conn = db.connect(tmp_path / "t.db")
+    seed(conn, [("One", 1)])
+    for minutes in (0, 10, 20):
+        translate.translate_rows(conn, CFG, GLOSSARY, always_fails,
+                                 now=clock(minutes))
+    attempts = conn.execute("SELECT fa_attempts FROM items").fetchone()[0]
+    assert attempts < translate.MAX_ATTEMPTS
+    # backed off, not abandoned: the second failure buys an hour
+    assert translate.pending_rows(conn, 7, 10, now=clock(25)) == []
+    assert translate.pending_rows(conn, 7, 10, now=clock(85))
+
+
+def test_the_backoff_grows_with_the_attempt_count(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    (one,) = seed(conn, [("One", 1)])
+    conn.execute(
+        "UPDATE items SET fa_attempts = 2, fa_failed_at = ? WHERE id = ?",
+        (clock(0), one))
+    conn.commit()
+    assert translate.pending_rows(conn, 7, 10, now=clock(30)) == []
+    assert translate.pending_rows(conn, 7, 10, now=clock(90))
+
+
+def test_a_row_that_never_failed_is_never_backed_off(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    seed(conn, [("One", 1)])
+    assert translate.pending_rows(conn, 7, 10, now=clock(0))
+
+
+def test_force_retranslates_a_row_the_model_already_translated(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    (one,) = seed(conn, [("One", 1)])
+    translate.translate_rows(conn, CFG, GLOSSARY, fake_run())
+    conn.execute("UPDATE items SET headline_fa = 'OLD' WHERE id = ?", (one,))
+    conn.commit()
+
+    stats = translate.translate_rows(conn, CFG, GLOSSARY, fake_run(), force=True)
+    assert stats["translated"] == 1
+    assert conn.execute("SELECT headline_fa FROM items").fetchone()[0] != "OLD"
+
+
+def test_force_never_overwrites_persian_that_came_from_a_flash(tmp_path):
+    """Flash Persian is the channel's own editorial wording and it came free.
+    The reuse pass owns those rows; --force must not pay to replace them."""
+    conn = db.connect(tmp_path / "t.db")
+    (one,) = seed(conn, [("One", 1)])
+    add_flash(conn, one)
+    translate.reuse_flash_persian(conn)
+
+    calls = []
+    stats = translate.translate_rows(
+        conn, CFG, GLOSSARY, fake_run(calls=calls), force=True)
+    assert calls == []
+    assert stats["translated"] == 0
+    row = conn.execute("SELECT headline_fa, fa_source FROM items").fetchone()
+    assert row["headline_fa"] == "تیتر فارسی" and row["fa_source"] == "flash"
+
+
+def test_force_re_arms_rows_the_attempt_cap_abandoned(tmp_path):
+    """The spec, verbatim: a row at 3 attempts is reset by --force and retried
+    once more, so an operator clearing a known-bad state does not have to edit
+    the database."""
+    conn = db.connect(tmp_path / "t.db")
+    (one,) = seed(conn, [("One", 1)])
+    conn.execute(
+        "UPDATE items SET fa_attempts = ?, fa_error = 'auth lapsed',"
+        " fa_failed_at = ? WHERE id = ?",
+        (translate.MAX_ATTEMPTS, clock(-5), one))
+    conn.commit()
+    assert translate.pending_rows(conn, 7, 10) == []      # abandoned today
+
+    stats = translate.translate_rows(conn, CFG, GLOSSARY, fake_run(), force=True)
+    assert stats["translated"] == 1
+    row = conn.execute(
+        "SELECT headline_fa, fa_attempts, fa_error FROM items").fetchone()
+    assert row["headline_fa"].startswith("FA")
+    assert row["fa_attempts"] == 0 and row["fa_error"] is None
+
+
+def test_force_re_arms_and_retranslates_events(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    add_event(conn, "e1", "US CPI (MoM)", 24)
+    conn.execute(
+        "UPDATE events SET title_fa = 'OLD', fa_attempts = ? WHERE id = 'e1'",
+        (translate.MAX_ATTEMPTS,))
+    conn.commit()
+
+    def run(prompt, schema):
+        return {"1": {"title": "NEW"}}
+
+    stats = translate.translate_events(conn, CFG, GLOSSARY, run, force=True)
+    assert stats["translated"] == 1
+    row = conn.execute("SELECT title_fa, fa_attempts FROM events").fetchone()
+    assert row["title_fa"] == "NEW" and row["fa_attempts"] == 0
+
+
+def test_run_translate_force_reaches_the_rows_pass(tmp_path):
+    """--force was wired only into the docs pass: an outage that abandoned the
+    row backlog had no operator remedy short of editing the database."""
+    conn = db.connect(tmp_path / "t.db")
+    (one,) = seed(conn, [("One", 1)])
+    conn.execute("UPDATE items SET fa_attempts = ? WHERE id = ?",
+                 (translate.MAX_ATTEMPTS, one))
+    conn.commit()
+    stats = translate.run_translate(
+        conn, {"translate": {**FULL_CFG, "reports_since": "2026-09-01"}},
+        root=tmp_path, glossary=GLOSSARY, run=fake_run(), force=True)
+    assert stats["rows"]["translated"] == 1

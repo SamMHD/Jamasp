@@ -220,10 +220,17 @@ ADDED_COLUMNS = (
     ("items", "fa_at", "TEXT"),
     ("items", "fa_attempts", "INTEGER NOT NULL DEFAULT 0"),
     ("items", "fa_error", "TEXT"),
+    # When the last attempt FAILED, which is a different fact from fa_at
+    # ("when Persian was written") and is what the translate job's retry
+    # backoff is keyed off. A separate column rather than overloading fa_at:
+    # the panel reads fa_at as the age of a translation, and a row whose
+    # fa_at moved without any Persian behind it would read as fresh.
+    ("items", "fa_failed_at", "TEXT"),
     ("events", "title_fa", "TEXT"),
     ("events", "fa_at", "TEXT"),
     ("events", "fa_attempts", "INTEGER NOT NULL DEFAULT 0"),
     ("events", "fa_error", "TEXT"),
+    ("events", "fa_failed_at", "TEXT"),
 )
 
 
