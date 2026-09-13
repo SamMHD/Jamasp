@@ -810,3 +810,35 @@ def test_run_translate_reports_every_pass(tmp_path):
         root=tmp_path, glossary=GLOSSARY, run=fake_run())
     for key in ("reused", "rows", "events", "docs"):
         assert key in stats
+
+
+def test_run_translate_stamps_that_the_job_ran(tmp_path):
+    """The watchdog's translate probes gate on this stamp, so it is what tells
+    them the job exists on this host — mirroring meta.last_ingest_at."""
+    conn = db.connect(tmp_path / "t.db")
+    seed(conn, [("One", 1)])
+    build_state(tmp_path)
+    translate.run_translate(
+        conn, {"translate": {**FULL_CFG, "reports_since": "2026-09-01"}},
+        root=tmp_path, glossary=GLOSSARY, run=fake_run(),
+        now="2026-09-13T12:00:00Z")
+    assert db.get_meta(conn, "last_translate_at") == "2026-09-13T12:00:00Z"
+
+
+def test_run_translate_stamps_even_when_it_translated_nothing(tmp_path):
+    """The point of the stamp is that the job ran, not that it did work."""
+    conn = db.connect(tmp_path / "t.db")
+    translate.run_translate(
+        conn, {"translate": {**FULL_CFG, "reports_since": "2026-09-01"}},
+        root=tmp_path, glossary=GLOSSARY, run=fake_run())
+    assert db.get_meta(conn, "last_translate_at") is not None
+
+
+def test_dry_run_does_not_stamp(tmp_path):
+    """--dry-run is an inspection, not a run: it must not arm the probes."""
+    conn = db.connect(tmp_path / "t.db")
+    seed(conn, [("One", 1)])
+    translate.run_translate(
+        conn, {"translate": {**FULL_CFG, "reports_since": "2026-09-01"}},
+        root=tmp_path, glossary=GLOSSARY, run=fake_run(), dry_run=True)
+    assert db.get_meta(conn, "last_translate_at") is None

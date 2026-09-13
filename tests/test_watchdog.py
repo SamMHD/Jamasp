@@ -287,6 +287,7 @@ def test_translate_backlog_violation_when_rows_sit_untranslated(tmp_path):
         " 'https://e/1','gold','2026-09-13T10:00:00Z')"
     )
     conn.commit()
+    db.set_meta(conn, "last_translate_at", "2026-09-13T11:55:00Z")
     violations = watchdog.check(conn, tmp_path, now=stamp,
                                 credentials_path=tmp_path / "none.json",
                                 translate_window_days=7)
@@ -327,6 +328,7 @@ def test_abandoned_rows_are_reported_separately(tmp_path):
         " 'https://e/1','gold','2026-09-13T11:55:00Z', 3)"
     )
     conn.commit()
+    db.set_meta(conn, "last_translate_at", "2026-09-13T11:55:00Z")
     violations = watchdog.check(conn, tmp_path, now="2026-09-13T12:00:00Z",
                                 credentials_path=tmp_path / "none.json")
     assert any("gave up" in v for v in violations)
@@ -362,6 +364,7 @@ def test_row_inside_window_and_old_does_violate_when_window_supplied(tmp_path):
         " 'https://e/1','gold','2026-09-13T10:00:00Z')"
     )
     conn.commit()
+    db.set_meta(conn, "last_translate_at", "2026-09-13T11:55:00Z")
     violations = watchdog.check(conn, tmp_path, now="2026-09-13T12:00:00Z",
                                 credentials_path=tmp_path / "none.json",
                                 translate_window_days=7)
@@ -392,6 +395,7 @@ def test_abandoned_violation_still_fires_when_window_days_is_none(tmp_path):
         " 'https://e/1','gold','2026-09-13T11:55:00Z', 3)"
     )
     conn.commit()
+    db.set_meta(conn, "last_translate_at", "2026-09-13T11:55:00Z")
     violations = watchdog.check(conn, tmp_path, now="2026-09-13T12:00:00Z",
                                 credentials_path=tmp_path / "none.json",
                                 translate_window_days=None)
@@ -408,6 +412,7 @@ def test_translate_backlog_boundary_at_exactly_threshold_minutes(tmp_path):
         " 'https://e/1','gold','2026-09-13T11:15:00Z')"
     )
     conn.commit()
+    db.set_meta(conn, "last_translate_at", "2026-09-13T11:55:00Z")
     violations = watchdog.check(conn, tmp_path, now="2026-09-13T12:00:00Z",
                                 credentials_path=tmp_path / "none.json",
                                 translate_window_days=7)
@@ -427,3 +432,54 @@ def test_translate_backlog_boundary_at_exactly_threshold_minutes(tmp_path):
                                 translate_window_days=7)
     assert any("translate backlog" in v for v in violations), \
         "Row at 46 minutes old should violate"
+
+
+def test_no_translate_violations_before_the_job_has_ever_run(tmp_path):
+    """The `translate:` block ships configured while the timer stays disabled
+    until host volume is measured (the spec's Risks section). Gating the probes
+    on config presence alerted the desk about a backlog for a job that has
+    never been asked to run — 120 items, violation fired, on a database where
+    translate had never run. Evidence that it ran is the stamp, not the config.
+    """
+    conn = db.connect(tmp_path / "t.db")
+    conn.execute(
+        "INSERT INTO items (id, source, published_at, headline, url, topic,"
+        " fetched_at) VALUES ('i1','a','2026-09-13T10:00:00Z','H',"
+        " 'https://e/1','gold','2026-09-13T10:00:00Z')"
+    )
+    conn.execute(
+        "INSERT INTO items (id, source, published_at, headline, url, topic,"
+        " fetched_at, fa_attempts) VALUES ('i2','a','2026-09-13T10:00:00Z','H',"
+        " 'https://e/2','gold','2026-09-13T10:00:00Z', 3)"
+    )
+    conn.commit()
+
+    violations = watchdog.check(conn, tmp_path, now="2026-09-13T12:00:00Z",
+                                credentials_path=tmp_path / "none.json",
+                                translate_window_days=7)
+    # (matched narrowly: pytest's tmp_path contains this test's own name)
+    assert not any("translate backlog" in v for v in violations), violations
+    assert not any("gave up" in v for v in violations), violations
+
+
+def test_both_translate_probes_resume_once_the_job_has_run(tmp_path):
+    """The same database, one `meta.last_translate_at` later."""
+    conn = db.connect(tmp_path / "t.db")
+    conn.execute(
+        "INSERT INTO items (id, source, published_at, headline, url, topic,"
+        " fetched_at) VALUES ('i1','a','2026-09-13T10:00:00Z','H',"
+        " 'https://e/1','gold','2026-09-13T10:00:00Z')"
+    )
+    conn.execute(
+        "INSERT INTO items (id, source, published_at, headline, url, topic,"
+        " fetched_at, fa_attempts) VALUES ('i2','a','2026-09-13T10:00:00Z','H',"
+        " 'https://e/2','gold','2026-09-13T10:00:00Z', 3)"
+    )
+    conn.commit()
+    db.set_meta(conn, "last_translate_at", "2026-09-13T11:55:00Z")
+
+    violations = watchdog.check(conn, tmp_path, now="2026-09-13T12:00:00Z",
+                                credentials_path=tmp_path / "none.json",
+                                translate_window_days=7)
+    assert any("translate backlog" in v for v in violations), violations
+    assert any("gave up" in v for v in violations), violations

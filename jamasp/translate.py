@@ -22,7 +22,7 @@ import yaml
 
 from jamasp import config as config_mod
 from jamasp import modelrun, translatetext
-from jamasp.db import utcnow
+from jamasp.db import set_meta, utcnow
 
 
 def reuse_flash_persian(conn: sqlite3.Connection, now: str | None = None) -> int:
@@ -625,4 +625,17 @@ def run_translate(
         stats["events"] = translate_events(conn, cfg, glossary, run, now)
     if want_docs:
         stats["docs"] = translate_docs(root, cfg, glossary, run, now, force)
+
+    # Evidence that the job runs on this host, mirroring meta.last_ingest_at.
+    # The watchdog's backlog and abandoned probes gate on this rather than on
+    # the `translate:` config block: the block ships enabled-looking while the
+    # timer stays disabled until host volume is measured, and probing on
+    # configuration alone alerts the desk about a job nobody has asked to run.
+    # Written even when nothing was translated — the claim is "it ran", not "it
+    # did work" — and never by --dry-run, which is an inspection.
+    #
+    # An `--only` run stamps too: it is still the job running, and the alt —
+    # a partial run leaving the probes disarmed — would be a quieter watchdog
+    # for an operator action that is rare and deliberate either way.
+    set_meta(conn, "last_translate_at", now or utcnow())
     return stats
