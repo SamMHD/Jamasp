@@ -177,3 +177,62 @@ def translate_rows(
         failed += bad
         batches += 1
     return {"translated": translated, "failed": failed, "batches": batches}
+
+
+EVENT_FIELDS = ("title",)
+
+
+def pending_events(
+    conn: sqlite3.Connection, window_days: int, limit: int,
+    now: str | None = None,
+) -> list[sqlite3.Row]:
+    """Untranslated events from the recent past forward, soonest first.
+
+    No upper bound: the calendar is a forward-looking view, so every future
+    event qualifies. The window only bounds how far back a just-passed event
+    stays worth translating.
+    """
+    return conn.execute(
+        "SELECT id, title FROM events"
+        " WHERE title_fa IS NULL AND starts_at >= ? AND fa_attempts < ?"
+        " ORDER BY starts_at LIMIT ?",
+        (_since(window_days, now), MAX_ATTEMPTS, limit),
+    ).fetchall()
+
+
+def _write_event(conn, event_id: str, entry: dict, now: str) -> None:
+    conn.execute(
+        "UPDATE events SET title_fa = ?, fa_at = ?, fa_error = NULL WHERE id = ?",
+        (entry["title"], now, event_id),
+    )
+
+
+def _record_event_failure(conn, event_id: str, error: str) -> None:
+    conn.execute(
+        "UPDATE events SET fa_attempts = fa_attempts + 1, fa_error = ?"
+        " WHERE id = ?",
+        (error[:500], event_id),
+    )
+
+
+def translate_events(
+    conn: sqlite3.Connection, cfg: dict, glossary: dict,
+    run: Callable[[str, dict], object], now: str | None = None,
+) -> dict:
+    """Translate pending calendar events in batches. Returns counts."""
+    stamp = now or utcnow()
+    batch_size = cfg["batch_size"]
+    ceiling = cfg["max_batches_per_run"]
+    rows = pending_events(conn, cfg["window_days"], batch_size * ceiling, now)
+
+    translated = failed = batches = 0
+    for start in range(0, len(rows), batch_size):
+        chunk = rows[start:start + batch_size]
+        ok, bad = _batch_with_fallback(
+            conn, chunk, EVENT_FIELDS, glossary, run, stamp,
+            _write_event, _record_event_failure,
+        )
+        translated += ok
+        failed += bad
+        batches += 1
+    return {"translated": translated, "failed": failed, "batches": batches}

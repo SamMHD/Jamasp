@@ -237,3 +237,50 @@ def test_a_lede_the_model_omits_leaves_lede_fa_null(tmp_path):
     row = conn.execute("SELECT headline_fa, lede_fa FROM items").fetchone()
     assert row["headline_fa"] == "FA1"
     assert row["lede_fa"] is None
+
+
+def add_event(conn, event_id, title, hours_from_now):
+    dt = datetime.now(timezone.utc) + timedelta(hours=hours_from_now)
+    conn.execute(
+        "INSERT INTO events (id, source, title, country, impact, starts_at,"
+        " fetched_at) VALUES (?, 'cal', ?, 'US', 'high', ?, ?)",
+        (event_id, title, dt.strftime("%Y-%m-%dT%H:%M:%SZ"), ago(1)),
+    )
+    conn.commit()
+
+
+def test_pending_events_includes_future_and_recent_past(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    add_event(conn, "e1", "US CPI (MoM)", 48)       # future
+    add_event(conn, "e2", "FOMC Statement", -24)    # yesterday
+    add_event(conn, "e3", "Ancient event", -24 * 30)
+    ids = [r["id"] for r in translate.pending_events(conn, 7, 10)]
+    assert set(ids) == {"e1", "e2"}
+
+
+def test_translate_events_writes_title_fa(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    add_event(conn, "e1", "US CPI (MoM)", 24)
+
+    def run(prompt, schema):
+        assert "US CPI (MoM)" in prompt
+        return {"1": {"title": "شاخص قیمت مصرف‌کننده آمریکا (ماهانه)"}}
+
+    stats = translate.translate_events(conn, CFG, GLOSSARY, run)
+    assert stats["translated"] == 1
+    row = conn.execute("SELECT title_fa, fa_at FROM events").fetchone()
+    assert row["title_fa"].startswith("شاخص")
+    assert row["fa_at"] is not None
+
+
+def test_translate_events_records_failure_on_the_event_row(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    add_event(conn, "e1", "US CPI (MoM)", 24)
+
+    def run(prompt, schema):
+        raise modelrun.ModelError("event boom")
+
+    assert translate.translate_events(conn, CFG, GLOSSARY, run)["failed"] == 1
+    row = conn.execute("SELECT fa_attempts, fa_error FROM events").fetchone()
+    assert row["fa_attempts"] == 1
+    assert "event boom" in row["fa_error"]
