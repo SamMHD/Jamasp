@@ -1218,3 +1218,74 @@ def test_translate_predictions_leaves_the_sidecar_alone_when_everything_fails(tm
     assert translate.translate_predictions(
         src, side, GLOSSARY, failing)["failed"] == 1
     assert side.read_text(encoding="utf-8") == before
+
+
+def test_force_is_not_bounded_by_the_per_run_document_ceiling(tmp_path):
+    """Two fixes collided. Under --force the hash check is skipped but the
+    budget still applied, and a budget-refused unit was written back carrying
+    its CURRENT hash — so the next ordinary tick saw it as up to date and never
+    revisited it. Measured with a ceiling of 3 and 7 units: one --force did the
+    first 3, reported the rest "deferred to the next tick", the next ordinary
+    tick did nothing, and three further --force runs re-did the same first 3
+    forever. The spec's promise is the other way round: "changing the glossary
+    does not retranslate anything by itself; jamasp translate --force does"."""
+    build_state(tmp_path)
+    units = len(tt.split_sections(STANCE_MD)) + 4   # + playbook, watchlist,
+    assert units == 7                               #   predictions, report
+
+    calls = []
+    stats = translate.translate_docs(
+        tmp_path, {**DOC_CFG, "max_doc_calls_per_run": 3}, GLOSSARY,
+        counting_doc_run(calls), force=True)
+
+    assert len(calls) == units          # every unit, not the first three
+    assert stats["translated"] == units
+    assert stats["skipped"] == 0        # nothing deferred, so claim nothing
+    # The report is translated last of all, so its sidecar is the tail of the
+    # pass that repeat --force runs used never to reach.
+    for rel in ("state/stance.fa.md", "state/playbook.fa.md",
+                "state/watchlist.fa.yaml", "state/predictions.fa.jsonl",
+                "reports/2026/09/2026-09-12-brief.fa.md"):
+        assert (tmp_path / rel).exists(), rel
+
+
+def test_force_re_glosses_every_document_it_offers(tmp_path):
+    """The operator action this exists for: edit config/glossary.fa.yaml, run
+    --force once, and get the whole state tree re-glossed in that run — not the
+    first `max_doc_calls_per_run` units of it.
+
+    Reports already carrying a sidecar are not among them, and that is a
+    separate, deliberate rule: `new_reports` offers only reports with no
+    sidecar yet (spec decision 18), which --force does not widen."""
+    build_state(tmp_path)
+    translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY, doc_run("OLD:"))
+
+    calls = []
+    stats = translate.translate_docs(
+        tmp_path, {**DOC_CFG, "max_doc_calls_per_run": 3}, GLOSSARY,
+        counting_doc_run(calls, "NEW:"), force=True)
+
+    assert len(calls) == 6              # 3 stance sections + the other 3 docs
+    assert stats["translated"] == 6 and stats["skipped"] == 0
+    for rel in ("state/stance.fa.md", "state/playbook.fa.md",
+                "state/watchlist.fa.yaml", "state/predictions.fa.jsonl"):
+        body = (tmp_path / rel).read_text(encoding="utf-8")
+        assert "NEW:" in body and "OLD:" not in body, rel
+
+
+def test_the_ordinary_tick_still_stops_at_the_ceiling_and_converges(tmp_path):
+    """What the ceiling was added for, kept: an unattended tick stays bounded,
+    and the deferred backlog still drains over subsequent ticks."""
+    build_state(tmp_path)
+    cfg = {**DOC_CFG, "max_doc_calls_per_run": 3}
+    calls = []
+    stats = translate.translate_docs(
+        tmp_path, cfg, GLOSSARY, counting_doc_run(calls))
+    assert len(calls) == 3 and stats["skipped"] == 4
+
+    for _ in range(3):
+        translate.translate_docs(tmp_path, cfg, GLOSSARY, doc_run())
+    after = []
+    assert translate.translate_docs(
+        tmp_path, cfg, GLOSSARY, counting_doc_run(after))["skipped"] == 0
+    assert after == []

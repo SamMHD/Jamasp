@@ -778,3 +778,13 @@ def test_translate_dry_run_survives_a_broken_translator(tmp_path):
     )
     assert check.exit_code != 0
     assert "not-a-real-binary-7z1" in check.output
+
+
+def test_the_translate_line_only_claims_a_deferral_when_there_was_one():
+    """--force has no document ceiling, so it defers nothing and must not tell
+    the operator that some of their tree is queued for a later tick."""
+    base = {"reused": 0, "rows": {}, "events": {}}
+    assert "deferred" not in cli._translate_line(
+        {**base, "docs": {"translated": 7, "failed": 0, "skipped": 0}})
+    assert "4 deferred" in cli._translate_line(
+        {**base, "docs": {"translated": 3, "failed": 0, "skipped": 4}})

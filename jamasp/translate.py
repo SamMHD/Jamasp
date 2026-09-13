@@ -393,7 +393,8 @@ class DocBudget:
     simply picked up next tick, exactly like the rows backlog.
 
     A limit of None is no ceiling, which is what every caller that does not
-    configure one gets.
+    configure one gets — and what `--force` gets deliberately, for the reason
+    written out in `translate_docs`.
     """
 
     def __init__(self, limit: int | None = None):
@@ -694,7 +695,22 @@ def translate_docs(
     totals = {"translated": 0, "failed": 0}
     # One budget across every document type: the ceiling that matters is the
     # tick's total, not any single file's. See DocBudget.
-    budget = DocBudget(cfg.get("max_doc_calls_per_run"))
+    #
+    # --force deliberately has NO ceiling, and this is load-bearing rather than
+    # an oversight — do not "fix" it back. Force skips the hash check, so a
+    # unit it defers is written back carrying its CURRENT hash and the next
+    # ordinary tick sees it as up to date: the intent "retranslate even though
+    # nothing changed" lives only in this run and is lost the moment the budget
+    # refuses. An operator who edits config/glossary.fa.yaml and runs --force
+    # would re-gloss the first `max_doc_calls_per_run` units, be told the rest
+    # were queued, and never reach them however many times they ran it. In
+    # ORDINARY operation there is no such trap: a deferred unit keeps its OLD
+    # hash, which still differs from the source, so it is correctly retried.
+    #
+    # The ceiling exists to bound an UNATTENDED timer tick. The timer never
+    # passes --force; --force is an attended operator action, and the unit's
+    # TimeoutStartSec does not constrain a manual invocation either.
+    budget = DocBudget(None if force else cfg.get("max_doc_calls_per_run"))
 
     def merge(result):
         totals["translated"] += result["translated"]
