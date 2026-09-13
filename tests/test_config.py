@@ -285,3 +285,18 @@ def test_active_pins_default_band_matches_the_shipped_config_when_fit_is_absent(
     )
     with pytest.raises(ValueError, match=r"outside the configured"):
         active_pins(load_weights(p), "2026-08-20")
+
+
+def test_load_glossary_returns_term_map(tmp_path):
+    path = tmp_path / "glossary.fa.yaml"
+    path.write_text("Fed: فدرال رزرو\nDXY: DXY\n", encoding="utf-8")
+    assert config.load_glossary(path) == {"Fed": "فدرال رزرو", "DXY": "DXY"}
+
+
+def test_load_glossary_of_real_file_keeps_tickers_latin():
+    """The shipped glossary must not translate tickers or bare acronyms."""
+    g = config.load_glossary()
+    assert g["DXY"] == "DXY"
+    assert g["XAU"] == "XAU"
+    assert g["FOMC"] == "FOMC"
+    assert g["Fed"] != "Fed"

@@ -97,8 +97,9 @@ flash pass disables itself and logs to `source_errors`; ingestion, briefs, and
 scans are unaffected.
 
 ### 5. systemd units
-All 16 unit files (8 services + 8 timers: ingest, brief, scan, dispatch,
-retro, watchdog, flash-rollup, weights) live in `ops/systemd/` in this repo — copy them onto the
+All 18 unit files (9 services + 9 timers: ingest, brief, scan, dispatch,
+retro, watchdog, flash-rollup, weights, translate) live in `ops/systemd/` in
+this repo — copy them onto the
 host rather than hand-writing units. Use **system** units
 (`/etc/systemd/system/`, `User=jamasp`) when you have root; use **user**
 units (`~/.config/systemd/user/`, plus `loginctl enable-linger jamasp` and
@@ -138,6 +139,20 @@ after the human handoff:
 systemctl --user enable --now jamasp-ingest.timer jamasp-dispatch.timer jamasp-watchdog.timer jamasp-flash-rollup.timer jamasp-weights.timer
 # jamasp-brief.timer, jamasp-scan.timer, jamasp-retro.timer stay DISABLED
 # until the human steps below are done
+```
+
+`jamasp-translate.timer` is the ninth, and it stays **disabled** here too —
+for a different reason from the agentic three. It needs codex installed and
+logged in (next section), and the design spec asks for the host's item volume
+to be measured before `max_batches_per_run` is trusted: count a day of items
+and how many already carry flash Persian, set the knob against the remainder,
+then enable it. Until it has run once the watchdog's translate probes stay
+silent, so leaving it off costs no false alerts.
+
+```bash
+uv run jamasp translate --check          # codex resolves and is authenticated
+uv run jamasp translate --dry-run        # how much a first tick would face
+systemctl --user enable --now jamasp-translate.timer
 ```
 
 ### 6. verify the deterministic half now
@@ -189,6 +204,56 @@ headline-only sources.
 2. **Telegram**: create a bot via @BotFather; you will need two channels.
    - **Desk channel** (briefs, scan alerts, failure notices): get its chat id and put the bot token + this chat id as `JAMASP_TG_TOKEN` and `JAMASP_TG_CHAT` in `~/.config/jamasp/env`. Verify: `set -a && . ~/.config/jamasp/env && set +a && uv run jamasp notify "test"`.
    - **News channel** (per-story gold news flashes): create a second channel, add the same bot as an administrator with **both** "Post Messages" and "Edit Messages of Others" enabled (the flash pipeline edits its own earlier message when a second outlet picks up the same story), get its chat id, and put it as `JAMASP_TG_NEWS_CHAT` in the same env file. If you leave this blank, the flash pass disables itself silently — ingestion, briefs, and scans are unaffected, and `uv run jamasp watchdog` will still print OK. The check that catches it is `uv run jamasp flash --dry-run`: its summary line ends with an error count, and a missing news chat shows up there as `1 errors`.
+
+### codex: install, then credentials (for `jamasp translate`)
+
+The translate timer shells out to `codex exec`, so codex has to **be there**
+before it can be logged in. `jamasp-translate.service` hard-codes
+`PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin`, which is the constraint on
+where it may land: install it **as the `jamasp` service user** into
+`~/.local/bin`, or system-wide into `/usr/local/bin`.
+
+```bash
+su - jamasp -c 'npm install -g @openai/codex --prefix ~/.local'   # needs node
+# or drop the release binary for this arch into ~/.local/bin/codex, chmod +x
+su - jamasp -c 'command -v codex && codex --version'              # must print a path
+```
+
+If it resolves anywhere else (a version manager's shim, `~/.bun/bin`, a snap),
+either symlink it into `~/.local/bin` or point `translate.cmd[0]` in
+`config/settings.yaml` at the absolute path. A login shell finding `codex`
+proves nothing about the unit: the unit does not read your profile.
+
+Then authenticate, again **as the `jamasp` service user**, not as root:
+
+```bash
+su - jamasp -c 'codex login'
+```
+
+The credentials land in `$CODEX_HOME` — `~/.codex` by default, so
+`/home/jamasp/.codex/auth.json`. Two things follow. The unit runs as `jamasp`
+with `%h` = `/home/jamasp`, so a login performed as root writes
+`/root/.codex/auth.json` and the timer never sees it. And if you set
+`CODEX_HOME` anywhere (to keep credentials off the home directory, say), set
+it in `~/.config/jamasp/env` as well — the unit reads that file and nothing
+else:
+
+```bash
+echo 'CODEX_HOME=/home/jamasp/.codex' >> ~/.config/jamasp/env   # only if moved
+```
+
+Verify the whole path before enabling the timer:
+
+```bash
+su - jamasp -c 'cd ~/Jamasp && uv run jamasp translate --check'
+```
+
+Same trap as Claude's credentials: an interactive login as the wrong user
+leaves the service user unauthenticated, and a `codex exec` with lapsed auth
+fails every batch while still exiting zero — so the unit's `OnFailure` alert
+stays silent. `--check` is what catches it; `jamasp watchdog`'s backlog probe
+is what catches it later — and that probe only arms once translate has run at
+least once, so on a host where the timer was never enabled it says nothing.
 
 Then run one **supervised brief** (`claude`, type `/brief`) or
 `systemctl start jamasp-brief.service`; confirm a report appeared under

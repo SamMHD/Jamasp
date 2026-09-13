@@ -7,3 +7,9 @@ dist/
 .claude/worktrees/
 *.passlock
 .superpowers/
+
+# `jamasp translate` writes every sidecar through a same-directory temp file
+# (jamasp/translatetext.py write_atomic). A kill mid-write leaves
+# state/.stance.fa.md.XXXX.tmp behind, and the next agent run commits
+# everything under CLAUDE.md rule 4 — including that.
+.*.tmp

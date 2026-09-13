@@ -54,6 +54,16 @@ def load_weights(path: Path = Path("config/weights.yaml")) -> dict:
     return yaml.safe_load(path.read_text())
 
 
+def load_glossary(path: Path = Path("config/glossary.fa.yaml")) -> dict[str, str]:
+    """Pinned Persian for recurring market terms, term -> rendering.
+
+    Shared by `jamasp translate` and the flash pipeline's prompts: one file is
+    what keeps the panel and the news channel from settling on two different
+    Persian words for the same thing.
+    """
+    return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+
+
 def themes(weights: dict) -> tuple[str, ...]:
     """The fundamental map's theme slots, in configured order.
 

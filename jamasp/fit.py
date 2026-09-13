@@ -6,8 +6,11 @@ because numerics a reader must AUDIT are worse than numerics a reader
 RECOGNISES. np.linalg.solve is a line anyone can check against a textbook.
 
 The normalisation is `m = beta / beta_bar` where beta_bar is the mean of the
-strictly POSITIVE coefficients, so before clamping the positive multipliers
-average exactly 1.0. Negative coefficients stay out of that mean and clamp to
+strictly POSITIVE coefficients AMONG THE COLUMNS THE FIT REPORTS, so before
+clamping the published positive multipliers average exactly 1.0. The reported
+qualifier is load-bearing: Fit B fits its themes alongside technical controls
+it then discards, and a mean taken over the controls too is a mean of numbers
+that never ship. Negative coefficients stay out of that mean and clamp to
 the floor with a flag: a negative coefficient means items scored bullish were
 followed by gold going down, which is evidence the DIRECTION SCORING is wrong
 for that column, not that the column should shrink. abs() would bury the
@@ -98,22 +101,43 @@ def ridge(X: list[list[float]], y: list[float], alpha: float
     return betas.tolist(), ses.tolist()
 
 
-def to_multipliers(betas: list[float], lo: float, hi: float
+def to_multipliers(betas: list[float], lo: float, hi: float,
+                   report: tuple[int, ...] | None = None
                    ) -> tuple[list[float], list[str]]:
-    """Coefficients -> clamped multipliers, plus any flags raised."""
+    """Coefficients -> clamped multipliers, plus any flags raised.
+
+    `report` names the positions whose multipliers the caller will actually
+    publish; None means all of them. It exists because the normalising mean is
+    only meaningful over the population it normalises. Fit B fits six themes
+    alongside thirty-eight technical CONTROLS whose coefficients are an order
+    of magnitude larger, then discards the controls — so a mean taken over the
+    whole matrix divides every published theme by a number no published theme
+    contributed to, and the entire reported set lands on the floor with its
+    ordering replaced by the clamp. Normalising over the reported columns is
+    what makes `mean(positive multipliers) == 1.0` true of the numbers that
+    ship, which is the invariant the design states.
+
+    Flags follow the same rule: `negative:` is an instruction to the retro to
+    re-examine a column's DIRECTION SCORING, so raising it for a column the
+    fit does not publish points the retro at something it cannot act on.
+    """
+    reported = frozenset(range(len(betas)) if report is None else report)
     flags: list[str] = []
-    positives = [b for b in betas if b > 0]
+    positives = [betas[i] for i in sorted(reported) if betas[i] > 0]
     if not positives:
         # Nothing to normalise against. Neutral multipliers are the honest
         # answer; a map of equal tiles says "no read yet" rather than
-        # inventing an ordering out of noise.
+        # inventing an ordering out of noise. A positive CONTROL is not a
+        # rescue here — it says nothing about whether the themes can be
+        # ordered.
         return [1.0] * len(betas), ["degenerate_mean"]
 
     bar = sum(positives) / len(positives)
     out: list[float] = []
     for i, b in enumerate(betas):
         if b < 0:
-            flags.append(f"negative:{i}")
+            if i in reported:
+                flags.append(f"negative:{i}")
             out.append(lo)
         else:
             out.append(max(lo, min(hi, b / bar)))
@@ -126,16 +150,17 @@ def run_fit(name: str, data: TrainingData, cfg: dict, pins: dict[str, float],
     if len(data.y) < cfg["min_rows"]:
         return None
 
+    keep = report_columns if report_columns is not None else data.columns
     betas, ses = ridge(data.X, data.y, cfg["ridge_alpha"])
     multipliers, flags = to_multipliers(
-        betas, cfg["multiplier_min"], cfg["multiplier_max"])
+        betas, cfg["multiplier_min"], cfg["multiplier_max"],
+        report=tuple(data.columns.index(c) for c in keep if c in data.columns))
     # Re-label the positional flags to_multipliers emitted with real keys.
     flags = [
         f"negative:{data.columns[int(f.split(':')[1])]}" if f.startswith("negative:") else f
         for f in flags
     ]
 
-    keep = report_columns if report_columns is not None else data.columns
     coefficients: list[Coefficient] = []
     for col in keep:
         # A requested column absent from the matrix is skipped rather than
@@ -148,7 +173,13 @@ def run_fit(name: str, data: TrainingData, cfg: dict, pins: dict[str, float],
         obs = data.observations.get(col, 0)
         fitted = obs >= cfg["min_observations"]
         # An under-observed column renders neutral and dashed rather than
-        # publishing a coefficient estimated from a handful of rows.
+        # publishing a coefficient estimated from a handful of rows. 1.0 is
+        # the right neutral precisely BECAUSE of the normalisation above: the
+        # reported positive multipliers average exactly 1.0 before clamping,
+        # so an unfitted column sits at the centre of the measured population
+        # rather than above or below it. That only holds when the mean is
+        # taken over the reported columns — normalise over the whole matrix
+        # and 1.0 becomes an outlier that outranks every measurement.
         m = multipliers[j] if fitted else 1.0
         pinned = col in pins
         if pinned:

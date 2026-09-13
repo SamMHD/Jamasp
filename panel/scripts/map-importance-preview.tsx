@@ -29,7 +29,7 @@ const css = process.env.PANEL_CSS ? readFileSync(process.env.PANEL_CSS, "utf8") 
 
 const TREATMENTS: { key: ImportanceTreatment; title: string; blurb: string }[] = [
   { key: "none", title: "Baseline — area + colour only",
-    blurb: "What ships today. Area = tier x theme multiplier, colour = direction x conviction, hatch = bearish." },
+    blurb: "What ships today. Area = tier, colour = direction x conviction, hatch = bearish." },
   { key: "pips", title: "Option A — tier pips",
     blurb: "Five fixed-size marks across the top of each tile, `tier` of them filled. Fixed geometry, so a run of three reads the same on any tile. Costs 6px of label box." },
   { key: "boundary", title: "Option B — publish-gate boundary",

@@ -162,6 +162,36 @@ def test_all_negative_coefficients_yield_neutral_multipliers_and_a_flag():
     assert "degenerate_mean" in flags
 
 
+def test_the_normalising_mean_ignores_columns_the_fit_will_not_report():
+    # Fit B fits themes alongside 38 technical controls whose coefficients are
+    # an order of magnitude larger, then reports only the themes. Normalising
+    # over the whole matrix divides every published theme by a mean it had no
+    # part in, pushing the entire published set onto the floor.
+    ms, _ = fit.to_multipliers([0.05, 0.01, 3.0], lo=0.25, hi=3.0,
+                               report=(0, 1))
+    assert ms[0] / ms[1] == pytest.approx(5.0)
+    assert sum(ms[:2]) / 2 == pytest.approx(1.0)
+
+
+def test_an_unreported_column_cannot_raise_a_negative_flag():
+    # `negative:` is an instruction to the retro to re-examine a theme's
+    # direction scoring. A flag naming a discarded control column is an
+    # instruction about something the fit does not publish.
+    ms, flags = fit.to_multipliers([1.0, -0.5, -9.0], lo=0.25, hi=3.0,
+                                   report=(0, 1))
+    assert flags == ["negative:1"]
+    assert ms[1] == 0.25
+
+
+def test_a_positive_control_cannot_rescue_an_all_negative_report():
+    # Degeneracy is a property of the published set. A control column being
+    # positive says nothing about whether the themes can be ordered.
+    ms, flags = fit.to_multipliers([-1.0, -2.0, 9.0], lo=0.25, hi=3.0,
+                                   report=(0, 1))
+    assert ms[:2] == [1.0, 1.0]
+    assert "degenerate_mean" in flags
+
+
 # ---- run_fit ----------------------------------------------------------------
 
 def _data(columns, X, y, observations=None):
@@ -208,6 +238,42 @@ def test_run_fit_reports_only_the_requested_columns():
     res = fit.run_fit("theme", _data(["t1", "t2", "ctrl"], X, y), CFG, {},
                       report_columns=("t1", "t2"))
     assert [c.key for c in res.coefficients] == ["t1", "t2"]
+
+
+def test_run_fit_does_not_floor_the_strongest_theme_beneath_an_unfitted_one():
+    # The production inversion, in miniature. `t_strong` carries the largest
+    # measured theme coefficient; `t_thin` is under min_observations and so
+    # renders at the neutral 1.0. Normalising against the control drove
+    # `t_strong` onto the 0.25 floor, leaving "we could not measure this"
+    # outranking "this is the strongest thing we measured".
+    X, y = _synthetic(400, [0.05, 0.01, 3.0])
+    res = fit.run_fit("theme",
+                      _data(["t_strong", "t_thin", "sma50@1d"], X, y,
+                            {"t_strong": 400, "t_thin": 16, "sma50@1d": 400}),
+                      CFG, {}, report_columns=("t_strong", "t_thin"))
+    by_key = {c.key: c for c in res.coefficients}
+    assert by_key["t_thin"].fitted is False
+    assert by_key["t_thin"].multiplier == 1.0
+    assert by_key["t_strong"].beta > by_key["t_thin"].beta > 0
+    assert by_key["t_strong"].multiplier > by_key["t_thin"].multiplier
+
+
+def test_run_fit_flags_name_only_the_reported_columns():
+    X, y = _synthetic(400, [0.05, -0.01, -3.0])
+    res = fit.run_fit("theme", _data(["t1", "t2", "sma50@1d"], X, y), CFG, {},
+                      report_columns=("t1", "t2"))
+    assert res.flags == ["negative:t2"]
+
+
+def test_fit_a_normalises_over_every_column_because_it_reports_every_column():
+    # The guard on the fix: with no report_columns the population is the whole
+    # matrix, exactly as before.
+    X, y = _synthetic(400, [3.0, 1.0, 0.5])
+    res = fit.run_fit("technical", _data(["a", "b", "c"], X, y), CFG, {})
+    betas, _ = fit.ridge(X, y, CFG["ridge_alpha"])
+    direct, _ = fit.to_multipliers(betas, CFG["multiplier_min"],
+                                   CFG["multiplier_max"])
+    assert [c.multiplier for c in res.coefficients] == pytest.approx(direct)
 
 
 def test_run_fit_records_n_and_the_hyperparameters():

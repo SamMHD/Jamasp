@@ -1,0 +1,32 @@
+# Pinned Persian for recurring market terms.
+#
+# Injected into every `jamasp translate` prompt AND into the flash pipeline's
+# write/rollup prompts, so the panel and the Telegram news channel cannot drift
+# apart on terminology. Tickers and bare acronyms stay Latin deliberately: a
+# gold desk reads DXY as DXY, and a transliteration is a readability
+# regression, not a localization win.
+#
+# Editing this file does not retranslate anything. `jamasp translate --force`
+# does.
+Fed: فدرال رزرو
+Federal Reserve: فدرال رزرو
+FOMC: FOMC
+CPI: شاخص قیمت مصرف‌کننده (CPI)
+PPI: شاخص قیمت تولیدکننده (PPI)
+PCE: PCE
+NFP: NFP
+DXY: DXY
+XAU: XAU
+Treasury yield: بازده اوراق خزانه
+real yield: بازده واقعی
+safe haven: دارایی امن
+hawkish: انقباضی
+dovish: انبساطی
+rate cut: کاهش نرخ بهره
+rate hike: افزایش نرخ بهره
+inflation: تورم
+central bank: بانک مرکزی
+ETF: ETF
+bullion: شمش
+spot gold: طلای نقدی
+gold futures: قراردادهای آتی طلا
