@@ -1,5 +1,5 @@
 {
- "fitted_at": "2026-09-12T23:34:11Z",
+ "fitted_at": "2026-09-13T23:37:12Z",
  "fits": {
   "technical": {
    "n": 5887,
@@ -345,27 +345,13 @@
    "ridge_alpha": 1.0,
    "flags": [
     "negative:etf_flows",
-    "negative:supply_mining",
-    "negative:sma50@4h",
-    "negative:sma200@1d",
-    "negative:macd@1d",
-    "negative:macd@4h",
-    "negative:macd@1w",
-    "negative:adx@1w",
-    "negative:rsi14@1d",
-    "negative:stoch@1d",
-    "negative:willr@1d",
-    "negative:fib618@1d",
-    "negative:fib618@4h",
-    "negative:pivot@4h",
-    "negative:bollinger@4h",
-    "negative:atr14@4h"
+    "negative:supply_mining"
    ],
    "coefficients": {
     "rates_dollar": {
      "beta": 0.017087083556675323,
      "se": 0.021094122082939287,
-     "multiplier": 0.25,
+     "multiplier": 0.6178752364217156,
      "observations": 302,
      "fitted": true,
      "pinned": false
@@ -373,7 +359,7 @@
     "geopolitics": {
      "beta": 0.062000190216723906,
      "se": 0.021958970445542427,
-     "multiplier": 0.3882787018113924,
+     "multiplier": 2.2419497195812497,
      "observations": 300,
      "fitted": true,
      "pinned": false
@@ -405,7 +391,7 @@
     "other": {
      "beta": 0.027614055849484124,
      "se": 0.020836595734978043,
-     "multiplier": 0.25,
+     "multiplier": 0.9985344327468288,
      "observations": 211,
      "fitted": true,
      "pinned": false
