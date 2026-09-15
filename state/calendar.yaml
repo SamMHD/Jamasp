@@ -299,6 +299,16 @@ events:
       and BTC as liquidity tells. Claim recorded 8 Sep: no USDJPY print
       below 150.00 through 10 Sep 23:59Z (0.55).
 
+    update_2026_09_15: >
+      Tuesday brief. Feed row (jamasp calendar, 15 Sep) lists BOJ Policy
+      Rate + Monetary Policy Statement Fri 18 Sep 02:30Z (06:30 Dubai) and
+      the press conference 05:30Z (09:30 Dubai), versus the actionforex
+      row's 05:30Z / 06:30Z - the BoJ has no fixed announcement slot, so
+      wakeup #56 at 07:30Z stands: it sits after both candidate presser
+      times. Goldman preview (investinglive 14 Sep): yen and Nikkei risk
+      building on a faster BoJ path. USDJPY 154.86 at 03:30Z (+0.6% on the
+      day, above 155 intraday Monday); 6ddbe426 has ~3% of room.
+
   - date: 2026-08-26
     time_dubai: "16:30 (12:30Z) — DATE CORRECTED 22 Aug (was 28 Aug; WF week-ahead + actionforex table both say Wednesday; same slot: Q2 GDP prelim + durable goods)"
     title: US core PCE (Jul) — the hike-case gate
@@ -900,6 +910,28 @@ events:
       nuclear file, not Hormuz, and was never on this track. Read: the one
       scheduled oil-down catalyst before the FOMC is gone; a rescheduled
       date is only anchored (rule 16) when Oman/GCC publish it, not Tehran.
+    update_2026_09_15: >
+      Tuesday brief. Why it collapsed, on record: Oman's FM - postponed "in
+      the interests of consensus" (Gulf News 15 Sep); Maritime Executive 14
+      Sep - Oman's draft rested on freedom of navigation/innocent passage
+      while Iran demanded passage fees and the right to vet traffic; Saudi
+      Arabia objected to the technical arrangements, Bahrain refused to
+      attend over the Iranian attacks, the UAE was expected to share the
+      concerns; Oman had told the GCC it believed Washington approved;
+      Araghchi (Fars) said the aim was a joint presentation of a corridor
+      agreement; seven Iranian pre-conditions tied to the 17 June MoU. NO
+      rescheduled date from any host. Iran (Gulf News): an Oman arrangement
+      would not reopen Hormuz anyway. a8cf8123 stays on a HIT trajectory
+      and 6c6ed87f on a MISS trajectory (no host or neutral readout of any
+      meeting taking place); both score at the Wednesday brief. Successor
+      ffd190c0 recorded 15 Sep: Gulf side does not sign through Sat 19 Sep
+      23:59Z (0.7); dea6f346: pipeline not restored to full flow through 18
+      Sep (0.65). Read: the Gulf-signed route to an oil-down/gold-up-first
+      session now needs Saudi and Bahraini objections resolved on record,
+      not just a new date; the live diplomacy channel is US-Iran
+      ("step-by-step", Pakistani sources; Trump: "will not be long") and
+      it moved oil off its high on 14 Sep even unconfirmed.
+
   - date: 2026-09-16
     time_dubai: "15-16 Sep meeting; decision 18:00Z (22:00 Dubai) / presser 18:30Z (22:30 Dubai) — DATE and TIME VERIFIED 12 Sep (actionforex weekly calendar row; CNBC 11 Sep for the date)"
     title: FOMC 15-16 Sep — the hike-or-hold meeting; ec71ce01 (no Sept hike, 0.8) scores here
@@ -940,4 +972,16 @@ events:
       toward 1.25% Fri. Tuesday's brief records no fresh directional gold
       claim into the print; #54 (19:45Z) scores 8af1d9b9 vs ec71ce01 and
       reads the forward language against the tape clause.
-
+    update_2026_09_15: >
+      Tuesday brief (T-1). Slot RE-VERIFIED against the feed row printed
+      15 Sep: Federal Funds Rate, FOMC Statement and Economic Projections
+      Wed 16 Sep 18:00Z (22:00 Dubai), press conference 18:30Z (22:30
+      Dubai), all High impact - #54 (19:45Z) stands. 14 Sep NY close: hike
+      pricing 100% (investinglive wrap), 2y 4.662 (new cycle high), 10y
+      4.994 with 5.01 intraday (first since Oct 2023), 30y 5.354 flat, USD
+      up vs every major; 15 Sep 03:30Z: 2y 4.671, 10y 5.01, 30y 5.369. The
+      decision carries no information; the statement's forward language,
+      the dots and any Warsh line on oil (supply shock vs second-round)
+      are the gold variables. No fresh directional gold claim recorded
+      today (T-1 rule). The Wednesday brief scores the five 15 Sep windows
+      (e694f252, 6c6ed87f, 66db8e8e, b3adcf1e, a8cf8123) before #54 runs.
