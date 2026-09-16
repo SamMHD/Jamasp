@@ -1004,6 +1004,21 @@ events:
       Successor 645cc78a (no co-confirmed US-Iran track through 22 Sep,
       0.7) recorded after Rezaei's 'No talks until Iran's conditions are
       met. Period!' and Vance's 'new phase within months'.
+    update_2026_09_16_deepdive: >
+      #54 ran 19:45Z. DELIVERED: +25bp to 3.75-4.00%, 12-0, no guidance
+      sentence in the statement; dots one more in 2026 (4.1 median, 16 of
+      18 see >=1 more, 4 see two), 2027 4.1, LR 3.2; PCE 3.7 / core 3.4.
+      Warsh: 'not restrictive', 'inflation too high', 'commodity prices
+      bear watching' (oil not looked through), 'won't prejudge'. Oct hike
+      38 -> 55-58%, 33bp priced for the year. Tape: GC 4386 -> 4301
+      (-1.9%) through the presser, 2y 4.60 -> 4.73, 30y bid 5.35, DXY
+      100.25, USDJPY 156.1; Brent -3% on reported Saudi half-restart and
+      gold fell WITH oil - the Fed overrode the oil chain. Scored 8af1d9b9
+      HIT, ec71ce01 MISS. Weights 20/50/30 -> 15/60/25; Thursday's settle
+      vs 4387.3 / 4300 decides 65 or 50. 09cb81a7 on MISS trajectory (DXY
+      daily close ~21:00Z; Thursday brief scores). New claims 1889819a,
+      78317918. Entry closed - no further updates here.
+
 
   - date: 2026-09-15
     time_dubai: "unscheduled (loadings suspended Tue 15 Sep, US afternoon; restart open-ended)"
@@ -1039,3 +1054,14 @@ events:
       a deepdive at publication+60 that reads Brent and GC's first hour
       against the peace sign (oil down = gold up first) and scores dea6f346
       if it is a full-flow statement.
+    update_2026_09_16_fomc_run: >
+      19:45Z deepdive: fxempire relays 'recent reports' that Saudi Arabia
+      plans to restart about half of East-West capacity 'in the next few
+      days' and full capacity in ~six weeks; Aramco declined to comment
+      (Bloomberg via gcaptain, which also reports ~20mb of prompt spot
+      sales to Asian refiners for Gulf-of-Oman STS loading Sep-Oct - the
+      pivot back through Hormuz). Brent -3.2% to 105.30, WTI -3.7% to
+      101.92 on the report. NOT on record: dea6f346 stays HIT trajectory
+      and the deepdive-at-publication+60 trigger is unchanged. Gold read
+      for the day: oil down AND gold down (FOMC session) - the oil-down =
+      gold-up chain needs the 2y to follow (78317918).

@@ -1,28 +1,27 @@
 watchlist:
   - theme: fed-rate-path
     why: >
-      Real yields are gold's dominant driver, and this Fed is debating a HIKE.
-      Sept-hike pricing ran ~35% mid-August -> 58% (4 Sep) -> 64% (PPI) ->
-      70% (10 Sep close) -> 82-90% on the 11 Sep CPI -> 100% at the 14 Sep
-      NY close -> 92% at the 15 Sep NY close, with 97bp of hikes priced for
-      the year ahead (investinglive wrap). No speaker moved it - the
-      blackout (5-16 Sep) holds - data and oil did. August CPI: headline
-      0.4/3.4, core 0.318 with wireless +5.9% m/m a record (~0.1pp; ex-that
-      on consensus), shelter 0.1 -> 0.3, supercore 0.51. 15 Sep NY close:
-      10y +4.7bp to 5.01 on WTI +4.5%, USD led, 20y auction tailed 2bp;
-      Empire Fed +7.6 vs 15 the only soft print. 16 Sep 03:30Z (CNBC): 2y
-      4.646, 10y 4.979, 30y 5.348 (all -1.7bp) with gold +1.15% off the
-      settle on oil -1% - the front end still drives. Decision TODAY Wed 16
-      Sep 18:00Z, projections same slot, presser 18:30Z (feed row printed
-      again 16 Sep; wakeup #54, 19:45Z). The decision is priced; the gold
-      variables are the forward language, the dots and any Warsh line on
-      oil (supply shock vs second-round) - investinglive: pushing the front
-      end buys long-end credibility but his 'strategic ambiguity' can read
-      dovish. 'Further firming' + GC -1% print-to-settle is the
-      bearish-rates 65 line; one-and-done + gold up is base 25; trigger
-      without tape moves <=5 pts (11 Sep lesson). Claims: 8af1d9b9 (hike,
-      0.55, HIT traj.) vs ec71ce01 (no hike, 0.8, MISS traj.) score at #54;
-      e694f252 scored HIT 16 Sep (never below 70% at any close 11-15 Sep).
+      Real yields are gold's dominant driver, and this Fed just HIKED: 16 Sep
+      +25bp to 3.75-4.00%, 12-0 (no dissent), statement with no guidance
+      sentence ('timelier return to 2 percent', 'will deliver price
+      stability'); dots one more in 2026 (median 4.1; 16 of 18 see >=1 more,
+      4 see two, 2 stop; Warsh submitted none), 2027 4.1 (8/6/4 split), LR
+      3.2; PCE 3.7 / core 3.4, U 4.1. Warsh: conditions 'not restrictive',
+      'inflation is too high', 'commodity prices bear watching' (oil = upside
+      inflation risk, not looked through), 'won't prejudge'. Pricing: Oct
+      hike 38 -> 55-58%, 33bp for the year from 27; the market came in at a
+      4.50-4.75 plateau vs dots of two hikes total - that gap is the forward
+      variable. Tape: GC 4386 -> 4301 (-1.9%) print-to-19:35Z through the
+      presser, 2y 4.60 -> 4.73, DXY 99.7 -> 100.25, 30y BID (5.35, <5.40) -
+      front end and dollar, not term premium. Oil fell 3% the same session
+      (reported Saudi half-restart) and gold fell with it: the oil -> 2y ->
+      gold chain ran pre-print and the Fed overrode it at 18:00Z. Path was
+      ~35% mid-Aug -> 64% (PPI) -> 82-90% (CPI) -> 100% (14 Sep) -> 92% ->
+      delivered. Claims: 8af1d9b9 HIT / ec71ce01 MISS (16 Sep); 78317918 (2y
+      no close <4.60 Thu/Fri, 0.55); 1889819a (no two consecutive gold-up/
+      2y-up closes through 22 Sep, 0.7). Next gates: Thursday's GC settle vs
+      4387.3 / 4300 (bearish-rates 65 or back to 50), post-blackout Fed
+      speakers (unscheduled), BoJ 18 Sep, Sept CPI mid-Oct.
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -44,28 +43,31 @@ watchlist:
       headline: the chain, not demand. Confirms: WGC monthlies net buying
       through the drawdown; a bought dip at 4300 on an oil-UP day. Kills:
       two consecutive months of net official selling.
+      16 Sep FOMC: GC 4301.3 at 19:35Z - the 4300 floor is on the tick with
+      the settle (4387.3) printed before the trigger; Thursday's settle is
+      the first close-basis test since 2 Sep, on a dollar-UP, oil-DOWN day.
     since: 2026-07-31
 
   - theme: warsh-credibility
     why: >
       The debasement channel - the best explanation for gold above $4,000
-      against a positive real yield (DFII10 2.60 on 14 Sep). Warsh chairs a
-      Fed whose independence is openly contested while the long end prices
-      distrust: 10y through 5% on 14 Sep and 5.01 close 15 Sep, 30y
-      5.35-5.39 (above the 5.31 that produced the 19 Aug buyback move), a
-      20y auction tail 15 Sep, TLT at 2004 lows, buybacks that FAILED in
-      public 9-10 Sep. Political pressure explicit (President, VP, Bessent,
-      Navarro against a hike); three July dissents for a hike and Warsh's
-      Jackson Hole line are the counterweight. A hike delivered through
-      this pressure is credibility-positive and bearish gold via real
-      yields; a hold that looks coerced is the debasement case. The tell is
-      gold rallying WITH yields: printed once (9 Sep), absent since - 15
-      Sep was the tenth session against (10y +4.7bp, gold -0.18%), and the
-      16 Sep overnight rally came with yields DOWN. One for, ten against.
-      Decision TODAY 18:00Z: investinglive frames the dilemma as front-end
-      credibility vs 'strategic ambiguity' reading dovish. Kills it: a
-      delivered hike that pulls the long end down, or a visible
-      re-anchoring of independence.
+      against a positive real yield (DFII10 2.60). 16 Sep: the hike was
+      delivered THROUGH the political pressure (President, VP, Bessent,
+      Navarro on record against), 12-0, with Warsh saying conditions are
+      'not restrictive' and refusing to prejudge - credibility-positive; the
+      theme's own kill line ('a delivered hike that pulls the long end down')
+      printed on the letter: 30y -1.3bp to 5.35 with the 2y +12bp, curve
+      flatter, while gold fell 1.9% with the dollar through 100. Eleventh
+      inverted session; the tell (gold rallying WITH yields) is 1 for / 11
+      against. Warsh's three reasons for high yields omitted deficits. What
+      keeps the theme alive at base 15 rather than dead: the market prices
+      four hikes vs dots of two; investinglive expects 'the inevitable
+      tantrum from the White House' - a Trump move on Warsh that prices as
+      gold UP with the 2y UP is the fiscal-dominance channel (rule 7 caps any
+      timing claim on it). Kills it fully: two consecutive gold-up/2y-up
+      closes NOT printing through 22 Sep (1889819a HIT) with the 30y holding
+      below 5.40. Revives it: a governor publicly calling for a pause, or the
+      long end rising on a dollar-DOWN day.
     since: 2026-07-31
 
   - theme: middle-east-risk-premium
