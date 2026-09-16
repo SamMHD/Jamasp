@@ -985,3 +985,57 @@ events:
       are the gold variables. No fresh directional gold claim recorded
       today (T-1 rule). The Wednesday brief scores the five 15 Sep windows
       (e694f252, 6c6ed87f, 66db8e8e, b3adcf1e, a8cf8123) before #54 runs.
+    update_2026_09_16: >
+      Wednesday brief (T-0). Slot printed again by the feed today: statement +
+      projections 18:00Z (22:00 Dubai), presser 18:30Z; #54 (19:45Z) stands.
+      Tue 15 Sep NY close: hike pricing 92% (from 100% Mon), 97bp of hikes
+      priced for the year ahead, 10y +4.7bp to 5.01, 20y auction tailed 2bp,
+      USD led; 16 Sep 03:30Z: 2y 4.646, 10y 4.979, 30y 5.348 (all -1.7bp),
+      DXY 99.65, GC 4377 (+1.15% off the 4327.1 settle on oil -1% and yields
+      down - the chain, no headline). Oil is the second event tonight: Yanbu
+      loadings suspended, Libya valve shut, Brent settle 108.75 / WTI 105.83
+      (highest since 19 May), EIA ~14:30Z after the API +7.1mb. Read for #54:
+      'further firming' or two-hike dots + GC -1% print-to-settle ->
+      bearish-rates 65; one-and-done or Warsh looking through oil + gold up
+      -> base 25; trigger without tape moves <=5 pts. Five 15 Sep windows
+      scored this morning (e694f252, a8cf8123, 66db8e8e, b3adcf1e HIT;
+      6c6ed87f MISS); the four 16 Sep windows (24f8b482, 09cb81a7,
+      6ddbe426, 81e84f0c) close 23:59Z and score at the Thursday brief.
+      Successor 645cc78a (no co-confirmed US-Iran track through 22 Sep,
+      0.7) recorded after Rezaei's 'No talks until Iran's conditions are
+      met. Period!' and Vance's 'new phase within months'.
+
+  - date: 2026-09-15
+    time_dubai: "unscheduled (loadings suspended Tue 15 Sep, US afternoon; restart open-ended)"
+    title: Saudi Arabia suspends crude loadings at Yanbu — the Hormuz bypass is closed at both ends
+    why: >
+      Added 16 Sep. With the East-West pipeline shut since 10 Sep, Saudi
+      Arabia suspended loadings at Yanbu, its only Red Sea crude port
+      (investinglive wrap 15 Sep; Maritime Executive: a pause in the loading
+      program, ~4 mb/d loaded before the shutdown, ~4% of world supply; Gulf
+      News: some European cargoes cancelled; market rumours of no oil until
+      November). Soar Atlas imagery shows significant damage at Pump Station
+      9 and possible damage at PS8 - three stations, 'much bigger than a
+      single strike'; officials familiar with the assessment keep 3-5 weeks
+      for full flow while Wright says 'back online within days'. The
+      offset: TankerTrackers (14 Sep imagery) sees bi-directional daytime
+      VLCC traffic through Hormuz and elevated STS off Fujairah, i.e. Aramco
+      pushing Gulf-side exports through the escorted corridor; Kpler counts
+      4 commodity transits on Monday vs ~125 pre-war. In this regime oil is
+      gold's price-setter: the suspension lifted WTI +4.5% to 105.83 and the
+      10y +4.7bp to 5.01 and gold printed a 4304 low; an on-record
+      resumption (Aramco/SPA/energy ministry) is oil DOWN = gold UP first.
+      Claims riding on it: dea6f346 (no full pre-strike flow on record
+      through 18 Sep 23:59Z, 0.65 - hit trajectory, Wright's 'days' the
+      named risk); 47d2085d (no projectile HIT on Yanbu through 18 Sep - a
+      program pause is NOT a hit and does not score); b3adcf1e scored HIT on
+      the barrels mechanism this morning.
+    action: >
+      No wakeup - restart timing is 'days' (Wright) vs 'weeks' (officials),
+      no published slot (rules 7/16). Scans carry: Yanbu, Aramco, SPA, Saudi
+      energy ministry, Petroline/East-West, bypass line, pumping station,
+      Soar Atlas, TankerTrackers, Fujairah STS, Brent vs 110/105. An
+      on-record Aramco/SPA statement of resumed loadings or full flow earns
+      a deepdive at publication+60 that reads Brent and GC's first hour
+      against the peace sign (oil down = gold up first) and scores dea6f346
+      if it is a full-flow statement.

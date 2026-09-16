@@ -1,98 +1,93 @@
-# Stance — 2026-09-15 03:30Z (Tuesday brief) — EVENT-PENDING (FOMC Wed 18:00Z, T-1); HIKE 100% PRICED, 10y THROUGH 5%; OMAN TRACK BLOCKED ON RECORD; NINTH INVERTED SESSION: 20/50/30, CONVICTION CAPPED
+# Stance — 2026-09-16 03:30Z (Wednesday brief) — EVENT-PENDING (FOMC TODAY 18:00Z, T-0); HIKE 92% PRICED, YANBU SHUT, 10y AT 5.00; TENTH INVERTED SESSION: 20/50/30, CONVICTION CAPPED, NO DIRECTIONAL CLAIM
 
-**Monday 14 Sep:** GC 4408.9 → low **4305.9** (14:06Z, on the 50DMA 4310) → settle **4335.1**
-(−1.7%); the 49-pt bounce to 4354.7 (16:51Z) tracked Brent off its 109.80 high, not a buyer
-at the line. Silver −2%, copper −2.3%; USD up vs every major; 2y 4.662 (+1.8bp, cycle high),
-10y 4.994 (5.01 intraday, first since Oct 2023), 30y 5.354 flat (5.386 high, 5.40 rejected
-again); hike pricing **100%** (investinglive wrap). WTI settle 101.86, Brent ICE settle
-105.68 (high 108.41–109.80), Murban +7% to 127.8. Nasdaq 100 −0.8% (AI/chip sell-off); BTC
-+3.4% against it. **Tue 03:30Z:** GC **4352.5** (+0.4%; Asia 4325–4356), 2y 4.671, 10y 5.01,
-30y 5.369, DXY 99.58, USDJPY 154.86, Brent 106.96 (+1.2%).
-**On record:** Oman's FM postponed Salalah "in the interests of consensus"; MarEx: Saudi
-objected to the technical arrangements, Bahrain refused to attend, Iran demanded fees +
-vetting vs Oman's innocent passage; no date. US–Iran "step-by-step" (Pakistani sources),
-Trump "will not be long" — not co-confirmed. Pipeline: officials 3–5 weeks for full flow,
-one station destroyed; Wright "very soon". CENTCOM: El Gaia hit by an Iranian missile +
-drone (IRGC: mine); JMIC 3 vessels/72h; Iran PGSA 77-vessel list. Houthis hit Khamis
-Mushait/Abha/Taif (13 injured); Saudi struck Yemen. Scored: `54b6127f` HIT (right-reason).
+**Tuesday 15 Sep:** GC 4356 (Asia high) → low **4304.0** (09:21Z, London, oil-up morning)
+→ 4349.7 (18:51Z, oil off its highs) → settle **4327.1** (−0.18%). WTI +4.5% to **105.83**,
+Brent **108.75** (highest settles since 19 May) on Saudi suspending Yanbu loadings + Libya;
+10y +4.7bp to 5.01, USD led, S&P −0.4%, BTC −3.9% (CLARITY Act failed); hike pricing **92%**
+(from 100%), 97bp of hikes priced for the year; 20y auction tailed 2bp. **Wed 03:30Z:** GC
+**4377.1** (+1.15% off the settle, 4320 → 4377 in an hour with NO headline — oil −1% on the
+API +7.1mb, 2y 4.646 / 10y 4.979 / 30y 5.348 all −1.7bp, DXY 99.65 off 99.74, USDJPY 155.3,
+Brent 107.59, WTI 104.31). The chain in reverse, not a buyer.
+**On record:** Yanbu (~4 mb/d pre-shutdown) paused; Soar Atlas imagery: three pumping
+stations damaged; officials 3–5 weeks vs Wright "days". TankerTrackers: bi-directional
+daytime VLCC traffic in Hormuz, more STS off Fujairah; Kpler: 4 transits Monday. Houthi
+drone toward Mecca downed (coalition; Houthis deny), alerts in Jazan/Abha/Khamis, "Red
+Line" vow, US "reconsider travel" advisory. Rezaei: "No talks until Iran's conditions are
+met. Period!"; Vance: new phase "within months", US "responding, not offensive"; Iran
+exports zero 60 days; Pentagon IG munitions shortfall. Bessent: only a "nominal" yen
+show. Scored: `e694f252` `a8cf8123` `66db8e8e` `b3adcf1e` HIT, `6c6ed87f` MISS.
 
 ## View (weights 20/50/30 base/bearish-rates/kinetic — unchanged; event-pending, capped)
 
-- **Bearish-rates (50):** the Fed leg is fully priced; the price-setter is oil → front end
-  → dollar, and both oil-DOWN routes moved further away (Gulf text blocked on record,
-  US–Iran unconfirmed). Skew bearish-gold on any oil re-rate: Brent settle >108 with a 30y
-  close ≥5.40 → 4300 in play. Counter: the growth-scare version (China soft, copper through
-  its 200-MA, CICC demand destruction) makes oil DOWN the likelier repricer from here, and
-  oil down = gold UP first.
-- **Kinetic (30):** held. Two hull hits, a city salvo and a Saudi strike in Yemen — no
-  ladder trigger printed; full 35 still needs gold UP from a trigger's print to the close
-  on an oil-UP session. Triggers: Yanbu (`47d2085d`), Kharg/Larak infrastructure
-  (`010cb839`), a Saudi strike on Iran (`e0e5cd9c`), US ordnance on Iranian territory
-  (`87e409a7`), a Kuwaiti/Bahraini port or Fujairah-approach hit, a warship struck, a NAMED
-  Saudi hull with casualties (`81e84f0c`), Pickaxe (`e87144df`).
-- **Base (20):** ninth inverted session; the 10y crossed 5% on a bear-flattener with gold
-  down and the dollar up — the front end led, not the long end. Tue Asia +0.4% with the 2y
-  up is 17 pts of noise; a CLOSE up with the 2y up would be session one of the two-session
-  test.
+- **Bearish-rates (50):** the Fed leg is priced (92%); oil → front end → dollar sets gold,
+  and both oil-DOWN routes are further away (Gulf text blocked, Rezaei "Period!"). Tonight:
+  "further firming"/two-hike dots + GC −1% print-to-settle → 65 (4177 in scope); the
+  trigger without the tape moves ≤5 pts. Brent settle >110 with a 30y ≥5.40 → 4300 in play
+  regardless of the Fed. Counter: an on-record Yanbu/bypass restart, or Warsh looking
+  through oil as a supply shock, is oil DOWN = gold UP first.
+- **Kinetic (30):** held. Mecca drone, city alerts, a UKMTO projectile, El Gaia's missing
+  crew — no ladder trigger printed; a Saudi answer inside Yemen is not one. Triggers
+  unchanged: Yanbu HIT (`47d2085d`), Kharg/Larak infrastructure (`010cb839`), Saudi strike
+  on Iran (`e0e5cd9c`), US ordnance on Iranian territory (`87e409a7`), Kuwaiti/Bahraini
+  port or Fujairah-approach hit, a warship struck, a NAMED Saudi hull with casualties
+  (`81e84f0c`), Pickaxe (`e87144df`) — each needs gold UP from its print to the close on an
+  oil-up session for 35. "Not offensive" + munitions shortfalls lower the US-territory odds.
+- **Base (20):** tenth inverted session; debasement tell 1 for / 10 against (overnight gold
+  rose with yields DOWN). One-and-done + gold up → 25; two consecutive gold-up/2y-up CLOSES
+  → 25. A coerced-looking hold is the debasement case (`ec71ce01` revives).
 
-**Levels (GC=F, last 4352.5; spot basis ~40–50):** R 4356 (Asia high) / 4373 (Mon overnight
-high) / 4391 / **4409 (Fri settle)** / 4436 / 4474 / 4551 (200DMA). S 4325 (Asia low) /
-**4306 (Mon low; 50DMA 4310)** / **4300 (`66db8e8e` Tue close, 0.55)** / 4278 (BB lower) /
-4177 (fib S1); spot 4250–4270 is the mid-August breakout zone (≈ GC 4295–4315). Path:
-4306–4373 into the statement; the decision carries no information — forward language, dots
-and Warsh on oil (supply shock vs second-round) are the variables. **No fresh directional
-gold claim today (T-1).**
+**Levels (GC=F, last 4377.1; spot basis ~40–50):** R 4391 / **4409 (Fri settle)** / 4436 /
+4474 / 4552 (200DMA). S 4356 / 4350 (Tue NY high) / 4327 (Tue settle) / **4304 (Tue low;
+50DMA 4313)** / 4300 / 4278–4263 (BB lower) / 4177 (fib S1). Path into the statement:
+4327–4409; the decision carries no information — forward language, dots, Warsh on oil.
+**No fresh directional gold claim today (T-0).**
 
 ## What flips me
 
-- Brent settle >108 with a 30y close ≥5.40, or a GC close <4300 → bearish-rates 65, 4177 in
-  scope. 30y ≥5.40 with DXY ≥100 → base 10.
+- Brent settle >110 with a 30y close ≥5.40, or a GC close <4300 → bearish-rates 65, 4177
+  in scope. 30y ≥5.40 with DXY ≥100 → base 10.
 - On-record Gulf acceptance of an Iranian-administered route (`ffd190c0` MISS) with Brent
-  <100, or a GC close >4474 with the 30y <5.30 → bearish-rates 45, base 25. **Peace = gold
-  UP first.** A Gulf text now needs Saudi and Bahraini objections resolved on record.
-- Two consecutive gold-up/2y-up closes → base 25. "Further firming" + gold −1% from the
-  statement's print to the settle → bearish-rates 65; one-and-done + gold up → base 25
-  (tape clause both ways; trigger without tape moves ≤5 pts).
-- Kinetic trigger AND gold up from its print to the close on an oil-up session → 35; a
-  supply hit traded as stagflation (long end up, dollar DOWN, gold up) → 35/20.
-- Fed-sourced hold leak → `e694f252` breaks, `ec71ce01` revives, gold UP through the
-  dollar. Bessent cap raise (`52db03df`) → base 25. USDJPY <150 with Nikkei/BTC down →
-  liquidity regime, cut base and kinetic. Co-confirmed US–Iran track (`24f8b482` MISS) →
-  oil down, gold UP first, bearish-rates 45.
+  <100, a co-confirmed US–Iran track (`645cc78a` MISS), or an on-record Aramco full-flow /
+  Yanbu resumption (`dea6f346` MISS) → oil down, **gold UP first**, bearish-rates 45.
+- "Further firming" + GC −1% print-to-settle → 65; one-and-done + gold up → base 25; a
+  Fed-sourced hold leak or coerced hold → gold UP through the dollar (tape clause both ways).
+- Kinetic trigger AND gold up print-to-close on an oil-up session → 35; a supply hit traded
+  as stagflation (long end up, dollar DOWN, gold up) → 35/20. Bessent cap raise (`52db03df`
+  MISS) → base 25. USDJPY <150 with Nikkei/BTC down → liquidity regime, cut base and kinetic.
 
-## Open predictions (22)
+## Open predictions (18)
 
-**Tonight 15 Sep 23:59Z (Wednesday brief scores):** `e694f252` (≥70% closes — 100% Mon,
-HIT traj.), `6c6ed87f` (meeting — MISS traj.), `66db8e8e` (4300 floor — Mon 4335.1 held,
-Tue pending), `b3adcf1e` (WTI ≥92 — Mon 101.86 held), `a8cf8123` (Gulf does not sign — HIT
-traj.). **16 Sep:** `24f8b482` (HIT traj.), `09cb81a7` (DXY <100; 99.6), `6ddbe426` (USDJPY
-≥150; 154.9), `81e84f0c`; FOMC `ec71ce01` (MISS traj.) vs `8af1d9b9` (HIT traj.) at #54.
-**18 Sep:** `52db03df` `e87144df` `47d2085d` `87e409a7` **`dea6f346` (pipeline not
-restored to full flow, 0.65 — new)**. **19 Sep:** `010cb839` **`ffd190c0` (Gulf does not
-sign, 0.7 — new)**. **20 Sep:** `a0429ae4` `e0e5cd9c`. **Mid-Oct:** `4dfbd1d8` `62c34dbd`
-(midpoint 30 Sep).
+**Tonight 16 Sep 23:59Z (Thursday brief scores):** `24f8b482` (no co-confirmed track — HIT
+traj.), `09cb81a7` (DXY close <100 — Tue 99.65, HIT traj.), `6ddbe426` (USDJPY ≥150 — low
+153.42, HIT traj.), `81e84f0c` (no Saudi hull hit — HIT traj.); FOMC `ec71ce01` (MISS
+traj.) vs `8af1d9b9` (HIT traj.) at #54. **18 Sep:** `52db03df` `e87144df` `47d2085d`
+`87e409a7` `dea6f346` (HIT traj.; Wright "days" the risk). **19 Sep:** `010cb839`
+`ffd190c0`. **20 Sep:** `a0429ae4` `e0e5cd9c`. **22 Sep:** **`645cc78a` (no co-confirmed
+US–Iran track, 0.7 — new)**. **Mid-Oct:** `4dfbd1d8` `62c34dbd` (midpoint 30 Sep).
 
 ## Wakeups
 
-**#54 Wed 16 Sep 19:45Z** FOMC — slot re-verified against the 15 Sep feed row. **#56 Fri 18
-Sep 07:30Z** BoJ — feed row 02:30Z/05:30Z vs actionforex 05:30Z/06:30Z; #56 sits after
-both. Wednesday brief: scores the five 15 Sep windows, stays event-pending until #54, no
-directional claim. Scans carry: Brent first at 07:00Z, then GC vs 4306/4300 and 4373/4409;
-a Fed-sourced hold leak; an Omani/GCC date or a Saudi/Bahraini on-record shift; an
-Aramco/SPA pipeline line; UKMTO names; Yanbu; a Saudi hull; 30y vs 5.40; DXY vs 100; USDJPY
-vs 152/150; Bessent; Pickaxe; a warship struck; a co-confirmed US–Iran track.
+**#54 Wed 16 Sep 19:45Z** FOMC — slot verified 15 Sep against the feed row (18:00Z /
+18:30Z, printed again today). **#56 Fri 18 Sep 07:30Z** BoJ — feed row 02:30Z/05:30Z vs
+actionforex 05:30Z/06:30Z; #56 sits after both. Thursday brief: scores the four 16 Sep
+windows, reads #54's verdict against the tape. Scans carry: Brent vs 110/105 at 07:00Z and
+15:00Z; EIA ~14:30Z; GC vs 4327/4304/4300 and 4391/4409; an Aramco/SPA Yanbu or bypass
+line; a Fed-sourced leak; an Omani/GCC date; a Saudi strike beyond Yemen; UKMTO names;
+30y vs 5.40; DXY vs 100; USDJPY vs 152/150; Bessent; Pickaxe; a warship struck.
 
 ## Desk-local
 
-Spot ~4300 (basis ~40–50) after retesting the 4250–4270 breakout zone; Murban +7% to 127.8
-and Aramco shifting barrels to escorted Hormuz loadings put the Gulf physical premium and
-Fujairah STS at the centre of the flow story into the FOMC; Iran's 77-vessel list raises
-detention risk for Gulf-side charterers.
+Spot ~4300 (basis ~40–50; XAU PM fix 4296) after Tuesday's 4266 spot low; Yanbu shut
+pushes every Saudi barrel through escorted Hormuz loadings and Fujairah STS — the Gulf
+physical premium and tanker rates to Asia are where the stress shows; Iran's PGSA
+77-vessel list and the Mecca "Red Line" raise Gulf-side charterer risk into the Fed.
 
 ## Sourcing health
 
-GC=F/DXY/USDJPY live (15-min rows); `inbox` warnings on `gold_spot`/`yield_10y_nominal` are
-the todo-003 false positive. Extracts fresh: investinglive wrap, Gulf News ×3, gcaptain,
-MarEx ×2, fxempire, investinglive TA; CNBC quotes `--fresh`. Two 404s were my own mistyped
-slugs. `predictions due` printed 0 matured while `54b6127f`'s window had closed (rule 18,
-todo-182) — scored from the claim text. Investing.com ×6 unread (403). Oil relay-only.
+GC=F/DXY/USDJPY live (15-min rows); `gold_spot` warning is the todo-003 false positive.
+Extracts fresh: investinglive wrap + Vance + Bessent (`/forex/` path; `/news/` 404s),
+MarEx Yanbu, Gulf News roundup, CNBC quotes `--fresh` (yields, Brent, WTI). Tuesday's
+UKMTO/El Gaia/Rezaei items re-read via a Haiku subagent because scans write no report
+file. `predictions due` printed 1 matured for 5 closed windows (rule 18, todo-182) —
+scored from the claim texts. Investing.com ×9 unread (403). `bars` daily GC rows are
+spot-basis (4287.3 Tue close vs GC_CLOSE 4327.1) — level claims stay on GC_CLOSE.
