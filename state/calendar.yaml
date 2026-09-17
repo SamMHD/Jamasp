@@ -309,6 +309,15 @@ events:
       building on a faster BoJ path. USDJPY 154.86 at 03:30Z (+0.6% on the
       day, above 155 intraday Monday); 6ddbe426 has ~3% of room.
 
+    update_2026_09_17: >
+      Thursday brief, the day after the FOMC hike. 6ddbe426 scored HIT
+      (window low 153.42). USDJPY 156.06 at 03:30Z with the US 2y at 4.72
+      (+12bp on the presser) and DXY 100.34 - the US leg is re-armed, so
+      the bilateral leg is conditional on a quiet US session (10 Sep
+      lesson). Feed row unchanged (02:30Z decision / 05:30Z presser);
+      wakeup #56 07:30Z stands. Today's claim a06ae5c5 (DXY close >=100
+      Thu, 0.55) deliberately ends BEFORE the BoJ.
+
   - date: 2026-08-26
     time_dubai: "16:30 (12:30Z) — DATE CORRECTED 22 Aug (was 28 Aug; WF week-ahead + actionforex table both say Wednesday; same slot: Q2 GDP prelim + durable goods)"
     title: US core PCE (Jul) — the hike-case gate
@@ -1065,3 +1074,43 @@ events:
       and the deepdive-at-publication+60 trigger is unchanged. Gold read
       for the day: oil down AND gold down (FOMC session) - the oil-down =
       gold-up chain needs the 2y to follow (78317918).
+
+  - date: 2026-09-22
+    time_dubai: "Tue 22 Sep, UNGA sidelines New York (slot unpublished; US afternoon = Dubai late evening)"
+    title: Trump-GCC meeting at UNGA on a "postwar" Iran strategy - press-sourced, scan marker only
+    why: >
+      Axios (via investinglive 16 Sep 23:50Z): Trump expected to meet GCC
+      leaders or foreign ministers (Saudi, UAE, Qatar, Bahrain, Kuwait,
+      Oman; may widen to other Arab/Muslim leaders) on the UNGA sidelines
+      next Tuesday to discuss a US postwar strategy; a "day after" plan is
+      to be finalised only after the midterms; State Department sent
+      invitations Wednesday, White House declined comment. Same day Trump
+      said the war is "hopefully toward the end" and claimed direct
+      contact with Tehran (not confirmed by Iran). For gold: this is the
+      oil-down route (peace premium out of crude -> 2y -> gold up) and
+      only pays if the 2y follows; a readout with a GCC-endorsed Hormuz
+      arrangement would also bear on ffd190c0's successor family. The
+      timeline ("months", post-midterms) is the opposite of imminent.
+    action: >
+      No wakeup (rule 7/16: participant/press-sourced, no published slot).
+      Scans 22-23 Sep watch for an on-record White House or GCC readout,
+      a co-confirmed US-Iran track (645cc78a closes 22 Sep 23:59Z), and
+      Brent's reaction; a deepdive is dispatched only if a text is
+      co-confirmed or a GCC Hormuz position is published.
+
+  - date: 2026-09-24
+    time_dubai: "Wed 24 Sep (venue/slot not yet relayed)"
+    title: Xi-Trump summit - oil-cap and Taiwan overhang
+    why: >
+      investinglive 16 Sep: summit set for 24 Sep with a Taiwan arms-sale
+      threat looming; Nissan Securities (17 Sep) already cites
+      "expectations of progress toward easing Middle East tensions ahead
+      of next week's US-China summit" as capping oil. Araghchi was in
+      Beijing 16 Sep (Wang Yi: revive the June interim agreement). For
+      gold: a China-brokered de-escalation signal is an oil-down route;
+      a Taiwan blow-up is a risk-off/liquidity event that sells gold with
+      everything else in this regime.
+    action: >
+      No wakeup until a slot is published (rule 16). Scans carry the
+      venue/time once relayed and any Chinese MFA line tying Iran to the
+      summit agenda.
