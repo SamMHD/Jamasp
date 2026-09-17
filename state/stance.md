@@ -13,6 +13,13 @@ Fox: Iranian drones/missile hit a US-contracted hull, US personnel minor injurie
 silent) — moved nothing. Scored: `24f8b482` HIT, `6ddbe426` HIT, `81e84f0c` HIT (class-
 scoped), `09cb81a7` MISS.
 
+**13:00Z scan (alerted):** GC **4407.8** (12:36Z, +2.0% vs 03:20Z, above 4387.3 intraday) on
+Brent 102.3 (−3.4%: Aramco on record "half capacity within days, full ~6 weeks"; Reuters:
+China privately asks Iran to rein in Houthis; Axios: Trump–Gulf UNGA Tue) with the **2y 4.68
+(−5bp) through claims 196k / Philly 37.8** — the chain with the 2y following this time, not
+the debasement tell. DXY 100.2, USDJPY 155.6. Weights unchanged pending the 17:30Z settle;
+`f8b7b030` on a MISS trajectory intraday, `78317918` / `1889819a` / `a06ae5c5` intact.
+
 ## View (weights 15/60/25 base/bearish-rates/kinetic — unchanged; settle decides)
 
 - **Bearish-rates (60):** the tape half landed (−1.9%, 2y +12bp, DXY >100) and the Street
