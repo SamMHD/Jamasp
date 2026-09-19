@@ -6,8 +6,11 @@
 "gold found buyers despite rising yields — a breakdown in the usual correlation"; "2–3 further
 hikes priced", 2s–10s near inversion. Schmid (KC, non-voter; first post-blackout speaker):
 backed the hike, inflation "trending above 3%", "not just about energy" — no October call.
-**Riyadh 00:00Z Sat:** air-raid alert, two explosions heard (AFP), lifted in 30 min, first
-time the capital is directly affected since July; no damage/attribution on record. Hours
+**Riyadh Sat:** 00:00Z air-raid alert, two explosions (AFP), first direct hit on the capital
+since July; second wave ~09–12Z: sirens Riyadh/al-Kharj plus Yanbu, al-Ula, Khamis Mushait,
+Jizan, Abha (Mehr), smoke and flames near KKIA, airport at Flightradar24 max disruption,
+Dubai/Sharjah flights hit (Gulf News 11:56Z); Houthi-attributed, no casualties or
+infrastructure damage on record (13:00Z scan alerted, weights unchanged). Hours
 earlier oil sold off on Reuters' "China asked Iran to rein in the Houthis". Hormuz: three
 UKMTO warnings since 16 Sep; the southern route took 22 of 35 strikes since 6 Jul; Aramco
 pushing ~60m bbl through it Sep–Oct; East-West full repair 5–6 weeks. Oct odds 53–58% (stale).
