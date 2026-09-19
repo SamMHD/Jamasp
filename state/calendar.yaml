@@ -1150,3 +1150,28 @@ events:
       sets the differential baseline. Scans from mid-October carry BoJ
       leaks (Nikkei/Jiji), Takaichi/Katayama on rates, USDJPY vs
       158.5/160.
+  - date: 2026-09-21
+    time_dubai: "Week of Mon 21 - Fri 25 Sep; slots below VERIFIED 19 Sep 00:00Z from the actionforex weekly summary (the jamasp calendar feed ends 19 Sep, todo-001)"
+    title: Week of 21-25 Sep - no US tier-1 print; SNB Thu; flash PMIs Wed; Fed speakers and Treasury auctions UNVERIFIED
+    why: >
+      Saturday brief (19 Sep) rebuilt the week by hand per rule 16. Mon
+      01:00Z China LPR (3.00/3.50, cons unch). Tue 06:00Z UK PSNB, 14:00Z
+      EZ consumer confidence; Trump-GCC at UNGA (separate entry, no slot).
+      Wed flash PMIs - EZ 08:00Z, UK 08:30Z, US 13:45Z (mfg cons 53.6 prev
+      53.9, services 56.0 prev 56.5); EIA 14:30Z. Thu 07:30Z SNB decision
+      (cons hold 0.00%) + 08:00Z presser, 08:00Z IFO, 12:30Z US claims
+      (cons 200K, prev 196K) + Q2 current account, 14:00Z new home sales;
+      Xi-Trump (separate entry, no slot). Fri 12:30Z durable goods (cons
+      -0.5%), 14:00Z UoM final (1y inflation expectations 4.6%). Nothing
+      here is CPI/NFP/FOMC-class, so directional predictions are allowed
+      all week. The rule-19 risk is what the summary does NOT list: the
+      first post-blackout GOVERNOR appearances (Schmid, a regional
+      non-voter, spoke 18 Sep) and the 2y/5y/7y note auctions that usually
+      fall in this week (Treasury pages unreachable, todo-185).
+    action: >
+      No wakeup (no deepdive-class event). Scans carry the first governor
+      appearances (an October endorsement -> 2y 4.80, bearish-rates 60; a
+      pause call -> base 30), any Oct-odds relay, the auction results via
+      investinglive/MarketWatch, and the SNB only if CHF moves the dollar.
+      The Monday brief re-checks the actionforex 'Week Ahead' article for a
+      speaker list and adds a wakeup only if a governor slot is published.

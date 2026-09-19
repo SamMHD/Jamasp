@@ -1,90 +1,80 @@
-# Stance — 2026-09-18 07:50Z (Fri BoJ deepdive #56) — BoJ HIKED 1.25% 7–2, UEDA "PHASE HAS CHANGED" WITH NO TIMING; THE YEN LEG DID NOT REACH GOLD — OIL AND THE LONG END DID; WEIGHTS 20/50/30 UNCHANGED, GATE READS ON THE FRI GC_CLOSE ROW
+# Stance — 2026-09-19 03:40Z (Sat brief) — FRIDAY PRINTED THE TELL ONCE (GOLD +0.96% WITH THE 2Y +6.6bp, 10Y 5.00, DXY FLAT, BTC +6%); RIYADH AIR-RAID ALERT UNPRICED UNTIL THE SUN 22:00Z REOPEN; WEIGHTS 20/50/30 HELD BY THE GATE, MONDAY DECIDES BOTH
 
-**BoJ (02:30Z) + Ueda (06:30Z):** +25bp to 1.25% (highest since 1995), 7–2 — Asada and Sato
-(both Takaichi appointees) for hold; Takata/Tamura for the hike but "target already met" — a
-three-way board, no outlook report. Ueda: "the policy phase has changed", overshoot risks
-"growing", will keep raising, **"not thinking about a specific timing"**, FY2027 wage talks
-the key, avoid "drastic"/"excessively fast" tightening, dissents "constructive". No terminal;
-Street: one hike per quarter, next Dec/turn-of-year, terminal 1.75–2% in 2027; Oct 30
-back-to-back priced out; Takata/Tamura leave Jul 2027. No MoF line (Reuters via CNBC:
-Bessent pressed Katayama for higher BoJ rates in May). **Tape:** USDJPY 156.15 → **157.12**
-post-vote (the >157 tell printed) → 156.71 on Ueda; Nikkei +1.4%, JGB 10y −5bp to 2.95,
-BTC +1.5% — orderly. DXY 100.21 → 100.28. US 2y **4.685 (−0.5bp, quiet)**, 10y 4.928 (−2),
-30y 5.274 (−2), Brent **102.2 (−2.5%, third down session)**. GC 4395 at the vote → 4378 low
-(03:20Z) → **4432 (06:36Z)**: +$54, of which $30 came 05:35–06:36Z with Brent 104 → 102.8
-and the 10y off 2bp; the presser moved gold $7. **The yen leg did not transmit** — USDJPY
-+0.6% moved DXY 7 ticks; the oil → long-end channel set the price, as on Thursday. Oct odds
-**53%** (actionforex, first relay since Wed; 27% a week ago). **Khasab:** IRGC (Mehr) claims
-the hit, naming the Togo-flagged tanker *Trend* — adversary detail on a UKMTO-confirmed
-event; still hull-class.
+**Friday close (final rows):** GC_CLOSE **4424.9** (+0.96%, range 4384–4436.6), 2y **4.756**
+(+6.6bp, highest since 2024), 10y **5.00**, 30y 5.328 (high 5.344), DXY 100.215 flat, USDJPY
+156.86 (BoJ rate check at 158.05), Brent 103.87 / WTI −2.3%, BTC 81.3K (+6%), S&P flat. Wrap:
+"gold found buyers despite rising yields — a breakdown in the usual correlation"; "2–3 further
+hikes priced", 2s–10s near inversion. Schmid (KC, non-voter; first post-blackout speaker):
+backed the hike, inflation "trending above 3%", "not just about energy" — no October call.
+**Riyadh 00:00Z Sat:** air-raid alert, two explosions heard (AFP), lifted in 30 min, first
+time the capital is directly affected since July; no damage/attribution on record. Hours
+earlier oil sold off on Reuters' "China asked Iran to rein in the Houthis". Hormuz: three
+UKMTO warnings since 16 Sep; the southern route took 22 of 35 strikes since 6 Jul; Aramco
+pushing ~60m bbl through it Sep–Oct; East-West full repair 5–6 weeks. Oct odds 53–58% (stale).
 
 ## View (weights 20/50/30 base/bearish-rates/kinetic — pre-committed gate)
 
-- **Bearish-rates (50):** mechanism intact (Oct 53%, 2y 4.685, 30y >5.27) but the desk's
-  live impulse is oil-down/yields-down/gold-up for a second session and the FOMC drop is
-  fully retraced (4386 → 4301 → 4432). **Gate reads on the Fri GC_CLOSE row: ≤4300 → 60;
-  >4409 with the 2y ≤4.65 → 40.** At 07:30Z the gold half is met, the 2y half (4.685) is not.
-- **Kinetic (30):** twelfth non-transmission holds; the IRGC naming Trend changes nothing.
-  To 35: a named trigger (Yanbu HIT `47d2085d`, Kharg/Larak infrastructure `010cb839`, Saudi
-  strike on Iran `e0e5cd9c`, US ordnance on Iranian territory `87e409a7`, Pickaxe `e87144df`,
-  a warship struck) AND gold up print-to-close on an oil-UP session; or a supply hit traded
-  as stagflation (long end up, dollar DOWN, gold up) → 35/20.
-- **Base (20):** the tell (gold up WITH the 2y up) has not printed (2y flat today); the BoJ
-  hiked on a fractured board and promised more with no timing — the yen pillar is neither
-  rebuilt (157, not 160) nor broken (not 150); the Fed side does the differential's work.
-  To 30: two consecutive gold-up/2y-up closes (`1889819a` MISS), a governor calling for a
-  pause, or Trump naming Warsh priced gold-up/2y-up.
+- **Gate result:** GC_CLOSE 4424.9 >4409 met, 2y ≤4.65 failed → bearish-rates stays 50;
+  ≤4300 did not print. Base needs two consecutive both-up closes; Friday is session 1.
+- **Bearish-rates (50):** mechanism fully intact (2y 4.756, Schmid, 2–3 hikes priced) and for
+  the first time gold did not obey it. Intact-and-not-transmitting is a watch, not a fade
+  (rule 3). To 40: Monday both-up (`1889819a` MISS). To 60: a governor endorsing October
+  with gold DOWN that session.
+- **Kinetic (30):** Riyadh is unpriced. To 35: the first oil-UP settle after the reopen prints
+  GC_CLOSE ≥+1% (`64c7ba41` MISS) — trigger AND tape. Oil UP / gold DOWN = 13th inverted
+  session, unchanged. Named triggers still: Yanbu HIT, Kharg/Larak infrastructure
+  (`010cb839`), Saudi strike on Iran (`e0e5cd9c`), US ordnance on Iranian territory,
+  Pickaxe, a warship struck — and now **ordnance confirmed on Riyadh with attribution**.
+- **Base (20):** the tell printed once with the fiscal-dominance signature (long end up,
+  dollar flat, gold up, BTC up). To 30: Monday both-up; or a 30y close ≥5.40 (`aec5cc8b`
+  MISS) with gold UP that session.
 
-**Levels (GC=F, last 4432; spot basis ~45–50):** R **4436.5** / 4470 / 4500 / 4554 (200DMA).
-S 4409 (Thu high, now support) / 4403 / 4378 (o/n low) / 4355 / 4326 (50DMA) / 4300 /
-4296.7 (`63bf960c` line) / 4250. Base case into Monday: 4380–4470, 2y 4.62–4.75, DXY
-99.9–100.5, USDJPY 155–158.5, Brent 100–105.
+**Levels (GC=F, Fri row 4424.9; spot basis ~44):** R 4436.6 / 4470 / 4500 / 4554 (200DMA).
+S 4409 / 4384 / 4378 / **4326.5 (50DMA, `d571e0f0`)** / 4300 / 4255. Base case Mon–Tue:
+4360–4480, 2y 4.68–4.85, DXY 99.9–100.6, USDJPY 155.5–158.5, Brent 101–108.
 
 ## What flips me
 
-- **The Friday close (Saturday brief):** GC_CLOSE >4409 with the 2y ≤4.65 → bearish-rates
-  40 and 4470/4500 in scope; GC_CLOSE ≥4426.5 = `b06eaec0` MISS (a cap written against the
-  controlling desk's impulse — rule 5); ≤4300 → 60.
-- **USDJPY:** ≥160 (MoF line; `be4d6b22` 0.55 says no) = yen pillar back, base 30; <152
-  with Nikkei and BTC down = liquidity regime, cut base and kinetic. Either way the yen
-  reaches gold only through DXY — watch 100 / 100.6 (double-bottom target), not 157.
-- First post-blackout governor endorsing October → 2y 4.80, bearish-rates 60; one calling
-  for a pause → base 30. Oil-DOWN routes (on-record East-West restart `dea6f346`, Gulf text
-  `ffd190c0`, co-confirmed US–Iran track `645cc78a` — UNGA week) = gold UP only with the
-  long end following, as today.
-- A US answer to Khasab: territory-class with oil up and gold DOWN = 13th inverted session,
-  kinetic stays 30; traded as stagflation → 35/20.
+- **Monday close (Tuesday brief):** GC_CLOSE >4424.9 AND 2y close >4.756 → base 30 /
+  bearish-rates 40 the same run. Gold down on a 2y up = Friday was a Friday, no change.
+- **Reopen Sun 22:00Z:** oil UP + gold ≥+1% print-to-close → kinetic 35 / bearish-rates 45.
+  Oil UP + gold DOWN → unchanged; `d571e0f0` at risk only with the 2y ≥4.80.
+- First post-blackout **governor** endorsing October → 2y 4.80, bearish-rates 60; one calling
+  a pause → base 30. Oil-DOWN routes (Macron G7 reserves, on-record East-West restart,
+  co-confirmed US–Iran track `645cc78a` in UNGA week) = gold UP only with the long end.
+- USDJPY: ≥160 now goes through the MoF (rate check at 158) — `be4d6b22` 0.55 strengthened;
+  <152 with Nikkei + BTC down = liquidity regime, cut base and kinetic.
+- A Saudi answer on Iranian territory after Riyadh (`e0e5cd9c` MISS) → oil +5%; gold scored on
+  the tape clause from the trigger's print time, not assumed.
 
-## Open predictions (19) — by window close
+## Open predictions (13) — by window close
 
-**Fri 18 Sep 23:59Z:** `63bf960c` (no GC_CLOSE ≤4300, 0.55 — 4432, safe), `78317918` (2y no
-close <4.60 — 4.685), `52db03df`, `e87144df`, `47d2085d`, `87e409a7`, `dea6f346` — HIT
-trajectory; **`b06eaec0` (no GC_CLOSE ≥4426.5, 0.5) — 4432 intraday, MISS trajectory.**
-**19 Sep:** `010cb839` `ffd190c0`. **20 Sep:** `a0429ae4` `e0e5cd9c`. **22 Sep:** `645cc78a`,
-`1889819a` (session 1 not both-up), `aec5cc8b` (30y no close ≥5.40 — 5.274). **23 Sep:**
-`9e629d6e`. **24 Sep:** new `be4d6b22` (USDJPY no print ≥160, 0.55). **Mid-Oct:** `4dfbd1d8`
-`62c34dbd`. `6ddbe426` was scored HIT at the Thursday brief (low 153.42) — not re-scored.
+**Sat 19 Sep 23:59Z:** `010cb839` `ffd190c0` (HIT trajectory on today's sweep). **Sun 20 Sep:**
+`a0429ae4` `e0e5cd9c`. **Mon–Tue 21–22 Sep:** new `d571e0f0` (no GC_CLOSE row ≤4326.5, 0.55),
+new `64c7ba41` (first oil-UP settle: no +1% gold session, 0.5, UNCLEAR if no oil-UP settle).
+**Tue 22 Sep:** `645cc78a`, `1889819a` (session 1 both-up — at risk), `aec5cc8b` (30y 5.328).
+**Wed 23 Sep:** `9e629d6e`. **Thu 24 Sep:** `be4d6b22`. **Mid-Oct:** `4dfbd1d8` `62c34dbd`.
+Scored today: 8/8 HIT (`63bf960c` `78317918` `52db03df` `e87144df` `47d2085d` `87e409a7`
+`dea6f346` right-reason; `b06eaec0` by 1.6 pts, zero-information, discounted).
 
 ## Wakeups
 
-None pending. Saturday brief scores the eight Friday windows from the GC_CLOSE row + the
-Americas wrap and re-verifies next week's calendar (feed ends 19 Sep; Trump–GCC 22 Sep,
-Xi–Trump 24 Sep, first post-blackout Fed speakers unknown). BoJ next: **30 Oct**, two days
-after the 28 Oct FOMC — second convergence window (calendar entry, slot unverified). Scans
-carry: UKMTO/gcaptain on "Trend"; CENTCOM on Khasab; Trump "big decision"; first Fed
-speaker; Aramco/SPA East-West; Warsh; Brent 105/100; 2y 4.60/4.75; 30y 5.40; USDJPY
-152/158.5/160; DXY 100/100.6.
+None pending, none added. The 23:00Z Sunday scan reads the reopen (+60); the Monday brief
+scores the Sat/Sun windows, prunes `us-canada-trade-war`, and re-checks Fed speakers (none in
+any feed — rule-19 risk) and the 2y/5y/7y auction slots (UNVERIFIED). Week ahead verified
+from actionforex 19 Sep: no US tier-1 print; SNB Thu 24 Sep 07:30Z; US flash PMI Wed 13:45Z;
+Trump–GCC Tue 22 Sep and Xi–Trump Wed 24 Sep without slots. BoJ next 30 Oct (slot unverified).
 
 ## Desk-local
 
-Spot ~4385 (basis ~47): Gulf physical back at Tuesday's levels with the dollar flat at
-100.3; Brent 102 on Saudi rerouting (four Hormuz transits Thursday against a 16-ship
-ten-day average); the IRGC claiming the Khasab hull by name did not move the premium;
-posture static.
+Spot ~4381 (basis ~44): Gulf physical bid into the weekend with the dollar flat at 100.2;
+Brent 104 with the Saudi barrels now routed through the corridor Iran is firing into; the
+Riyadh alert lands on a closed market — expect the premium at the Monday Asia open, not in
+Friday's price; posture: hold, read the reopen.
 
 ## Sourcing health
 
-GC=F/DXY/USDJPY/BTC live (15-min rows to 07:06Z); 2y/10y/30y/Brent/Nikkei from CNBC
-`--fresh` 07:31Z. Extracts: investinglive ×5 (Ueda ×2, presser preview, USDJPY 157,
-European open), CNBC Japan wrap, actionforex ×2 (USDJPY, gold), Mehr (IRGC Trend), fxempire
-oil. No MoF item in the feed. `gold_spot` erroring (todo-003).
+GC=F/DXY/USDJPY/BTC rows to 20:59Z; 2y/10y/30y/Brent/WTI from CNBC `--fresh` 03:31Z.
+Extracts: Gulf News (Riyadh), investinglive (Americas wrap, Schmid), gcaptain (three
+attacks), actionforex (week summary). `gold_spot` erroring (todo-003); `wgc` one 503
+(transient); calendar feed ends today (todo-001); no Fed-speaker schedule in any feed.
