@@ -114,10 +114,14 @@ def fake_run(answers=None, fail_on=None, calls=None):
             raise modelrun.ModelError("boom")
         if '"text"' in prompt:                       # a document prompt
             return {"text": "FA:" + prompt.split("---\n", 1)[1]}
-        return answers if answers is not None else {
-            str(i): {"headline": f"FA{i}", "lede": f"LEDE{i}"}
+        if answers is not None:
+            return answers
+        # The strict-mode batch shape: an array of entries each carrying its
+        # own `n`, not an object keyed by entry number. See rows_schema.
+        return {"items": [
+            {"n": i, "headline": f"FA{i}", "lede": f"LEDE{i}"}
             for i in range(1, prompt.count("headline:") + 1)
-        }
+        ]}
     return run
 
 
@@ -180,7 +184,7 @@ def test_a_failing_batch_retries_once_then_falls_back_to_singles(tmp_path):
         calls.append(prompt)
         if prompt.count("headline:") > 1:   # the batch, either attempt
             raise modelrun.ModelError("batch failed")
-        return {"1": {"headline": "FA-single"}}
+        return {"items": [{"n": 1, "headline": "FA-single"}]}
 
     stats = translate.translate_rows(conn, CFG, GLOSSARY, run)
     # batch, batch retry, then one call per row
@@ -214,7 +218,7 @@ def test_the_singles_loop_never_holds_the_write_lock_across_a_model_call(tmp_pat
             probes.append(True)
         except sqlite3.OperationalError as exc:
             probes.append(str(exc))
-        return {"1": {"headline": "FA-single"}}
+        return {"items": [{"n": 1, "headline": "FA-single"}]}
 
     translate.translate_rows(conn, CFG, GLOSSARY, run)
     assert probes == [True, True], probes
@@ -234,7 +238,7 @@ def test_a_locked_database_degrades_instead_of_crashing_the_run(tmp_path):
     conn.execute("PRAGMA busy_timeout = 100")
 
     def run(prompt, schema):
-        return {"1": {"headline": "FA1"}}
+        return {"items": [{"n": 1, "headline": "FA1"}]}
 
     stats = translate.translate_rows(conn, CFG, GLOSSARY, run)
     assert stats["failed"] == 1
@@ -281,7 +285,7 @@ def test_a_row_the_model_omits_counts_as_failed(tmp_path):
     seed(conn, [("One", 1), ("Two", 2)])
     # answer only for entry 1
     stats = translate.translate_rows(
-        conn, CFG, GLOSSARY, fake_run(answers={"1": {"headline": "FA1"}})
+        conn, CFG, GLOSSARY, fake_run(answers={"items": [{"n": 1, "headline": "FA1"}]})
     )
     assert stats["translated"] == 1
     assert stats["failed"] == 1
@@ -291,7 +295,7 @@ def test_a_lede_the_model_omits_leaves_lede_fa_null(tmp_path):
     conn = db.connect(tmp_path / "t.db")
     seed(conn, [("One", 1)])
     translate.translate_rows(
-        conn, CFG, GLOSSARY, fake_run(answers={"1": {"headline": "FA1"}})
+        conn, CFG, GLOSSARY, fake_run(answers={"items": [{"n": 1, "headline": "FA1"}]})
     )
     row = conn.execute("SELECT headline_fa, lede_fa FROM items").fetchone()
     assert row["headline_fa"] == "FA1"
@@ -323,7 +327,7 @@ def test_translate_events_writes_title_fa(tmp_path):
 
     def run(prompt, schema):
         assert "US CPI (MoM)" in prompt
-        return {"1": {"title": "شاخص قیمت مصرف‌کننده آمریکا (ماهانه)"}}
+        return {"items": [{"n": 1, "title": "شاخص قیمت مصرف‌کننده آمریکا (ماهانه)"}]}
 
     stats = translate.translate_events(conn, CFG, GLOSSARY, run)
     assert stats["translated"] == 1
@@ -1014,7 +1018,7 @@ def test_force_re_arms_and_retranslates_events(tmp_path):
     conn.commit()
 
     def run(prompt, schema):
-        return {"1": {"title": "NEW"}}
+        return {"items": [{"n": 1, "title": "NEW"}]}
 
     stats = translate.translate_events(conn, CFG, GLOSSARY, run, force=True)
     assert stats["translated"] == 1
