@@ -101,3 +101,21 @@ claim text.
   (partial-run commits).
 - `reports/2026/09/2026-09-06-retro.md` — the fortnight's four
   hand-deferrals.
+
+## Update 2026-09-20 — recurrence and one correct workaround
+
+- 13 Sep (lessons-inbox 2026-09-13): the 12 Sep brief's Watching section
+  named `110d5daa` and `e1e9ba8f` as "Sunday scores" while both claim texts
+  closed 13 Sep 23:59Z (Monday's scoring); the two that *did* close 12 Sep
+  23:59Z (`f04926f1`, `2fbc22dd`) were not surfaced by `predictions due` at
+  the 03:30Z run because `created_at + horizon` lands ~04:00Z on 13 Sep.
+  The brief scored them from the window text anyway.
+- 18 Sep: `a06ae5c5` (window "Thu 17 Sep") scored at the 03:33Z brief from
+  the window close, before the 03:38Z horizon tick — the manual discipline
+  (playbook rule 18) working as intended, and the case `--until` would make
+  automatic.
+- 20 Sep retro: `due` printed 0 matured; three claims closing that night
+  (`ac946837` 22:00Z, `a0429ae4`/`e0e5cd9c` 23:59Z) correctly not listed.
+  Backfill regex note: every claim text this fortnight carries "through
+  <weekday> <d> <Mon> 23:59Z" or "on <weekday> <d> <Mon>" — the Fix §3
+  one-off parser is feasible on the current ledger.

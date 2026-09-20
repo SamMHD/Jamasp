@@ -78,3 +78,14 @@ timestamp array for a session it does not recognise.
   todo-015's open question.
 - todo-182 (`matured` fires before window close) — the 7 Sep brief scored
   `58b7daab` at its event, not its `matured` flag.
+
+## Update 2026-09-20 — a prediction lost to the gap
+
+`a1fc647f` (GC does not trade below 4425 in the 6–7 Sep Labor Day session,
+0.65) scored **UNCLEAR** on 8 Sep: GC=F printed nothing in the window; the
+bitfinex proxy low 4385.8 maps to 4425–4435 GC-eq on the observed 39–49
+basis, so the line sat inside the basis error and no press relay carried a
+GC low. The 20 Sep retro folded the analysis half into playbook rule 17
+(name the proxy series and basis, or don't write the level); the feed
+half — a GC series that survives a US holiday's open Globex session — is
+this item. GC rows resumed 8 Sep 04:05Z per the `52e1b990` scoring note.

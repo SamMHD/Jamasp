@@ -25,8 +25,9 @@ watchlist:
       DESTINATION (unchanged), not the pace, so a 2y overshoot need not be
       sold. 1889819a (0.7, to 22 Sep) is at session 1 both-up - a Monday
       repeat = MISS -> base 30 / bearish-rates 40 (base only if the 30y
-      rises too). No Fed-speaker schedule in any feed (rule-19 risk); the
-      actionforex weekly carries none. Next gates: Monday both-up; 2y at
+      rises too). Fed speakers are in the ff_calendar feed under Low impact,
+      hidden by `jamasp calendar` (todo-188): Goolsbee Mon 21 Sep 10:30Z;
+      Williams, Hammack, Paulson Thu 24 Sep — rule-19 breakers. Next gates: Monday both-up; 2y at
       4.80 (confirmed by futures or rejected); first governor appearance;
       Sept CPI mid-Oct; 28 Oct FOMC.
     since: 2026-07-31

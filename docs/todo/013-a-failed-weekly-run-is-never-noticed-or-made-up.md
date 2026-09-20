@@ -134,3 +134,36 @@ in tests rather than waiting a week.
   produce (§2 report, §3 playbook rewrite, §3 lessons-inbox consumption).
 - `ops/systemd/jamasp-retro.timer` — `Persistent=true`, which does not cover
   this case.
+
+## Update 2026-09-20 — second occurrence, different cause
+
+`jamasp-retro.service` failed again on **2026-09-13 16:00Z** (`agent_runs`
+id 453, exit 1 after 48s). Journal last output:
+
+```
+retro: failed — last output:
+You've hit your session limit · resets 4:30pm (UTC)
+```
+
+Not OAuth this time — the Claude session limit, exhausted by the day's
+scans/briefs, resetting 30 minutes *after* the retro's 16:00Z slot. Both
+halves of the original problem statement held exactly:
+
+- **Delivery worked, noticing didn't.** `notify_log` 205 (runner FAILURE
+  notice) and 206 (systemd alert, Persian) both `ok=1` at 16:00:51Z. No
+  brief 14–19 Sep mentions the missing retro; the 20 Sep retro found it by
+  querying `agent_runs`. Seven days of unconsumed lessons (24 entries) and
+  59 unscored-for-calibration predictions accumulated, same as 30 Aug.
+- **No make-up.** Next attempt was the following Sunday, as before.
+
+New evidence for Fix §2: the cause this time is *time-of-day*, so the
+cheapest make-up is also the cheapest prevention — move `jamasp-retro.timer`
+to a slot after the session-limit reset (17:00Z or later; nothing else runs
+Sunday evening but the 17:00Z scan), and/or have `jamasp run retro` retry
+once after the reset instead of its immediate retry (which the 48s failure
+shows also hit the limit). Fix §1 (watchdog freshness on the retro report /
+playbook mtime) is unchanged and would have caught both occurrences on the
+Monday.
+
+Retro rows to date: 2, 9, 16, 23 Aug ok; **30 Aug failed**; 6 Sep ok;
+**13 Sep failed**; 20 Sep ok. Two of the last four Sundays lost.

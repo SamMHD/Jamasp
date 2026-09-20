@@ -65,3 +65,16 @@ rationale for keeping the flat ceiling.
 
 Playbook #11; retro reports 2026-08-16 and 2026-08-23 (calibration notes);
 `state/predictions.jsonl` scoring notes for `4cf94ab6`, `cd49c313` week.
+
+## Update 2026-09-20
+
+Fortnight 7–20 Sep: **14 of 14 claims written at 0.70 hit** — all
+structural negatives capped by the brief ceiling against the playbook's
+(now rule 10) 0.8 floor. Family record 50/50 across 3 Aug–19 Sep. The
+retro's stated-vs-observed gap this fortnight is 0.632 vs 0.842 (n=57);
+re-pricing the fourteen at 0.8 alone moves the stated average to ~0.66.
+The ceiling is now the single largest identifiable source of the
+calibration artefact the 23 Aug, 6 Sep and 20 Sep retros all reported.
+Skill line unchanged (`.claude/skills/brief/SKILL.md` "Cap `--confidence`
+at 0.7"). Playbook rule 10 still carries the workaround ("name the
+compliant floor in the claim text").

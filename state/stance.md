@@ -69,8 +69,9 @@ right-reason (`010cb839` `ffd190c0`, both ceiling-capped).
 
 None pending, none added (no published slot for anything deepdive-class; a Trump decision is a
 scan read). The 23:00Z scan reads the reopen; the Monday brief scores tonight's two windows and
-`ac946837`, prunes `us-canada-trade-war`, re-checks Fed speakers (none in any feed — rule-19
-risk) and the 2y/5y/7y auction slots (UNVERIFIED). Week verified 19 Sep: no US tier-1 print;
+`ac946837`, prunes `us-canada-trade-war`, lists the Fed speakers the feed holds under Low impact (retro 20
+Sep, todo-188: Goolsbee Mon 10:30Z; Williams 08:10Z, Hammack 12:50Z, Paulson 14:10Z Thu — rule-19
+breakers for `aec5cc8b` `1889819a` `be4d6b22`) and the 2y/5y/7y auction slots (UNVERIFIED). Week verified 19 Sep: no US tier-1 print;
 Trump–GCC Tue, US flash PMI Wed 13:45Z, SNB Thu 07:30Z, Xi–Trump Wed (no slots).
 
 ## Desk-local
@@ -86,5 +87,6 @@ GC_CLOSE final row 23:15Z Sat; BTC live to 03:16Z; yields/oil are Friday closes 
 Extracts: Gulf News ×3 (AP/CNN relays: Trump/Riyadh, seven conditions, Houthi explainer),
 actionforex weekly (truncated ~1,250 words, market sections complete), Mehr (Shekarchi).
 `cftc_gold_cot` 503 ×10 Sat 21:46Z–Sun 00:00Z (COT as-of 15 Sep in hand — no gap); `mining_com`
-proxy unreachable ×3/3d; `gold_spot` erroring (todo-003); calendar feed ended 19 Sep (todo-001);
-no Fed-speaker schedule in any feed.
+proxy unreachable ×3/3d; `gold_spot` erroring (todo-003); calendar feed rolled to 26 Sep at the
+Sunday rollover (todo-001); Fed speakers ARE in the feed, tagged Low and hidden by `jamasp calendar`
+(todo-188, retro 20 Sep).
