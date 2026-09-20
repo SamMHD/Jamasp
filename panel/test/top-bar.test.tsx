@@ -1,15 +1,22 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
+import en from "@/messages/en.json";
 
 const pathname = vi.hoisted(() => ({ current: "/" }));
 vi.mock("next/navigation", () => ({ usePathname: () => pathname.current }));
+// TopBar now renders LangToggle, which calls the server action setLocale on
+// click — never exercised by renderToStaticMarkup, but the import chain
+// still pulls in @/lib/actions, which is worth stubbing rather than letting
+// this test depend on next/cache and next/headers behaving outside a real
+// request.
+vi.mock("@/lib/actions", () => ({ setLocale: vi.fn() }));
 
 const { TopBar } = await import("@/components/shell/top-bar");
 
 type Tone = "fresh" | "stale" | "unknown";
 const render = (path: string, tone: Tone = "fresh") => {
   pathname.current = path;
-  return renderToStaticMarkup(<TopBar ingestTone={tone} />);
+  return renderToStaticMarkup(<TopBar ingestTone={tone} locale="en" messages={en} />);
 };
 
 describe("TopBar", () => {

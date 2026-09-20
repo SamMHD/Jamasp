@@ -1,14 +1,21 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
+import en from "@/messages/en.json";
 
 const pathname = vi.hoisted(() => ({ current: "/" }));
 vi.mock("next/navigation", () => ({ usePathname: () => pathname.current }));
+// SideNav now renders LangToggle, which calls the server action setLocale on
+// click — never exercised by renderToStaticMarkup, but the import chain
+// still pulls in @/lib/actions, which is worth stubbing rather than letting
+// this test depend on next/cache and next/headers behaving outside a real
+// request.
+vi.mock("@/lib/actions", () => ({ setLocale: vi.fn() }));
 
 const { SideNav } = await import("@/components/shell/side-nav");
 
 const render = (path: string) => {
   pathname.current = path;
-  return renderToStaticMarkup(<SideNav />);
+  return renderToStaticMarkup(<SideNav locale="en" messages={en} />);
 };
 
 describe("SideNav", () => {

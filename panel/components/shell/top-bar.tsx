@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ALL, isActive } from "@/lib/nav";
+import { LangToggle } from "@/components/lang-toggle";
 import { NavPendingDot } from "@/components/shell/nav-pending";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cls } from "@/lib/format";
+import type { Locale, Messages } from "@/lib/i18n";
 
 const DOT = {
   fresh: "bg-up",
@@ -21,7 +23,11 @@ const DOT = {
  * stated in the accessible name as well as the dot colour, because a dot is
  * colour alone.
  */
-export function TopBar({ ingestTone }: { ingestTone: "fresh" | "stale" | "unknown" }) {
+export function TopBar({ ingestTone, locale, messages }: {
+  ingestTone: "fresh" | "stale" | "unknown";
+  locale: Locale;
+  messages: Messages;
+}) {
   const path = usePathname();
   const current = ALL.find(i => isActive(path, i.href));
   return (
@@ -44,6 +50,7 @@ export function TopBar({ ingestTone }: { ingestTone: "fresh" | "stale" | "unknow
           >
             <NavPendingDot className={cls("h-2.5 w-2.5 rounded-full", DOT[ingestTone])} />
           </Link>
+          <LangToggle locale={locale} messages={messages} />
           <ThemeToggle />
         </span>
       </div>
