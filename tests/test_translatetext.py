@@ -29,29 +29,46 @@ def test_prompt_carries_the_standing_rules():
         assert rule.lower() in prompt.lower()
 
 
-def test_schema_requires_each_field_except_optional_lede():
+def test_schema_is_strict_mode_compliant():
+    """The shape OpenAI strict structured output actually accepts.
+
+    The first production run failed every call with `invalid_json_schema`
+    because the schema keyed entries by number, which needs an open
+    `additionalProperties` map. Entries are an array now, each carrying `n`.
+    """
     schema = tt.rows_schema(("headline", "lede"))
-    props = schema["additionalProperties"]["properties"]
-    assert set(props) == {"headline", "lede"}
-    assert schema["additionalProperties"]["required"] == ["headline"]
+    assert schema["additionalProperties"] is False
+    assert schema["required"] == ["items"]
+    entry = schema["properties"]["items"]["items"]
+    assert entry["additionalProperties"] is False
+    assert set(entry["properties"]) == {"n", "headline", "lede"}
+    # Strict mode permits no optional property: absence is expressed by a
+    # null value, not by omitting the key, so every one is required.
+    assert entry["required"] == ["n", "headline", "lede"]
+    assert entry["properties"]["lede"]["type"] == ["string", "null"]
 
 
-def test_parse_maps_indices_back_to_zero_based_positions():
+def test_parse_maps_entry_numbers_back_to_zero_based_positions():
     out = tt.parse_rows_response(
-        {"1": {"headline": "طلا بالا رفت"}, "2": {"headline": "فدرال رزرو"}},
+        {"items": [{"n": 1, "headline": "طلا بالا رفت"},
+                   {"n": 2, "headline": "فدرال رزرو"}]},
         count=2, fields=("headline",),
     )
     assert out == {0: {"headline": "طلا بالا رفت"}, 1: {"headline": "فدرال رزرو"}}
 
 
 def test_parse_accepts_a_json_string_as_well_as_an_object():
-    out = tt.parse_rows_response('{"1": {"headline": "ط"}}', 1, ("headline",))
+    out = tt.parse_rows_response(
+        '{"items": [{"n": 1, "headline": "ط"}]}', 1, ("headline",))
     assert out[0]["headline"] == "ط"
 
 
-def test_parse_drops_out_of_range_and_unparsable_indices():
+def test_parse_drops_out_of_range_and_unnumbered_entries():
     out = tt.parse_rows_response(
-        {"1": {"headline": "ok"}, "9": {"headline": "x"}, "n": {"headline": "y"}},
+        {"items": [{"n": 1, "headline": "ok"},
+                   {"n": 9, "headline": "x"},
+                   {"n": "nope", "headline": "y"},
+                   {"headline": "no n at all"}]},
         count=1, fields=("headline",),
     )
     assert out == {0: {"headline": "ok"}}
@@ -59,15 +76,29 @@ def test_parse_drops_out_of_range_and_unparsable_indices():
 
 def test_parse_skips_entries_missing_the_required_field():
     out = tt.parse_rows_response(
-        {"1": {"lede": "only a lede"}, "2": {"headline": "fine"}},
+        {"items": [{"n": 1, "lede": "only a lede"},
+                   {"n": 2, "headline": "fine"}]},
         count=2, fields=("headline", "lede"),
     )
     assert out == {1: {"headline": "fine"}}
 
 
-def test_parse_keeps_an_absent_optional_field_absent():
-    out = tt.parse_rows_response({"1": {"headline": "h"}}, 1, ("headline", "lede"))
-    assert "lede" not in out[0]
+def test_parse_treats_a_null_lede_as_absent():
+    """Strict mode cannot omit the key, so the model says `null` instead.
+
+    That must land as no `lede` at all, leaving `lede_fa` NULL — not as the
+    string "None" or an empty string, either of which the panel would render.
+    """
+    out = tt.parse_rows_response(
+        {"items": [{"n": 1, "headline": "h", "lede": None}]},
+        1, ("headline", "lede"),
+    )
+    assert out[0] == {"headline": "h"}
+
+
+def test_parse_rejects_a_payload_without_an_items_array():
+    with pytest.raises(tt.ParseError, match="items"):
+        tt.parse_rows_response({"1": {"headline": "old shape"}}, 1, ("headline",))
 
 
 def test_parse_rejects_non_json():
