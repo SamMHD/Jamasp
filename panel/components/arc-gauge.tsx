@@ -55,6 +55,9 @@ export function ArcGauge({ label, value, min, max, digits = 1, ticks = [], class
   const display = value === null ? "—" : num(value, digits);
   return (
     <svg viewBox="0 0 120 70" role="img"
+      // @ts-expect-error -- dir is a real, valid attribute on <svg>;
+      // @types/react's SVGProps just omits it.
+      dir="ltr"
       aria-label={value === null ? `${label}: no data` : `${label} ${display}`}
       className={cls("w-full max-w-44", className)}>
       {/* track: a lighter step of the same hue, never a foreign gray */}

@@ -44,7 +44,7 @@ export function DriverTape({ drivers }: { drivers: DriverRead[] }) {
   if (symbols.length === 0) return null;
 
   return (
-    <section aria-label="Driver tape"
+    <section aria-label="Driver tape" dir="ltr"
       className="mb-4 rounded border border-border"
       style={{ ...(TV_THEME_TOKENS as CSSProperties), height: TV_TICKER_TAPE_HEIGHT }}>
       <TickerTape symbols={symbols}>

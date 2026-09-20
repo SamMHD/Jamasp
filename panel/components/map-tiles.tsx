@@ -896,7 +896,10 @@ export function MapLegend({ importance = "none" }: {
   importance?: ImportanceTreatment;
 }) {
   return (
-    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-meta text-muted-foreground">
+    // The steps are a fixed reading order (bearish -> neutral -> bullish),
+    // not an unordered set — see market-map.tsx for why that axis must not
+    // mirror under Persian's dir="rtl".
+    <div dir="ltr" className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-meta text-muted-foreground">
       {LEGEND_STEPS.map(s => (
         <span key={s.tone} className="flex items-center gap-1">
           <span aria-hidden className="h-2.5 w-2.5 rounded-[2px]"

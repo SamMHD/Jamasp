@@ -37,7 +37,7 @@ export function LevelLadder({ levels }: { levels: Level[] }) {
   }
   const gaps = ladderGaps(levels.map(l => l.value));
   return (
-    <ol className="relative ml-1 border-l-2 border-border py-1 pl-5 tabular-nums">
+    <ol dir="ltr" className="relative ml-1 border-l-2 border-border py-1 pl-5 tabular-nums">
       {levels.map((l, i) => (
         <li key={l.label}
           style={i === 0 ? undefined : { marginTop: `${gaps[i - 1]}px` }}

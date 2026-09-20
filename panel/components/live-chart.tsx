@@ -174,7 +174,7 @@ export function LiveChart({ symbol, label = TV_LIVE_LABEL, children }: {
 
   const live = status === "live";
   return (
-    <div>
+    <div dir="ltr">
       <div className="relative h-[300px] w-full overflow-hidden rounded-md border border-border/60 md:h-[380px]">
         {/* Always mounted, always sized: TradingView needs a laid-out box to
             autosize into, so it cannot be conditionally rendered. */}

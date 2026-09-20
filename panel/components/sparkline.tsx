@@ -22,6 +22,9 @@ export function Sparkline({ points, className, stroke = "var(--chart-1)" }: {
     .join(" ");
   return (
     <svg viewBox="0 0 100 100" preserveAspectRatio="none"
+      // @ts-expect-error -- dir is a real, valid attribute on <svg>;
+      // @types/react's SVGProps just omits it.
+      dir="ltr"
       className={cls("h-10 w-full", className)} role="img"
       aria-label={`gold price trend, ${points.length} points`}>
       <path d={d} fill="none" stroke={stroke} strokeWidth="1.5"

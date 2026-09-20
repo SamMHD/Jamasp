@@ -99,7 +99,7 @@ export function TechnicalMap({ tiles, width, height, fittedAt }: {
   const unfitted = tiles.filter(t => !t.fitted && !t.pinned).length;
 
   return (
-    <section id={TECHNICAL_MAP_ELEMENT_ID} aria-label="Technical signal treemap"
+    <section id={TECHNICAL_MAP_ELEMENT_ID} aria-label="Technical signal treemap" dir="ltr"
       className="rounded border border-border p-4 bg-background">
       <div className="mb-2 flex items-center justify-end">
         <FullscreenButton targetId={TECHNICAL_MAP_ELEMENT_ID} />

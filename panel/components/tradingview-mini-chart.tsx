@@ -42,8 +42,16 @@ export function TradingViewMiniChart({ embed, onReady, className }: {
   // The Drivers card sits well below the fold on the overview, so nothing
   // about TradingView — script, chunks, sockets — is fetched until the reader
   // actually scrolls to it.
+  //
+  // This component owns no DOM node of its own — its entire render is the
+  // one TvWidget call below, which already pins itself LTR (tv-widget.tsx).
+  // The wrapper here exists only so that guarantee also has a literal home
+  // at THIS call site; `contents` keeps it out of the box tree entirely, so
+  // it cannot affect the flex sizing `className` sets up for the caller.
   return (
-    <TvWidget tag={TV_MINI_CHART_TAG} script={TV_MINI_CHART_SCRIPT}
-      attributes={attributes} gate="viewport" onReady={onReady} className={className} />
+    <div dir="ltr" className="contents">
+      <TvWidget tag={TV_MINI_CHART_TAG} script={TV_MINI_CHART_SCRIPT}
+        attributes={attributes} gate="viewport" onReady={onReady} className={className} />
+    </div>
   );
 }

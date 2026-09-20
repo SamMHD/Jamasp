@@ -43,7 +43,7 @@ export function PriceChart({ symbol }: { symbol: string }) {
   const points = data?.points ?? [];
 
   return (
-    <div className="rounded border border-border p-4">
+    <div dir="ltr" className="rounded border border-border p-4">
       <div className="mb-2 flex items-center justify-between">
         <h2 className="font-medium">{symbol}</h2>
         <div className="flex gap-1">

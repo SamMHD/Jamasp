@@ -72,7 +72,7 @@ export function HorizonStrip({ horizon, now }: { horizon: Horizon; now: Date }) 
   const labelled = entries.find(e => e.lane === "event" && e.impact === "high");
 
   return (
-    <section aria-label="Horizon" className="rounded border border-border p-4">
+    <section aria-label="Horizon" dir="ltr" className="rounded border border-border p-4">
       <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
         <h2 className="font-medium">
           Horizon

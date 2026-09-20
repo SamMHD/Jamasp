@@ -138,7 +138,10 @@ export function MarketMap({ items, width, height, range, coverage,
     // or hand over a ref. bg-background is load-bearing rather than cosmetic —
     // a fullscreened element inherits no background, so the browser paints
     // behind it black and the map would float on it.
-    <section id={MAP_ELEMENT_ID} aria-label="Scored news treemap"
+    // Pinned LTR: the panel flips to dir="rtl" in Persian, and every
+    // instrument here is positioned along a left-to-right time axis.
+    // Mirroring them would reverse the axis for no reader's benefit.
+    <section id={MAP_ELEMENT_ID} aria-label="Scored news treemap" dir="ltr"
       className="rounded border border-border p-4 bg-background">
       <div className="mb-2 flex items-center justify-end">
         <FullscreenButton targetId={MAP_ELEMENT_ID} />

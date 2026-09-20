@@ -54,7 +54,7 @@ export function TickerTape({ symbols, children }: {
   const attributes = useMemo(() => tickerTapeAttributes(key.split(",")), [key]);
 
   return (
-    <div className="relative h-full overflow-hidden">
+    <div dir="ltr" className="relative h-full overflow-hidden">
       <div className={cls("h-full", live && "invisible")}>{children}</div>
       <TvWidget tag={TV_TICKER_TAPE_TAG} script={TV_TICKER_TAPE_SCRIPT}
         attributes={attributes} gate="idle" onReady={setLive}
