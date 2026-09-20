@@ -57,16 +57,43 @@ def build_rows_prompt(
 def rows_schema(fields: Sequence[str]) -> dict:
     """JSON Schema for a batch response, passed to codex as --output-schema.
 
-    Only the first field is required. A headline always exists; a lede often
-    does not, and a schema that demanded one would make the model invent it.
+    Shaped for OpenAI STRICT structured output, which is narrower than JSON
+    Schema and rejects the obvious encoding. Strict mode requires every object
+    to carry `additionalProperties: false` and to list every one of its
+    properties in `required`. So:
+
+    - The batch cannot be an object keyed by entry number. That needs
+      `additionalProperties` as a *sub-schema* to allow arbitrary keys, which
+      strict mode reads as the forbidden open map and rejects with HTTP 400
+      `invalid_json_schema`. The entries are an array instead, each carrying
+      its own `n`.
+    - No field can be optional. A lede often does not exist, and demanding a
+      string would make the model invent one, so `lede` is nullable
+      (`["string", "null"]`) and required — the model says "absent" by
+      returning null rather than by omitting the key.
+
+    This shape is verified against real codex, not only against the fake: see
+    `tests/fake_codex.py`, which now enforces the same strict rules so a
+    regression here fails in the suite instead of in production.
     """
     return {
         "type": "object",
-        "additionalProperties": {
-            "type": "object",
-            "properties": {f: {"type": "string"} for f in fields},
-            "required": [fields[0]],
+        "properties": {
+            "items": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "n": {"type": "integer"},
+                        **{f: {"type": ["string", "null"]} for f in fields},
+                    },
+                    "required": ["n", *fields],
+                    "additionalProperties": False,
+                },
+            }
         },
+        "required": ["items"],
+        "additionalProperties": False,
     }
 
 
@@ -88,14 +115,23 @@ def parse_rows_response(
     if not isinstance(payload, dict):
         raise ParseError(f"response is {type(payload).__name__}, not an object")
 
+    entries = payload.get("items")
+    if not isinstance(entries, list):
+        raise ParseError("response has no `items` array")
+
     out: dict[int, dict[str, str]] = {}
-    for key, value in payload.items():
+    for value in entries:
+        if not isinstance(value, dict):
+            continue
         try:
-            index = int(str(key)) - 1
-        except ValueError:
+            index = int(value.get("n")) - 1
+        except (TypeError, ValueError):
             continue
-        if not (0 <= index < count) or not isinstance(value, dict):
+        if not (0 <= index < count):
             continue
+        # A null or blank field means "the model had nothing for this" — for a
+        # lede that is the honest answer and the column stays NULL. Dropping
+        # the key here is what keeps `lede_fa` absent rather than empty.
         entry = {
             f: str(value[f]).strip()
             for f in fields
@@ -252,10 +288,17 @@ def build_doc_prompt(text: str, glossary: Mapping[str, str]) -> str:
 
 
 def doc_schema() -> dict:
+    """Response shape for one document or stance section.
+
+    `additionalProperties: false` is required by OpenAI strict structured
+    output, not decoration — without it codex rejects the call with HTTP 400
+    `invalid_json_schema` before the model ever runs. See `rows_schema`.
+    """
     return {
         "type": "object",
         "properties": {"text": {"type": "string"}},
         "required": ["text"],
+        "additionalProperties": False,
     }
 
 

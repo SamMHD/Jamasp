@@ -5,7 +5,16 @@ import pytest
 from jamasp import modelrun
 
 FAKE = [sys.executable, "tests/fake_codex.py"]
-SCHEMA = {"type": "object"}
+# Strict-mode compliant, because tests/fake_codex.py validates what it is
+# handed exactly as the real service does. A bare {"type": "object"} is
+# rejected there, which is the point — see that file's module docstring.
+SCHEMA = {
+    "type": "object",
+    "properties": {"items": {"type": "array", "items": {"type": "string"}}},
+    "required": ["items"],
+    "additionalProperties": False,
+}
+EXPECTED = {"items": [{"n": 1, "headline": "FA:1", "lede": "FA-LEDE:1"}]}
 PROMPT = "[1]\nheadline: Gold climbs"
 
 
@@ -15,13 +24,41 @@ def run(protocol="codex", timeout=30, cmd=None):
 
 def test_codex_protocol_reads_the_output_file_not_stdout(monkeypatch):
     monkeypatch.setenv("FAKE_CODEX_MODE", "ok")
-    assert run() == {"1": {"headline": "FA:1", "lede": "FA-LEDE:1"}}
+    assert run() == EXPECTED
 
 
 def test_stdout_protocol_parses_the_last_json_object_on_stdout(monkeypatch):
     monkeypatch.setenv("FAKE_CODEX_MODE", "stdout")
-    assert run(protocol="stdout") == {"1": {"headline": "FA:1",
-                                            "lede": "FA-LEDE:1"}}
+    assert run(protocol="stdout") == EXPECTED
+
+
+def test_a_schema_that_strict_mode_would_reject_is_caught(monkeypatch):
+    """The regression guard for the first production run's total failure.
+
+    Every model call 400ed with `invalid_json_schema` because the shipped
+    schema used `additionalProperties` as a sub-schema. The suite was green,
+    because the fake ignored the schema. It does not any more.
+    """
+    monkeypatch.setenv("FAKE_CODEX_MODE", "ok")
+    open_map = {
+        "type": "object",
+        "additionalProperties": {"type": "object", "properties": {},
+                                 "required": []},
+    }
+    with pytest.raises(modelrun.ModelError, match="additionalProperties"):
+        modelrun.run_json(FAKE, "codex", PROMPT, open_map, 30)
+
+
+def test_a_schema_omitting_a_property_from_required_is_caught(monkeypatch):
+    monkeypatch.setenv("FAKE_CODEX_MODE", "ok")
+    loose = {
+        "type": "object",
+        "properties": {"a": {"type": "string"}, "b": {"type": "string"}},
+        "required": ["a"],
+        "additionalProperties": False,
+    }
+    with pytest.raises(modelrun.ModelError, match="required"):
+        modelrun.run_json(FAKE, "codex", PROMPT, loose, 30)
 
 
 def test_non_zero_exit_raises_model_error(monkeypatch):
