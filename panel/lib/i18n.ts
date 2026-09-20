@@ -48,3 +48,26 @@ export function t(messages: Messages, key: string): string {
 export function dirFor(locale: Locale): "rtl" | "ltr" {
   return locale === "fa" ? "rtl" : "ltr";
 }
+
+/**
+ * Pick a content field for the locale, and say whether it fell back.
+ *
+ * Returning the flag alongside the text is what keeps the `EN` marker
+ * honest: a caller has to destructure it to get the text, so it cannot
+ * render English and silently forget to mark it.
+ *
+ * Persian fields follow the job's naming: `headline` -> `headline_fa`.
+ */
+export function localized(
+  row: Record<string, unknown>, field: string, locale: Locale,
+): { text: string; fallback: boolean } {
+  const english = typeof row[field] === "string" ? (row[field] as string) : "";
+  if (locale === "en") return { text: english, fallback: false };
+  const persian = row[`${field}_fa`];
+  if (typeof persian === "string" && persian.trim()) {
+    return { text: persian, fallback: false };
+  }
+  // No Persian and no English either: nothing to mark, because there is
+  // nothing missing — the row simply has no such field.
+  return { text: english, fallback: english !== "" };
+}
