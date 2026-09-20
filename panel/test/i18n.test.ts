@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import en from "@/messages/en.json";
 import fa from "@/messages/fa.json";
-import { DEFAULT_LOCALE, getMessages, resolveLocale, t } from "@/lib/i18n";
+import { DEFAULT_LOCALE, dirFor, getMessages, resolveLocale, t } from "@/lib/i18n";
 
 describe("resolveLocale", () => {
   it("accepts a known locale", () => {
@@ -58,5 +58,12 @@ describe("dictionary parity", () => {
       expect(String(v), `${k} must not use Persian-Indic digits`)
         .not.toMatch(/[۰-۹٠-٩]/);
     }
+  });
+});
+
+describe("dirFor", () => {
+  it("is rtl for Persian and ltr for English", () => {
+    expect(dirFor("fa")).toBe("rtl");
+    expect(dirFor("en")).toBe("ltr");
   });
 });

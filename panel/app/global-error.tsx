@@ -21,6 +21,12 @@ import "./globals.css";
 export default function GlobalError({ error, reset }: { error: Error; reset: () => void }) {
   return (
     // global-error must include its own html and body tags.
+    // lang stays hard-coded "en" rather than reading the locale cookie: this
+    // is a client component that renders precisely when server rendering has
+    // broken, so it cannot lean on the same server-side cookie read the root
+    // layout uses, and it is the one screen a non-English visitor sees rarely
+    // enough that this is an acceptable, deliberate gap rather than an
+    // oversight.
     <html lang="en">
       <body className="min-h-screen bg-background font-sans text-foreground antialiased">
         <div className="flex min-h-screen items-center justify-center p-4">

@@ -44,3 +44,7 @@ export function t(messages: Messages, key: string): string {
   const fallback = (en as Messages)[key];
   return fallback && fallback.trim() ? fallback : key;
 }
+
+export function dirFor(locale: Locale): "rtl" | "ltr" {
+  return locale === "fa" ? "rtl" : "ltr";
+}
