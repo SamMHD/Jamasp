@@ -17,7 +17,15 @@ import { t, type Locale, type Messages } from "@/lib/i18n";
  */
 export function LangToggle({ locale, messages }: { locale: Locale; messages: Messages }) {
   const next: Locale = locale === "fa" ? "en" : "fa";
-  const label = t(messages, next === "fa" ? "lang.switchToFa" : "lang.switchToEn");
+  const glyph = t(messages, next === "fa" ? "lang.fa" : "lang.en");
+  const actionLabel = t(messages, next === "fa" ? "lang.switchToFa" : "lang.switchToEn");
+  // WCAG 2.5.3 Label in Name: the visible text on the button is the glyph
+  // ("EN"/"فا"), not the action phrase. A voice-control user speaks what
+  // they SEE, so the accessible name has to contain that glyph verbatim or
+  // "click فا" has nothing to match. Leading with the glyph satisfies that;
+  // the action phrase that follows is what a screen-reader user needs to
+  // hear, since two letters alone don't say what the button does.
+  const label = `${glyph} — ${actionLabel}`;
   return (
     <button
       type="button"
@@ -25,11 +33,11 @@ export function LangToggle({ locale, messages }: { locale: Locale; messages: Mes
       title={label}
       onClick={() => setLocale(next)}
       className="inline-flex h-11 min-w-11 items-center justify-center gap-1 rounded-md
-                 px-2 text-body hover:bg-secondary focus-visible:outline-2
-                 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                 px-2 text-body text-muted-foreground hover:bg-secondary hover:text-foreground
+                 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
     >
       <Languages aria-hidden className="h-4 w-4" />
-      <span>{t(messages, next === "fa" ? "lang.fa" : "lang.en")}</span>
+      <span>{glyph}</span>
     </button>
   );
 }
