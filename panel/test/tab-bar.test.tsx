@@ -1,5 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
+import en from "@/messages/en.json";
 
 const pathname = vi.hoisted(() => ({ current: "/" }));
 vi.mock("next/navigation", () => ({ usePathname: () => pathname.current }));
@@ -8,7 +9,7 @@ const { TabBar } = await import("@/components/shell/tab-bar");
 
 const render = (path: string) => {
   pathname.current = path;
-  return renderToStaticMarkup(<TabBar />);
+  return renderToStaticMarkup(<TabBar messages={en} />);
 };
 
 describe("TabBar", () => {

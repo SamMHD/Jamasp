@@ -7,6 +7,7 @@ import { LangToggle } from "@/components/lang-toggle";
 import { NavItemBody } from "@/components/shell/nav-pending";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cls } from "@/lib/format";
+import { t } from "@/lib/i18n";
 import type { Locale, Messages } from "@/lib/i18n";
 
 /**
@@ -32,7 +33,7 @@ export function SideNav({ locale, messages }: { locale: Locale; messages: Messag
         </span>
       </div>
       <nav aria-label="Sections" className="flex flex-col gap-0.5 px-2 pb-4">
-        {ALL.map(({ href, label, icon: Icon }) => {
+        {ALL.map(({ href, labelKey, icon: Icon }) => {
           const active = isActive(path, href);
           return (
             <Link
@@ -47,7 +48,7 @@ export function SideNav({ locale, messages }: { locale: Locale; messages: Messag
                   : "border-l-transparent text-muted-foreground hover:bg-secondary hover:text-foreground",
               )}
             >
-              <NavItemBody icon={Icon} label={label} />
+              <NavItemBody icon={Icon} label={t(messages, labelKey)} />
             </Link>
           );
         })}

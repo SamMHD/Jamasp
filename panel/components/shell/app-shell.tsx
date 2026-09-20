@@ -94,7 +94,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
       >
         {children}
       </main>
-      <TabBar />
+      <TabBar messages={messages} />
     </div>
   );
 }

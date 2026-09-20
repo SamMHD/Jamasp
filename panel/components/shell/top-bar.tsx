@@ -7,6 +7,7 @@ import { LangToggle } from "@/components/lang-toggle";
 import { NavPendingDot } from "@/components/shell/nav-pending";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cls } from "@/lib/format";
+import { t } from "@/lib/i18n";
 import type { Locale, Messages } from "@/lib/i18n";
 
 const DOT = {
@@ -38,7 +39,7 @@ export function TopBar({ ingestTone, locale, messages }: {
       <div className="flex h-14 items-center gap-3 px-3">
         <span className="text-heading font-semibold text-primary">Jamasp</span>
         {current && (
-          <span className="truncate text-body text-muted-foreground">{current.label}</span>
+          <span className="truncate text-body text-muted-foreground">{t(messages, current.labelKey)}</span>
         )}
         <span className="ml-auto flex items-center gap-1">
           <Link
