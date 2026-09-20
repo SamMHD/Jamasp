@@ -70,7 +70,11 @@ export async function setLocale(locale: Locale): Promise<void> {
     path: "/",
     maxAge: 60 * 60 * 24 * 365,
     sameSite: "lax",
-    httpOnly: false,
+    // No client component reads this cookie directly; the locale reaches
+    // them as a prop threaded down from the server, like every other piece
+    // of data in this panel. Nothing needs script access to it, so don't
+    // grant it.
+    httpOnly: true,
   });
   revalidatePath("/", "layout");
 }
