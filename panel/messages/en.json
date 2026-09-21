@@ -54,5 +54,8 @@
   "runType.brief": "Brief",
   "runType.scan": "Scan",
   "runType.deepdive": "Deepdive",
-  "runType.retro": "Retro"
+  "runType.retro": "Retro",
+  "tone.bearish": "bearish",
+  "tone.neutral": "neutral",
+  "tone.bullish": "bullish"
 }

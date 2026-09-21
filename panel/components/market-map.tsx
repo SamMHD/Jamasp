@@ -222,7 +222,7 @@ export function MarketMap({ items, width, height, range, coverage,
           </g>
         ))}
       </svg>
-      <MapLegend importance={importance} />
+      <MapLegend importance={importance} messages={messages} />
       <p className="mt-2 text-xs text-muted-foreground">
         {coverage.scored} scored {coverage.scored === 1 ? "story" : "stories"} {WINDOW_LABEL[range]}
         {" "}· {coverage.unscored} unscored not shown

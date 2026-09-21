@@ -1,4 +1,5 @@
 import { type Tone } from "@/lib/marketmap";
+import { t, type Messages } from "@/lib/i18n";
 
 /**
  * Tile primitives shared by both market maps.
@@ -924,12 +925,35 @@ export function MapTile({ x, y, w, h, tone, title, lines,
   );
 }
 
-const LEGEND_STEPS: { tone: Tone; label: string }[] = [
-  { tone: "bear", label: "bearish" },
-  { tone: "bear-mid", label: "bearish (mid)" },
-  { tone: "neutral", label: "neutral" },
-  { tone: "bull-mid", label: "bullish (mid)" },
-  { tone: "bull", label: "bullish" },
+/**
+ * `Tone` (lib/marketmap.ts) is a closed, code-defined enum — chrome, not
+ * content — so the legend's words render through the dictionary rather
+ * than the literal English this used to hardcode. Typed as
+ * `Record<Tone, string>`, like TONE_FILL/TONE_INK above: a fifth Tone value
+ * added to the union without a matching entry here fails `tsc`, the same
+ * guard those two already give the colour tables.
+ *
+ * Only THREE keys exist (`tone.bearish`/`tone.neutral`/`tone.bullish`) for
+ * FIVE tone values: the "-mid" steps are an intensity of their pole, not a
+ * distinct direction, so they share its word — the swatch colour is what
+ * tells a bear tile from a bear-mid one, exactly as it already does for a
+ * reader who cannot see the (untranslated, deliberately terse) "(mid)"
+ * qualifier LEGEND_STEPS appends below.
+ */
+export const TONE_LABEL_KEY: Record<Tone, string> = {
+  bear: "tone.bearish",
+  "bear-mid": "tone.bearish",
+  neutral: "tone.neutral",
+  "bull-mid": "tone.bullish",
+  bull: "tone.bullish",
+};
+
+const LEGEND_STEPS: { tone: Tone; mid: boolean }[] = [
+  { tone: "bear", mid: false },
+  { tone: "bear-mid", mid: true },
+  { tone: "neutral", mid: false },
+  { tone: "bull-mid", mid: true },
+  { tone: "bull", mid: false },
 ];
 
 /**
@@ -983,8 +1007,9 @@ function ImportanceKey({ treatment }: { treatment: ImportanceTreatment }) {
   );
 }
 
-export function MapLegend({ importance = "none" }: {
+export function MapLegend({ importance = "none", messages }: {
   importance?: ImportanceTreatment;
+  messages: Messages;
 }) {
   return (
     // The steps are a fixed reading order (bearish -> neutral -> bullish),
@@ -995,7 +1020,7 @@ export function MapLegend({ importance = "none" }: {
         <span key={s.tone} className="flex items-center gap-1">
           <span aria-hidden className="h-2.5 w-2.5 rounded-[2px]"
             style={{ background: TONE_FILL[s.tone] }} />
-          {s.label}
+          {t(messages, TONE_LABEL_KEY[s.tone])}{s.mid ? " (mid)" : ""}
         </span>
       ))}
       <span className="flex items-center gap-1">
@@ -1009,7 +1034,7 @@ export function MapLegend({ importance = "none" }: {
               "repeating-linear-gradient(45deg, currentColor 0, currentColor 1px, transparent 1px, transparent 4px)",
             color: "var(--map-bear)",
           }} />
-        hatched = bearish
+        hatched = {t(messages, TONE_LABEL_KEY.bear)}
       </span>
       <ImportanceKey treatment={importance} />
     </div>

@@ -3,6 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import en from "@/messages/en.json";
 import fa from "@/messages/fa.json";
+import { TONE_FILL, TONE_LABEL_KEY } from "@/components/map-tiles";
 
 /**
  * Every theme in weights.yaml must have a label in both dictionaries.
@@ -55,6 +56,34 @@ describe("fixed enums are chrome", () => {
       if (k.startsWith("signal.")) {
         expect(String(v)).not.toMatch(/[۰-۹]/);
       }
+    }
+  });
+
+  /**
+   * `Tone` (lib/marketmap.ts) has no runtime existence of its own — it is
+   * erased at compile time like every TS type — so this derives the list of
+   * real tone values from `TONE_FILL`, map-tiles.tsx's own
+   * `Record<Tone, string>` color table, rather than hard-coding
+   * "bear"/"bear-mid"/"neutral"/"bull-mid"/"bull" here. `TONE_FILL` is
+   * already exhaustive over `Tone` by construction (TypeScript refuses to
+   * compile a `Record<Tone, string>` missing a member), so a fifth
+   * (currently) or future sixth tone shows up in `Object.keys(TONE_FILL)`
+   * automatically — and if `TONE_LABEL_KEY` (map-tiles.tsx's tone -> dict-key
+   * map, exhaustive the same way) has not been extended to cover it, the
+   * lookup below is `undefined` and the assertion fails, exactly the
+   * "a fourth tone added later fails the test" guarantee asked for.
+   */
+  it("has a dictionary key for every Tone value", () => {
+    const missing = (Object.keys(TONE_FILL) as (keyof typeof TONE_FILL)[])
+      .filter(tone => !(TONE_LABEL_KEY[tone] in en));
+    expect(missing, "tones with no dictionary entry render as raw English")
+      .toEqual([]);
+  });
+
+  it("translates every tone label into Persian", () => {
+    for (const tone of Object.keys(TONE_FILL) as (keyof typeof TONE_FILL)[]) {
+      const key = TONE_LABEL_KEY[tone] as keyof typeof fa;
+      expect(String(fa[key] ?? "").trim()).not.toBe("");
     }
   });
 });

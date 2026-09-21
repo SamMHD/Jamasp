@@ -1,8 +1,7 @@
 import type { CSSProperties } from "react";
 import { TickerTape } from "@/components/ticker-tape";
 import { Delta } from "@/components/quote-tile";
-import { driverLabel } from "@/components/driver-panel";
-import type { DriverRead } from "@/lib/drivers";
+import { driverLabel, type DriverRead } from "@/lib/drivers";
 import {
   TV_THEME_TOKENS, TV_TICKER_TAPE_HEIGHT, tickerTapeSymbols, tvEmbedFor,
 } from "@/lib/tradingview";

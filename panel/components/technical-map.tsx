@@ -131,7 +131,7 @@ export function TechnicalMap({ tiles, width, height, fittedAt, messages }: {
           </g>
         ))}
       </svg>
-      <MapLegend />
+      <MapLegend messages={messages} />
       <p className="mt-2 text-xs text-muted-foreground">
         {tiles.length} signals
         {unfitted > 0 ? ` · ${unfitted} not yet fitted (dashed)` : ""}

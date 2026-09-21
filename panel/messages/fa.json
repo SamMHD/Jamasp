@@ -54,5 +54,8 @@
   "runType.brief": "گزارش روزانه",
   "runType.scan": "پایش",
   "runType.deepdive": "بررسی عمیق",
-  "runType.retro": "مرور هفتگی"
+  "runType.retro": "مرور هفتگی",
+  "tone.bearish": "نزولی",
+  "tone.neutral": "خنثی",
+  "tone.bullish": "صعودی"
 }
