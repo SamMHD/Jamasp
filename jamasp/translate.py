@@ -70,6 +70,49 @@ def _since(window_days: int, now: str | None = None) -> str:
     return (base - timedelta(days=window_days)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def floor_for(cfg: dict, window_days: int, now: str | None = None) -> str:
+    """The oldest `published_at` this pass will translate.
+
+    Normally the rolling window: everything published in the last
+    `window_days`. But `translate.translate_from` pins a hard floor under it,
+    and the later of the two wins.
+
+    That floor exists because the rolling window is also a BACKFILL
+    instruction. Pointed at a database with months of history, the first tick
+    does not see "today's news" — it sees every item published in the last
+    seven days, all untranslated, and works through the lot. On this host that
+    was ~2,800 items on the first run, and the run cost far more than the
+    arithmetic suggests: once the translator starts refusing, every batch of
+    20 falls back to 20 single calls, so a failing tick costs 22x a healthy
+    one (see `_batch_with_fallback`). The backfill exhausted the codex quota,
+    the quota errors then triggered the fallback on every batch, and 1,861
+    rows were driven to the attempt cap and abandoned.
+
+    Setting `translate_from` to the day the desk turned this on makes the job
+    forward-only: it translates what arrives from here, and never reaches back
+    for history. History stays English, which is what the panel's EN marker is
+    for.
+
+    Omit the key and the behaviour is the old rolling window, so an operator
+    who wants a deliberate, supervised backfill can still have one by clearing
+    it.
+    """
+    window = _since(window_days, now)
+    # str() before strip(): an operator who writes `translate_from: 2026-09-21`
+    # without quotes gets a datetime.date from the YAML loader, not a string,
+    # and .strip() on that would crash the pass at the first tick — a config
+    # typo taking the job down rather than being read as the date it obviously
+    # is.
+    raw = cfg.get("translate_from")
+    pinned = "" if raw is None else str(raw).strip()
+    if not pinned:
+        return window
+    # A bare date means midnight UTC that day; anything longer is used as-is,
+    # so an operator can pin an exact moment rather than a whole day.
+    floor = f"{pinned}T00:00:00Z" if len(pinned) == 10 else pinned
+    return max(window, floor)
+
+
 # How long a row waits after its Nth failure before it is offered again — one
 # delay per failure that can still be retried, so the tuple is MAX_ATTEMPTS - 1
 # long. A third delay would be dead code: `pending_rows` filters
@@ -116,7 +159,7 @@ def _backoff(now: str) -> tuple[str, list[str]]:
 
 def pending_rows(
     conn: sqlite3.Connection, window_days: int, limit: int,
-    now: str | None = None, force: bool = False,
+    now: str | None = None, force: bool = False, since: str | None = None,
 ) -> list[sqlite3.Row]:
     """Untranslated items inside the window, newest first.
 
@@ -143,7 +186,7 @@ def pending_rows(
         f"SELECT id, headline, lede FROM items"
         f" WHERE {selector} AND published_at >= ? AND fa_attempts < ?{clause}"
         " ORDER BY published_at DESC LIMIT ?",
-        (_since(window_days, stamp), MAX_ATTEMPTS, *thresholds, limit),
+        (since or _since(window_days, stamp), MAX_ATTEMPTS, *thresholds, limit),
     ).fetchall()
 
 
@@ -304,7 +347,8 @@ def translate_rows(
     if force:
         rearm(conn, "items", "published_at", cfg["window_days"], stamp)
     rows = pending_rows(
-        conn, cfg["window_days"], batch_size * ceiling, stamp, force)
+        conn, cfg["window_days"], batch_size * ceiling, stamp, force,
+        since=floor_for(cfg, cfg["window_days"], stamp))
 
     translated = failed = batches = 0
     for start in range(0, len(rows), batch_size):
@@ -324,7 +368,7 @@ EVENT_FIELDS = ("title",)
 
 def pending_events(
     conn: sqlite3.Connection, window_days: int, limit: int,
-    now: str | None = None, force: bool = False,
+    now: str | None = None, force: bool = False, since: str | None = None,
 ) -> list[sqlite3.Row]:
     """Untranslated events from the recent past forward, soonest first.
 
@@ -342,7 +386,7 @@ def pending_events(
         f"SELECT id, title FROM events"
         f" WHERE {selector} AND starts_at >= ? AND fa_attempts < ?{clause}"
         " ORDER BY starts_at LIMIT ?",
-        (_since(window_days, stamp), MAX_ATTEMPTS, *thresholds, limit),
+        (since or _since(window_days, stamp), MAX_ATTEMPTS, *thresholds, limit),
     ).fetchall()
 
 
@@ -373,7 +417,8 @@ def translate_events(
     if force:
         rearm(conn, "events", "starts_at", cfg["window_days"], stamp)
     rows = pending_events(
-        conn, cfg["window_days"], batch_size * ceiling, stamp, force)
+        conn, cfg["window_days"], batch_size * ceiling, stamp, force,
+        since=floor_for(cfg, cfg["window_days"], stamp))
 
     translated = failed = batches = 0
     for start in range(0, len(rows), batch_size):
@@ -818,10 +863,12 @@ def run_translate(
             "dry_run": True,
             "pending_rows": len(pending_rows(
                 conn, cfg["window_days"],
-                cfg["batch_size"] * cfg["max_batches_per_run"], now, force)),
+                cfg["batch_size"] * cfg["max_batches_per_run"], now, force,
+                since=floor_for(cfg, cfg["window_days"], now))),
             "pending_events": len(pending_events(
                 conn, cfg["window_days"],
-                cfg["batch_size"] * cfg["max_batches_per_run"], now, force)),
+                cfg["batch_size"] * cfg["max_batches_per_run"], now, force,
+                since=floor_for(cfg, cfg["window_days"], now))),
             "pending_reports": len(new_reports(root / "reports", cfg["reports_since"])),
         }
 

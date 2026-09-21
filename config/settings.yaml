@@ -67,6 +67,14 @@ translate:
   # Cost knobs. window_days matches the map's widest window; everything older
   # renders English-with-marker in the panel. max_batches_per_run bounds one
   # tick — a larger backlog drains over subsequent ticks, newest first.
+  # Hard floor under the rolling window: nothing published before this date is
+  # ever translated. Set to the day the desk turned the timer on, because the
+  # rolling window is also a BACKFILL instruction -- pointed at months of
+  # history it works through every item in the last window_days, which on this
+  # host was ~2,800 rows and exhausted the codex quota on the first day. Clear
+  # this key to restore the plain rolling window for a deliberate, supervised
+  # backfill.
+  translate_from: "2026-09-21"
   window_days: 7
   batch_size: 20
   max_batches_per_run: 6
