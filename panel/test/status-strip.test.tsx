@@ -147,7 +147,7 @@ const wakeup: WakeupRow = { id: 7, due_at: "2026-08-01T14:00:00Z", run_type: "de
 
 const event: EventRow = { id: "e1", source: "econ-cal", title: "US CPI",
   country: "US", impact: "high", starts_at: "2026-08-01T13:30:00Z",
-  fetched_at: "2026-08-01T09:00:00Z" };
+  fetched_at: "2026-08-01T09:00:00Z", title_fa: null };
 
 const alert: NotifyLogRow = { id: 3, ts: "2026-08-01T11:00:00Z", text: "desk alert text", ok: 1 };
 

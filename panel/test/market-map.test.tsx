@@ -2,11 +2,17 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { MarketMap } from "../components/market-map";
 import type { ScoredItem } from "../lib/marketmap";
+import type { Locale, Messages } from "../lib/i18n";
+import en from "../messages/en.json";
+import fa from "../messages/fa.json";
+
+const messages = { en: en as Messages, fa: fa as Messages };
 
 function item(over: Partial<ScoredItem> = {}): ScoredItem {
   return {
     itemId: "a", tier: 4, direction: 2, conviction: 0.8, theme: "rates_dollar",
     headline: "Gold jumps as Treasury buyback plans push yields lower",
+    headline_fa: null,
     source: "investing_commodities", url: "https://x/1",
     publishedAt: "2026-08-19T18:46:13Z", ...over,
   };
@@ -15,10 +21,11 @@ function item(over: Partial<ScoredItem> = {}): ScoredItem {
 const render = (
   items: ScoredItem[],
   extra: { themeMultipliers?: Record<string, number>;
-           fittedAt?: string | null } = {},
+           fittedAt?: string | null; locale?: Locale; messages?: Messages } = {},
 ) => renderToStaticMarkup(
   <MarketMap items={items} width={800} height={500} range="24h"
-    coverage={{ scored: items.length, unscored: 0 }} {...extra} />);
+    coverage={{ scored: items.length, unscored: 0 }}
+    locale="en" messages={messages.en} {...extra} />);
 
 describe("MarketMap", () => {
   it("renders one rect per item and names the theme", () => {
@@ -116,7 +123,7 @@ describe("MarketMap", () => {
   it("states coverage rather than implying completeness", () => {
     const html = renderToStaticMarkup(
       <MarketMap items={[item()]} width={800} height={500} range="24h"
-        coverage={{ scored: 1, unscored: 7 }} />);
+        coverage={{ scored: 1, unscored: 7 }} locale="en" messages={messages.en} />);
     expect(html).toContain("7");
   });
 
@@ -133,7 +140,7 @@ describe("MarketMap", () => {
     }));
     const html = renderToStaticMarkup(
       <MarketMap items={many} width={120} height={70} range="24h"
-        coverage={{ scored: many.length, unscored: 0 }} />);
+        coverage={{ scored: many.length, unscored: 0 }} locale="en" messages={messages.en} />);
     expect(html.match(/<rect/g)?.length).toBe(40);
     // Strip <title> content (which legitimately always carries the full
     // headline) before checking that no visible <text> label leaked one
@@ -203,5 +210,46 @@ describe("MarketMap", () => {
     // from both inputs so no caller can produce that mismatch.
     expect(render([item()], { themeMultipliers: {}, fittedAt: "2026-08-20T04:17:00Z" }))
       .toContain("theme fit not yet run");
+  });
+});
+
+describe("MarketMap Persian headlines", () => {
+  // Short enough (well under fitLabel's MIN_LINE_CHARS) that the wrapper
+  // keeps it on one line rather than splitting it across tspans, so a plain
+  // substring check is a valid test of what actually reaches the screen —
+  // not just "the component did not crash".
+  const HEADLINE_FA = "طلا بالا رفت";
+
+  it("renders the Persian headline as the tile label, with no EN marker in the title", () => {
+    const html = render([item({ headline_fa: HEADLINE_FA })],
+      { locale: "fa", messages: messages.fa });
+    expect(html).toContain(HEADLINE_FA);
+    // The wrapped label is centred on the raw headline text with no
+    // additional per-line escaping; a single Persian tspan is the ground
+    // truth here rather than a JSX-serialisation detail.
+    const withoutTitles = html.replace(/<title>[\s\S]*?<\/title>/g, "");
+    expect(withoutTitles).toContain(HEADLINE_FA);
+    expect(withoutTitles).not.toContain("Gold jumps as Treasury buyback");
+    expect(html).not.toContain(messages.fa["content.sourceEnglishTitle"]);
+  });
+
+  it("falls back to the English label when no Persian headline exists, and says so in the title", () => {
+    // map-tiles.tsx draws its label as raw SVG <text>/<tspan>, which cannot
+    // host the HTML <SourceLang> chip (see market-map.tsx#tileTitle) — the
+    // fallback marker for this surface lives in the tile's hover title
+    // instead, in the same dictionary string SourceLang uses elsewhere.
+    const html = render([item({ headline_fa: null })], { locale: "fa", messages: messages.fa });
+    const withoutTitles = html.replace(/<title>[\s\S]*?<\/title>/g, "");
+    expect(withoutTitles).toContain("Gold jumps as Treasury buyback");
+    expect(html).toContain(messages.fa["content.sourceEnglishTitle"]);
+  });
+
+  it("never shows the fallback marker when English is what was asked for", () => {
+    const html = render([item({ headline_fa: HEADLINE_FA })],
+      { locale: "en", messages: messages.en });
+    const withoutTitles = html.replace(/<title>[\s\S]*?<\/title>/g, "");
+    expect(withoutTitles).toContain("Gold jumps as Treasury buyback");
+    expect(withoutTitles).not.toContain(HEADLINE_FA);
+    expect(html).not.toContain(messages.en["content.sourceEnglishTitle"]);
   });
 });

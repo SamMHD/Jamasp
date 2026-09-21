@@ -13,7 +13,7 @@ let db: typeof import("../lib/db");
 
 const item = (id: string, url: string, publishedAt: string, headline: string) =>
   `('${id}','reuters','${publishedAt}','${headline}',NULL,'${url}','gold',NULL,` +
-  `'${publishedAt}',NULL)`;
+  `'${publishedAt}',NULL,NULL,NULL,NULL)`;
 
 const score = (id: string, tier: number, dir: number, conv: number, theme: string) =>
   `('${id}',${tier},${dir},${conv},'${theme}','2026-08-19T22:00:00Z')`;
@@ -26,7 +26,8 @@ beforeAll(async () => {
     CREATE TABLE items (id TEXT PRIMARY KEY, source TEXT NOT NULL,
       published_at TEXT NOT NULL, headline TEXT NOT NULL, lede TEXT,
       url TEXT NOT NULL, topic TEXT NOT NULL, cluster_id TEXT,
-      fetched_at TEXT NOT NULL, read_at TEXT);
+      fetched_at TEXT NOT NULL, read_at TEXT,
+      headline_fa TEXT, lede_fa TEXT, fa_source TEXT);
     CREATE TABLE item_scores (item_id TEXT PRIMARY KEY, tier INTEGER NOT NULL,
       direction INTEGER NOT NULL, conviction REAL NOT NULL, theme TEXT NOT NULL,
       scored_at TEXT NOT NULL);
@@ -184,6 +185,13 @@ describe("getScoredItems", () => {
   it("returns an empty array when the window holds nothing", () => {
     // The component renders an empty state; it must not receive undefined.
     expect(db.getScoredItems("2030-01-01T00:00:00Z")).toEqual([]);
+  });
+
+  it("selects the Persian headline for the map", () => {
+    // getScoredItems names its columns explicitly, unlike getItems — a
+    // Persian headline reaches the map only if it is in that list.
+    const items = db.getScoredItems("2000-01-01T00:00:00Z");
+    expect(items[0]).toHaveProperty("headline_fa");
   });
 });
 

@@ -11,6 +11,8 @@ import {
 import type { ItemRow } from "@/lib/db";
 import { markInboxRead } from "@/lib/actions";
 import { fmtAge, fmtUtc } from "@/lib/format";
+import { localized, type Locale, type Messages } from "@/lib/i18n";
+import { SourceLang } from "@/components/source-lang";
 
 const PAGE_SIZE = 50;
 
@@ -23,7 +25,9 @@ const fetcher = async (url: string) => {
   return r.json();
 };
 
-export function InboxTable({ sources, topics }: { sources: string[]; topics: string[] }) {
+export function InboxTable({ sources, topics, locale, messages }: {
+  sources: string[]; topics: string[]; locale: Locale; messages: Messages;
+}) {
   const [source, setSource] = useState("");
   const [topic, setTopic] = useState("");
   const [unread, setUnread] = useState(true);
@@ -91,6 +95,8 @@ export function InboxTable({ sources, topics }: { sources: string[]; topics: str
     ? (selectedGroup.find(g => g.id === selectedKey) ?? selectedGroup[0])
     : undefined;
   const selectedOthers = selectedGroup?.filter(g => g.id !== selectedRep!.id) ?? [];
+  const selectedLocalized = selectedRep
+    ? localized(selectedRep, "headline", locale) : { text: "", fallback: false };
 
   return (
     <div>
@@ -124,6 +130,7 @@ export function InboxTable({ sources, topics }: { sources: string[]; topics: str
         {[...clusters.entries()].map(([key, group]) => {
           const rep = group.find(g => g.id === key) ?? group[0];
           const others = group.filter(g => g.id !== rep.id);
+          const { text: headline, fallback } = localized(rep, "headline", locale);
           return (
             <li key={key} className="rounded border border-border p-3">
               <div className="flex items-start justify-between gap-2">
@@ -131,7 +138,7 @@ export function InboxTable({ sources, topics }: { sources: string[]; topics: str
                   className={`text-left ${rep.read_at
                     ? "text-muted-foreground hover:text-foreground"
                     : "font-medium hover:text-primary"}`}>
-                  {rep.headline}
+                  <SourceLang fallback={fallback} messages={messages}>{headline}</SourceLang>
                 </button>
                 {!rep.read_at && <Badge>unread</Badge>}
               </div>
@@ -167,7 +174,11 @@ export function InboxTable({ sources, topics }: { sources: string[]; topics: str
           {selectedRep && (
             <>
               <DialogHeader>
-                <DialogTitle className="leading-snug">{selectedRep.headline}</DialogTitle>
+                <DialogTitle className="leading-snug">
+                  <SourceLang fallback={selectedLocalized.fallback} messages={messages}>
+                    {selectedLocalized.text}
+                  </SourceLang>
+                </DialogTitle>
                 {selectedRep.lede && <DialogDescription>{selectedRep.lede}</DialogDescription>}
               </DialogHeader>
               <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1.5 text-sm">

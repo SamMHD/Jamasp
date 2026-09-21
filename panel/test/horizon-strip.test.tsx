@@ -9,7 +9,8 @@ const NOW = new Date("2026-08-11T09:00:00Z");
 
 const ev = (over: Partial<EventRow>): EventRow => ({
   id: "e", source: "ff_calendar", title: "CPI m/m", country: "USD", impact: "High",
-  starts_at: "2026-08-12T12:30:00Z", fetched_at: "2026-08-11T00:00:00Z", ...over,
+  starts_at: "2026-08-12T12:30:00Z", fetched_at: "2026-08-11T00:00:00Z",
+  title_fa: null, ...over,
 });
 const pred = (over: Partial<Prediction>): Prediction => ({
   id: "772323d6", date: "2026-08-09", claim: "no 200DMA tag pre-CPI", direction: "flat",

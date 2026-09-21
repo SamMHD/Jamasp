@@ -5,6 +5,7 @@ import {
   MapGroupHeader, MapHatchDefs, MapLegend, MapTile, GROUP_HEADER_H, fitLabel,
   importanceInsets, tierFate, type ImportanceTreatment, type TierGates,
 } from "@/components/map-tiles";
+import { localized, t, type Locale, type Messages } from "@/lib/i18n";
 
 /**
  * Fundamental market map: a two-level treemap of scored news, drawn as
@@ -78,12 +79,35 @@ const FATE_WORD = {
   quiet: "not sent to the channel",
 } as const;
 
-function tileTitle(item: ScoredItem, now: Date, gates?: TierGates): string {
+/**
+ * `headline` is passed in already resolved for the locale (Persian when
+ * available, English otherwise) rather than read off `item` directly — this
+ * is the one string on the tile that must agree with what the label itself
+ * renders, so there is exactly one place (market-map.tsx's cell loop) that
+ * decides it.
+ *
+ * When Persian fell back to English, the title says so, in the same
+ * dictionary voice `SourceLang`'s chip uses elsewhere (`content.
+ * sourceEnglishTitle`). This tile's label is drawn as raw SVG `<text>`/
+ * `<tspan>`, not HTML: an HTML element such as `SourceLang` renders is not
+ * part of SVG's content model for `<text>`, and a browser parsing that
+ * markup breaks it OUT of the SVG tree entirely (the HTML parser's "foreign
+ * content" rules pop `span` back into the surrounding HTML content) rather
+ * than rendering it in place — silently wrong output, not a crash, and a
+ * hydration mismatch besides. The tile's hover `<title>` is plain text and
+ * costs the label no room, which is why the marker rides there instead of
+ * inventing new visible tile chrome for it.
+ */
+function tileTitle(
+  item: ScoredItem, headline: string, fallback: boolean, now: Date,
+  messages: Messages, gates?: TierGates,
+): string {
   const dirWord = item.direction > 0 ? "bullish" : item.direction < 0 ? "bearish" : "neutral";
   const sign = item.direction > 0 ? "+" : "";
-  return `${item.headline} — tier ${item.tier} (${FATE_WORD[tierFate(item.tier, gates)]}), `
+  const base = `${headline} — tier ${item.tier} (${FATE_WORD[tierFate(item.tier, gates)]}), `
     + `${dirWord} ${sign}${item.direction} `
     + `(conviction ${item.conviction.toFixed(2)}), ${item.source}, ${fmtAge(item.publishedAt, now)}`;
+  return fallback ? `${base} — ${t(messages, "content.sourceEnglishTitle")}` : base;
 }
 
 /**
@@ -94,7 +118,7 @@ function tileTitle(item: ScoredItem, now: Date, gates?: TierGates): string {
  * turn off.
  */
 export function MarketMap({ items, width, height, range, coverage,
-  themeMultipliers, fittedAt, importance = "none", tierGates }: {
+  themeMultipliers, fittedAt, importance = "none", tierGates, locale, messages }: {
   items: ScoredItem[];
   width: number;
   height: number;
@@ -104,6 +128,8 @@ export function MarketMap({ items, width, height, range, coverage,
   fittedAt?: string | null;
   importance?: ImportanceTreatment;
   tierGates?: TierGates;
+  locale: Locale;
+  messages: Messages;
 }) {
   const now = new Date();
 
@@ -154,7 +180,14 @@ export function MarketMap({ items, width, height, range, coverage,
             <MapGroupHeader x={box.x} y={box.y} w={box.w}
               label={themeLabel(box.theme)} />
             {box.items.map(cell => {
-              const t = tone(cell.node.direction, cell.node.conviction);
+              const tn = tone(cell.node.direction, cell.node.conviction);
+              // Persian when the translate pass has filled it, English
+              // otherwise — this is the ONE resolution of the headline for
+              // the tile, shared by both the wrapped label below and the
+              // hover title, so the two can never disagree about which
+              // language is on screen.
+              const { text: headline, fallback } =
+                localized(cell.node, "headline", locale);
               // The headline is sized to its own tile rather than to one
               // map-wide constant — see map-tiles.tsx#fitLabel. When an
               // importance treatment reserves a band, the label is fitted to
@@ -162,12 +195,13 @@ export function MarketMap({ items, width, height, range, coverage,
               // to the whole tile and then sliding it down is exactly how a
               // reserved band turns into an overflow at the other edge.
               const inset = importanceInsets(importance, cell.w, cell.h);
-              const label = fitLabel(cell.node.headline, cell.w,
+              const label = fitLabel(headline, cell.w,
                 cell.h - inset.top - inset.bottom);
               return (
                 <MapTile key={cell.node.itemId}
                   x={cell.x} y={cell.y} w={cell.w} h={cell.h}
-                  tone={t} title={tileTitle(cell.node, now, tierGates)}
+                  tone={tn}
+                  title={tileTitle(cell.node, headline, fallback, now, messages, tierGates)}
                   lines={label.lines} fontSize={label.fontSize}
                   importance={importance} tier={cell.node.tier} gates={tierGates} />
               );

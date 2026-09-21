@@ -8,7 +8,12 @@ CREATE TABLE IF NOT EXISTS items (
     topic        TEXT NOT NULL,
     cluster_id   TEXT,
     fetched_at   TEXT NOT NULL,
-    read_at      TEXT
+    read_at      TEXT,
+    -- Mirrors jamasp/db.py's ADDED_COLUMNS: filled by the separate
+    -- `translate` timer, never by this fixture's own inserts below.
+    headline_fa  TEXT,
+    lede_fa      TEXT,
+    fa_source    TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_items_read ON items(read_at);
 CREATE TABLE IF NOT EXISTS prices (
@@ -45,7 +50,8 @@ CREATE TABLE IF NOT EXISTS events (
     country    TEXT,
     impact     TEXT,
     starts_at  TEXT NOT NULL,
-    fetched_at TEXT NOT NULL
+    fetched_at TEXT NOT NULL,
+    title_fa   TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_events_starts ON events(starts_at);
 CREATE TABLE IF NOT EXISTS agent_runs (
@@ -77,9 +83,9 @@ CREATE TABLE IF NOT EXISTS item_scores (
 );
 
 INSERT INTO items VALUES
- ('i1','cnbc_finance','2026-08-01T08:00:00Z','Gold steadies as dollar slips','Spot gold held near…','https://example.com/a1','gold','i1','2026-08-01T08:05:00Z',NULL),
- ('i2','marketwatch_top','2026-08-01T07:30:00Z','Fed officials split on September cut',NULL,'https://example.com/a2','fed','i2','2026-08-01T07:35:00Z',NULL),
- ('i3','cnbc_finance','2026-08-01T06:00:00Z','Dollar slides on jobs data','—','https://example.com/a3','gold','i1','2026-08-01T06:05:00Z','2026-08-01T07:00:00Z');
+ ('i1','cnbc_finance','2026-08-01T08:00:00Z','Gold steadies as dollar slips','Spot gold held near…','https://example.com/a1','gold','i1','2026-08-01T08:05:00Z',NULL,NULL,NULL,NULL),
+ ('i2','marketwatch_top','2026-08-01T07:30:00Z','Fed officials split on September cut',NULL,'https://example.com/a2','fed','i2','2026-08-01T07:35:00Z',NULL,NULL,NULL,NULL),
+ ('i3','cnbc_finance','2026-08-01T06:00:00Z','Dollar slides on jobs data','—','https://example.com/a3','gold','i1','2026-08-01T06:05:00Z','2026-08-01T07:00:00Z',NULL,NULL,NULL);
 INSERT INTO prices VALUES
  ('GC','2026-07-25T08:00:00Z',3290.0),('GC','2026-07-31T08:00:00Z',3310.5),('GC','2026-08-01T08:00:00Z',3325.0),
  ('DXY','2026-07-31T08:00:00Z',104.2),('DXY','2026-08-01T08:00:00Z',103.8),
@@ -109,8 +115,8 @@ INSERT INTO wakeups (id,due_at,run_type,task,status,attempts,created_at,fired_at
  (1,'2026-08-02T05:00:00Z','deepdive','read the Fed statement','pending',0,'2026-08-01T08:00:00Z',NULL),
  (2,'2026-07-31T05:00:00Z','scan','old one','done',1,'2026-07-30T08:00:00Z','2026-07-31T05:02:00Z');
 INSERT INTO events VALUES
- ('e1','ff_calendar','US Nonfarm Payrolls','US','High','2026-08-07T12:30:00Z','2026-08-01T00:00:00Z'),
- ('e2','ff_calendar','FOMC Minutes','US','Medium','2026-08-19T18:00:00Z','2026-08-01T00:00:00Z');
+ ('e1','ff_calendar','US Nonfarm Payrolls','US','High','2026-08-07T12:30:00Z','2026-08-01T00:00:00Z',NULL),
+ ('e2','ff_calendar','FOMC Minutes','US','Medium','2026-08-19T18:00:00Z','2026-08-01T00:00:00Z',NULL);
 INSERT INTO agent_runs (run_type,task,started_at,finished_at,exit_code,status) VALUES
  ('retro',NULL,'2026-07-20T05:00:00Z','2026-07-20T05:20:00Z',0,'ok'),
  ('brief',NULL,'2026-08-01T05:00:00Z','2026-08-01T05:09:00Z',0,'ok'),

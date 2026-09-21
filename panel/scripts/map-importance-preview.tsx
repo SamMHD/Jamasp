@@ -21,6 +21,7 @@ import type { ImportanceTreatment } from "../components/map-tiles";
 import { getScoredItems } from "../lib/db";
 import { readFittedWeights } from "../lib/files";
 import { buildThemeMultipliers, type MapRange } from "../lib/marketmap";
+import { DEFAULT_LOCALE, getMessages } from "../lib/i18n";
 
 const outDir = process.argv[2] ?? "/tmp/jamasp-mapdesign/out";
 mkdirSync(outDir, { recursive: true });
@@ -52,6 +53,9 @@ const since = new Date(Date.now() - sinceMs).toISOString().replace(/\.\d{3}Z$/, 
 const items = getScoredItems(since);
 const weights = readFittedWeights();
 const themeMultipliers = buildThemeMultipliers(weights?.fits?.theme?.coefficients);
+// Design preview only, no request/cookie to read a visitor's locale from —
+// DEFAULT_LOCALE is the one constant this may reference, per lib/i18n.ts.
+const previewMessages = getMessages(DEFAULT_LOCALE);
 
 console.log(`range=${range} items=${items.length} multipliers=${JSON.stringify(themeMultipliers)}`);
 
@@ -76,7 +80,7 @@ for (const t of TREATMENTS) {
       coverage={{ scored: items.length, unscored: 0 }}
       themeMultipliers={themeMultipliers}
       fittedAt={weights?.fittedAt ?? null}
-      importance={t.key} />);
+      importance={t.key} locale={DEFAULT_LOCALE} messages={previewMessages} />);
   for (const theme of THEMES) {
     for (const vp of VIEWPORTS) {
       const name = `${t.key}-${theme}-${vp.key}.html`;
