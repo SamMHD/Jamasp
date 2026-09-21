@@ -5,6 +5,7 @@ import {
   MapGroupHeader, MapHatchDefs, MapLegend, MapTile, GROUP_HEADER_H, fitLabel,
 } from "@/components/map-tiles";
 import { FullscreenButton } from "@/components/fullscreen-button";
+import { t, type Messages } from "@/lib/i18n";
 
 /**
  * Technical market map: a two-level treemap of signal states, drawn as
@@ -39,18 +40,19 @@ const FAMILY_HEADER_H = GROUP_HEADER_H;
 
 export const TECHNICAL_MAP_ELEMENT_ID = "technical-map";
 
-const FAMILY_LABELS: Record<string, string> = {
-  trend: "Trend",
-  momentum: "Momentum",
-  levels: "Levels",
-  volatility: "Volatility",
-  positioning: "Positioning",
-};
-
-/** Unrecognised slugs degrade to a readable label rather than crashing. */
-function familyLabel(family: string): string {
-  return FAMILY_LABELS[family] ??
-    family.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+/**
+ * `family` is the fixed grouping config/weights.yaml#signals defines (one
+ * per signal, in `trend`/`momentum`/`levels`/`volatility`/`positioning`) —
+ * chrome, not content, so it renders through the dictionary (`signal.*`)
+ * rather than the raw slug. Unrecognised slugs degrade to a readable label
+ * rather than the literal `signal.foo` key `t()` would otherwise return, or
+ * a crash.
+ */
+function familyLabel(family: string, messages: Messages): string {
+  const key = `signal.${family}`;
+  const label = t(messages, key);
+  return label !== key ? label
+    : family.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 }
 
 function tileTitle(t: SignalTile, now: Date): string {
@@ -70,11 +72,12 @@ function tileTitle(t: SignalTile, now: Date): string {
     + `${weight}${via}, ${fmtAge(t.ts, now)}`;
 }
 
-export function TechnicalMap({ tiles, width, height, fittedAt }: {
+export function TechnicalMap({ tiles, width, height, fittedAt, messages }: {
   tiles: SignalTile[];
   width: number;
   height: number;
   fittedAt: string | null;
+  messages: Messages;
 }) {
   const now = new Date();
 
@@ -110,7 +113,7 @@ export function TechnicalMap({ tiles, width, height, fittedAt }: {
         {boxes.map(box => (
           <g key={box.group}>
             <MapGroupHeader x={box.x} y={box.y} w={box.w}
-              label={familyLabel(box.group)} />
+              label={familyLabel(box.group, messages)} />
             {box.items.map(cell => {
               // The label is sized to its own tile rather than to one
               // map-wide constant — see map-tiles.tsx#fitLabel.

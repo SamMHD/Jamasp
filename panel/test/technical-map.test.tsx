@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { TechnicalMap } from "@/components/technical-map";
 import type { SignalTile } from "@/lib/technicalmap";
+import { getMessages } from "@/lib/i18n";
+
+const messages = getMessages("en");
 
 const tile = (over: Partial<SignalTile> = {}): SignalTile => ({
   key: "rsi14@1d", signal: "rsi14", timeframe: "1d", family: "momentum",
@@ -12,7 +15,7 @@ const tile = (over: Partial<SignalTile> = {}): SignalTile => ({
 const render = (tiles: SignalTile[]) =>
   renderToStaticMarkup(
     <TechnicalMap tiles={tiles} width={1200} height={600}
-      fittedAt="2026-08-20T04:17:00Z" />);
+      fittedAt="2026-08-20T04:17:00Z" messages={messages} />);
 
 describe("TechnicalMap", () => {
   it("renders a tile per signal, grouped by family", () => {

@@ -5,6 +5,34 @@ import { DriverLiveTile } from "@/components/driver-live-tile";
 import type { DriverRead } from "@/lib/drivers";
 import { tvEmbedFor, TV_THEME_TOKENS } from "@/lib/tradingview";
 import { fmtAge } from "@/lib/format";
+import { t, type Messages } from "@/lib/i18n";
+
+/**
+ * `lib/drivers.ts#DRIVER_SPECS` is not in this task's file list, so its
+ * `label` strings stay the English source rather than gaining dictionary
+ * keys of their own — this map is the bridge from a driver's SYMBOL (the
+ * stable identifier) to the `driver.*` key that carries its chrome
+ * translation. `driverLabel` falls back to the spec's own English `label`
+ * for any symbol added to DRIVER_SPECS before this map is updated, the same
+ * "English word beats a raw slug" tradeoff themeLabel/familyLabel make.
+ *
+ * Exported so driver-tape.tsx — the same six drivers, same order, rendered
+ * as a scanning strip instead of tiles — uses this exact mapping rather
+ * than a second one that could drift from it.
+ */
+export const DRIVER_LABEL_KEY: Record<string, string> = {
+  "DX-Y.NYB": "driver.dxy",
+  "^TNX": "driver.us10y",
+  "USDJPY": "driver.usdjpy",
+  "^GSPC": "driver.sp500",
+  "BTC-USD": "driver.btc",
+  "DFII10": "driver.realYield",
+};
+
+export function driverLabel(d: { symbol: string; label: string }, messages: Messages): string {
+  const key = DRIVER_LABEL_KEY[d.symbol];
+  return key ? t(messages, key) : d.label;
+}
 
 /**
  * The cross-asset complex that moves gold.
@@ -35,7 +63,9 @@ import { fmtAge } from "@/lib/format";
  * This stays a server component: only the thin overlay wrapper is a client
  * component, so QuoteTile and the sparkline never reach the browser bundle.
  */
-export function DriverPanel({ drivers, now }: { drivers: DriverRead[]; now: Date }) {
+export function DriverPanel({ drivers, now, messages }: {
+  drivers: DriverRead[]; now: Date; messages: Messages;
+}) {
   return (
     <section aria-label="Drivers" className="@container rounded border border-border p-4"
       style={TV_THEME_TOKENS as CSSProperties}>
@@ -63,7 +93,7 @@ export function DriverPanel({ drivers, now }: { drivers: DriverRead[]; now: Date
         {drivers.map(d => {
           const embed = tvEmbedFor(d.symbol);
           const tile = (
-            <QuoteTile className="h-full" label={d.label} value={d.quote?.value ?? null}
+            <QuoteTile className="h-full" label={driverLabel(d, messages)} value={d.quote?.value ?? null}
               digits={d.digits} ts={d.quote?.ts ?? null} delta={d.delta24h}
               // A source line on the tiles that have no widget, so they read
               // as attributed rather than as unfinished. It is the same word

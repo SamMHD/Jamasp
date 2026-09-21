@@ -184,7 +184,7 @@ export default async function Overview({
           on the server, so the live tape lands inside the box that is
           already there — see components/driver-tape.tsx for why this is the
           one embed on the panel that cannot be lazily gated on the viewport. */}
-      <DriverTape drivers={drivers} />
+      <DriverTape drivers={drivers} messages={messages} />
       <PageHeader title="Overview" subtitle={`as of ${fmtUtc(iso(now))}`} />
 
       <section aria-label="Market map" className="mb-4">
@@ -231,7 +231,7 @@ export default async function Overview({
             aspect ratio on purpose — stretching would distort tile areas, and
             area is the encoding on a treemap. */}
         <TechnicalMap tiles={signalTiles} width={1200} height={600}
-          fittedAt={fittedWeights?.fittedAt ?? null} />
+          fittedAt={fittedWeights?.fittedAt ?? null} messages={messages} />
       </section>
 
       <StatusStrip lastIngest={lastIngest} runsToday={runsToday} cap={cap}
@@ -253,7 +253,7 @@ export default async function Overview({
         <TechnicalPanel tech={tech} series={series} gvzSeries={gvzSeries}
           tvSymbol={liveGoldSymbol(files.loadSettings())}
           gvzDelta={gvz && gvzRef !== null ? gvz.value - gvzRef : null}
-          netSpecDelta={netSpecDelta?.delta ?? null} now={now} />
+          netSpecDelta={netSpecDelta?.delta ?? null} now={now} messages={messages} />
       </div>
 
       {/* grid-cols-1 at the base is load-bearing, not decorative: an
@@ -280,7 +280,7 @@ export default async function Overview({
             locale={locale} messages={messages} />
         </div>
         <div className="flex flex-col gap-4 lg:col-span-3">
-          <DriverPanel drivers={drivers} now={now} />
+          <DriverPanel drivers={drivers} now={now} messages={messages} />
           <PredictionPanel stats={predStats} bins={calibrationBins(preds)} />
         </div>
       </div>

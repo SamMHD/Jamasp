@@ -1,12 +1,14 @@
+import { cookies } from "next/headers";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { PageHeader } from "@/components/page-header";
 import { StatCard } from "@/components/stat-card";
-import { RunBadge } from "@/components/run-badge";
+import { RunBadge, runTypeLabel } from "@/components/run-badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AddWakeupDialog, CancelButton, RunNowButtons } from "@/components/schedule-forms";
 import * as db from "@/lib/db";
 import { maxRunsPerDay } from "@/lib/files";
 import { fmtAge, fmtUtc } from "@/lib/format";
+import { getMessages, LANG_COOKIE, resolveLocale } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +17,12 @@ function runDuration(started: string, finished: string | null): string {
   return `${Math.round((new Date(finished).getTime() - new Date(started).getTime()) / 1000)}s`;
 }
 
-export default function SchedulePage() {
+export default async function SchedulePage() {
+  // Same pattern as app/page.tsx and app/calendar/page.tsx: the locale
+  // cookie is httpOnly, so only a server component may read it.
+  const locale = resolveLocale((await cookies()).get(LANG_COOKIE)?.value);
+  const messages = getMessages(locale);
+
   const now = new Date();
   const pending = db.getWakeups("pending");
   const history = db.getWakeups().filter(w => w.status !== "pending").slice(0, 20);
@@ -46,7 +53,7 @@ export default function SchedulePage() {
           {pending.map(w => (
             <TableRow key={w.id}>
               <TableCell>{w.id}</TableCell><TableCell>{fmtUtc(w.due_at)}</TableCell>
-              <TableCell>{fmtAge(w.due_at, now)}</TableCell><TableCell>{w.run_type}</TableCell>
+              <TableCell>{fmtAge(w.due_at, now)}</TableCell><TableCell>{runTypeLabel(w.run_type, messages)}</TableCell>
               <TableCell className="max-w-md truncate">{w.task}</TableCell>
               <TableCell><CancelButton id={w.id} /></TableCell>
             </TableRow>
@@ -63,7 +70,7 @@ export default function SchedulePage() {
           {runs.length === 0 && <TableRow><TableCell colSpan={6} className="text-muted-foreground">none</TableCell></TableRow>}
           {runs.map(r => (
             <TableRow key={r.id}>
-              <TableCell>{fmtUtc(r.started_at)}</TableCell><TableCell>{r.run_type}</TableCell>
+              <TableCell>{fmtUtc(r.started_at)}</TableCell><TableCell>{runTypeLabel(r.run_type, messages)}</TableCell>
               <TableCell><RunBadge status={r.status} /></TableCell>
               <TableCell>{runDuration(r.started_at, r.finished_at)}</TableCell>
               <TableCell>{r.exit_code ?? "—"}</TableCell>
@@ -76,7 +83,7 @@ export default function SchedulePage() {
       <ul className="space-y-1 text-sm text-muted-foreground">
         {history.length === 0 && <li>none</li>}
         {history.map(w => (
-          <li key={w.id}>#{w.id} {w.run_type} · {w.status} · due {fmtUtc(w.due_at)} · {w.task}</li>
+          <li key={w.id}>#{w.id} {runTypeLabel(w.run_type, messages)} · {w.status} · due {fmtUtc(w.due_at)} · {w.task}</li>
         ))}
       </ul>
     </div>

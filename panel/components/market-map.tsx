@@ -53,19 +53,19 @@ const THEME_HEADER_H = GROUP_HEADER_H;
 /** Shared between the section and the button that fullscreens it. */
 export const MAP_ELEMENT_ID = "market-map";
 
-const THEME_LABELS: Record<string, string> = {
-  rates_dollar: "Rates & dollar",
-  physical_cb: "Physical / CB",
-  etf_flows: "ETF flows",
-  supply_mining: "Supply & mining",
-  geopolitics: "Geopolitics",
-  other: "Other",
-};
-
-/** Unrecognised slugs degrade to a readable label rather than crashing. */
-function themeLabel(theme: string): string {
-  return THEME_LABELS[theme] ??
-    theme.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+/**
+ * `theme` is the fixed taxonomy config/weights.yaml#themes defines — chrome,
+ * not content, so it renders through the dictionary (`theme.*`) rather than
+ * the raw slug the fit and the DB pass around. Unrecognised slugs (there
+ * shouldn't be any: "other" is the fallback slot the config itself reserves)
+ * degrade to a readable label rather than the literal `theme.foo` key `t()`
+ * would otherwise return, or a crash.
+ */
+function themeLabel(theme: string, messages: Messages): string {
+  const key = `theme.${theme}`;
+  const label = t(messages, key);
+  return label !== key ? label
+    : theme.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 }
 
 const WINDOW_LABEL: Record<MapRange, string> = {
@@ -182,7 +182,7 @@ export function MarketMap({ items, width, height, range, coverage,
         {boxes.map(box => (
           <g key={box.theme}>
             <MapGroupHeader x={box.x} y={box.y} w={box.w}
-              label={themeLabel(box.theme)} />
+              label={themeLabel(box.theme, messages)} />
             {box.items.map(cell => {
               const tn = tone(cell.node.direction, cell.node.conviction);
               // Persian when the translate pass has filled it, English

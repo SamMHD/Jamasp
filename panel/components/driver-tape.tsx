@@ -1,10 +1,12 @@
 import type { CSSProperties } from "react";
 import { TickerTape } from "@/components/ticker-tape";
 import { Delta } from "@/components/quote-tile";
+import { driverLabel } from "@/components/driver-panel";
 import type { DriverRead } from "@/lib/drivers";
 import {
   TV_THEME_TOKENS, TV_TICKER_TAPE_HEIGHT, tickerTapeSymbols, tvEmbedFor,
 } from "@/lib/tradingview";
+import type { Messages } from "@/lib/i18n";
 
 /**
  * The band across the top of the overview: the driver complex as a glance.
@@ -36,7 +38,7 @@ import {
  * This stays a server component: only the thin upgrade wrapper is a client
  * component, so the readings below are in the HTML at first paint.
  */
-export function DriverTape({ drivers }: { drivers: DriverRead[] }) {
+export function DriverTape({ drivers, messages }: { drivers: DriverRead[]; messages: Messages }) {
   const quoted = drivers.filter(d => tvEmbedFor(d.symbol) !== null);
   const symbols = tickerTapeSymbols(quoted.map(d => d.symbol));
   // No mapped drivers at all means no tape and no reserved band — an empty
@@ -56,7 +58,7 @@ export function DriverTape({ drivers }: { drivers: DriverRead[] }) {
         <div className="flex h-full items-center gap-4 overflow-x-auto whitespace-nowrap px-3">
           {quoted.map(d => (
             <div key={d.symbol} className="flex shrink-0 items-baseline gap-1.5">
-              <span className="text-meta uppercase text-ink-dim">{d.label}</span>
+              <span className="text-meta uppercase text-ink-dim">{driverLabel(d, messages)}</span>
               <span className="text-sm font-medium tabular-nums">
                 {d.quote === null
                   ? "—"

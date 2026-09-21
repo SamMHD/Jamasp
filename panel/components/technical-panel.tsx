@@ -9,6 +9,7 @@ import type { PricePoint } from "@/lib/db";
 import type { GoldTechnicals } from "@/lib/technicals";
 import { JAMASP_INSTRUMENT, TV_LIVE_LABEL, TV_LIVE_SYMBOL } from "@/lib/tradingview";
 import { cls, fmtAge } from "@/lib/format";
+import { t, type Messages } from "@/lib/i18n";
 
 function num(v: number | null, digits = 1): string {
   return v === null ? "—" : v.toLocaleString(undefined, { maximumFractionDigits: digits });
@@ -111,7 +112,7 @@ function LastReading({ spot, now }: {
  * not store TradingView's buy/sell gauges either.
  */
 export function TechnicalPanel({ tech, series, tvSymbol = TV_LIVE_SYMBOL, gvzSeries = [],
-  gvzDelta = null, netSpecDelta = null, now }: {
+  gvzDelta = null, netSpecDelta = null, now, messages }: {
   tech: GoldTechnicals;
   series: PricePoint[];
   /** What the widget charts; overridable from config — see lib/tradingview.ts. */
@@ -120,6 +121,7 @@ export function TechnicalPanel({ tech, series, tvSymbol = TV_LIVE_SYMBOL, gvzSer
   gvzDelta?: number | null;
   netSpecDelta?: number | null;
   now: Date;
+  messages: Messages;
 }) {
   const atrPctOfSpot = tech.indicators.atr14 !== null && tech.spot !== null && tech.spot.value > 0
     ? (tech.indicators.atr14 / tech.spot.value) * 100
@@ -177,16 +179,17 @@ export function TechnicalPanel({ tech, series, tvSymbol = TV_LIVE_SYMBOL, gvzSer
         <>
           <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
             <div className="flex items-center justify-center rounded-md border border-border/60 p-2">
-              <ArcGauge label="RSI14" value={tech.indicators.rsi14} min={0} max={100}
+              <ArcGauge label={t(messages, "signal.rsi14")} value={tech.indicators.rsi14}
+                min={0} max={100}
                 ticks={[{ at: 30, text: "30" }, { at: 70, text: "70" }]} />
             </div>
-            <QuoteTile label="GVZ implied vol" value={tech.indicators.gvz} digits={2}
+            <QuoteTile label={t(messages, "signal.gvz")} value={tech.indicators.gvz} digits={2}
               ts={tech.gvzAsOf} delta={gvzDelta} series={gvzSeries} now={now} />
-            <QuoteTile label="ATR14 range" value={tech.indicators.atr14} digits={1}
+            <QuoteTile label={t(messages, "signal.atr14")} value={tech.indicators.atr14} digits={1}
               ts={tech.indicatorsAsOf}
               note={atrPctOfSpot === null ? undefined : `${num(atrPctOfSpot)}% of spot`}
               now={now} />
-            <QuoteTile label="Net spec" value={tech.indicators.netSpec} digits={1}
+            <QuoteTile label={t(messages, "signal.netSpec")} value={tech.indicators.netSpec} digits={1}
               ts={tech.netSpecAsOf} delta={netSpecDelta} deltaLabel="w/w"
               deltaTone="neutral" note="CFTC weekly" now={now} />
           </div>
