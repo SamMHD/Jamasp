@@ -51,7 +51,8 @@ const RECT = { x: 0, y: 0, w: 400, h: 300 };
 function item(over: Partial<ScoredItem> = {}): ScoredItem {
   return {
     itemId: "a", tier: 3, direction: 1, conviction: 0.5, theme: "geopolitics",
-    headline: "h", source: "s", url: "u", publishedAt: "2026-08-19T12:00:00Z",
+    headline: "h", headline_fa: null, source: "s", url: "u",
+    publishedAt: "2026-08-19T12:00:00Z",
     ...over,
   };
 }
@@ -214,7 +215,8 @@ describe("layoutGroups", () => {
     // layoutMap is the adapter; its consumers read .theme and must not churn.
     const items = [
       { itemId: "1", tier: 5, direction: 2, conviction: 0.8, theme: "rates_dollar",
-        headline: "h", source: "s", url: "u", publishedAt: "2026-08-20T00:00:00Z" },
+        headline: "h", headline_fa: null, source: "s", url: "u",
+        publishedAt: "2026-08-20T00:00:00Z" },
     ];
     const boxes = layoutMap(items, rect, 20);
     expect(boxes[0].theme).toBe("rates_dollar");
@@ -226,7 +228,7 @@ describe("layoutMap area encoding", () => {
   const rect = { x: 0, y: 0, w: 400, h: 300 };
   const item = (id: string, theme: string, tier = 5) => ({
     itemId: id, tier, direction: 2, conviction: 0.8, theme,
-    headline: "h", source: "s", url: `u${id}`,
+    headline: "h", headline_fa: null, source: "s", url: `u${id}`,
     publishedAt: "2026-08-20T00:00:00Z",
   });
 

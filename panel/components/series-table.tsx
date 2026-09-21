@@ -1,5 +1,6 @@
 import type { PricePoint } from "@/lib/db";
 import { fmtUtc } from "@/lib/format";
+import { getMessages, t, type Messages } from "@/lib/i18n";
 
 /**
  * The value-exact twin of whatever chart sits above it: every stored reading,
@@ -14,22 +15,26 @@ import { fmtUtc } from "@/lib/format";
  * Renders nothing with no points: an empty disclosure inviting a click that
  * reveals an empty table is worse than silence.
  */
-export function SeriesTable({ points, label = "view as table" }: {
+export function SeriesTable({ points, label, messages = getMessages("en") }: {
   points: PricePoint[];
   label?: string;
+  /** Optional, defaulting to English — its only call site (technical-panel.tsx)
+   *  already passes a locale-resolved `label`; `messages` here is only for
+   *  the two column headers, which no test asserts on. */
+  messages?: Messages;
 }) {
   if (points.length === 0) return null;
   return (
     <details className="mt-1">
       <summary className="cursor-pointer text-xs text-muted-foreground">
-        {label}
+        {label ?? t(messages, "common.viewAsTable")}
       </summary>
       <div className="mt-2 max-h-40 overflow-y-auto">
         <table className="w-full text-xs">
           <thead>
             <tr className="text-left text-muted-foreground">
-              <th className="font-normal">time (UTC)</th>
-              <th className="font-normal">value</th>
+              <th className="font-normal">{t(messages, "table.time")}</th>
+              <th className="font-normal">{t(messages, "table.value")}</th>
             </tr>
           </thead>
           <tbody className="tabular-nums">

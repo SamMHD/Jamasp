@@ -2,11 +2,17 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { MarketMap } from "../components/market-map";
 import type { ScoredItem } from "../lib/marketmap";
+import type { Locale, Messages } from "../lib/i18n";
+import en from "../messages/en.json";
+import fa from "../messages/fa.json";
+
+const messages = { en: en as Messages, fa: fa as Messages };
 
 function item(over: Partial<ScoredItem> = {}): ScoredItem {
   return {
     itemId: "a", tier: 4, direction: 2, conviction: 0.8, theme: "rates_dollar",
     headline: "Gold jumps as Treasury buyback plans push yields lower",
+    headline_fa: null,
     source: "investing_commodities", url: "https://x/1",
     publishedAt: "2026-08-19T18:46:13Z", ...over,
   };
@@ -15,10 +21,11 @@ function item(over: Partial<ScoredItem> = {}): ScoredItem {
 const render = (
   items: ScoredItem[],
   extra: { themeMultipliers?: Record<string, number>;
-           fittedAt?: string | null } = {},
+           fittedAt?: string | null; locale?: Locale; messages?: Messages } = {},
 ) => renderToStaticMarkup(
   <MarketMap items={items} width={800} height={500} range="24h"
-    coverage={{ scored: items.length, unscored: 0 }} {...extra} />);
+    coverage={{ scored: items.length, unscored: 0 }}
+    locale="en" messages={messages.en} {...extra} />);
 
 describe("MarketMap", () => {
   it("renders one rect per item and names the theme", () => {
@@ -116,7 +123,7 @@ describe("MarketMap", () => {
   it("states coverage rather than implying completeness", () => {
     const html = renderToStaticMarkup(
       <MarketMap items={[item()]} width={800} height={500} range="24h"
-        coverage={{ scored: 1, unscored: 7 }} />);
+        coverage={{ scored: 1, unscored: 7 }} locale="en" messages={messages.en} />);
     expect(html).toContain("7");
   });
 
@@ -133,7 +140,7 @@ describe("MarketMap", () => {
     }));
     const html = renderToStaticMarkup(
       <MarketMap items={many} width={120} height={70} range="24h"
-        coverage={{ scored: many.length, unscored: 0 }} />);
+        coverage={{ scored: many.length, unscored: 0 }} locale="en" messages={messages.en} />);
     expect(html.match(/<rect/g)?.length).toBe(40);
     // Strip <title> content (which legitimately always carries the full
     // headline) before checking that no visible <text> label leaked one
@@ -203,5 +210,178 @@ describe("MarketMap", () => {
     // from both inputs so no caller can produce that mismatch.
     expect(render([item()], { themeMultipliers: {}, fittedAt: "2026-08-20T04:17:00Z" }))
       .toContain("theme fit not yet run");
+  });
+});
+
+// The visible on-tile marker (map-tiles.tsx's fallbackMarkerBand) is its
+// own independent <text> element, right-anchored and 9px — see MapTile's
+// JSX. Matched precisely on that shape rather than a bare `.toContain("EN")`,
+// which would also match "EN" appearing incidentally inside a headline.
+const MARKER_RE =
+  /<text x="[\d.]+" y="([\d.]+)" text-anchor="end" font-size="(\d+)"[^>]*>EN<\/text>/;
+
+function visibleMarker(html: string): { y: number; fontSize: number } | null {
+  const m = html.match(MARKER_RE);
+  return m ? { y: Number(m[1]), fontSize: Number(m[2]) } : null;
+}
+
+// The wrapped label's own first <text> — text-anchor="middle" with a
+// <tspan> child distinguishes it from the meta band's <text> (also
+// text-anchor="middle", but a plain text child, no <tspan>), which this
+// suite does not otherwise exercise but should not accidentally match.
+function firstLabelLine(html: string): { y: number; fontSize: number } | null {
+  const m = html.match(
+    /<text x="[\d.]+" y="([\d.]+)" text-anchor="middle" font-size="(\d+)"[^>]*><tspan/);
+  return m ? { y: Number(m[1]), fontSize: Number(m[2]) } : null;
+}
+
+// Mirrors map-tiles.tsx's own ASCENT/DESCENT (0.97/0.25, Inter's measured
+// ratios) — same duplication test/map-importance.test.tsx's PAINTED_LINE
+// already carries, and for the same reason: an independent, ground-truth
+// check of what the glyphs actually ink, not a re-assertion of the
+// production constant against itself.
+const ASCENT = 0.97, DESCENT = 0.25;
+function inkRange(node: { y: number; fontSize: number }): [number, number] {
+  return [node.y - node.fontSize * ASCENT, node.y + node.fontSize * DESCENT];
+}
+
+describe("MarketMap Persian headlines", () => {
+  // Short enough (well under fitLabel's MIN_LINE_CHARS) that the wrapper
+  // keeps it on one line rather than splitting it across tspans, so a plain
+  // substring check is a valid test of what actually reaches the screen —
+  // not just "the component did not crash".
+  const HEADLINE_FA = "طلا بالا رفت";
+
+  it("renders the Persian headline as the tile label, with no EN marker anywhere", () => {
+    const html = render([item({ headline_fa: HEADLINE_FA })],
+      { locale: "fa", messages: messages.fa });
+    expect(html).toContain(HEADLINE_FA);
+    // The wrapped label is centred on the raw headline text with no
+    // additional per-line escaping; a single Persian tspan is the ground
+    // truth here rather than a JSX-serialisation detail.
+    const withoutTitles = html.replace(/<title>[\s\S]*?<\/title>/g, "");
+    expect(withoutTitles).toContain(HEADLINE_FA);
+    expect(withoutTitles).not.toContain("Gold jumps as Treasury buyback");
+    expect(html).not.toContain(messages.fa["content.sourceEnglishTitle"]);
+    // Persian exists, so this is not a fallback: neither the hover title
+    // nor the visible corner mark should say otherwise.
+    expect(visibleMarker(html)).toBeNull();
+  });
+
+  it("falls back to the English label when no Persian headline exists, and shows the visible marker as well as the title", () => {
+    // map-tiles.tsx draws its label as raw SVG <text>/<tspan>, which cannot
+    // host the HTML <SourceLang> chip (see market-map.tsx#tileTitle) — the
+    // fallback marker for this surface is its own independent <text>
+    // element (map-tiles.tsx#fallbackMarkerBand), not the SourceLang chip,
+    // and the hover title carries the same signal in addition to it.
+    const html = render([item({ headline_fa: null })], { locale: "fa", messages: messages.fa });
+    const withoutTitles = html.replace(/<title>[\s\S]*?<\/title>/g, "");
+    expect(withoutTitles).toContain("Gold jumps as Treasury buyback");
+    expect(html).toContain(messages.fa["content.sourceEnglishTitle"]);
+    // The visible marker is not hover-gated: it must be in the markup this
+    // suite's renderToStaticMarkup already produces, not behind an
+    // interaction this project has no way to simulate.
+    expect(visibleMarker(html)).not.toBeNull();
+  });
+
+  it("never shows the fallback marker — title or visible — when English is what was asked for", () => {
+    const html = render([item({ headline_fa: HEADLINE_FA })],
+      { locale: "en", messages: messages.en });
+    const withoutTitles = html.replace(/<title>[\s\S]*?<\/title>/g, "");
+    expect(withoutTitles).toContain("Gold jumps as Treasury buyback");
+    expect(withoutTitles).not.toContain(HEADLINE_FA);
+    expect(html).not.toContain(messages.en["content.sourceEnglishTitle"]);
+    expect(visibleMarker(html)).toBeNull();
+  });
+
+  it("draws the visible marker at the smallest tile size that still shows a label, without colliding with it", () => {
+    // header (24) + 32 = 56: 32 is exactly MIN_LABEL_H (18) +
+    // FALLBACK_MARKER_BAND (14) — map-tiles.tsx's own floor for showing the
+    // marker at all. Below it the marker is suppressed outright (see
+    // fallbackMarkerFits); this is the smallest tile where it still shows,
+    // which is exactly the case a corner mark is most likely to crowd the
+    // label it sits next to.
+    const boundary = renderToStaticMarkup(
+      <MarketMap items={[item({ headline_fa: null, headline: "Gold jumps" })]}
+        width={200} height={56} range="24h"
+        coverage={{ scored: 1, unscored: 0 }} locale="fa" messages={messages.fa} />);
+    const marker = visibleMarker(boundary);
+    const label = firstLabelLine(boundary);
+    expect(marker).not.toBeNull();
+    expect(label).not.toBeNull();
+    const markerRange = inkRange(marker!);
+    const labelRange = inkRange(label!);
+    // The marker's ink must end before the label's ink begins — computed
+    // from the actual rendered coordinates, not asserted as a fixed pixel
+    // value, so this fails if either side's geometry ever drifts.
+    expect(markerRange[1]).toBeLessThan(labelRange[0]);
+  });
+
+  it("suppresses the marker below its own floor, even though the label alone would still show", () => {
+    // One px under fallbackMarkerFits' own height floor (32): the label's
+    // bare floor (MIN_LABEL_H, 18) is still comfortably cleared, so the
+    // label keeps showing — only the marker's extra band does not fit, and
+    // "reserves nothing and draws nothing" (map-tiles.tsx's own rule for
+    // every optional band) is what must happen rather than crowding it in.
+    const boundary = renderToStaticMarkup(
+      <MarketMap items={[item({ headline_fa: null, headline: "Gold jumps" })]}
+        width={200} height={55} range="24h"
+        coverage={{ scored: 1, unscored: 0 }} locale="fa" messages={messages.fa} />);
+    expect(visibleMarker(boundary)).toBeNull();
+    expect(firstLabelLine(boundary)).not.toBeNull();
+  });
+});
+
+describe("MarketMap — Persian chrome", () => {
+  it("translates the empty-state sentence", () => {
+    // render()'s coverage is derived from items.length, so an empty array
+    // renders the base "no scored stories" sentence with no unscored clause
+    // — that clause is exercised directly in the next test.
+    const html = render([], { locale: "fa", messages: messages.fa });
+    expect(html).toContain(fa["map.windowLast24h"]);
+    expect(html).not.toMatch(/[۰-۹]/);
+  });
+
+  it("translates the unscored-count clause when items are all unscored", () => {
+    const html = renderToStaticMarkup(
+      <MarketMap items={[]} width={800} height={500} range="24h"
+        coverage={{ scored: 0, unscored: 3 }} locale="fa" messages={messages.fa} />);
+    expect(html).toContain(fa["map.unscoredItemWord"]);
+    expect(html).toContain(fa["map.notShown"]);
+    expect(html).toContain("3");
+    expect(html).not.toMatch(/[۰-۹]/);
+  });
+
+  it("translates the footer caption's words, keeping the count Latin", () => {
+    const html = render([item(), item({ itemId: "b" })], { locale: "fa", messages: messages.fa });
+    expect(html).toContain(fa["map.scoredWord"]);
+    expect(html).toContain(fa["map.storyWord"]);
+    expect(html).toContain(fa["map.windowLast24h"]);
+    expect(html).toContain(fa["map.unscoredNotShownFooter"]);
+    expect(html).toContain(fa["map.themeFitNotRun"]);
+    expect(html).toContain(fa["map.areaIsTier"]);
+    expect(html).not.toMatch(/[۰-۹]/);
+  });
+
+  it("translates the dated theme-fit line when a fit exists", () => {
+    const html = render([item()], {
+      locale: "fa", messages: messages.fa,
+      themeMultipliers: { rates_dollar: 1.2 }, fittedAt: "2026-08-19T00:00:00Z",
+    });
+    expect(html).toContain(fa["map.themeFit"]);
+    expect(html).toContain(fa["map.notAppliedToArea"]);
+    expect(html).not.toContain(fa["map.themeFitNotRun"]);
+  });
+
+  it("translates the hatched-legend label and the pips importance key", () => {
+    const html = renderToStaticMarkup(
+      <MarketMap items={[item()]} width={800} height={500} range="24h"
+        coverage={{ scored: 1, unscored: 0 }} importance="pips"
+        locale="fa" messages={messages.fa} />);
+    expect(html).toContain(fa["map.hatchedLabel"]);
+    // The template's "{n}" is replaced with the real MAX_TIER, so the
+    // dictionary string itself never renders verbatim.
+    expect(html).not.toContain("{n}");
+    expect(html).toContain(fa["tone.bearish"]);
   });
 });

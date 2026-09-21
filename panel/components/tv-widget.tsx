@@ -202,5 +202,10 @@ export function TvWidget({ tag, script, attributes, gate = "viewport", onReady, 
   // an empty host costs no layout, and giving the widget its real dimensions
   // up front means its internal ResizeObserver measures the box once instead
   // of laying out at 0px and reflowing.
-  return <div ref={host} aria-hidden={!ready} className={className} />;
+  //
+  // dir="ltr" unconditionally: every widget this hosts is a price/time
+  // instrument, and both of this component's callers already pin their own
+  // wrapper the same way — hardcoding it here means a third caller gets it
+  // for free rather than by remembering to.
+  return <div ref={host} dir="ltr" aria-hidden={!ready} className={className} />;
 }

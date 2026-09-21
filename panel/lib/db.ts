@@ -52,13 +52,20 @@ function hasColumn(db: Database.Database, table: string, column: string): boolea
 // ---- types (exactly as in the Interfaces block above) ----
 export type ItemRow = { id: string; source: string; published_at: string; headline: string;
   lede: string | null; url: string; topic: string; cluster_id: string | null;
-  fetched_at: string; read_at: string | null };
+  fetched_at: string; read_at: string | null;
+  // Filled by the separate `translate` timer (jamasp/translate.py), never by
+  // an agent run — see lib/i18n.ts#localized for how a component reads
+  // these. `fa_source` distinguishes Persian copied verbatim from the flash
+  // pass ('flash') from Persian a model produced for the panel ('model');
+  // the panel itself never branches on it, but it rides along because it is
+  // part of the row `SELECT *` returns.
+  headline_fa: string | null; lede_fa: string | null; fa_source: string | null };
 export type WakeupRow = { id: number; due_at: string; run_type: string; task: string;
   status: string; attempts: number; created_at: string; fired_at: string | null };
 export type AgentRunRow = { id: number; run_type: string; task: string | null;
   started_at: string; finished_at: string | null; exit_code: number | null; status: string };
 export type EventRow = { id: string; source: string; title: string; country: string | null;
-  impact: string | null; starts_at: string; fetched_at: string };
+  impact: string | null; starts_at: string; fetched_at: string; title_fa: string | null };
 export type SourceErrorRow = { source: string; ts: string; error: string };
 export type NotifyLogRow = { id: number; ts: string; text: string; ok: number };
 export type PricePoint = { ts: string; value: number };
@@ -87,6 +94,11 @@ export function getItems(opts?: { limit?: number; offset?: number; source?: stri
   if (o.topic) { cond.push("topic = ?"); args.push(o.topic); }
   if (o.unreadOnly) cond.push("read_at IS NULL");
   if (o.search) {
+    // Decision, not an oversight: this matches `headline`/`lede` only, never
+    // `headline_fa`/`lede_fa`. The inbox search box is English-only for now
+    // — widening it to the Persian columns too is out of scope for the item-
+    // content i18n pass (see docs/superpowers/plans/2026-09-20-panel-i18n.md,
+    // Task 7).
     const like = `%${o.search.replace(/[\\%_]/g, m => `\\${m}`)}%`;
     cond.push("(headline LIKE ? ESCAPE '\\' OR lede LIKE ? ESCAPE '\\')");
     args.push(like, like);
@@ -410,11 +422,12 @@ export function getScoredItems(sinceIso: string): ScoredItem[] {
     return db.prepare(`
       WITH windowed AS (
         SELECT s.item_id AS itemId, s.tier, s.direction, s.conviction, s.theme,
-               i.headline, i.source, i.url, i.published_at AS publishedAt
+               i.headline, i.headline_fa, i.source, i.url, i.published_at AS publishedAt
           FROM item_scores s JOIN items i ON i.id = s.item_id
          WHERE i.published_at >= ? AND i.published_at >= '2000-01-01T00:00:00Z'
       )
-      SELECT itemId, tier, direction, conviction, theme, headline, source, url, publishedAt
+      SELECT itemId, tier, direction, conviction, theme, headline, headline_fa,
+             source, url, publishedAt
         FROM (SELECT *, ROW_NUMBER() OVER (
                 PARTITION BY url ORDER BY tier DESC, publishedAt DESC, itemId
               ) AS rn FROM windowed)

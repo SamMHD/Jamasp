@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { chartBins, type CalibrationBin } from "@/lib/calibration";
 import type { PredictionStats } from "@/lib/files";
+import { t, type Messages } from "@/lib/i18n";
 
 /**
  * The analyst's forecast record: counts, hit rate, and a diverging
@@ -32,7 +33,7 @@ function barPath(x: number, y0: number, h: number, up: boolean): string {
   return `M${x},${y0} V${yb - r} Q${x},${yb} ${x + r},${yb} H${x + w - r} Q${x + w},${yb} ${x + w},${yb - r} V${y0} Z`;
 }
 
-function CalibrationChart({ bins }: { bins: CalibrationBin[] }) {
+function CalibrationChart({ bins, messages }: { bins: CalibrationBin[]; messages: Messages }) {
   const slice = chartBins(bins);
   const maxCount = Math.max(1, ...slice.flatMap(b => [b.hits, b.misses]));
   const unit = ARM_H / maxCount;
@@ -70,20 +71,21 @@ function CalibrationChart({ bins }: { bins: CalibrationBin[] }) {
         100%
       </text>
       <text x={w / 2} y={h - 3} fontSize="9" textAnchor="middle" fill="var(--muted-foreground)">
-        stated confidence
+        {t(messages, "predictions.statedConfidence")}
       </text>
     </svg>
   );
 }
 
-export function PredictionPanel({ stats, bins }: {
+export function PredictionPanel({ stats, bins, messages }: {
   stats: PredictionStats;
   bins: CalibrationBin[];
+  messages: Messages;
 }) {
   const none = stats.scored === 0 && stats.open === 0 && stats.maturedUnscored === 0;
   const decisive = stats.hits + stats.misses;
   return (
-    <section aria-label="Forecast record" className="rounded border border-border p-4">
+    <section aria-label={t(messages, "predictions.forecastRecordHeading")} className="rounded border border-border p-4">
       {/* → predictions, not → state. This card is entirely the prediction
           ledger, and /predictions is the ledger itself — every row, its state,
           and what is overdue — where /state is stance + watchlist + playbook
@@ -94,13 +96,13 @@ export function PredictionPanel({ stats, bins }: {
           link but the chart's non-hover, non-colour twin, which the page owes
           a reader who cannot use either. */}
       <h2 className="mb-3 font-medium">
-        Forecast record
+        {t(messages, "predictions.forecastRecordHeading")}
         <Link className="ml-2 text-xs font-normal text-primary" href="/predictions">
-          → predictions
+          → {t(messages, "nav.predictions").toLowerCase()}
         </Link>
       </h2>
       {none ? (
-        <p className="text-sm text-muted-foreground">no predictions recorded</p>
+        <p className="text-sm text-muted-foreground">{t(messages, "predictions.noneRecorded")}</p>
       ) : (
         <>
           <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
@@ -110,44 +112,45 @@ export function PredictionPanel({ stats, bins }: {
                   {Math.round(stats.hitRate * 100)}%
                 </span>
                 <span className="ml-2 text-xs text-muted-foreground">
-                  hit rate · {decisive} decisive
+                  {t(messages, "predictions.wordHitRate")} · {decisive} {t(messages, "predictions.subtitleDecisive")}
                 </span>
               </div>
             ) : (
-              <span className="text-sm text-muted-foreground">none scored yet</span>
+              <span className="text-sm text-muted-foreground">{t(messages, "predictions.noneScoredYet")}</span>
             )}
             <div className="text-xs text-muted-foreground tabular-nums">
-              {stats.hits} hit · {stats.misses} miss · {stats.unclear} unclear · {stats.open} open
+              {stats.hits} {t(messages, "predictions.wordHit")} · {stats.misses} {t(messages, "predictions.wordMiss")} ·{" "}
+              {stats.unclear} {t(messages, "predictions.wordUnclear")} · {stats.open} {t(messages, "predictions.wordOpen")}
               {stats.maturedUnscored > 0 && (
                 <span className="text-amber-600 dark:text-amber-400">
-                  {" "}· {stats.maturedUnscored} awaiting score
+                  {" "}· {stats.maturedUnscored} {t(messages, "predictions.awaitingScore")}
                 </span>
               )}
             </div>
           </div>
           {decisive > 0 && (
             <div className="mt-3">
-              <CalibrationChart bins={bins} />
+              <CalibrationChart bins={bins} messages={messages} />
               <div className="mt-1 flex gap-4 text-meta text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <span aria-hidden className="h-2 w-2 rounded-[2px] bg-emerald-700 dark:bg-emerald-400" />
-                  hit (above line)
+                  {t(messages, "predictions.hitAboveLine")}
                 </span>
                 <span className="flex items-center gap-1">
                   <span aria-hidden className="h-2 w-2 rounded-[2px] bg-destructive" />
-                  miss (below line)
+                  {t(messages, "predictions.missBelowLine")}
                 </span>
               </div>
               <details className="mt-1">
                 <summary className="cursor-pointer text-xs text-muted-foreground">
-                  view as table
+                  {t(messages, "common.viewAsTable")}
                 </summary>
                 <table className="mt-2 w-full text-xs tabular-nums">
                   <thead>
                     <tr className="text-left text-muted-foreground">
-                      <th className="font-normal">confidence</th>
-                      <th className="font-normal">hits</th>
-                      <th className="font-normal">misses</th>
+                      <th className="font-normal">{t(messages, "table.confidence")}</th>
+                      <th className="font-normal">{t(messages, "predictions.colHits")}</th>
+                      <th className="font-normal">{t(messages, "predictions.colMisses")}</th>
                     </tr>
                   </thead>
                   <tbody>

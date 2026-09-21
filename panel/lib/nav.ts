@@ -3,7 +3,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-export type NavItem = { href: string; label: string; icon: LucideIcon };
+export type NavItem = { href: string; labelKey: string; icon: LucideIcon };
 
 /**
  * The four destinations worth a tab slot on a phone. Alerts is deliberately
@@ -12,19 +12,19 @@ export type NavItem = { href: string; label: string; icon: LucideIcon };
  * so the alerting path stays one tap away without spending a slot.
  */
 export const PRIMARY: NavItem[] = [
-  { href: "/", label: "Overview", icon: Gauge },
-  { href: "/inbox", label: "Inbox", icon: Inbox },
-  { href: "/briefs", label: "Briefs", icon: FileText },
-  { href: "/schedule", label: "Schedule", icon: Clock },
+  { href: "/", labelKey: "nav.overview", icon: Gauge },
+  { href: "/inbox", labelKey: "nav.inbox", icon: Inbox },
+  { href: "/briefs", labelKey: "nav.briefs", icon: FileText },
+  { href: "/schedule", labelKey: "nav.schedule", icon: Clock },
 ];
 
 export const OVERFLOW: NavItem[] = [
-  { href: "/crawl", label: "Crawl", icon: Rss },
-  { href: "/calendar", label: "Calendar", icon: CalendarDays },
-  { href: "/alerts", label: "Alerts", icon: Bell },
-  { href: "/state", label: "State", icon: Radio },
-  { href: "/predictions", label: "Predictions", icon: Target },
-  { href: "/prices", label: "Prices", icon: LineChart },
+  { href: "/crawl", labelKey: "nav.crawl", icon: Rss },
+  { href: "/calendar", labelKey: "nav.calendar", icon: CalendarDays },
+  { href: "/alerts", labelKey: "nav.alerts", icon: Bell },
+  { href: "/state", labelKey: "nav.state", icon: Radio },
+  { href: "/predictions", labelKey: "nav.predictions", icon: Target },
+  { href: "/prices", labelKey: "nav.prices", icon: LineChart },
 ];
 
 export const ALL: NavItem[] = [...PRIMARY, ...OVERFLOW];

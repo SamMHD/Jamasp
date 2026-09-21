@@ -26,6 +26,9 @@ export function DriverLiveTile({ embed, reading, children }: {
   children: ReactNode;
 }) {
   const [live, setLive] = useState(false);
+  // No LTR pin needed here: this renders TradingViewMiniChart -> TvWidget,
+  // whose host div is already unconditionally pinned (tv-widget.tsx) — the
+  // guarantee is inherited transitively, not re-litigated at every level.
   return (
     <div className="relative h-full">
       <div className={cls("h-full", live && "invisible")}>{children}</div>

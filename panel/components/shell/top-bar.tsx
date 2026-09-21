@@ -3,14 +3,25 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ALL, isActive } from "@/lib/nav";
+import { LangToggle } from "@/components/lang-toggle";
 import { NavPendingDot } from "@/components/shell/nav-pending";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cls } from "@/lib/format";
+import { t } from "@/lib/i18n";
+import type { Locale, Messages } from "@/lib/i18n";
 
 const DOT = {
   fresh: "bg-up",
   stale: "bg-destructive",
   unknown: "bg-muted-foreground",
+} as const;
+
+// `shell.ingest{Fresh,Stale,Unknown}` — hand-translated in Task 1 but never
+// wired to a call site; this accessible name is the surface they were
+// always meant for (StatusStrip states the same three tones in its own
+// words via lib/format.ts's fmtAge, not through this shared dictionary key).
+const INGEST_KEY = {
+  fresh: "shell.ingestFresh", stale: "shell.ingestStale", unknown: "shell.ingestUnknown",
 } as const;
 
 /**
@@ -21,7 +32,11 @@ const DOT = {
  * stated in the accessible name as well as the dot colour, because a dot is
  * colour alone.
  */
-export function TopBar({ ingestTone }: { ingestTone: "fresh" | "stale" | "unknown" }) {
+export function TopBar({ ingestTone, locale, messages }: {
+  ingestTone: "fresh" | "stale" | "unknown";
+  locale: Locale;
+  messages: Messages;
+}) {
   const path = usePathname();
   const current = ALL.find(i => isActive(path, i.href));
   return (
@@ -32,18 +47,19 @@ export function TopBar({ ingestTone }: { ingestTone: "fresh" | "stale" | "unknow
       <div className="flex h-14 items-center gap-3 px-3">
         <span className="text-heading font-semibold text-primary">Jamasp</span>
         {current && (
-          <span className="truncate text-body text-muted-foreground">{current.label}</span>
+          <span className="truncate text-body text-muted-foreground">{t(messages, current.labelKey)}</span>
         )}
         <span className="ml-auto flex items-center gap-1">
           <Link
             href="/alerts"
-            aria-label={`Alerts — ingest ${ingestTone}`}
+            aria-label={`${t(messages, "nav.alerts")} — ${t(messages, INGEST_KEY[ingestTone])}`}
             className="inline-flex h-11 w-11 items-center justify-center rounded-md
                        hover:bg-secondary focus-visible:outline-2
                        focus-visible:outline-offset-2 focus-visible:outline-ring"
           >
             <NavPendingDot className={cls("h-2.5 w-2.5 rounded-full", DOT[ingestTone])} />
           </Link>
+          <LangToggle locale={locale} messages={messages} />
           <ThemeToggle />
         </span>
       </div>

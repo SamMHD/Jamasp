@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import en from "@/messages/en.json";
 import { ALL, isActive, OVERFLOW, PRIMARY } from "@/lib/nav";
 
 describe("nav model", () => {
@@ -22,9 +23,9 @@ describe("nav model", () => {
       .toEqual(["/alerts", "/calendar", "/crawl", "/predictions", "/prices", "/state"]);
   });
 
-  it("gives every destination an icon and a label", () => {
+  it("gives every destination an icon and a label key", () => {
     for (const item of ALL) {
-      expect(item.label.length, `${item.href} has no label`).toBeGreaterThan(0);
+      expect(item.labelKey.length, `${item.href} has no label key`).toBeGreaterThan(0);
       expect(item.icon, `${item.href} has no icon`).toBeTruthy();
     }
   });
@@ -42,5 +43,21 @@ describe("isActive", () => {
   // "/pricesomething" is not inside "/prices".
   it("does not match a sibling route that merely shares a prefix", () => {
     expect(isActive("/pricesomething", "/prices")).toBe(false);
+  });
+});
+
+describe("nav labels", () => {
+  it("names a dictionary key, not a literal", () => {
+    for (const item of ALL) {
+      expect(item.labelKey, `${item.href} must use a key`).toMatch(/^nav\./);
+    }
+  });
+
+  it("has an English string for every nav key", () => {
+    // A nav item whose key is absent renders as `nav.foo` in the tab bar,
+    // which is the most visible place in the panel to get this wrong.
+    for (const item of ALL) {
+      expect(Object.keys(en)).toContain(item.labelKey);
+    }
   });
 });

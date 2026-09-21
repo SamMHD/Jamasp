@@ -2,6 +2,10 @@ import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { TechnicalMap } from "@/components/technical-map";
 import type { SignalTile } from "@/lib/technicalmap";
+import { getMessages } from "@/lib/i18n";
+import fa from "@/messages/fa.json";
+
+const messages = getMessages("en");
 
 const tile = (over: Partial<SignalTile> = {}): SignalTile => ({
   key: "rsi14@1d", signal: "rsi14", timeframe: "1d", family: "momentum",
@@ -12,7 +16,7 @@ const tile = (over: Partial<SignalTile> = {}): SignalTile => ({
 const render = (tiles: SignalTile[]) =>
   renderToStaticMarkup(
     <TechnicalMap tiles={tiles} width={1200} height={600}
-      fittedAt="2026-08-20T04:17:00Z" />);
+      fittedAt="2026-08-20T04:17:00Z" messages={messages} />);
 
 describe("TechnicalMap", () => {
   it("renders a tile per signal, grouped by family", () => {
@@ -134,4 +138,36 @@ it("names TradingView provenance in the hover title, and only then", () => {
   // off TradingView is a real reading from somewhere else and says so.
   expect(render([tile({ source: "tradingview" })])).toContain("via TradingView");
   expect(render([tile({ source: "bars" })])).not.toContain("via TradingView");
+});
+
+describe("TechnicalMap — Persian chrome", () => {
+  const faMessages = getMessages("fa");
+  const renderFa = (tiles: SignalTile[], fittedAt: string | null = "2026-08-20T04:17:00Z") =>
+    renderToStaticMarkup(
+      <TechnicalMap tiles={tiles} width={1200} height={600}
+        fittedAt={fittedAt} messages={faMessages} />);
+
+  it("translates the empty-state sentence around the literal CLI commands", () => {
+    const html = renderFa([]);
+    expect(html).toContain(fa["tech.noSignalsPrefix"]);
+    expect(html).toContain(fa["tech.noSignalsAnd"]);
+    expect(html).toContain("jamasp bars backfill");
+    expect(html).toContain("jamasp signals refresh");
+  });
+
+  it("translates the footer's signal count, fit note and family headers", () => {
+    const html = renderFa([tile()]);
+    expect(html).toContain(fa["tech.signalsWord"]);
+    expect(html).toContain(fa["tech.weightsFitted"]);
+    expect(html).toContain(fa["signal.momentum"]);
+    expect(html).not.toMatch(/[۰-۹]/);
+  });
+
+  it("translates the not-yet-fitted and no-fit-yet footer states", () => {
+    const unfitted = renderFa([tile({ fitted: false, pinned: false })]);
+    expect(unfitted).toContain(fa["tech.notYetFitted"]);
+
+    const noFit = renderFa([tile()], null);
+    expect(noFit).toContain(fa["tech.noFitYet"]);
+  });
 });

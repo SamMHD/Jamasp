@@ -7,11 +7,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { isActive, OVERFLOW } from "@/lib/nav";
 import { NavItemBody } from "@/components/shell/nav-pending";
 import { cls } from "@/lib/format";
+import { t } from "@/lib/i18n";
+import type { Messages } from "@/lib/i18n";
 
 /** The destinations that do not earn a tab slot. Uses the existing radix
  *  dialog rather than adding a sheet dependency. */
-export function MoreSheet({ open, onOpenChange }: {
-  open: boolean; onOpenChange: (value: boolean) => void;
+export function MoreSheet({ open, onOpenChange, messages }: {
+  open: boolean; onOpenChange: (value: boolean) => void; messages: Messages;
 }) {
   const path = usePathname();
 
@@ -34,9 +36,9 @@ export function MoreSheet({ open, onOpenChange }: {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-sm">
-        <DialogHeader><DialogTitle>More</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{t(messages, "nav.more")}</DialogTitle></DialogHeader>
         <nav aria-label="More sections" className="flex flex-col gap-0.5">
-          {OVERFLOW.map(({ href, label, icon: Icon }) => {
+          {OVERFLOW.map(({ href, labelKey, icon: Icon }) => {
             const active = isActive(path, href);
             return (
               <Link
@@ -54,7 +56,7 @@ export function MoreSheet({ open, onOpenChange }: {
                          : "text-foreground hover:bg-secondary",
                 )}
               >
-                <NavItemBody icon={Icon} label={label} />
+                <NavItemBody icon={Icon} label={t(messages, labelKey)} />
               </Link>
             );
           })}

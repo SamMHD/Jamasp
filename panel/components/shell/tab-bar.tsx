@@ -8,6 +8,8 @@ import { isActive, OVERFLOW, PRIMARY } from "@/lib/nav";
 import { MoreSheet } from "@/components/shell/more-sheet";
 import { NavItemBody } from "@/components/shell/nav-pending";
 import { cls } from "@/lib/format";
+import { t } from "@/lib/i18n";
+import type { Messages } from "@/lib/i18n";
 
 const ITEM = "flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 " +
   "rounded-md px-1 text-label focus-visible:outline-2 " +
@@ -18,7 +20,7 @@ const ITEM = "flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 
  * convention for a phone's primary nav, and it keeps the targets inside
  * comfortable thumb reach.
  */
-export function TabBar() {
+export function TabBar({ messages }: { messages: Messages }) {
   const path = usePathname();
   const [moreOpen, setMoreOpen] = useState(false);
   const overflowActive = OVERFLOW.some(i => isActive(path, i.href));
@@ -34,7 +36,7 @@ export function TabBar() {
         className="fixed inset-x-0 bottom-0 z-30 flex min-h-14 items-stretch gap-1 border-t
                    border-border bg-card px-1 pt-1 pb-[env(safe-area-inset-bottom)] lg:hidden"
       >
-        {PRIMARY.map(({ href, label, icon: Icon }) => {
+        {PRIMARY.map(({ href, labelKey, icon: Icon }) => {
           const active = isActive(path, href);
           return (
             <Link
@@ -43,7 +45,7 @@ export function TabBar() {
               aria-current={active ? "page" : undefined}
               className={cls(ITEM, active ? "font-medium text-primary" : "text-muted-foreground")}
             >
-              <NavItemBody icon={Icon} label={label} size="h-5 w-5" />
+              <NavItemBody icon={Icon} label={t(messages, labelKey)} size="h-5 w-5" />
             </Link>
           );
         })}
@@ -55,10 +57,10 @@ export function TabBar() {
           className={cls(ITEM, overflowActive ? "font-medium text-primary" : "text-muted-foreground")}
         >
           <Ellipsis className="h-5 w-5" aria-hidden="true" />
-          More
+          {t(messages, "nav.more")}
         </button>
       </nav>
-      <MoreSheet open={moreOpen} onOpenChange={setMoreOpen} />
+      <MoreSheet open={moreOpen} onOpenChange={setMoreOpen} messages={messages} />
     </>
   );
 }

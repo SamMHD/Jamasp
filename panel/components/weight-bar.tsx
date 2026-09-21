@@ -26,7 +26,7 @@ export function WeightBar({ weights }: { weights: StanceWeight[] }) {
   const drawable = weights.length <= SLOT_VARS.length && sum > 0
     && weights.every(w => w.pct >= 0);
   return (
-    <div>
+    <div dir="ltr">
       {drawable && (
         <div className="flex h-2.5 w-full gap-0.5" role="img"
           aria-label={`scenario weights: ${weights.map(w => `${w.label} ${w.pct}%`).join(", ")}`}>

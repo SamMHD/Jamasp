@@ -3,6 +3,8 @@ import type { ClusterHeadRow, ItemRow } from "@/lib/db";
 import type { NewsPulse } from "@/lib/newsflow";
 import { niceTicks } from "@/components/spot-chart";
 import { fmtAge } from "@/lib/format";
+import { localized, t, type Locale, type Messages } from "@/lib/i18n";
+import { SourceLang } from "@/components/source-lang";
 
 /**
  * News flow as a shape, not a list: a fortnight of daily volume with the
@@ -114,53 +116,63 @@ function VolumeChart({ pulse }: { pulse: NewsPulse }) {
   );
 }
 
-export function NewsFlow({ pulse, heads, top, lastItemTs, now }: {
+export function NewsFlow({ pulse, heads, top, lastItemTs, now, locale, messages }: {
   pulse: NewsPulse;
   heads: ClusterHeadRow[];
   top: { item: ItemRow; sources: number; items: number } | null;
   lastItemTs: string | null;
   now: Date;
+  locale: Locale;
+  messages: Messages;
 }) {
+  // Computed once up front, not inline in the ternary below: `top` can be
+  // null, and `localized` has no null-safe overload of its own. The `top ===
+  // null` branch never reads this value, so the placeholder never renders.
+  const topLocalized = top
+    ? localized(top.item, "headline", locale) : { text: "", fallback: false };
+
   return (
-    <section aria-label="News flow" className="rounded border border-border p-4">
+    <section aria-label={t(messages, "news.heading")} className="rounded border border-border p-4">
       <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
         <h2 className="font-medium">
-          News flow
-          <Link className="ml-2 text-xs font-normal text-primary" href="/inbox">→ inbox</Link>
+          {t(messages, "news.heading")}
+          <Link className="ml-2 text-xs font-normal text-primary" href="/inbox">
+            → {t(messages, "nav.inbox").toLowerCase()}
+          </Link>
         </h2>
         {lastItemTs && (
           <span className="text-xs text-muted-foreground">
-            last item {fmtAge(lastItemTs, now)}
+            {t(messages, "news.lastItemPrefix")} {fmtAge(lastItemTs, now)}
           </span>
         )}
       </div>
 
       {pulse.days.length === 0 ? (
-        <p className="text-sm text-muted-foreground">no news items recorded yet</p>
+        <p className="text-sm text-muted-foreground">{t(messages, "news.noItemsRecorded")}</p>
       ) : (
         <>
           <VolumeChart pulse={pulse} />
           <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-meta text-muted-foreground">
             <span className="flex items-center gap-1">
               <span aria-hidden className="h-2 w-2 rounded-[2px]"
-                style={{ background: "var(--viz-spot)" }} /> gold topic
+                style={{ background: "var(--viz-spot)" }} /> {t(messages, "news.goldTopic")}
             </span>
             <span className="flex items-center gap-1">
               <span aria-hidden className="h-2 w-2 rounded-[2px] bg-muted-foreground/40" />
-              other topics
+              {t(messages, "news.otherTopics")}
             </span>
           </div>
           <details className="mt-1">
             <summary className="cursor-pointer text-xs text-muted-foreground">
-              daily counts
+              {t(messages, "news.dailyCounts")}
             </summary>
             <table className="mt-2 w-full text-xs tabular-nums">
               <thead>
                 <tr className="text-left text-muted-foreground">
-                  <th className="font-normal">day</th>
-                  <th className="font-normal">gold</th>
-                  <th className="font-normal">other</th>
-                  <th className="font-normal">total</th>
+                  <th className="font-normal">{t(messages, "news.colDay")}</th>
+                  <th className="font-normal">{t(messages, "news.colGold")}</th>
+                  <th className="font-normal">{t(messages, "news.colOther")}</th>
+                  <th className="font-normal">{t(messages, "news.colTotal")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -180,18 +192,22 @@ export function NewsFlow({ pulse, heads, top, lastItemTs, now }: {
             {top ? (
               <>
                 <span className="text-xs uppercase tracking-wide text-muted-foreground">
-                  top story
+                  {t(messages, "news.topStory")}
                 </span>{" "}
                 <a href={top.item.url} target="_blank" rel="noreferrer"
-                  className="hover:underline">{top.item.headline}</a>{" "}
+                  className="hover:underline">
+                  <SourceLang fallback={topLocalized.fallback} messages={messages}>
+                    {topLocalized.text}
+                  </SourceLang>
+                </a>{" "}
                 <span className="text-xs text-muted-foreground tabular-nums"
                   title={`${top.items} items from ${top.sources} distinct sources in 48h`}>
-                  · {top.sources} wires
+                  · {top.sources} {t(messages, "news.wiresWord")}
                 </span>
               </>
             ) : (
               <span className="text-xs text-muted-foreground">
-                no story on more than one wire in the last 48h
+                {t(messages, "news.noStoryOnMultipleWires")}
               </span>
             )}
           </p>
@@ -200,28 +216,33 @@ export function NewsFlow({ pulse, heads, top, lastItemTs, now }: {
 
       <div className="mt-4 border-t border-border pt-3">
         <h3 className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">
-          Latest headlines
+          {t(messages, "news.latestHeadlines")}
         </h3>
         <ul className="space-y-1 text-sm">
-          {heads.length === 0 && <li className="text-muted-foreground">no items</li>}
-          {heads.map(i => (
-            <li key={i.id} className="flex items-baseline gap-2">
-              <span className="w-14 shrink-0 text-xs text-muted-foreground">
-                {fmtAge(i.published_at, now)}
-              </span>
-              <span className="w-24 shrink-0 truncate text-xs text-muted-foreground">
-                {i.source}
-              </span>
-              <a href={i.url} target="_blank" rel="noreferrer"
-                className="min-w-0 flex-1 truncate hover:underline">{i.headline}</a>
-              {i.sources_n >= 2 && (
-                <span className="shrink-0 rounded border border-border px-1 text-meta text-muted-foreground tabular-nums"
-                  title={`carried by ${i.sources_n} distinct sources`}>
-                  {i.sources_n} wires
+          {heads.length === 0 && <li className="text-muted-foreground">{t(messages, "news.noItems")}</li>}
+          {heads.map(i => {
+            const { text, fallback } = localized(i, "headline", locale);
+            return (
+              <li key={i.id} className="flex items-baseline gap-2">
+                <span className="w-14 shrink-0 text-xs text-muted-foreground">
+                  {fmtAge(i.published_at, now)}
                 </span>
-              )}
-            </li>
-          ))}
+                <span className="w-24 shrink-0 truncate text-xs text-muted-foreground">
+                  {i.source}
+                </span>
+                <a href={i.url} target="_blank" rel="noreferrer"
+                  className="min-w-0 flex-1 truncate hover:underline">
+                  <SourceLang fallback={fallback} messages={messages}>{text}</SourceLang>
+                </a>
+                {i.sources_n >= 2 && (
+                  <span className="shrink-0 rounded border border-border px-1 text-meta text-muted-foreground tabular-nums"
+                    title={`carried by ${i.sources_n} distinct sources`}>
+                    {i.sources_n} {t(messages, "news.wiresWord")}
+                  </span>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </div>
     </section>

@@ -2,9 +2,11 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { JAMASP_ROOT } from "./paths";
 import { buildWakeupAddArgs, buildWakeupCancelArgs } from "./cliArgs";
 import { validateWakeup } from "./validate";
+import { LANG_COOKIE, LOCALES, type Locale } from "./i18n";
 
 const pexec = promisify(execFile);
 
@@ -47,4 +49,32 @@ export async function cancelWakeup(id: number): Promise<ActionResult> {
 export async function runNow(runType: string, task: string): Promise<ActionResult> {
   return addWakeup(new Date().toISOString(), runType,
     task.trim() || `${runType} triggered from panel`);
+}
+
+/**
+ * Persist the viewer's language choice.
+ *
+ * A cookie rather than a database row: the panel's rule is that every DATA
+ * write goes through the `jamasp` CLI, and a per-browser display preference
+ * is not data. This also keeps the choice working on a host where the CLI is
+ * mid-deploy.
+ *
+ * `revalidatePath("/", "layout")` rather than a client-side refresh, because
+ * the locale changes server-rendered output — every headline, every label —
+ * not just what the browser paints.
+ */
+export async function setLocale(locale: Locale): Promise<void> {
+  if (!LOCALES.includes(locale)) return;
+  const jar = await cookies();
+  jar.set(LANG_COOKIE, locale, {
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365,
+    sameSite: "lax",
+    // No client component reads this cookie directly; the locale reaches
+    // them as a prop threaded down from the server, like every other piece
+    // of data in this panel. Nothing needs script access to it, so don't
+    // grant it.
+    httpOnly: true,
+  });
+  revalidatePath("/", "layout");
 }
