@@ -32,4 +32,33 @@ describe("SourceLang", () => {
       <SourceLang fallback messages={messages}>Gold climbs</SourceLang>);
     expect(html).toContain('lang="en"');
   });
+
+  it("wraps fallback content in a span by default", () => {
+    // The common case is inline English (a headline, a title) sitting
+    // beside other inline text — a <div> there would break the line.
+    const html = renderToStaticMarkup(
+      <SourceLang fallback messages={messages}>Gold climbs</SourceLang>);
+    expect(html).toContain('<span lang="en" dir="ltr">Gold climbs</span>');
+  });
+
+  it("wraps fallback content in a div when block is set", () => {
+    // <Markdown> renders a <div class="prose"> containing <p>/<ul>/<table> —
+    // block content, which a <span> (phrasing-only) cannot legally contain.
+    const html = renderToStaticMarkup(
+      <SourceLang fallback block messages={messages}>
+        <div className="prose">Gold climbs</div>
+      </SourceLang>);
+    expect(html).toContain('<div lang="en" dir="ltr">');
+    expect(html).not.toContain('<span lang="en"');
+  });
+
+  it("keeps the badge itself a span even in block mode", () => {
+    // Only the wrapper around the CONTENT changes; the small "EN" badge
+    // beside it is inline text either way.
+    const html = renderToStaticMarkup(
+      <SourceLang fallback block messages={messages}>
+        <div className="prose">Gold climbs</div>
+      </SourceLang>);
+    expect(html).toContain(`>${messages["content.sourceEnglish"]}</span>`);
+  });
 });

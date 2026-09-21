@@ -152,7 +152,7 @@ function Section({ heading, body, fallback, messages }: {
   return (
     <div className="mt-4">
       <h3 className={H3}>{heading}</h3>
-      <SourceLang fallback={fallback} messages={messages}>
+      <SourceLang fallback={fallback} messages={messages} block>
         <Markdown text={body} />
       </SourceLang>
     </div>
@@ -171,7 +171,7 @@ function ViewSection({ heading, body, weights, fallback, messages }: {
   return (
     <div className="mt-4">
       <h3 className={H3}>{heading}</h3>
-      <SourceLang fallback={fallback} messages={messages}>
+      <SourceLang fallback={fallback} messages={messages} block>
         <>
           {intro && <Markdown text={intro} />}
           <ul className="mt-2 space-y-1.5">
@@ -207,7 +207,7 @@ function FlipsSection({ heading, body, fallback, messages }: {
   return (
     <div className="mt-4">
       <h3 className={H3}>{heading}</h3>
-      <SourceLang fallback={fallback} messages={messages}>
+      <SourceLang fallback={fallback} messages={messages} block>
         <>
           {intro && <Markdown text={intro} />}
           <ul className="mt-2 space-y-2">
@@ -318,7 +318,7 @@ export function FundamentalPanel({
             </div>
           )}
           {preamble && (
-            <SourceLang fallback={preamble.fallback} messages={messages}>
+            <SourceLang fallback={preamble.fallback} messages={messages} block>
               <Markdown text={preamble.text} />
             </SourceLang>
           )}

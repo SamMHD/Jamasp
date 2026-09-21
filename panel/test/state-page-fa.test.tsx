@@ -83,6 +83,34 @@ describe("state page (stance/playbook Persian sidecars)", () => {
     expect(html).not.toContain('lang="en"');
   });
 
+  // Fix round 1: the writer can leave the sidecar's TOP-LEVEL hash matching
+  // while one section still carries the empty-hash hazard (a failed or
+  // budget-skipped section with no prior Persian — see
+  // lib/files.ts#readStanceFa's doc comment). This page has no per-section
+  // marker to hang on just that section, so it must discard the WHOLE
+  // sidecar rather than splice that section's literal English into an
+  // otherwise-Persian block with no marker at all.
+  it("falls back to the whole English stance, marked, when any section has an empty hash", async () => {
+    mockFiles.stance = englishStance;
+    mockFiles.stanceFa = { sections: [
+      { heading: "", hash: "h0", body: "طلا رو به رشد بر اساس شاخص قیمت مصرف‌کننده ملایم.\n" },
+      // The hazard: hash is empty even though this "sidecar" otherwise
+      // looks usable (readStanceFa is mocked here, so this stands in for a
+      // sidecar whose top-level src_hash already matched the source).
+      { heading: "", hash: "", body: "some other stale or English body\n" },
+    ] };
+    mockFiles.playbook = null;
+    mockFiles.playbookFa = null;
+
+    const html = await renderPage("fa");
+    // The real English stance, verbatim — not a half-Persian splice.
+    expect(html).toContain("Gold constructive on soft CPI");
+    expect(html).not.toContain("طلا رو به رشد");
+    expect(html).not.toContain("some other stale or English body");
+    expect((html.match(/lang="en"/g) ?? []).length).toBe(1);
+    expect(html).toContain(fa["content.sourceEnglishTitle" as keyof typeof fa]);
+  });
+
   it("renders the playbook sidecar independently of the stance sidecar", async () => {
     mockFiles.stance = null;
     mockFiles.stanceFa = null;

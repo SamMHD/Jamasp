@@ -15,13 +15,13 @@ export const dynamic = "force-dynamic";
  * A whole-document sidecar rendered as one block: the sidecar's own body
  * when its hash matches the English source, the English body with ONE
  * marker otherwise. Unlike FundamentalPanel's per-section treatment, this
- * page is a raw dump — its Markdown block has no sub-structure to match
- * Persian bodies into by position, so a stance whose sidecar carries a
- * single failed section (see lib/files.ts#readStanceFa's empty-per-section-
- * hash contract) renders that one section's literal English text inline,
- * unmarked, rather than gaining a second, finer-grained marker here. That
- * asymmetry is deliberate: this page trades precision for simplicity, and
- * FundamentalPanel is where the precise per-section marker lives.
+ * page is a raw dump — its Markdown block has no sub-structure to hang a
+ * finer-grained marker on, so `sidecarBody` is `null` (forcing the English
+ * fallback) not only when the top-level hash mismatches but also when ANY
+ * section still carries the empty-hash hazard (see lib/files.ts#readStanceFa):
+ * a coarse page gets the coarse treatment, all-or-nothing, rather than
+ * splicing that one section's literal English into an otherwise-Persian
+ * block with no way to mark it.
  */
 function LocalizedDocument({ english, sidecarBody, locale, messages }: {
   english: string;
@@ -31,7 +31,7 @@ function LocalizedDocument({ english, sidecarBody, locale, messages }: {
 }) {
   if (locale === "en" || sidecarBody === null) {
     return (
-      <SourceLang fallback={locale === "fa"} messages={messages}>
+      <SourceLang fallback={locale === "fa"} messages={messages} block>
         <Markdown text={english} />
       </SourceLang>
     );
@@ -49,8 +49,18 @@ export default async function StatePage() {
   // headings dropped: jamasp/translatetext.py's own note is that a
   // section's heading line is "an anchor, never rendered," and this page
   // has no dictionary to render a canonical heading through anyway.
+  //
+  // A sidecar can pass its OWN top-level hash check while one section still
+  // carries the empty-hash hazard (a failed or budget-skipped section with
+  // no prior Persian — see readStanceFa's doc comment). This page has no
+  // per-section marker to hang on that one section, so ANY empty hash here
+  // discards the whole sidecar, same as a stale top-level hash: better one
+  // honest English page than a silent, unmarked splice of English into
+  // Persian.
   const stanceFa = files.readStanceFa();
-  const stanceFaBody = stanceFa ? stanceFa.sections.map(s => s.body).join("") : null;
+  const stanceFaBody = stanceFa && stanceFa.sections.every(s => s.hash !== "")
+    ? stanceFa.sections.map(s => s.body).join("")
+    : null;
   const playbook = files.readPlaybook();
   const playbookFa = files.readPlaybookFa();
   const watchlist = files.readWatchlist();
