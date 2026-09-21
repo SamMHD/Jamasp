@@ -1125,7 +1125,7 @@ events:
       (645cc78a closes 22 Sep 23:59Z; 2df323fa scores only on a Gulf
       ministry naming Iran as Hormuz administrator).
   - date: 2026-09-24
-    time_dubai: "Wed 24 Sep (venue/slot not yet relayed)"
+    time_dubai: "Thu 24 Sep (day corrected 21 Sep: 24 Sep 2026 is a Thursday; investinglive 21 Sep: Xi's visit to Washington 'on Thursday'; venue/slot not yet relayed)"
     title: Xi-Trump summit - oil-cap and Taiwan overhang
     why: >
       investinglive 16 Sep: summit set for 24 Sep with a Taiwan arms-sale
@@ -1187,3 +1187,36 @@ events:
       investinglive/MarketWatch, and the SNB only if CHF moves the dollar.
       The Monday brief re-checks the actionforex 'Week Ahead' article for a
       speaker list and adds a wakeup only if a governor slot is published.
+    update_2026_09_21_brief: >
+      Fed speakers VERIFIED from the ff_calendar feed (events table, Low
+      impact, hidden by `jamasp calendar`, todo-188): Goolsbee Mon 10:30Z;
+      Williams 14:05Z, Jefferson 14:20Z, Barkin 17:00Z Tue; Barr Wed
+      14:05Z; Williams 08:10Z, Hammack 12:50Z, Paulson 14:10Z Thu; Williams
+      09:15Z, Hammack 18:00Z Fri. Governor slots published -> wakeups #57
+      (Jefferson, Tue 15:05Z) and #58 (Barr + US flash PMI, Wed 14:50Z)
+      per the action line above. Auctions still UNVERIFIED (no relay in the
+      DB). Xi-Trump corrected to THURSDAY 24 Sep. Trump 'probably open' to
+      meeting Pezeshkian at UNGA (Fox, 20 Sep) - a co-confirmed meeting is
+      the 645cc78a falsifier (closes Tue 23:59Z); scan marker, no slot.
+
+  - date: 2026-09-22
+    time_dubai: "Tue 22 Sep 18:20 Dubai (14:20Z) Jefferson; Wed 23 Sep 18:05 Dubai (14:05Z) Barr - slots from the ff_calendar feed (neutral-published, rule 16)"
+    title: First post-blackout Fed GOVERNOR appearances - Jefferson (Vice Chair) Tue, Barr Wed
+    why: >
+      The stance's pre-committed flip lines run on a governor, not a
+      regional president (Schmid 18 Sep and Kashkari 20 Sep backed the hike
+      and closed the energy look-through but are not governors). Jefferson
+      voted for the 16 Sep hike (12-0); Barr likewise. An October
+      endorsement with gold DOWN from the speech to the Globex close ->
+      bearish-rates 60 (2y toward 4.80); a pause call with gold UP -> base
+      30; tone without guidance -> no move (rule 6, 4/4 for >=10-pt Fed
+      repricings). Rule-19 breakers for aec5cc8b (30y 5.40), 1889819a
+      (both-up), be4d6b22 (USDJPY 160), fc5c5a29 (2y 4.60). Williams
+      14:05Z and Barkin 17:00Z Tue, and the US flash PMI 13:45Z Wed, sit in
+      the same runs.
+    action: >
+      Wakeup #57 deepdive Tue 22 Sep 15:05Z (Jefferson +45); wakeup #58
+      deepdive Wed 23 Sep 14:50Z (Barr +45, PMI +65). Relay order: the
+      investinglive post first (odds sentence), then actionforex, then the
+      CNBC quotes for the 2y/30y; tape clause read from the speech's start
+      time to the Globex close (rule 23). Scans carry any earlier headline.
