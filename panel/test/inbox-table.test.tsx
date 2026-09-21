@@ -55,6 +55,21 @@ describe("InboxTable list row", () => {
     expect(html).not.toContain(messages.fa["content.sourceEnglish"]);
   });
 
+  it("translates the unread badge, the filter bar and the mark-delta-read button", () => {
+    const html = renderTable([item({ read_at: null })], "fa");
+    expect(html).toContain(messages.fa["inboxTable.unreadBadge"]);
+    expect(html).toContain(messages.fa["inboxTable.allSources"]);
+    expect(html).toContain(messages.fa["inboxTable.allTopics"]);
+    expect(html).toContain(messages.fa["inboxTable.unreadOnly"]);
+    expect(html).toContain(messages.fa["inboxTable.markDeltaRead"]);
+    expect(html).not.toContain(">unread<");
+  });
+
+  it("translates the empty-list state", () => {
+    const html = renderTable([], "fa");
+    expect(html).toContain(messages.fa["inboxTable.nothingHere"]);
+  });
+
   it("falls back to the English headline with the EN marker when untranslated", () => {
     const html = renderTable([item({ headline_fa: null })], "fa");
     expect(html).toContain("Gold holds 4380");

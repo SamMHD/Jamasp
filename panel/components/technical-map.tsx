@@ -82,12 +82,14 @@ export function TechnicalMap({ tiles, width, height, fittedAt, messages }: {
   const now = new Date();
 
   if (tiles.length === 0) {
+    // aria-label deliberately English-only in both locales: see
+    // components/market-map.tsx's identical section for the reasoning.
     return (
       <section aria-label="Technical signal treemap"
         className="rounded border border-border p-4">
         <p className="text-sm text-muted-foreground">
-          No technical signals yet — run <code>jamasp bars backfill</code> and{" "}
-          <code>jamasp signals refresh</code>.
+          {t(messages, "tech.noSignalsPrefix")} <code>jamasp bars backfill</code>{" "}
+          {t(messages, "tech.noSignalsAnd")} <code>jamasp signals refresh</code>.
         </p>
       </section>
     );
@@ -133,9 +135,11 @@ export function TechnicalMap({ tiles, width, height, fittedAt, messages }: {
       </svg>
       <MapLegend messages={messages} />
       <p className="mt-2 text-xs text-muted-foreground">
-        {tiles.length} signals
-        {unfitted > 0 ? ` · ${unfitted} not yet fitted (dashed)` : ""}
-        {fittedAt ? ` · weights fitted ${fmtAge(fittedAt, now)}` : " · no fit yet"}
+        {tiles.length} {t(messages, "tech.signalsWord")}
+        {unfitted > 0 ? <> · {unfitted} {t(messages, "tech.notYetFitted")}</> : ""}
+        {fittedAt
+          ? <> · {t(messages, "tech.weightsFitted")} {fmtAge(fittedAt, now)}</>
+          : <> · {t(messages, "tech.noFitYet")}</>}
       </p>
     </section>
   );

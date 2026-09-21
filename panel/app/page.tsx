@@ -25,7 +25,7 @@ import { deriveTechnicals, TECHNICAL_SYMBOLS } from "@/lib/technicals";
 import { liveGoldSymbol } from "@/lib/tradingview";
 import { buildThemeMultipliers, type MapRange } from "@/lib/marketmap";
 import { cls, fmtUtc } from "@/lib/format";
-import { getMessages, LANG_COOKIE, resolveLocale } from "@/lib/i18n";
+import { getMessages, LANG_COOKIE, resolveLocale, t } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -185,11 +185,12 @@ export default async function Overview({
           already there — see components/driver-tape.tsx for why this is the
           one embed on the panel that cannot be lazily gated on the viewport. */}
       <DriverTape drivers={drivers} messages={messages} />
-      <PageHeader title="Overview" subtitle={`as of ${fmtUtc(iso(now))}`} />
+      <PageHeader title={t(messages, "nav.overview")}
+        subtitle={`${t(messages, "overview.asOfPrefix")} ${fmtUtc(iso(now))}`} />
 
-      <section aria-label="Market map" className="mb-4">
+      <section aria-label={t(messages, "overview.marketMapHeading")} className="mb-4">
         <div className="mb-2 flex items-center justify-between">
-          <h2 className="text-sm font-medium text-muted-foreground">Market map</h2>
+          <h2 className="text-sm font-medium text-muted-foreground">{t(messages, "overview.marketMapHeading")}</h2>
           <nav aria-label="Map window" className="flex gap-1 text-sm">
             <Link href="/?w=24h" aria-current={range === "24h" ? "page" : undefined}
               className={cls("rounded px-2 py-0.5",
@@ -201,7 +202,7 @@ export default async function Overview({
               className={cls("rounded px-2 py-0.5",
                 range === "week" ? "bg-foreground text-background"
                   : "text-muted-foreground hover:text-foreground")}>
-              This week
+              {t(messages, "overview.thisWeek")}
             </Link>
           </nav>
         </div>
@@ -225,8 +226,8 @@ export default async function Overview({
           locale={locale} messages={messages} />
       </section>
 
-      <section aria-label="Technical map" className="mb-4">
-        <h2 className="mb-2 text-sm font-medium text-muted-foreground">Technical map</h2>
+      <section aria-label={t(messages, "overview.technicalMapHeading")} className="mb-4">
+        <h2 className="mb-2 text-sm font-medium text-muted-foreground">{t(messages, "overview.technicalMapHeading")}</h2>
         {/* Same 2:1 viewBox as the fundamental map. The SVG preserves its
             aspect ratio on purpose — stretching would distort tile areas, and
             area is the encoding on a treemap. */}
@@ -235,7 +236,8 @@ export default async function Overview({
       </section>
 
       <StatusStrip lastIngest={lastIngest} runsToday={runsToday} cap={cap}
-        sourceErrors={sourceErrors.length} lastRuns={db.lastRunPerType()} now={now} />
+        sourceErrors={sourceErrors.length} lastRuns={db.lastRunPerType()} now={now}
+        messages={messages} />
 
       {warnings.length > 0 && (
         <div className="mt-3 space-y-2">
@@ -275,13 +277,13 @@ export default async function Overview({
           shorter at every one of those widths. */}
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-5">
         <div className="flex flex-col gap-4 lg:col-span-2">
-          <HorizonStrip horizon={horizon} now={now} />
+          <HorizonStrip horizon={horizon} now={now} messages={messages} />
           <NewsFlow pulse={pulse} heads={heads} top={top} lastItemTs={lastItemTs} now={now}
             locale={locale} messages={messages} />
         </div>
         <div className="flex flex-col gap-4 lg:col-span-3">
           <DriverPanel drivers={drivers} now={now} messages={messages} />
-          <PredictionPanel stats={predStats} bins={calibrationBins(preds)} />
+          <PredictionPanel stats={predStats} bins={calibrationBins(preds)} messages={messages} />
         </div>
       </div>
 
@@ -299,7 +301,8 @@ export default async function Overview({
       </div>
 
       <FooterStrip wakeup={pendingWakeups[0]}
-        event={db.getEvents(14, now)[0]} lastAlert={db.getNotifyLog(1)[0]} now={now} />
+        event={db.getEvents(14, now)[0]} lastAlert={db.getNotifyLog(1)[0]} now={now}
+        locale={locale} messages={messages} />
     </div>
   );
 }

@@ -162,4 +162,36 @@ describe("NewsFlow", () => {
       expect(html).not.toContain("طلا در ۴۳۸۰ ثابت ماند");
     });
   });
+
+  describe("Persian chrome", () => {
+    it("translates the heading, legend, table headers and empty-state words", () => {
+      const html = render({ locale: "fa", messages: messages.fa });
+      expect(html).toContain(messages.fa["news.heading"]);
+      expect(html).toContain(messages.fa["news.goldTopic"]);
+      expect(html).toContain(messages.fa["news.otherTopics"]);
+      expect(html).toContain(messages.fa["news.dailyCounts"]);
+      expect(html).toContain(messages.fa["news.colDay"]);
+      expect(html).toContain(messages.fa["news.latestHeadlines"]);
+      expect(html).toContain(messages.fa["news.lastItemPrefix"]);
+      expect(html).not.toContain(">News flow<");
+    });
+
+    it("translates the top-story and wires words", () => {
+      const html = render({
+        heads: [], locale: "fa", messages: messages.fa,
+        top: { item: item("t1", "Strait strike verified"), sources: 4, items: 6 },
+      });
+      expect(html).toContain(messages.fa["news.topStory"]);
+      expect(html).toContain(messages.fa["news.wiresWord"]);
+      expect(html).toContain("4"); // the count stays a Latin number
+      expect(html).not.toMatch(/[۰-۹]/);
+    });
+
+    it("translates the no-items and no-multi-wire-story empty states", () => {
+      expect(render({ heads: [], locale: "fa", messages: messages.fa }))
+        .toContain(messages.fa["news.noItems"]);
+      expect(render({ top: null, locale: "fa", messages: messages.fa }))
+        .toContain(messages.fa["news.noStoryOnMultipleWires"]);
+    });
+  });
 });

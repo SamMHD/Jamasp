@@ -3,7 +3,7 @@ import { AutoRefresh } from "@/components/auto-refresh";
 import { PageHeader } from "@/components/page-header";
 import { InboxTable } from "@/components/inbox-table";
 import { getItemFilters, getUnreadCount } from "@/lib/db";
-import { getMessages, LANG_COOKIE, resolveLocale } from "@/lib/i18n";
+import { getMessages, LANG_COOKIE, resolveLocale, t } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +18,8 @@ export default async function InboxPage() {
   return (
     <div>
       <AutoRefresh />
-      <PageHeader title="Inbox" subtitle={`${getUnreadCount()} unread cluster representatives`} />
+      <PageHeader title={t(messages, "nav.inbox")}
+        subtitle={`${getUnreadCount()} ${t(messages, "inbox.unreadSubtitle")}`} />
       <InboxTable sources={sources} topics={topics} locale={locale} messages={messages} />
     </div>
   );

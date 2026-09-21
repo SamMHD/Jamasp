@@ -37,6 +37,28 @@ function direction(delta: number | null): Direction {
 }
 
 /**
+ * `tech.regime` is one of exactly four strings lib/technicals.ts#deriveRegime
+ * produces — paired byte-for-byte with jamasp/pricesummary.py#_tech_line and
+ * asserted exactly by test/technicals.test.ts. This is prose ("above both",
+ * not an identifier), so unlike the level ladder's shorthand labels it gets a
+ * full Persian rendering rather than staying Latin — an exact-match lookup,
+ * never a paraphrase of deriveRegime's own return value.
+ */
+const REGIME_KEY: Record<string, string> = {
+  "above both": "tech.regimeAboveBoth",
+  "below both": "tech.regimeBelowBoth",
+  "above 50DMA, below 200DMA": "tech.regimeAbove50Below200",
+  "below 50DMA, above 200DMA": "tech.regimeBelow50Above200",
+};
+
+/** Falls back to the raw string for a regime shape deriveRegime has never
+ *  actually produced — never a blank line where a reading belongs. */
+function regimeLabel(regime: string, messages: Messages): string {
+  const key = REGIME_KEY[regime];
+  return key ? t(messages, key) : regime;
+}
+
+/**
  * Jamasp's own stored gold reading, boxed and labelled as such.
  *
  * This used to be the panel's unlabelled hero figure, which was the whole
@@ -51,20 +73,24 @@ function direction(delta: number | null): Direction {
  * shut and train the desk to ignore it, whereas a plain age is
  * self-interpreting in both directions.
  */
-function LastReading({ spot, now }: {
+function LastReading({ spot, now, messages }: {
   spot: NonNullable<GoldTechnicals["spot"]>;
   now: Date;
+  messages: Messages;
 }) {
   const dir = direction(spot.delta24h);
   return (
     <div className="rounded-md border border-border/60 p-3">
-      <div className="text-label uppercase text-ink-dim">Jamasp&rsquo;s last reading</div>
+      <div className="text-label uppercase text-ink-dim">{t(messages, "tech.lastReadingLabel")}</div>
       <div className="mt-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-1">
         {/* hero figure: proportional digits — tabular is for columns */}
         <span className="text-3xl font-semibold leading-none tracking-tight">
           {num(spot.value)}
         </span>
         <span className={cls("text-sm tabular-nums", DIR_TONE[dir])}>
+          {/* "24h" and the em dash are Latin/unit chrome in both locales — see
+              components/quote-tile.tsx's Delta, which renders the identical
+              "<label> —" shape for the same reason. */}
           {dir === "unknown" ? "24h —" : (
             <>
               {DIR_MARK[dir]} {num(Math.abs(spot.delta24h!))}
@@ -74,7 +100,8 @@ function LastReading({ spot, now }: {
         </span>
       </div>
       <p className="mt-2 text-meta text-ink-dim">
-        {JAMASP_INSTRUMENT} · COMEX front-month · read {fmtAge(spot.ts, now)}
+        {JAMASP_INSTRUMENT} · {t(messages, "tech.comexFrontMonth")} · {t(messages, "tech.readPrefix")}{" "}
+        {fmtAge(spot.ts, now)}
       </p>
       {/* The one thing a side-by-side must not leave the reader to guess.
           The widget charts SPOT (lib/tradingview.ts explains why it cannot
@@ -83,10 +110,10 @@ function LastReading({ spot, now }: {
           reading it as a stale or broken feed would be exactly wrong. */}
       {/* "trades at", not "runs": e2e/smoke.spec.ts asserts an unrelated
           getByText("runs") for the ops strip, and a second match anywhere on
-          the page is a Playwright strict-mode violation. */}
+          the page is a Playwright strict-mode violation — kept true in
+          Persian too, since TV_LIVE_LABEL ("spot XAU/USD") stays Latin. */}
       <p className="text-meta text-ink-dim">
-        vs. live {TV_LIVE_LABEL} — the future trades at a carry premium over
-        spot, so a small standing gap is expected
+        {t(messages, "tech.vsLive")} {TV_LIVE_LABEL} — {t(messages, "tech.carryNote")}
       </p>
     </div>
   );
@@ -127,11 +154,13 @@ export function TechnicalPanel({ tech, series, tvSymbol = TV_LIVE_SYMBOL, gvzSer
     ? (tech.indicators.atr14 / tech.spot.value) * 100
     : null;
   return (
-    <section aria-label="Technical" className="rounded border border-border p-4">
+    <section aria-label={t(messages, "tech.technicalHeading")} className="rounded border border-border p-4">
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
         <h2 className="font-medium">
-          Technical
-          <Link className="ml-2 text-xs font-normal text-primary" href="/prices">→ prices</Link>
+          {t(messages, "tech.technicalHeading")}
+          <Link className="ml-2 text-xs font-normal text-primary" href="/prices">
+            → {t(messages, "nav.prices").toLowerCase()}
+          </Link>
         </h2>
       </div>
 
@@ -144,7 +173,7 @@ export function TechnicalPanel({ tech, series, tvSymbol = TV_LIVE_SYMBOL, gvzSer
               price feed is exactly when the desk most needs a live number to
               check against, so this is deliberately outside the spot guard
               below. */}
-          <LiveChart symbol={tvSymbol}>
+          <LiveChart symbol={tvSymbol} messages={messages}>
             {/* `undefined`, not `&&`: LiveChart distinguishes "no fallback
                 chart to show" from a rendered one, and a `false` child would
                 read as the latter. */}
@@ -155,19 +184,21 @@ export function TechnicalPanel({ tech, series, tvSymbol = TV_LIVE_SYMBOL, gvzSer
                   .map(l => ({ label: l.label, value: l.value }))} />
             ) : undefined}
           </LiveChart>
-          <SeriesTable points={series} label={"view Jamasp’s stored readings as table"} />
+          <SeriesTable points={series} label={t(messages, "tech.storedReadingsTable")} messages={messages} />
         </div>
 
         <div className="flex flex-col gap-3">
           {tech.spot === null ? (
-            <p className="text-sm text-muted-foreground">no price data yet</p>
+            <p className="text-sm text-muted-foreground">{t(messages, "common.noPriceData")}</p>
           ) : (
             <>
-              <LastReading spot={tech.spot} now={now} />
+              <LastReading spot={tech.spot} now={now} messages={messages} />
               <div>
-                <LevelLadder levels={tech.levels} />
+                <LevelLadder levels={tech.levels} messages={messages} />
                 <p className="mt-3 text-sm">
-                  {tech.regime ?? <span className="text-muted-foreground">insufficient data</span>}
+                  {tech.regime
+                    ? regimeLabel(tech.regime, messages)
+                    : <span className="text-muted-foreground">{t(messages, "tech.insufficientData")}</span>}
                 </p>
               </div>
             </>
@@ -180,25 +211,30 @@ export function TechnicalPanel({ tech, series, tvSymbol = TV_LIVE_SYMBOL, gvzSer
           <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
             <div className="flex items-center justify-center rounded-md border border-border/60 p-2">
               <ArcGauge label={t(messages, "signal.rsi14")} value={tech.indicators.rsi14}
-                min={0} max={100}
+                min={0} max={100} messages={messages}
                 ticks={[{ at: 30, text: "30" }, { at: 70, text: "70" }]} />
             </div>
             <QuoteTile label={t(messages, "signal.gvz")} value={tech.indicators.gvz} digits={2}
-              ts={tech.gvzAsOf} delta={gvzDelta} series={gvzSeries} now={now} />
+              ts={tech.gvzAsOf} delta={gvzDelta} series={gvzSeries} now={now} messages={messages} />
             <QuoteTile label={t(messages, "signal.atr14")} value={tech.indicators.atr14} digits={1}
               ts={tech.indicatorsAsOf}
-              note={atrPctOfSpot === null ? undefined : `${num(atrPctOfSpot)}% of spot`}
-              now={now} />
+              note={atrPctOfSpot === null ? undefined
+                : `${num(atrPctOfSpot)}% ${t(messages, "tech.ofSpotSuffix")}`}
+              now={now} messages={messages} />
+            {/* "w/w" (week-over-week) is compact chrome notation in the same
+                register as "24h" elsewhere on this panel — Latin in both
+                locales, same reasoning as fmtAge's own "ago"/"in" (see
+                lib/format.ts, deliberately not locale-aware). */}
             <QuoteTile label={t(messages, "signal.netSpec")} value={tech.indicators.netSpec} digits={1}
               ts={tech.netSpecAsOf} delta={netSpecDelta} deltaLabel="w/w"
-              deltaTone="neutral" note="CFTC weekly" now={now} />
+              deltaTone="neutral" note={t(messages, "tech.cftcWeekly")} now={now} messages={messages} />
           </div>
 
           {tech.indicatorsAsOf && (
             <p className={cls("mt-2 text-xs",
               tech.stale ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground")}>
-              indicators {fmtAge(tech.indicatorsAsOf, now)}
-              {tech.stale && " — stale, technicals feed has missed a cycle"}
+              {t(messages, "tech.indicatorsPrefix")} {fmtAge(tech.indicatorsAsOf, now)}
+              {tech.stale && <> — {t(messages, "tech.stale")}</>}
             </p>
           )}
         </>

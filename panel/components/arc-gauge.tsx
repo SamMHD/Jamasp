@@ -1,4 +1,5 @@
 import { cls } from "@/lib/format";
+import { getMessages, t, type Messages } from "@/lib/i18n";
 
 /**
  * Server-rendered semicircular gauge, for a measure with a *genuinely*
@@ -38,7 +39,8 @@ function num(v: number, digits: number): string {
   return v.toLocaleString(undefined, { maximumFractionDigits: digits });
 }
 
-export function ArcGauge({ label, value, min, max, digits = 1, ticks = [], className }: {
+export function ArcGauge({ label, value, min, max, digits = 1, ticks = [], className,
+  messages = getMessages("en") }: {
   label: string;
   value: number | null;
   min: number;
@@ -46,6 +48,9 @@ export function ArcGauge({ label, value, min, max, digits = 1, ticks = [], class
   digits?: number;
   ticks?: { at: number; text: string }[];
   className?: string;
+  /** Optional, defaulting to English — see quote-tile.tsx#QuoteTile's
+   *  identical reasoning; this leaf's only literal is the "no data" word. */
+  messages?: Messages;
 }) {
   const span = max - min;
   const f = value === null || span <= 0
@@ -61,7 +66,7 @@ export function ArcGauge({ label, value, min, max, digits = 1, ticks = [], class
     // mechanism is the `direction` CSS property directly.
     <svg viewBox="0 0 120 70" role="img"
       style={{ direction: "ltr" }}
-      aria-label={value === null ? `${label}: no data` : `${label} ${display}`}
+      aria-label={value === null ? `${label}: ${t(messages, "common.noData")}` : `${label} ${display}`}
       className={cls("w-full max-w-44", className)}>
       {/* track: a lighter step of the same hue, never a foreign gray */}
       <path d={arcPath(1)} fill="none" strokeWidth="7" strokeLinecap="round"
@@ -97,7 +102,7 @@ export function ArcGauge({ label, value, min, max, digits = 1, ticks = [], class
       <text x={CX} y={64} textAnchor="middle" fontSize="7"
         style={{ textTransform: "uppercase", letterSpacing: "0.08em" }}
         fill="var(--muted-foreground)">
-        {value === null ? `${label} · no data` : label}
+        {value === null ? `${label} · ${t(messages, "common.noData")}` : label}
       </text>
     </svg>
   );

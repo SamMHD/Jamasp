@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import en from "@/messages/en.json";
+import fa from "@/messages/fa.json";
 
 const pathname = vi.hoisted(() => ({ current: "/" }));
 vi.mock("next/navigation", () => ({ usePathname: () => pathname.current }));
@@ -14,9 +15,10 @@ vi.mock("@/lib/actions", () => ({ setLocale: vi.fn() }));
 const { TopBar } = await import("@/components/shell/top-bar");
 
 type Tone = "fresh" | "stale" | "unknown";
-const render = (path: string, tone: Tone = "fresh") => {
+const render = (path: string, tone: Tone = "fresh", messages: typeof en | typeof fa = en) => {
   pathname.current = path;
-  return renderToStaticMarkup(<TopBar ingestTone={tone} locale="en" messages={en} />);
+  return renderToStaticMarkup(
+    <TopBar ingestTone={tone} locale={messages === fa ? "fa" : "en"} messages={messages} />);
 };
 
 describe("TopBar", () => {
@@ -50,5 +52,20 @@ describe("TopBar", () => {
 
   it("respects the top safe area", () => {
     expect(render("/")).toContain("pt-[env(safe-area-inset-top)]");
+  });
+
+  // These two dictionary keys were hand-translated in Task 1 but never
+  // wired to any call site until now — an orphaned key means a surface was
+  // missed, not that the key was spare (same finding class as Task 4's
+  // nav.more). Asserted against the real fa.json.
+  it("states the ingest tone from the dictionary in Persian, in the accessible name", () => {
+    const html = render("/", "stale", fa);
+    expect(html).toContain(fa["shell.ingestStale"]);
+    expect(html).toContain(fa["nav.alerts"]);
+    expect(html).not.toContain("ingest stale");
+  });
+
+  it("keeps the English wording in the English locale", () => {
+    expect(render("/", "fresh", en)).toContain(en["shell.ingestFresh"]);
   });
 });

@@ -16,6 +16,14 @@ const DOT = {
   unknown: "bg-muted-foreground",
 } as const;
 
+// `shell.ingest{Fresh,Stale,Unknown}` — hand-translated in Task 1 but never
+// wired to a call site; this accessible name is the surface they were
+// always meant for (StatusStrip states the same three tones in its own
+// words via lib/format.ts's fmtAge, not through this shared dictionary key).
+const INGEST_KEY = {
+  fresh: "shell.ingestFresh", stale: "shell.ingestStale", unknown: "shell.ingestUnknown",
+} as const;
+
 /**
  * Mobile header, rendered below 1024px only.
  *
@@ -44,7 +52,7 @@ export function TopBar({ ingestTone, locale, messages }: {
         <span className="ml-auto flex items-center gap-1">
           <Link
             href="/alerts"
-            aria-label={`Alerts — ingest ${ingestTone}`}
+            aria-label={`${t(messages, "nav.alerts")} — ${t(messages, INGEST_KEY[ingestTone])}`}
             className="inline-flex h-11 w-11 items-center justify-center rounded-md
                        hover:bg-secondary focus-visible:outline-2
                        focus-visible:outline-offset-2 focus-visible:outline-ring"

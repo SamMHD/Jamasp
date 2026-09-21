@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Horizon, HorizonEntry, HorizonLane } from "@/lib/horizon";
 import { cls, fmtAge, fmtUtc } from "@/lib/format";
+import { t, type Messages } from "@/lib/i18n";
 
 /**
  * The fundamental band's forward axis: what is scheduled that could move
@@ -33,9 +34,12 @@ const LANE_Y: Record<HorizonLane, number> = { event: 18, prediction: 42, wakeup:
 const LANE_VAR: Record<HorizonLane, string> = {
   event: "var(--viz-1)", prediction: "var(--viz-2)", wakeup: "var(--viz-3)",
 };
-const LANE_TEXT: Record<HorizonLane, string> = {
-  event: "events", prediction: "maturities", wakeup: "wakeups",
+const LANE_TEXT_KEY: Record<HorizonLane, string> = {
+  event: "horizon.laneEvents", prediction: "horizon.laneMaturities", wakeup: "horizon.wakeupsWord",
 };
+// Latin weekday abbreviations in both locales — the same Gregorian-dates
+// exemption fmtUtc/fmtDubai already carry (spec decision 9), not an
+// oversight of this file.
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const AXIS_Y = 82;
 const MAX_ROWS = 6;
@@ -54,7 +58,9 @@ function Mark({ entry, x }: { entry: HorizonEntry; x: number }) {
   );
 }
 
-export function HorizonStrip({ horizon, now }: { horizon: Horizon; now: Date }) {
+export function HorizonStrip({ horizon, now, messages }: {
+  horizon: Horizon; now: Date; messages: Messages;
+}) {
   const { entries, counts, overdueCount, days } = horizon;
   const t0 = Date.parse(horizon.start);
   const t1 = Date.parse(horizon.end);
@@ -72,25 +78,30 @@ export function HorizonStrip({ horizon, now }: { horizon: Horizon; now: Date }) 
   const labelled = entries.find(e => e.lane === "event" && e.impact === "high");
 
   return (
-    <section aria-label="Horizon" dir="ltr" className="rounded border border-border p-4">
+    <section aria-label={t(messages, "horizon.heading")} dir="ltr" className="rounded border border-border p-4">
       <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
         <h2 className="font-medium">
-          Horizon
-          <Link className="ml-2 text-xs font-normal text-primary" href="/calendar">→ calendar</Link>
+          {t(messages, "horizon.heading")}
+          <Link className="ml-2 text-xs font-normal text-primary" href="/calendar">
+            → {t(messages, "nav.calendar").toLowerCase()}
+          </Link>
         </h2>
         <span className="text-xs text-muted-foreground tabular-nums">
-          next {days}d · {counts.event} event {counts.event === 1 ? "slot" : "slots"} ·{" "}
-          {counts.prediction} maturing · {counts.wakeup} {counts.wakeup === 1 ? "wakeup" : "wakeups"}
+          {t(messages, "horizon.nextPrefix")} {days}d · {counts.event}{" "}
+          {t(messages, counts.event === 1 ? "horizon.eventSlotWord" : "horizon.eventSlotsWord")} ·{" "}
+          {counts.prediction} {t(messages, "horizon.maturingWord")} · {counts.wakeup}{" "}
+          {t(messages, counts.wakeup === 1 ? "horizon.wakeupWord" : "horizon.wakeupsWord")}
           {overdueCount > 0 && (
-            <span className="text-amber-600 dark:text-amber-400"> · {overdueCount} overdue</span>
+            <span className="text-amber-600 dark:text-amber-400">
+              {" "}· {overdueCount} {t(messages, "horizon.overdueWord")}
+            </span>
           )}
         </span>
       </div>
 
       {entries.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          nothing on the horizon — no high/medium-impact events, open-prediction
-          maturities, or pending wakeups in the next {days} days
+          {t(messages, "horizon.nothingOnHorizon").replace("{n}", String(days))}
         </p>
       ) : (
         <>
@@ -121,12 +132,12 @@ export function HorizonStrip({ horizon, now }: { horizon: Horizon; now: Date }) 
             {/* end-anchored into the gutter so it can never collide with the
                 first day label, whatever hour the render lands on */}
             <text x={GUTTER - 4} y={H - 4} fontSize="10" textAnchor="end"
-              fill="var(--muted-foreground)">now</text>
+              fill="var(--muted-foreground)">{t(messages, "horizon.nowLabel")}</text>
 
             {/* lane labels — identity by text, never colour alone */}
             {(Object.keys(LANE_Y) as HorizonLane[]).map(lane => (
               <text key={lane} x={GUTTER - 10} y={LANE_Y[lane] + 3.5} fontSize="10"
-                textAnchor="end" fill="var(--muted-foreground)">{LANE_TEXT[lane]}</text>
+                textAnchor="end" fill="var(--muted-foreground)">{t(messages, LANE_TEXT_KEY[lane])}</text>
             ))}
 
             {/* the one direct label: the first high-impact event */}
@@ -144,11 +155,11 @@ export function HorizonStrip({ horizon, now }: { horizon: Horizon; now: Date }) 
           <div className="mt-1 flex gap-4 text-meta text-muted-foreground">
             <span className="flex items-center gap-1">
               <span aria-hidden className="h-2.5 w-2.5 rounded-full"
-                style={{ background: "var(--viz-1)" }} /> high impact
+                style={{ background: "var(--viz-1)" }} /> {t(messages, "horizon.highImpact")}
             </span>
             <span className="flex items-center gap-1">
               <span aria-hidden className="h-2.5 w-2.5 rounded-full border-[1.5px]"
-                style={{ borderColor: "var(--viz-1)" }} /> medium
+                style={{ borderColor: "var(--viz-1)" }} /> {t(messages, "horizon.mediumImpact")}
             </span>
           </div>
 
@@ -164,15 +175,24 @@ export function HorizonStrip({ horizon, now }: { horizon: Horizon; now: Date }) 
                   </span>
                   <span className={cls("w-14 shrink-0 text-xs",
                     e.overdue ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground")}>
-                    {e.overdue ? "overdue" : fmtAge(e.ts, now)}
+                    {e.overdue ? t(messages, "horizon.overdueWord") : fmtAge(e.ts, now)}
                   </span>
                   <span className="min-w-0 flex-1 truncate">
+                    {/* e.label is a wakeup's "#{id} {run_type}" (built in
+                        lib/horizon.ts), an event's headline, or a
+                        prediction's id — none of these is chrome, so none
+                        goes through the dictionary here. The run_type slug
+                        specifically stays Latin: splitting it out of this
+                        precomposed string to translate just that word would
+                        mean restructuring HorizonEntry's shape, which
+                        test/horizon.test.ts pins independently of this
+                        component. */}
                     <span className="font-medium">{e.label}</span>
                     <span className="text-muted-foreground"> — {e.detail}</span>
                   </span>
                   {e.lane === "prediction" && e.confidence !== null && (
                     <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
-                      conf {e.confidence}
+                      {t(messages, "horizon.confPrefix")} {e.confidence}
                     </span>
                   )}
                 </Link>
@@ -180,7 +200,7 @@ export function HorizonStrip({ horizon, now }: { horizon: Horizon; now: Date }) 
             ))}
             {entries.length > MAX_ROWS && (
               <li className="text-xs text-muted-foreground">
-                +{entries.length - MAX_ROWS} more within {days}d
+                +{entries.length - MAX_ROWS} {t(messages, "horizon.moreWithin").replace("{n}", String(days))}
               </li>
             )}
           </ul>

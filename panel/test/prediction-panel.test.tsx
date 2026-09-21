@@ -4,6 +4,10 @@ import { PredictionPanel } from "../components/prediction-panel";
 import { calibrationBins } from "../lib/calibration";
 import type { PredictionStats } from "../lib/files";
 import type { Prediction } from "../lib/files";
+import { getMessages } from "../lib/i18n";
+import fa from "../messages/fa.json";
+
+const messages = getMessages("en");
 
 const pred = (confidence: number, outcome: string | null): Prediction => ({
   id: "x", date: "2026-08-01", claim: "c", direction: "up", horizon_days: 5,
@@ -20,7 +24,7 @@ describe("PredictionPanel", () => {
   it("renders hit rate, counts and the calibration chart", () => {
     const preds = [pred(0.72, "hit"), pred(0.72, "hit"), pred(0.85, "miss")];
     const html = renderToStaticMarkup(
-      <PredictionPanel bins={calibrationBins(preds)}
+      <PredictionPanel messages={messages} bins={calibrationBins(preds)}
         stats={stats({ scored: 3, hits: 2, misses: 1, hitRate: 2 / 3 })} />);
     expect(html).toContain("67%");
     expect(html).toContain("2 hit · 1 miss · 0 unclear · 0 open");
@@ -36,7 +40,7 @@ describe("PredictionPanel", () => {
   // accessible counterpart, not a stand-in for a real page.
   it("links out to the ledger page", () => {
     const html = renderToStaticMarkup(
-      <PredictionPanel bins={calibrationBins([])} stats={stats({ open: 1 })} />);
+      <PredictionPanel messages={messages} bins={calibrationBins([])} stats={stats({ open: 1 })} />);
     expect(html).toContain('href="/predictions"');
     expect(html).toContain("→ predictions");
   });
@@ -44,7 +48,7 @@ describe("PredictionPanel", () => {
   it("keeps every count reachable without hover via the table twin", () => {
     const preds = [pred(0.72, "hit"), pred(0.72, "hit"), pred(0.85, "miss")];
     const html = renderToStaticMarkup(
-      <PredictionPanel bins={calibrationBins(preds)}
+      <PredictionPanel messages={messages} bins={calibrationBins(preds)}
         stats={stats({ scored: 3, hits: 2, misses: 1, hitRate: 2 / 3 })} />);
     expect(html).toContain("70–80%");
     expect(html).toContain("80–90%");
@@ -52,14 +56,14 @@ describe("PredictionPanel", () => {
 
   it("states an empty ledger outright", () => {
     const html = renderToStaticMarkup(
-      <PredictionPanel bins={calibrationBins([])} stats={stats({})} />);
+      <PredictionPanel messages={messages} bins={calibrationBins([])} stats={stats({})} />);
     expect(html).toContain("no predictions recorded");
     expect(html).not.toContain("<svg");
   });
 
   it("says 'none scored yet' when the ledger has only open predictions — no empty chart", () => {
     const html = renderToStaticMarkup(
-      <PredictionPanel bins={calibrationBins([pred(0.7, null)])}
+      <PredictionPanel messages={messages} bins={calibrationBins([pred(0.7, null)])}
         stats={stats({ open: 1 })} />);
     expect(html).toContain("none scored yet");
     expect(html).toContain("1 open");
@@ -69,7 +73,7 @@ describe("PredictionPanel", () => {
 
   it("draws no chart from unclear-only outcomes — they carry no calibration information", () => {
     const html = renderToStaticMarkup(
-      <PredictionPanel bins={calibrationBins([pred(0.7, "unclear")])}
+      <PredictionPanel messages={messages} bins={calibrationBins([pred(0.7, "unclear")])}
         stats={stats({ scored: 1, unclear: 1 })} />);
     expect(html).toContain("none scored yet");
     expect(html).toContain("1 unclear");
@@ -78,9 +82,39 @@ describe("PredictionPanel", () => {
 
   it("flags matured-but-unscored predictions in amber", () => {
     const html = renderToStaticMarkup(
-      <PredictionPanel bins={calibrationBins([])}
+      <PredictionPanel messages={messages} bins={calibrationBins([])}
         stats={stats({ open: 1, maturedUnscored: 2 })} />);
     expect(html).toContain("2 awaiting score");
     expect(html).toContain("text-amber-600");
+  });
+});
+
+describe("PredictionPanel — Persian", () => {
+  const faMessages = getMessages("fa");
+
+  it("translates the heading, stats words and legend from the dictionary", () => {
+    const preds = [pred(0.72, "hit"), pred(0.72, "hit"), pred(0.85, "miss")];
+    const html = renderToStaticMarkup(
+      <PredictionPanel messages={faMessages} bins={calibrationBins(preds)}
+        stats={stats({ scored: 3, hits: 2, misses: 1, hitRate: 2 / 3 })} />);
+    expect(html).toContain(fa["predictions.forecastRecordHeading"]);
+    expect(html).toContain(fa["predictions.wordHitRate"]);
+    expect(html).toContain(fa["predictions.wordHit"]);
+    expect(html).toContain(fa["predictions.wordMiss"]);
+    expect(html).toContain(fa["predictions.hitAboveLine"]);
+    expect(html).toContain(fa["predictions.missBelowLine"]);
+    expect(html).toContain(fa["common.viewAsTable"]);
+    expect(html).not.toContain(">hit<");
+  });
+
+  it("translates the empty-ledger and none-scored-yet states", () => {
+    const empty = renderToStaticMarkup(
+      <PredictionPanel messages={faMessages} bins={calibrationBins([])} stats={stats({})} />);
+    expect(empty).toContain(fa["predictions.noneRecorded"]);
+
+    const noneScored = renderToStaticMarkup(
+      <PredictionPanel messages={faMessages} bins={calibrationBins([pred(0.7, null)])}
+        stats={stats({ open: 1 })} />);
+    expect(noneScored).toContain(fa["predictions.noneScoredYet"]);
   });
 });

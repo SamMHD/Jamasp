@@ -2,8 +2,12 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { StatusStrip, FooterStrip } from "../components/status-strip";
 import type { AgentRunRow, EventRow, NotifyLogRow, WakeupRow } from "../lib/db";
+import { getMessages } from "../lib/i18n";
+import en from "../messages/en.json";
+import fa from "../messages/fa.json";
 
 const NOW = new Date("2026-08-01T12:00:00Z");
+const messages = { en: getMessages("en"), fa: getMessages("fa") };
 
 const run = (run_type: string, status: string, started_at: string): AgentRunRow => ({
   id: Math.floor(Math.random() * 100000), run_type, task: null,
@@ -27,6 +31,7 @@ const BASE: StatusStripProps = {
   sourceErrors: 0,
   lastRuns: BASE_RUNS,
   now: NOW,
+  messages: messages.en,
 };
 
 const render = (props: StatusStripProps) => renderToStaticMarkup(<StatusStrip {...props} />);
@@ -139,7 +144,8 @@ describe("StatusStrip — per-run-type dots", () => {
 const renderFooter = (props: {
   wakeup: WakeupRow | undefined; event: EventRow | undefined;
   lastAlert: NotifyLogRow | undefined; now: Date;
-}) => renderToStaticMarkup(<FooterStrip {...props} />);
+}, locale: "en" | "fa" = "en") =>
+  renderToStaticMarkup(<FooterStrip {...props} locale={locale} messages={messages[locale]} />);
 
 const wakeup: WakeupRow = { id: 7, due_at: "2026-08-01T14:00:00Z", run_type: "deepdive",
   task: "read the Fed statement", status: "pending", attempts: 0,
@@ -181,5 +187,58 @@ describe("FooterStrip", () => {
     // branch's "none pending" a few spans earlier, so it asserted nothing at
     // all about the last-alert fallback.
     expect(html).toContain("last alert: none");
+  });
+});
+
+// Task 11's explicit carry-forward: this component and schedule-forms.tsx
+// were flagged as rendering raw run-type slugs through interpolation
+// ({t}, <option key={t}>{t}</option>) rather than through the runType.*
+// dictionary — invisible to the brief's own literal-JSX-text grep. Asserted
+// against the real fa.json, never a hand-typed guess, so a wording edit
+// there cannot silently desync these tests.
+describe("StatusStrip / FooterStrip — Persian", () => {
+  it("renders every run-type dot's label from the dictionary, lower-cased to match this strip's register", () => {
+    const html = renderToStaticMarkup(<StatusStrip {...BASE} messages={messages.fa} />);
+    for (const rt of ["brief", "scan", "deepdive", "retro"] as const) {
+      expect(html).toContain(fa[`runType.${rt}` as keyof typeof fa]);
+    }
+    // Never the raw English slug leaking through instead of the dictionary.
+    expect(html).not.toContain(">brief<");
+    expect(html).not.toContain(">retro<");
+  });
+
+  it("translates the ingest/runs/errors words", () => {
+    const html = renderToStaticMarkup(<StatusStrip {...BASE} messages={messages.fa} />);
+    expect(html).toContain(fa["status.ingestWord"]);
+    expect(html).toContain(fa["status.runsWord"]);
+  });
+
+  it("renders the wakeup's run type through the dictionary in the footer", () => {
+    const html = renderFooter({ wakeup, event: undefined, lastAlert: undefined, now: NOW }, "fa");
+    expect(html).toContain(fa["runType.deepdive"]);
+    expect(html).not.toContain(">deepdive<");
+  });
+
+  it("renders the event title in Persian with no EN marker when translated", () => {
+    const translated: EventRow = { ...event, title_fa: "شاخص قیمت مصرف‌کننده آمریکا" };
+    const html = renderFooter({ wakeup: undefined, event: translated, lastAlert: undefined, now: NOW }, "fa");
+    expect(html).toContain("شاخص قیمت مصرف‌کننده آمریکا");
+    expect(html).not.toContain(fa["content.sourceEnglish"]);
+  });
+
+  it("falls back to the English event title with the EN marker when untranslated", () => {
+    const html = renderFooter({ wakeup: undefined, event, lastAlert: undefined, now: NOW }, "fa");
+    expect(html).toContain("US CPI");
+    expect(html).toContain(fa["content.sourceEnglish"]);
+  });
+
+  it("translates the wakeup/event/alert prefixes and absent-state words", () => {
+    const html = renderFooter({ wakeup: undefined, event: undefined, lastAlert: undefined, now: NOW }, "fa");
+    expect(html).toContain(fa["status.nextWakeupPrefix"]);
+    expect(html).toContain(fa["status.noneWakeupPending"]);
+    expect(html).toContain(fa["status.nextEventPrefix"]);
+    expect(html).toContain(fa["status.nothingUpcoming"]);
+    expect(html).toContain(fa["status.lastAlertPrefix"]);
+    expect(html).not.toMatch(/[۰-۹]/);
   });
 });

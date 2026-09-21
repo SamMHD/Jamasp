@@ -82,9 +82,14 @@ CREATE TABLE IF NOT EXISTS item_scores (
     scored_at  TEXT NOT NULL
 );
 
+-- i2 deliberately carries a headline_fa and i1/i3 deliberately do not, so the
+-- panel-i18n e2e suite (e2e/i18n.spec.ts) has one translated and one
+-- untranslated unread row on the same /inbox page: an untranslated row must
+-- show the EN marker, a translated one must not. Unlike the calendar's fixed
+-- 2026-08 dates, /inbox has no forward-looking date window to drift out of.
 INSERT INTO items VALUES
  ('i1','cnbc_finance','2026-08-01T08:00:00Z','Gold steadies as dollar slips','Spot gold held near…','https://example.com/a1','gold','i1','2026-08-01T08:05:00Z',NULL,NULL,NULL,NULL),
- ('i2','marketwatch_top','2026-08-01T07:30:00Z','Fed officials split on September cut',NULL,'https://example.com/a2','fed','i2','2026-08-01T07:35:00Z',NULL,NULL,NULL,NULL),
+ ('i2','marketwatch_top','2026-08-01T07:30:00Z','Fed officials split on September cut',NULL,'https://example.com/a2','fed','i2','2026-08-01T07:35:00Z',NULL,'شکاف فدرال رزرو بر سر کاهش نرخ سپتامبر',NULL,'model'),
  ('i3','cnbc_finance','2026-08-01T06:00:00Z','Dollar slides on jobs data','—','https://example.com/a3','gold','i1','2026-08-01T06:05:00Z','2026-08-01T07:00:00Z',NULL,NULL,NULL);
 INSERT INTO prices VALUES
  ('GC','2026-07-25T08:00:00Z',3290.0),('GC','2026-07-31T08:00:00Z',3310.5),('GC','2026-08-01T08:00:00Z',3325.0),

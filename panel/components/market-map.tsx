@@ -68,10 +68,23 @@ function themeLabel(theme: string, messages: Messages): string {
     : theme.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 }
 
-const WINDOW_LABEL: Record<MapRange, string> = {
-  "24h": "in the last 24h",
-  week: "this week",
+const WINDOW_LABEL_KEY: Record<MapRange, string> = {
+  "24h": "map.windowLast24h",
+  week: "map.windowThisWeek",
 };
+
+function windowLabel(range: MapRange, messages: Messages): string {
+  return t(messages, WINDOW_LABEL_KEY[range]);
+}
+
+/**
+ * English-only, deliberately, in both locales: the svg's own aria-label
+ * below is a dynamically composed accessibility sentence (item counts
+ * folded in), not visible chrome with a Persian rendering to match against
+ * — see this task's report for the full reasoning next to the section
+ * aria-label just above it, which gets the identical treatment.
+ */
+const WINDOW_LABEL_EN: Record<MapRange, string> = { "24h": "in the last 24h", week: "this week" };
 
 
 const FATE_WORD = {
@@ -138,12 +151,19 @@ export function MarketMap({ items, width, height, range, coverage,
   const now = new Date();
 
   if (items.length === 0) {
+    // aria-label deliberately English-only in both locales: it names an
+    // SVG-accessibility surface, not visible chrome, and has no visible
+    // counterpart elsewhere on the page for a Persian rendering to match
+    // against — see this task's report for the full reasoning.
     return (
       <section aria-label="Scored news treemap" className="rounded border border-border p-4">
         <p className="text-sm text-muted-foreground">
-          No scored stories {WINDOW_LABEL[range]}
+          {t(messages, "map.noScoredStoriesTemplate").replace("{window}", windowLabel(range, messages))}
           {coverage.unscored > 0
-            ? ` — ${coverage.unscored} unscored item${coverage.unscored === 1 ? "" : "s"} not shown.`
+            ? // English keeps its own singular/plural word ("item"/"items");
+              // Persian has no such distinction, so the same word covers both.
+              ` — ${coverage.unscored} ${t(messages, "map.unscoredItemWord")}` +
+              `${locale === "en" && coverage.unscored !== 1 ? "s" : ""} ${t(messages, "map.notShown")}.`
             : "."}
         </p>
       </section>
@@ -177,7 +197,7 @@ export function MarketMap({ items, width, height, range, coverage,
         <FullscreenButton targetId={MAP_ELEMENT_ID} />
       </div>
       <svg viewBox={`0 0 ${width} ${height}`} className="w-full" role="img"
-        aria-label={`scored news treemap, ${items.length} scored stories ${WINDOW_LABEL[range]}`}>
+        aria-label={`scored news treemap, ${items.length} scored stories ${WINDOW_LABEL_EN[range]}`}>
         <MapHatchDefs />
         {boxes.map(box => (
           <g key={box.theme}>
@@ -224,16 +244,26 @@ export function MarketMap({ items, width, height, range, coverage,
       </svg>
       <MapLegend importance={importance} messages={messages} />
       <p className="mt-2 text-xs text-muted-foreground">
-        {coverage.scored} scored {coverage.scored === 1 ? "story" : "stories"} {WINDOW_LABEL[range]}
-        {" "}· {coverage.unscored} unscored not shown
+        {/* English keeps "scored story"/"scored stories" (adjective-noun,
+            pluralized); Persian's natural order is noun-then-adjective, and
+            has no plural to carry, so the two locales compose the same three
+            dictionary words in a different order rather than forcing one
+            template to read naturally in both. */}
+        {locale === "fa"
+          ? <>{coverage.scored} {t(messages, "map.storyWord")} {t(messages, "map.scoredWord")}</>
+          : <>{coverage.scored} {t(messages, "map.scoredWord")}{" "}
+              {t(messages, coverage.scored === 1 ? "map.storyWord" : "map.storiesWord")}</>}
+        {" "}{windowLabel(range, messages)}
+        {" "}· {coverage.unscored} {t(messages, "map.unscoredNotShownFooter")}
         {/* Area is the triage tier, full stop — see the header comment. The
             theme fit is still worth dating here because it is the other
             number this map is built from and the desk has no other view of
             its freshness; it is named as NOT an area term so the line cannot
             be read as the rescale claim it replaced. */}
         {fittedAt && hasMultipliers
-          ? ` · area is the triage tier · theme fit ${fmtAge(fittedAt, now)}, not applied to area`
-          : " · area is the triage tier · theme fit not yet run"}
+          ? <> · {t(messages, "map.areaIsTier")} · {t(messages, "map.themeFit")}{" "}
+              {fmtAge(fittedAt, now)}, {t(messages, "map.notAppliedToArea")}</>
+          : <> · {t(messages, "map.areaIsTier")} · {t(messages, "map.themeFitNotRun")}</>}
       </p>
     </section>
   );

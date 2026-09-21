@@ -236,15 +236,19 @@ function FlipsSection({ heading, body, fallback, messages }: {
   );
 }
 
-function Watching({ watchlist, now }: { watchlist: WatchlistEntry[]; now: Date }) {
+function Watching({ watchlist, now, messages }: {
+  watchlist: WatchlistEntry[]; now: Date; messages: Messages;
+}) {
   return (
     <div className="mt-6 border-t border-border pt-3">
       <h3 className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">
-        Watching
-        <Link className="ml-2 normal-case tracking-normal text-primary" href="/state">→ state</Link>
+        {t(messages, "fundamental.watchingHeading")}
+        <Link className="ml-2 normal-case tracking-normal text-primary" href="/state">
+          → {t(messages, "nav.state").toLowerCase()}
+        </Link>
       </h3>
       {watchlist.length === 0 ? (
-        <p className="text-sm text-muted-foreground">watchlist empty</p>
+        <p className="text-sm text-muted-foreground">{t(messages, "fundamental.watchlistEmpty")}</p>
       ) : (
         <div className="flex flex-wrap gap-1.5">
           {watchlist.map(w => (
@@ -287,27 +291,32 @@ export function FundamentalPanel({
     ? bodyAt(stance.sections.whatFlipsMe.body, positions.byKey.whatFlipsMe) : null;
 
   return (
-    <section aria-label="Fundamental" className="rounded border border-border p-4">
+    <section aria-label={t(messages, "fundamental.heading")} className="rounded border border-border p-4">
       <div className="mb-2 flex items-baseline justify-between gap-2">
         <h2 className="font-medium">
-          Fundamental
-          <Link className="ml-2 text-xs font-normal text-primary" href="/state">→ state</Link>
+          {t(messages, "fundamental.heading")}
+          <Link className="ml-2 text-xs font-normal text-primary" href="/state">
+            → {t(messages, "nav.state").toLowerCase()}
+          </Link>
         </h2>
         {stance?.asOf && (
           <span className="text-xs text-muted-foreground">
-            stance {stance.asOf}{stance.updatedNote ? ` · ${stance.updatedNote}` : ""}
+            {t(messages, "fundamental.stancePrefix")} {stance.asOf}
+            {stance.updatedNote ? ` · ${stance.updatedNote}` : ""}
             {age !== null && age >= 2 && (
-              <span className="text-amber-600 dark:text-amber-400"> · {age}d old</span>
+              <span className="text-amber-600 dark:text-amber-400">
+                {" "}· {age}{t(messages, "fundamental.daysOldSuffix")}
+              </span>
             )}
           </span>
         )}
       </div>
 
       {stance === null ? (
-        <p className="text-sm text-muted-foreground">no stance yet</p>
+        <p className="text-sm text-muted-foreground">{t(messages, "common.noStanceYet")}</p>
       ) : stance.degraded ? (
         <>
-          <Badge variant="outline" className="mb-2">unrecognised format</Badge>
+          <Badge variant="outline" className="mb-2">{t(messages, "fundamental.unrecognisedFormat")}</Badge>
           <Markdown text={stance.raw} />
         </>
       ) : (
@@ -345,7 +354,7 @@ export function FundamentalPanel({
         </>
       )}
 
-      <Watching watchlist={watchlist} now={now} />
+      <Watching watchlist={watchlist} now={now} messages={messages} />
     </section>
   );
 }

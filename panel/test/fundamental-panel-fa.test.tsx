@@ -128,3 +128,35 @@ describe("FundamentalPanel Persian rendering", () => {
     expect(fallbackCount(html)).toBe(0);
   });
 });
+
+describe("FundamentalPanel — Persian chrome", () => {
+  it("translates the heading, no-stance/no-format states, and the watching section", () => {
+    const html = render("fa", null);
+    expect(html).toContain(fa["fundamental.heading"]);
+    expect(html).not.toContain(">Fundamental<");
+
+    const noStance = renderToStaticMarkup(
+      <FundamentalPanel stance={null} watchlist={[]} now={NOW} locale="fa" messages={messages.fa} />);
+    expect(noStance).toContain(fa["common.noStanceYet"]);
+
+    const empty = renderToStaticMarkup(
+      <FundamentalPanel stance={parseStance(STANCE)} watchlist={[]} now={NOW}
+        locale="fa" messages={messages.fa} />);
+    expect(empty).toContain(fa["fundamental.watchingHeading"]);
+    expect(empty).toContain(fa["fundamental.watchlistEmpty"]);
+  });
+
+  it("translates the stance-age label and 'd old' suffix, keeping the number Latin", () => {
+    const html = render("fa", faSections());
+    expect(html).toContain(fa["fundamental.stancePrefix"]);
+
+    // STANCE is dated 2026-08-01; a later `now` puts it well past the ≥2-day
+    // amber threshold, so the age suffix is guaranteed to render here.
+    const laterNow = new Date("2026-08-05T12:00:00Z");
+    const aged = renderToStaticMarkup(
+      <FundamentalPanel stance={parseStance(STANCE)} watchlist={[]} now={laterNow}
+        locale="fa" messages={messages.fa} stanceFa={faSections()} />);
+    expect(aged).toContain(`4${fa["fundamental.daysOldSuffix"]}`); // "4" + fa suffix, no space
+    expect(aged).not.toMatch(/[۰-۹]/);
+  });
+});

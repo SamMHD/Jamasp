@@ -28,7 +28,19 @@ export function runBadge(status: string): { variant: "secondary" | "destructive"
   return { variant: "destructive" };
 }
 
-export function RunBadge({ status }: { status: string }) {
+/**
+ * `status` is the closed set lib/validate.ts's agent-run statuses define
+ * (ok/failed/timeout/deferred/empty) — chrome, not content, same treatment
+ * as `runTypeLabel` above. Falls back to the raw value for anything outside
+ * that set (there shouldn't be any) rather than a dictionary-miss key.
+ */
+export function runStatusLabel(status: string, messages: Messages): string {
+  const key = `runStatus.${status}`;
+  const label = t(messages, key);
+  return label !== key ? label : status;
+}
+
+export function RunBadge({ status, messages }: { status: string; messages: Messages }) {
   const badge = runBadge(status);
-  return <Badge variant={badge.variant} className={badge.className}>{status}</Badge>;
+  return <Badge variant={badge.variant} className={badge.className}>{runStatusLabel(status, messages)}</Badge>;
 }

@@ -1,6 +1,7 @@
 import { renderToReadableStream } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import fa from "@/messages/fa.json";
+import type { Prediction, WatchlistEntry } from "@/lib/files";
 
 // Same stubbing shape as test/calendar-i18n.test.tsx's "Full page wiring"
 // section: StatePage is an async server component reading the locale
@@ -20,14 +21,20 @@ const mockFiles = vi.hoisted(() => ({
   stanceFa: null as { sections: { heading: string; hash: string; body: string }[] } | null,
   playbook: null as string | null,
   playbookFa: null as string | null,
+  watchlist: [] as WatchlistEntry[],
+  watchlistFa: {} as Record<string, string>,
+  predictions: [] as Prediction[],
+  predictionsFa: {} as Record<string, string>,
 }));
 vi.mock("@/lib/files", () => ({
   readStance: () => mockFiles.stance,
   readStanceFa: () => mockFiles.stanceFa,
   readPlaybook: () => mockFiles.playbook,
   readPlaybookFa: () => mockFiles.playbookFa,
-  readWatchlist: () => [],
-  readPredictions: () => [],
+  readWatchlist: () => mockFiles.watchlist,
+  readWatchlistFa: () => mockFiles.watchlistFa,
+  readPredictions: () => mockFiles.predictions,
+  readPredictionsFa: () => mockFiles.predictionsFa,
   predictionStats: () => ({ open: 0, maturedUnscored: 0, scored: 0,
     hits: 0, misses: 0, unclear: 0, hitRate: null }),
 }));
@@ -120,5 +127,100 @@ describe("state page (stance/playbook Persian sidecars)", () => {
     const html = await renderPage("fa");
     expect(html).toContain("نگه‌داشتن خط در بازده واقعی");
     expect(html).not.toContain("Hold the line on real yields");
+  });
+});
+
+// Task 11's own required wiring: the watchlist's `why` and each prediction's
+// `claim`, through readWatchlistFa()/readPredictionsFa() keyed by
+// theme/id respectively — the part of this page Task 9 explicitly left for
+// this task (see the plan's pre-flight scan: "T9 stance section; T11
+// watchlist section").
+describe("state page — watchlist and predictions Persian wiring", () => {
+  it("renders the watchlist's Persian why with no EN marker when the sidecar matches, keeping the theme slug Latin", async () => {
+    mockFiles.stance = null; mockFiles.stanceFa = null;
+    mockFiles.playbook = null; mockFiles.playbookFa = null;
+    mockFiles.watchlist = [
+      { theme: "fed-rate-path", why: "dominant driver of real yields", since: "2026-07-31" },
+    ];
+    mockFiles.watchlistFa = { "fed-rate-path": "محرک اصلی بازده واقعی" };
+    mockFiles.predictions = [];
+    mockFiles.predictionsFa = {};
+
+    const html = await renderPage("fa");
+    expect(html).toContain("fed-rate-path"); // the theme slug stays Latin
+    expect(html).toContain("محرک اصلی بازده واقعی");
+    expect(html).not.toContain("dominant driver of real yields");
+    expect(html).not.toContain(fa["content.sourceEnglish"]);
+  });
+
+  it("falls back to the watchlist's English why with the EN marker when the theme has no sidecar entry", async () => {
+    mockFiles.stance = null; mockFiles.stanceFa = null;
+    mockFiles.playbook = null; mockFiles.playbookFa = null;
+    mockFiles.watchlist = [
+      { theme: "mecca-pact", why: "Gulf supply-side risk", since: "2026-08-01" },
+    ];
+    mockFiles.watchlistFa = {}; // still queued behind the translate job's budget
+    mockFiles.predictions = [];
+    mockFiles.predictionsFa = {};
+
+    const html = await renderPage("fa");
+    expect(html).toContain("Gulf supply-side risk");
+    expect(html).toContain(fa["content.sourceEnglish"]);
+  });
+
+  it("renders a prediction's Persian claim with no EN marker when the sidecar matches", async () => {
+    mockFiles.stance = null; mockFiles.stanceFa = null;
+    mockFiles.playbook = null; mockFiles.playbookFa = null;
+    mockFiles.watchlist = []; mockFiles.watchlistFa = {};
+    mockFiles.predictions = [{
+      id: "p1", date: "2026-08-01", claim: "Gold clears 3400 before the next FOMC.",
+      direction: "up", horizon_days: 5, confidence: 0.7,
+      created_at: "2026-08-01T00:00:00Z", outcome: null, scored_at: null, note: null,
+    }];
+    mockFiles.predictionsFa = { p1: "طلا قبل از نشست بعدی FOMC از ۳۴۰۰ عبور می‌کند." };
+
+    const html = await renderPage("fa");
+    expect(html).toContain("طلا قبل از نشست بعدی FOMC از ۳۴۰۰ عبور می‌کند.");
+    expect(html).not.toContain("Gold clears 3400 before the next FOMC.");
+    expect(html).not.toContain(fa["content.sourceEnglish"]);
+  });
+
+  it("falls back to a prediction's English claim with the EN marker when untranslated", async () => {
+    mockFiles.stance = null; mockFiles.stanceFa = null;
+    mockFiles.playbook = null; mockFiles.playbookFa = null;
+    mockFiles.watchlist = []; mockFiles.watchlistFa = {};
+    mockFiles.predictions = [{
+      id: "p2", date: "2026-08-01", claim: "DXY breaks below 100.",
+      direction: "down", horizon_days: 5, confidence: 0.6,
+      created_at: "2026-08-01T00:00:00Z", outcome: null, scored_at: null, note: null,
+    }];
+    mockFiles.predictionsFa = {};
+
+    const html = await renderPage("fa");
+    expect(html).toContain("DXY breaks below 100.");
+    expect(html).toContain(fa["content.sourceEnglish"]);
+  });
+
+  it("translates the direction and outcome enums, and the page/section chrome", async () => {
+    mockFiles.stance = null; mockFiles.stanceFa = null;
+    mockFiles.playbook = null; mockFiles.playbookFa = null;
+    mockFiles.watchlist = []; mockFiles.watchlistFa = {};
+    mockFiles.predictions = [{
+      id: "p3", date: "2026-08-01", claim: "c", direction: "down", horizon_days: 5,
+      confidence: 0.6, created_at: "2026-08-01T00:00:00Z",
+      outcome: "hit", scored_at: "2026-08-06T00:00:00Z", note: null,
+    }];
+    mockFiles.predictionsFa = {};
+
+    const html = await renderPage("fa");
+    expect(html).toContain(fa["nav.state"]);
+    expect(html).toContain(fa["state.stanceHeading"]);
+    expect(html).toContain(fa["state.watchlistHeading"]);
+    expect(html).toContain(fa["nav.predictions"]);
+    expect(html).toContain(fa["state.playbookHeading"]);
+    expect(html).toContain(fa["direction.down"]);
+    expect(html).toContain(fa["predictions.wordHit"]);
+    expect(html).not.toContain(">down<");
+    expect(html).not.toMatch(/[۰-۹]/); // confidence/horizon/date stay Latin
   });
 });

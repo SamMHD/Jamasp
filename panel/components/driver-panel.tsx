@@ -5,7 +5,7 @@ import { DriverLiveTile } from "@/components/driver-live-tile";
 import { driverLabel, type DriverRead } from "@/lib/drivers";
 import { tvEmbedFor, TV_THEME_TOKENS } from "@/lib/tradingview";
 import { fmtAge } from "@/lib/format";
-import type { Messages } from "@/lib/i18n";
+import { t, type Messages } from "@/lib/i18n";
 
 /**
  * The cross-asset complex that moves gold.
@@ -40,11 +40,13 @@ export function DriverPanel({ drivers, now, messages }: {
   drivers: DriverRead[]; now: Date; messages: Messages;
 }) {
   return (
-    <section aria-label="Drivers" className="@container rounded border border-border p-4"
+    <section aria-label={t(messages, "drivers.heading")} className="@container rounded border border-border p-4"
       style={TV_THEME_TOKENS as CSSProperties}>
       <h2 className="mb-3 font-medium">
-        Drivers
-        <Link className="ml-2 text-xs font-normal text-primary" href="/prices">→ prices</Link>
+        {t(messages, "drivers.heading")}
+        <Link className="ml-2 text-xs font-normal text-primary" href="/prices">
+          → {t(messages, "nav.prices").toLowerCase()}
+        </Link>
       </h2>
       {/* Uniform row height, and it is load-bearing rather than cosmetic: a
           "no data" tile is only two lines tall, and an embed positioned into
@@ -91,8 +93,7 @@ export function DriverPanel({ drivers, now, messages }: {
           the tile beside it already does. */}
       {drivers.some(d => tvEmbedFor(d.symbol) === null) && (
         <p className="mt-3 text-meta text-ink-dim">
-          Real yield is Jamasp&rsquo;s own reading: TradingView&rsquo;s free embed cannot
-          render a TIPS series, and a nominal yield is not a substitute for one.
+          {t(messages, "drivers.realYieldNote")}
         </p>
       )}
     </section>

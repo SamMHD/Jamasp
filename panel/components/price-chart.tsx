@@ -8,6 +8,7 @@ import type { TooltipContentProps } from "recharts";
 import { Button } from "@/components/ui/button";
 import type { PricePoint } from "@/lib/db";
 import { fmtUtc } from "@/lib/format";
+import { getMessages, t, type Messages } from "@/lib/i18n";
 
 const fetcher = (url: string) => fetch(url).then(r => {
   if (!r.ok) throw new Error(`price fetch failed (${r.status})`);
@@ -34,7 +35,12 @@ function ChartTooltip({ active, payload, label }: TooltipContentProps) {
   );
 }
 
-export function PriceChart({ symbol }: { symbol: string }) {
+export function PriceChart({ symbol, messages = getMessages("en") }: {
+  symbol: string;
+  /** Optional, defaulting to English — see quote-tile.tsx#QuoteTile's
+   *  identical reasoning; app/prices/page.tsx already passes it. */
+  messages?: Messages;
+}) {
   const [range, setRange] = useState<(typeof RANGES)[number]>("7d");
   const url = `/api/prices?symbol=${encodeURIComponent(symbol)}&range=${range}`;
   const { data, error, isLoading } = useSWR<{ points: PricePoint[] }>(url, fetcher, {
@@ -55,12 +61,13 @@ export function PriceChart({ symbol }: { symbol: string }) {
       </div>
       {error ? (
         <p className="rounded border border-destructive py-10 text-center text-sm text-destructive">
-          failed to load price data — {error instanceof Error ? error.message : "unknown error"}
+          {t(messages, "prices.failedToLoad")}{" "}
+          {error instanceof Error ? error.message : t(messages, "common.unknownError")}
         </p>
       ) : isLoading ? (
-        <p className="py-10 text-center text-sm text-muted-foreground">loading…</p>
+        <p className="py-10 text-center text-sm text-muted-foreground">{t(messages, "common.loadingEllipsis")}</p>
       ) : points.length < 2 ? (
-        <p className="py-10 text-center text-sm text-muted-foreground">not enough data in range</p>
+        <p className="py-10 text-center text-sm text-muted-foreground">{t(messages, "prices.notEnoughData")}</p>
       ) : (
         <>
           <ResponsiveContainer width="100%" height={220}>
@@ -80,14 +87,14 @@ export function PriceChart({ symbol }: { symbol: string }) {
           </ResponsiveContainer>
           <details className="mt-2">
             <summary className="cursor-pointer text-xs text-muted-foreground">
-              view as table
+              {t(messages, "common.viewAsTable")}
             </summary>
             <div className="mt-2 max-h-40 overflow-y-auto">
               <table className="w-full text-xs">
                 <thead>
                   <tr className="text-left text-muted-foreground">
-                    <th className="font-normal">time (UTC)</th>
-                    <th className="font-normal">value</th>
+                    <th className="font-normal">{t(messages, "table.time")}</th>
+                    <th className="font-normal">{t(messages, "table.value")}</th>
                   </tr>
                 </thead>
                 <tbody className="tabular-nums">

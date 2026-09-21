@@ -331,3 +331,57 @@ describe("MarketMap Persian headlines", () => {
     expect(firstLabelLine(boundary)).not.toBeNull();
   });
 });
+
+describe("MarketMap — Persian chrome", () => {
+  it("translates the empty-state sentence", () => {
+    // render()'s coverage is derived from items.length, so an empty array
+    // renders the base "no scored stories" sentence with no unscored clause
+    // — that clause is exercised directly in the next test.
+    const html = render([], { locale: "fa", messages: messages.fa });
+    expect(html).toContain(fa["map.windowLast24h"]);
+    expect(html).not.toMatch(/[۰-۹]/);
+  });
+
+  it("translates the unscored-count clause when items are all unscored", () => {
+    const html = renderToStaticMarkup(
+      <MarketMap items={[]} width={800} height={500} range="24h"
+        coverage={{ scored: 0, unscored: 3 }} locale="fa" messages={messages.fa} />);
+    expect(html).toContain(fa["map.unscoredItemWord"]);
+    expect(html).toContain(fa["map.notShown"]);
+    expect(html).toContain("3");
+    expect(html).not.toMatch(/[۰-۹]/);
+  });
+
+  it("translates the footer caption's words, keeping the count Latin", () => {
+    const html = render([item(), item({ itemId: "b" })], { locale: "fa", messages: messages.fa });
+    expect(html).toContain(fa["map.scoredWord"]);
+    expect(html).toContain(fa["map.storyWord"]);
+    expect(html).toContain(fa["map.windowLast24h"]);
+    expect(html).toContain(fa["map.unscoredNotShownFooter"]);
+    expect(html).toContain(fa["map.themeFitNotRun"]);
+    expect(html).toContain(fa["map.areaIsTier"]);
+    expect(html).not.toMatch(/[۰-۹]/);
+  });
+
+  it("translates the dated theme-fit line when a fit exists", () => {
+    const html = render([item()], {
+      locale: "fa", messages: messages.fa,
+      themeMultipliers: { rates_dollar: 1.2 }, fittedAt: "2026-08-19T00:00:00Z",
+    });
+    expect(html).toContain(fa["map.themeFit"]);
+    expect(html).toContain(fa["map.notAppliedToArea"]);
+    expect(html).not.toContain(fa["map.themeFitNotRun"]);
+  });
+
+  it("translates the hatched-legend label and the pips importance key", () => {
+    const html = renderToStaticMarkup(
+      <MarketMap items={[item()]} width={800} height={500} range="24h"
+        coverage={{ scored: 1, unscored: 0 }} importance="pips"
+        locale="fa" messages={messages.fa} />);
+    expect(html).toContain(fa["map.hatchedLabel"]);
+    // The template's "{n}" is replaced with the real MAX_TIER, so the
+    // dictionary string itself never renders verbatim.
+    expect(html).not.toContain("{n}");
+    expect(html).toContain(fa["tone.bearish"]);
+  });
+});

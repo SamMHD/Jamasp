@@ -7,7 +7,17 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import * as files from "@/lib/files";
 import { fmtAge } from "@/lib/format";
-import { getMessages, LANG_COOKIE, resolveLocale, type Locale, type Messages } from "@/lib/i18n";
+import { getMessages, LANG_COOKIE, localized, resolveLocale, t, type Locale, type Messages } from "@/lib/i18n";
+import { directionLabel } from "@/lib/predictions";
+import { STATE_LABEL_KEY } from "@/components/prediction-list";
+
+/** `outcome` is null (open) | "hit" | "miss" | "unclear" — reuses the same
+ *  `predictions.word*` keys components/prediction-list.tsx's STATE_LABEL_KEY
+ *  reads, so the ledger's own word for "hit" can never drift from this
+ *  table's. */
+const OUTCOME_KEY: Record<string, string> = {
+  hit: STATE_LABEL_KEY.hit, miss: STATE_LABEL_KEY.miss, unclear: STATE_LABEL_KEY.unclear,
+};
 
 export const dynamic = "force-dynamic";
 
@@ -64,70 +74,107 @@ export default async function StatePage() {
   const playbook = files.readPlaybook();
   const playbookFa = files.readPlaybookFa();
   const watchlist = files.readWatchlist();
+  // Keyed by theme, per lib/files.ts#readWatchlistFa's own contract: a theme
+  // missing here (not yet translated, or stale against the current `why`)
+  // is simply absent from the map, and `localized` below reads that as "no
+  // Persian" the same way it would read a missing `why_fa` column.
+  const watchlistFa = files.readWatchlistFa();
   const preds = files.readPredictions();
+  const predictionsFa = files.readPredictionsFa();
   const stats = files.predictionStats(preds);
   const openOrDue = preds.filter(p => p.outcome === null);
+
+  const allPreds = [...openOrDue, ...preds.filter(p => p.outcome !== null)];
 
   return (
     <div>
       <AutoRefresh seconds={60} />
-      <PageHeader title="State" />
+      <PageHeader title={t(messages, "nav.state")} />
       <section className="mb-8">
-        <h2 className="mb-2 font-medium">Stance</h2>
+        <h2 className="mb-2 font-medium">{t(messages, "state.stanceHeading")}</h2>
         {stance
           ? <LocalizedDocument english={stance} sidecarBody={stanceFaBody}
               locale={locale} messages={messages} />
-          : <p className="text-sm text-muted-foreground">no stance yet</p>}
+          : <p className="text-sm text-muted-foreground">{t(messages, "common.noStanceYet")}</p>}
       </section>
       <section className="mb-8">
-        <h2 className="mb-2 font-medium">Watchlist</h2>
+        <h2 className="mb-2 font-medium">{t(messages, "state.watchlistHeading")}</h2>
         <ul className="space-y-1 text-sm">
-          {watchlist.length === 0 && <li className="text-muted-foreground">empty</li>}
-          {watchlist.map(w => (
-            <li key={w.theme}>
-              <span className="font-medium">{w.theme}</span>
-              <span className="text-muted-foreground"> — {w.why} · since {w.since}</span>
-            </li>
-          ))}
+          {watchlist.length === 0 && (
+            <li className="text-muted-foreground">{t(messages, "state.watchlistEmptyWord")}</li>
+          )}
+          {watchlist.map(w => {
+            // Shaped as a one-off {why, why_fa} "row" for `localized`, the
+            // same pattern lib/files.ts's own doc comment on readWatchlistFa
+            // points callers at — the theme slug itself stays Latin, an
+            // identifier, never routed through localized/SourceLang.
+            const { text, fallback } = localized(
+              { why: w.why, why_fa: watchlistFa[w.theme] }, "why", locale);
+            return (
+              <li key={w.theme}>
+                <span className="font-medium">{w.theme}</span>
+                <span className="text-muted-foreground">
+                  {" — "}<SourceLang fallback={fallback} messages={messages}>{text}</SourceLang>
+                  {" · "}{t(messages, "state.sinceWord")} {w.since}
+                </span>
+              </li>
+            );
+          })}
         </ul>
       </section>
       <section className="mb-8">
         <h2 className="mb-2 font-medium">
-          Predictions
+          {t(messages, "nav.predictions")}
           <span className="ml-2 text-sm font-normal text-muted-foreground">
-            {stats.open} open · {stats.maturedUnscored} due · {stats.scored} scored ·
-            hit rate {stats.hitRate === null ? "—" : `${Math.round(stats.hitRate * 100)}%`}
+            {stats.open} {t(messages, "predictions.wordOpen")} · {stats.maturedUnscored}{" "}
+            {t(messages, "predictions.wordDue")} · {stats.scored} {t(messages, "predictions.wordScored")} ·{" "}
+            {t(messages, "predictions.wordHitRate")}{" "}
+            {stats.hitRate === null ? "—" : `${Math.round(stats.hitRate * 100)}%`}
           </span>
         </h2>
         <Table>
           <TableHeader><TableRow>
-            <TableHead>Claim</TableHead><TableHead>Dir</TableHead><TableHead>Conf</TableHead>
-            <TableHead>Horizon</TableHead><TableHead>Made</TableHead><TableHead>Outcome</TableHead></TableRow>
+            <TableHead>{t(messages, "table.claim")}</TableHead>
+            <TableHead>{t(messages, "table.direction")}</TableHead>
+            <TableHead>{t(messages, "table.confidence")}</TableHead>
+            <TableHead>{t(messages, "table.horizon")}</TableHead>
+            <TableHead>{t(messages, "table.made")}</TableHead>
+            <TableHead>{t(messages, "table.outcome")}</TableHead></TableRow>
           </TableHeader>
           <TableBody>
-            {[...openOrDue, ...preds.filter(p => p.outcome !== null)].map(p => (
-              <TableRow key={p.id}>
-                <TableCell className="max-w-md">{p.claim}</TableCell>
-                <TableCell>{p.direction}</TableCell>
-                <TableCell>{Math.round(p.confidence * 100)}%</TableCell>
-                <TableCell>{p.horizon_days}d</TableCell>
-                <TableCell>{fmtAge(p.created_at)}</TableCell>
-                <TableCell>
-                  {p.outcome
-                    ? <Badge variant={p.outcome === "hit" ? "secondary" : p.outcome === "miss" ? "destructive" : "outline"}>{p.outcome}</Badge>
-                    : <Badge variant="outline">open</Badge>}
-                </TableCell>
-              </TableRow>
-            ))}
+            {allPreds.map(p => {
+              // Same {claim, claim_fa} shaping as the watchlist above, keyed
+              // by prediction id per lib/files.ts#readPredictionsFa.
+              const { text, fallback } = localized(
+                { claim: p.claim, claim_fa: predictionsFa[p.id] }, "claim", locale);
+              return (
+                <TableRow key={p.id}>
+                  <TableCell className="max-w-md">
+                    <SourceLang fallback={fallback} messages={messages}>{text}</SourceLang>
+                  </TableCell>
+                  <TableCell>{directionLabel(p.direction, messages)}</TableCell>
+                  <TableCell>{Math.round(p.confidence * 100)}%</TableCell>
+                  <TableCell>{p.horizon_days}d</TableCell>
+                  <TableCell>{fmtAge(p.created_at)}</TableCell>
+                  <TableCell>
+                    {p.outcome
+                      ? <Badge variant={p.outcome === "hit" ? "secondary" : p.outcome === "miss" ? "destructive" : "outline"}>
+                          {t(messages, OUTCOME_KEY[p.outcome] ?? "predictions.wordUnclear")}
+                        </Badge>
+                      : <Badge variant="outline">{t(messages, "predictions.wordOpen")}</Badge>}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </section>
       <section>
-        <h2 className="mb-2 font-medium">Playbook</h2>
+        <h2 className="mb-2 font-medium">{t(messages, "state.playbookHeading")}</h2>
         {playbook
           ? <LocalizedDocument english={playbook} sidecarBody={playbookFa}
               locale={locale} messages={messages} />
-          : <p className="text-sm text-muted-foreground">no playbook yet</p>}
+          : <p className="text-sm text-muted-foreground">{t(messages, "state.noPlaybookYet")}</p>}
       </section>
     </div>
   );

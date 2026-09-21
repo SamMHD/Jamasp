@@ -969,7 +969,7 @@ const LEGEND_STEPS: { tone: Tone; mid: boolean }[] = [
  * a url(#map-hatch) reference, which the compliance test reads as "a bearish
  * tile".
  */
-function ImportanceKey({ treatment }: { treatment: ImportanceTreatment }) {
+function ImportanceKey({ treatment, messages }: { treatment: ImportanceTreatment; messages: Messages }) {
   if (treatment === "none") return null;
   if (treatment === "pips") {
     return (
@@ -983,10 +983,15 @@ function ImportanceKey({ treatment }: { treatment: ImportanceTreatment }) {
               }} />
           ))}
         </span>
-        filled pips = tier (of {MAX_TIER})
+        {t(messages, "map.pipsLegend").replace("{n}", String(MAX_TIER))}
       </span>
     );
   }
+  // "boundary" and the unnamed default treatment below are unreachable from
+  // any current caller (market-map.tsx passes "pips", technical-map.tsx
+  // passes no `importance` at all, defaulting to "none") — left in their
+  // original English rather than translated, since there is no live surface
+  // to verify a Persian rendering against. See this task's report.
   if (treatment === "boundary") {
     return (
       <>
@@ -1038,9 +1043,9 @@ export function MapLegend({ importance = "none", messages }: {
               "repeating-linear-gradient(45deg, currentColor 0, currentColor 1px, transparent 1px, transparent 4px)",
             color: "var(--map-bear)",
           }} />
-        hatched = {t(messages, TONE_LABEL_KEY.bear)}
+        {t(messages, "map.hatchedLabel")} = {t(messages, TONE_LABEL_KEY.bear)}
       </span>
-      <ImportanceKey treatment={importance} />
+      <ImportanceKey treatment={importance} messages={messages} />
     </div>
   );
 }

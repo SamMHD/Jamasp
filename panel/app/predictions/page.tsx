@@ -1,9 +1,11 @@
+import { cookies } from "next/headers";
 import Link from "next/link";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { PageHeader } from "@/components/page-header";
-import { PredictionList, STATE_INK, STATE_LABEL } from "@/components/prediction-list";
+import { PredictionList, STATE_INK, stateLabel } from "@/components/prediction-list";
 import * as files from "@/lib/files";
 import { cls } from "@/lib/format";
+import { getMessages, LANG_COOKIE, resolveLocale, t } from "@/lib/i18n";
 import {
   buildLedger, countByState, LIVE_STATES, RESOLVED_STATES,
   type PredictionState,
@@ -60,8 +62,14 @@ function FilterLink({ href, label, n, active, ink }: {
 export default async function PredictionsPage({ searchParams }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  // Same pattern as app/page.tsx and app/schedule/page.tsx: the locale
+  // cookie is httpOnly, so only a server component may read it.
+  const locale = resolveLocale((await cookies()).get(LANG_COOKIE)?.value);
+  const messages = getMessages(locale);
+
   const now = new Date();
   const preds = files.readPredictions();
+  const predictionsFa = files.readPredictionsFa();
   const stats = files.predictionStats(preds, now);
   const rows = buildLedger(preds, now);
   const counts = countByState(rows);
@@ -77,8 +85,8 @@ export default async function PredictionsPage({ searchParams }: {
     return (
       <div>
         <AutoRefresh seconds={60} />
-        <PageHeader title="Predictions" subtitle="the forecast ledger" />
-        <p className="text-sm text-muted-foreground">no predictions recorded</p>
+        <PageHeader title={t(messages, "nav.predictions")} subtitle={t(messages, "predictions.forecastLedgerSubtitle")} />
+        <p className="text-sm text-muted-foreground">{t(messages, "predictions.noneRecorded")}</p>
       </div>
     );
   }
@@ -86,17 +94,18 @@ export default async function PredictionsPage({ searchParams }: {
   return (
     <div>
       <AutoRefresh seconds={60} />
-      <PageHeader title="Predictions" subtitle={
-        `${rows.length} in the ledger · ` +
+      <PageHeader title={t(messages, "nav.predictions")} subtitle={
+        `${rows.length} ${t(messages, "predictions.subtitleLedger")} · ` +
         (stats.hitRate === null
-          ? "none scored yet"
-          : `${Math.round(stats.hitRate * 100)}% hit rate over ${decisive} decisive`) +
-        ` · ${live.length} still live`} />
+          ? t(messages, "predictions.noneScoredYet")
+          : `${Math.round(stats.hitRate * 100)}% ${t(messages, "predictions.subtitleHitRateOver")} ${decisive} ${t(messages, "predictions.subtitleDecisive")}`) +
+        ` · ${live.length} ${t(messages, "predictions.subtitleStillLive")}`} />
 
-      <nav aria-label="Filter by state" className="mb-4 flex flex-wrap gap-1.5">
-        <FilterLink href="/predictions" label="all" n={rows.length} active={filter === "all"} />
+      <nav aria-label={t(messages, "predictions.filterByStateAria")} className="mb-4 flex flex-wrap gap-1.5">
+        <FilterLink href="/predictions" label={t(messages, "predictions.filterAll")}
+          n={rows.length} active={filter === "all"} />
         {FILTERS.map(s => (
-          <FilterLink key={s} href={`/predictions?state=${s}`} label={STATE_LABEL[s]}
+          <FilterLink key={s} href={`/predictions?state=${s}`} label={stateLabel(s, messages)}
             n={counts[s]} active={filter === s} ink={STATE_INK[s]} />
         ))}
       </nav>
@@ -104,42 +113,49 @@ export default async function PredictionsPage({ searchParams }: {
       {counts.due > 0 && filter === "all" && (
         <p className={cls("mb-4 rounded border border-amber-400 bg-amber-100/60 px-3 py-2 text-sm",
           "text-amber-900 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-300")}>
-          {counts.due} matured but unscored — <code>jamasp predictions due</code> would hand
-          these to the next run.
+          {counts.due} {t(messages, "predictions.maturedUnscoredWarning")} <code>jamasp predictions due</code>{" "}
+          {t(messages, "predictions.wouldHandOff")}
         </p>
       )}
 
       {filter === "all" ? (
         <>
-          <section aria-label="Live predictions" className="mb-8">
+          <section aria-label={`${t(messages, "predictions.liveHeading")} ${t(messages, "predictions.noStateSuffixWord")}`} className="mb-8">
             <h2 className="mb-2 font-medium">
-              Live
+              {t(messages, "predictions.liveHeading")}
               <span className="ml-2 text-xs font-normal text-muted-foreground tabular-nums">
-                {counts.due} due · {counts.open} open ·{" "}
+                {counts.due} {t(messages, "predictions.wordDue")} · {counts.open} {t(messages, "predictions.wordOpen")} ·{" "}
                 {/* One sort rule, two readings: live rows go by maturity
                     ascending, so overdue ones lead when any exist and the
                     next claim to land leads when none do. The caption states
                     whichever of the two the reader is actually looking at. */}
-                {counts.due > 0 ? "most overdue first" : "soonest to mature first"}
+                {counts.due > 0
+                  ? t(messages, "predictions.mostOverdueFirst")
+                  : t(messages, "predictions.soonestFirst")}
               </span>
             </h2>
-            <PredictionList rows={live} now={now}
-              empty="nothing live — every prediction in the ledger is scored" />
+            <PredictionList rows={live} now={now} locale={locale} messages={messages}
+              predictionsFa={predictionsFa}
+              empty={t(messages, "predictions.nothingLive")} />
           </section>
-          <section aria-label="Resolved predictions">
+          <section aria-label={`${t(messages, "predictions.resolvedHeading")} ${t(messages, "predictions.noStateSuffixWord")}`}>
             <h2 className="mb-2 font-medium">
-              Resolved
+              {t(messages, "predictions.resolvedHeading")}
               <span className="ml-2 text-xs font-normal text-muted-foreground tabular-nums">
-                {counts.hit} hit · {counts.miss} miss · {counts.unclear} unclear · newest first
+                {counts.hit} {t(messages, "predictions.wordHit")} · {counts.miss} {t(messages, "predictions.wordMiss")} ·{" "}
+                {counts.unclear} {t(messages, "predictions.wordUnclear")} · {t(messages, "predictions.newestFirst")}
               </span>
             </h2>
-            <PredictionList rows={resolved} now={now} empty="nothing scored yet" />
+            <PredictionList rows={resolved} now={now} locale={locale} messages={messages}
+              predictionsFa={predictionsFa}
+              empty={t(messages, "predictions.nothingScoredYet")} />
           </section>
         </>
       ) : (
-        <section aria-label={`${STATE_LABEL[filter]} predictions`}>
+        <section aria-label={`${stateLabel(filter, messages)} ${t(messages, "predictions.noStateSuffixWord")}`}>
           <PredictionList rows={rows.filter(r => r.state === filter)} now={now}
-            empty={`no ${STATE_LABEL[filter]} predictions`} />
+            locale={locale} messages={messages} predictionsFa={predictionsFa}
+            empty={t(messages, "predictions.emptyStateFilteredTemplate").replace("{state}", stateLabel(filter, messages))} />
         </section>
       )}
     </div>
