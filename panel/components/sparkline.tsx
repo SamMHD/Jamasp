@@ -21,10 +21,13 @@ export function Sparkline({ points, className, stroke = "var(--chart-1)" }: {
     })
     .join(" ");
   return (
+    // `direction`, not `dir`: the UA stylesheet rule that turns a `dir`
+    // attribute into the `direction` property (`[dir=ltr i] {...}`) carries
+    // an implied HTML-namespace universal selector, so it never matches an
+    // SVG root — `dir="ltr"` here would be silently inert. SVG's own
+    // mechanism is the `direction` CSS property directly.
     <svg viewBox="0 0 100 100" preserveAspectRatio="none"
-      // @ts-expect-error -- dir is a real, valid attribute on <svg>;
-      // @types/react's SVGProps just omits it.
-      dir="ltr"
+      style={{ direction: "ltr" }}
       className={cls("h-10 w-full", className)} role="img"
       aria-label={`gold price trend, ${points.length} points`}>
       <path d={d} fill="none" stroke={stroke} strokeWidth="1.5"

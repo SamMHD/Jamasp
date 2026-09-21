@@ -54,10 +54,13 @@ export function ArcGauge({ label, value, min, max, digits = 1, ticks = [], class
   const marker = f === null ? null : at(f);
   const display = value === null ? "—" : num(value, digits);
   return (
+    // `direction`, not `dir`: the UA stylesheet rule that turns a `dir`
+    // attribute into the `direction` property (`[dir=ltr i] {...}`) carries
+    // an implied HTML-namespace universal selector, so it never matches an
+    // SVG root — `dir="ltr"` here would be silently inert. SVG's own
+    // mechanism is the `direction` CSS property directly.
     <svg viewBox="0 0 120 70" role="img"
-      // @ts-expect-error -- dir is a real, valid attribute on <svg>;
-      // @types/react's SVGProps just omits it.
-      dir="ltr"
+      style={{ direction: "ltr" }}
       aria-label={value === null ? `${label}: no data` : `${label} ${display}`}
       className={cls("w-full max-w-44", className)}>
       {/* track: a lighter step of the same hue, never a foreign gray */}
