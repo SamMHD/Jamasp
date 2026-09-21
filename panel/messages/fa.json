@@ -23,5 +23,11 @@
   "content.sourceEnglishTitle": "هنوز ترجمه نشده — متن اصلی انگلیسی نمایش داده می‌شود",
   "calendar.impactHigh": "بالا",
   "calendar.impactMedium": "متوسط",
-  "calendar.impactLow": "پایین"
+  "calendar.impactLow": "پایین",
+  "stance.view": "دیدگاه",
+  "stance.whatFlipsMe": "چه چیزی نظرم را برمی‌گرداند",
+  "stance.openPredictions": "پیش‌بینی‌های باز",
+  "stance.wakeups": "یادآوری‌ها",
+  "stance.deskLocal": "میز محلی",
+  "stance.sourcingHealth": "سلامت منابع"
 }

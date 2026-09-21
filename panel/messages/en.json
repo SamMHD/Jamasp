@@ -23,5 +23,11 @@
   "content.sourceEnglishTitle": "Not yet translated — showing the English source",
   "calendar.impactHigh": "High",
   "calendar.impactMedium": "Medium",
-  "calendar.impactLow": "Low"
+  "calendar.impactLow": "Low",
+  "stance.view": "View",
+  "stance.whatFlipsMe": "What flips me",
+  "stance.openPredictions": "Open predictions",
+  "stance.wakeups": "Wakeups",
+  "stance.deskLocal": "Desk-local",
+  "stance.sourcingHealth": "Sourcing health"
 }

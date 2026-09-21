@@ -107,6 +107,10 @@ export default async function Overview({
   // --- fundamental ---
   const stanceText = files.readStance();
   const stance = stanceText === null ? null : parseStance(stanceText);
+  // Read unconditionally, like every other file() call on this page — a
+  // stale or absent sidecar is cheap to read and FundamentalPanel already
+  // no-ops on it in English locale.
+  const stanceFa = files.readStanceFa();
   const watchlist = files.readWatchlist();
   const preds = files.readPredictions();
   const pendingWakeups = db.getWakeups("pending");
@@ -290,7 +294,8 @@ export default async function Overview({
           prose that has stopped competing for the fold may as well have the
           measure. */}
       <div className="mt-4">
-        <FundamentalPanel stance={stance} watchlist={watchlist} now={now} />
+        <FundamentalPanel stance={stance} watchlist={watchlist} now={now}
+          locale={locale} messages={messages} stanceFa={stanceFa} />
       </div>
 
       <FooterStrip wakeup={pendingWakeups[0]}
