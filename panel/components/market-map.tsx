@@ -3,7 +3,8 @@ import { layoutMap, tone, type MapRange, type ScoredItem } from "@/lib/marketmap
 import { FullscreenButton } from "@/components/fullscreen-button";
 import {
   MapGroupHeader, MapHatchDefs, MapLegend, MapTile, GROUP_HEADER_H, fitLabel,
-  importanceInsets, tierFate, type ImportanceTreatment, type TierGates,
+  fallbackMarkerBand, importanceInsets, tierFate,
+  type ImportanceTreatment, type TierGates,
 } from "@/components/map-tiles";
 import { localized, t, type Locale, type Messages } from "@/lib/i18n";
 
@@ -86,17 +87,20 @@ const FATE_WORD = {
  * renders, so there is exactly one place (market-map.tsx's cell loop) that
  * decides it.
  *
- * When Persian fell back to English, the title says so, in the same
+ * When Persian fell back to English, the title says so too, in the same
  * dictionary voice `SourceLang`'s chip uses elsewhere (`content.
- * sourceEnglishTitle`). This tile's label is drawn as raw SVG `<text>`/
- * `<tspan>`, not HTML: an HTML element such as `SourceLang` renders is not
- * part of SVG's content model for `<text>`, and a browser parsing that
- * markup breaks it OUT of the SVG tree entirely (the HTML parser's "foreign
- * content" rules pop `span` back into the surrounding HTML content) rather
- * than rendering it in place — silently wrong output, not a crash, and a
- * hydration mismatch besides. The tile's hover `<title>` is plain text and
- * costs the label no room, which is why the marker rides there instead of
- * inventing new visible tile chrome for it.
+ * sourceEnglishTitle`) — on top of, not instead of, the visible "EN" mark
+ * `MapTile` now draws on the tile itself (see map-tiles.tsx's
+ * fallbackMarkerBand). Both exist because the tile's own label is drawn as
+ * raw SVG `<text>`/`<tspan>`, not HTML: an HTML element such as
+ * `SourceLang` renders is not part of SVG's content model for `<text>`, and
+ * a browser parsing that markup breaks it OUT of the SVG tree entirely (the
+ * HTML parser's "foreign content" rules pop `span` back into the
+ * surrounding HTML content) rather than rendering it in place — silently
+ * wrong output, not a crash, and a hydration mismatch besides. The title
+ * stays because it is free and still useful on hover; the visible mark
+ * exists because a hover-only signal is not enough on the panel's most-
+ * scanned, least-hovered surface.
  */
 function tileTitle(
   item: ScoredItem, headline: string, fallback: boolean, now: Date,
@@ -195,15 +199,24 @@ export function MarketMap({ items, width, height, range, coverage,
               // to the whole tile and then sliding it down is exactly how a
               // reserved band turns into an overflow at the other edge.
               const inset = importanceInsets(importance, cell.w, cell.h);
+              // Reserved the same way importanceInsets' own bands are: out
+              // of the label's box before fitLabel runs, never appended
+              // into the headline text itself — see map-tiles.tsx's
+              // fallbackMarkerBand for why, and for why market-map.tsx
+              // (sizing the label) and MapTile (positioning the marker)
+              // both call this one function rather than each computing
+              // their own answer.
+              const fbBand = fallbackMarkerBand(importance, cell.w, cell.h, fallback);
               const label = fitLabel(headline, cell.w,
-                cell.h - inset.top - inset.bottom);
+                cell.h - inset.top - inset.bottom - fbBand);
               return (
                 <MapTile key={cell.node.itemId}
                   x={cell.x} y={cell.y} w={cell.w} h={cell.h}
                   tone={tn}
                   title={tileTitle(cell.node, headline, fallback, now, messages, tierGates)}
                   lines={label.lines} fontSize={label.fontSize}
-                  importance={importance} tier={cell.node.tier} gates={tierGates} />
+                  importance={importance} tier={cell.node.tier} gates={tierGates}
+                  fallback={fallback} />
               );
             })}
           </g>

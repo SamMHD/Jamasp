@@ -16,6 +16,27 @@ import { SourceLang } from "@/components/source-lang";
 
 const PAGE_SIZE = 50;
 
+/**
+ * Shared by the list row and the detail dialog's title, which is what makes
+ * the two provably agree rather than merely both remembering to call
+ * `localized(..., "headline", locale)` + `<SourceLang>` the same way: there
+ * is exactly one call site left to get the field name wrong, and both
+ * surfaces render through it.
+ *
+ * Exported so test/inbox-table.test.tsx can render the dialog title's exact
+ * code path directly: the dialog only mounts after a click sets
+ * `selectedKey`, and this project has no DOM/interaction simulation
+ * (no jsdom, no @testing-library/react) to drive that click and read the
+ * result back. Testing this component IS testing that call site, because
+ * `DialogTitle` renders nothing else.
+ */
+export function ItemHeadline({ item, locale, messages }: {
+  item: ItemRow; locale: Locale; messages: Messages;
+}) {
+  const { text, fallback } = localized(item, "headline", locale);
+  return <SourceLang fallback={fallback} messages={messages}>{text}</SourceLang>;
+}
+
 const fetcher = async (url: string) => {
   const r = await fetch(url);
   if (!r.ok) {
@@ -95,8 +116,6 @@ export function InboxTable({ sources, topics, locale, messages }: {
     ? (selectedGroup.find(g => g.id === selectedKey) ?? selectedGroup[0])
     : undefined;
   const selectedOthers = selectedGroup?.filter(g => g.id !== selectedRep!.id) ?? [];
-  const selectedLocalized = selectedRep
-    ? localized(selectedRep, "headline", locale) : { text: "", fallback: false };
 
   return (
     <div>
@@ -130,7 +149,6 @@ export function InboxTable({ sources, topics, locale, messages }: {
         {[...clusters.entries()].map(([key, group]) => {
           const rep = group.find(g => g.id === key) ?? group[0];
           const others = group.filter(g => g.id !== rep.id);
-          const { text: headline, fallback } = localized(rep, "headline", locale);
           return (
             <li key={key} className="rounded border border-border p-3">
               <div className="flex items-start justify-between gap-2">
@@ -138,7 +156,7 @@ export function InboxTable({ sources, topics, locale, messages }: {
                   className={`text-left ${rep.read_at
                     ? "text-muted-foreground hover:text-foreground"
                     : "font-medium hover:text-primary"}`}>
-                  <SourceLang fallback={fallback} messages={messages}>{headline}</SourceLang>
+                  <ItemHeadline item={rep} locale={locale} messages={messages} />
                 </button>
                 {!rep.read_at && <Badge>unread</Badge>}
               </div>
@@ -175,9 +193,7 @@ export function InboxTable({ sources, topics, locale, messages }: {
             <>
               <DialogHeader>
                 <DialogTitle className="leading-snug">
-                  <SourceLang fallback={selectedLocalized.fallback} messages={messages}>
-                    {selectedLocalized.text}
-                  </SourceLang>
+                  <ItemHeadline item={selectedRep} locale={locale} messages={messages} />
                 </DialogTitle>
                 {selectedRep.lede && <DialogDescription>{selectedRep.lede}</DialogDescription>}
               </DialogHeader>
