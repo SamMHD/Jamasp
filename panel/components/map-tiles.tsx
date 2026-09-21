@@ -936,9 +936,13 @@ export function MapTile({ x, y, w, h, tone, title, lines,
  * Only THREE keys exist (`tone.bearish`/`tone.neutral`/`tone.bullish`) for
  * FIVE tone values: the "-mid" steps are an intensity of their pole, not a
  * distinct direction, so they share its word — the swatch colour is what
- * tells a bear tile from a bear-mid one, exactly as it already does for a
- * reader who cannot see the (untranslated, deliberately terse) "(mid)"
- * qualifier LEGEND_STEPS appends below.
+ * tells a bear tile from a bear-mid one. The "(mid)" intensity marker
+ * itself is a SEPARATE closed-set chrome string, `legend.mid` below, not
+ * a fourth entry here — it qualifies whichever tone word it follows rather
+ * than naming a stance of its own, so folding it into `TONE_LABEL_KEY`
+ * would make an unmapped fourth `Tone` value silently pass this table's
+ * exhaustiveness check by accident (a `legend.mid`-shaped key would look
+ * like a mistaken entry, not a missing one).
  */
 export const TONE_LABEL_KEY: Record<Tone, string> = {
   bear: "tone.bearish",
@@ -1020,7 +1024,7 @@ export function MapLegend({ importance = "none", messages }: {
         <span key={s.tone} className="flex items-center gap-1">
           <span aria-hidden className="h-2.5 w-2.5 rounded-[2px]"
             style={{ background: TONE_FILL[s.tone] }} />
-          {t(messages, TONE_LABEL_KEY[s.tone])}{s.mid ? " (mid)" : ""}
+          {t(messages, TONE_LABEL_KEY[s.tone])}{s.mid ? ` (${t(messages, "legend.mid")})` : ""}
         </span>
       ))}
       <span className="flex items-center gap-1">

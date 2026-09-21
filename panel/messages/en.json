@@ -57,5 +57,6 @@
   "runType.retro": "Retro",
   "tone.bearish": "bearish",
   "tone.neutral": "neutral",
-  "tone.bullish": "bullish"
+  "tone.bullish": "bullish",
+  "legend.mid": "mid"
 }
