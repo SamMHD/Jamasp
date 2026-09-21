@@ -20,5 +20,8 @@
   "lang.switchToFa": "Switch to Persian",
   "lang.switchToEn": "Switch to English",
   "content.sourceEnglish": "EN",
-  "content.sourceEnglishTitle": "Not yet translated — showing the English source"
+  "content.sourceEnglishTitle": "Not yet translated — showing the English source",
+  "calendar.impactHigh": "High",
+  "calendar.impactMedium": "Medium",
+  "calendar.impactLow": "Low"
 }

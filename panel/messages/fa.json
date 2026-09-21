@@ -20,5 +20,8 @@
   "lang.switchToFa": "تغییر به فارسی",
   "lang.switchToEn": "تغییر به انگلیسی",
   "content.sourceEnglish": "EN",
-  "content.sourceEnglishTitle": "هنوز ترجمه نشده — متن اصلی انگلیسی نمایش داده می‌شود"
+  "content.sourceEnglishTitle": "هنوز ترجمه نشده — متن اصلی انگلیسی نمایش داده می‌شود",
+  "calendar.impactHigh": "بالا",
+  "calendar.impactMedium": "متوسط",
+  "calendar.impactLow": "پایین"
 }
