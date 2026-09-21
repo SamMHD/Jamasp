@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import { StatusStrip, FooterStrip } from "../components/status-strip";
 import type { AgentRunRow, EventRow, NotifyLogRow, WakeupRow } from "../lib/db";
 import { getMessages } from "../lib/i18n";
-import en from "../messages/en.json";
 import fa from "../messages/fa.json";
 
 const NOW = new Date("2026-08-01T12:00:00Z");
