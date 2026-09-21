@@ -4,12 +4,16 @@ import { HorizonStrip } from "../components/horizon-strip";
 import { deriveHorizon } from "../lib/horizon";
 import type { EventRow, WakeupRow } from "../lib/db";
 import type { Prediction } from "../lib/files";
+import { getMessages } from "../lib/i18n";
+import fa from "../messages/fa.json";
 
 const NOW = new Date("2026-08-11T09:00:00Z");
+const messages = { en: getMessages("en"), fa: getMessages("fa") };
 
 const ev = (over: Partial<EventRow>): EventRow => ({
   id: "e", source: "ff_calendar", title: "CPI m/m", country: "USD", impact: "High",
-  starts_at: "2026-08-12T12:30:00Z", fetched_at: "2026-08-11T00:00:00Z", ...over,
+  starts_at: "2026-08-12T12:30:00Z", fetched_at: "2026-08-11T00:00:00Z",
+  title_fa: null, ...over,
 });
 const pred = (over: Partial<Prediction>): Prediction => ({
   id: "772323d6", date: "2026-08-09", claim: "no 200DMA tag pre-CPI", direction: "flat",
@@ -21,11 +25,14 @@ const wk = (over: Partial<WakeupRow>): WakeupRow => ({
   status: "pending", attempts: 0, created_at: "2026-08-07T12:00:00Z", fired_at: null, ...over,
 });
 
-const render = (input: { events?: EventRow[]; predictions?: Prediction[]; wakeups?: WakeupRow[] }) =>
+const render = (
+  input: { events?: EventRow[]; predictions?: Prediction[]; wakeups?: WakeupRow[] },
+  locale: "en" | "fa" = "en",
+) =>
   renderToStaticMarkup(
     <HorizonStrip horizon={deriveHorizon(
       { events: input.events ?? [], predictions: input.predictions ?? [],
-        wakeups: input.wakeups ?? [] }, NOW)} now={NOW} />);
+        wakeups: input.wakeups ?? [] }, NOW)} now={NOW} messages={messages[locale]} />);
 
 describe("HorizonStrip", () => {
   it("renders all three lanes with marks, labels, and the list twin", () => {
@@ -81,7 +88,7 @@ describe("HorizonStrip", () => {
     const html = renderToStaticMarkup(
       <HorizonStrip horizon={deriveHorizon(
         { events: [ev({ starts_at: "2026-08-12T12:30:00Z" })], predictions: [], wakeups: [] },
-        lateNow)} now={lateNow} />);
+        lateNow)} now={lateNow} messages={messages.en} />);
     const dayLabels = html.match(/>(Sun|Mon|Tue|Wed|Thu|Fri|Sat) \d+</g) ?? [];
     expect(dayLabels).toHaveLength(6);
   });
@@ -106,5 +113,36 @@ describe("HorizonStrip", () => {
   it("never renders a verdict word", () => {
     const html = render({ events: [ev({})], predictions: [pred({})], wakeups: [wk({})] });
     expect(html).not.toMatch(/strong buy|strong sell|recommend|buy now|sell now/i);
+  });
+});
+
+describe("HorizonStrip — Persian", () => {
+  it("translates the heading, lane labels, and summary words", () => {
+    const html = render({ events: [ev({})], predictions: [pred({})], wakeups: [wk({})] }, "fa");
+    expect(html).toContain(fa["horizon.heading"]);
+    expect(html).toContain(fa["horizon.laneMaturities"]);
+    expect(html).toContain(fa["horizon.maturingWord"]);
+    expect(html).toContain(fa["horizon.wakeupWord"]);
+    expect(html).toContain(fa["horizon.nowLabel"]);
+    expect(html).not.toContain(">maturities<");
+  });
+
+  it("keeps the wakeup's run-type slug Latin even in Persian (see the component's own comment)", () => {
+    const html = render({ wakeups: [wk({})] }, "fa");
+    expect(html).toContain("#20 deepdive");
+  });
+
+  it("translates overdue, the empty state, and the 'more within' caption", () => {
+    const overdue = render({ wakeups: [wk({ id: 7, due_at: "2026-08-02T05:00:00Z" })] }, "fa");
+    expect(overdue).toContain(fa["horizon.overdueWord"]);
+
+    const empty = render({}, "fa");
+    expect(empty).toContain(fa["horizon.nothingOnHorizon"].split("{n}")[0]);
+
+    const events = Array.from({ length: 9 }, (_, i) =>
+      ev({ id: `e${i}`, title: `Event ${i}`, starts_at: `2026-08-1${2 + (i % 5)}T0${i % 9}:00:00Z` }));
+    const capped = render({ events }, "fa");
+    expect(capped).toContain(fa["horizon.moreWithin"].replace("{n}", "7"));
+    expect(capped).not.toMatch(/[۰-۹]/); // the count and day number stay Latin
   });
 });

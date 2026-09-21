@@ -14,6 +14,7 @@
  */
 import type { PricePoint } from "./db";
 import type { Quote } from "./technicals";
+import { t, type Messages } from "./i18n";
 
 export type DriverSpec = { symbol: string; label: string; digits: number };
 
@@ -53,6 +54,34 @@ export const DRIVER_SPECS: readonly DriverSpec[] = [
   { symbol: "BTC-USD", label: "BTC", digits: 0 },
   { symbol: "DFII10", label: "US 10y real", digits: 2 },
 ] as const;
+
+/**
+ * Bridge from a driver's SYMBOL (the stable identifier) to the `driver.*`
+ * dictionary key that carries its chrome translation. Lives beside
+ * DRIVER_SPECS — the module comment above already calls this array "the
+ * ONLY place [driver order] is expressed", and the label a symbol renders
+ * as is the same kind of fact: one place, not duplicated across the two
+ * components (driver-panel.tsx's tiles, driver-tape.tsx's scanning strip)
+ * that both render these six drivers in this same order.
+ *
+ * `driverLabel` falls back to the spec's own English `label` for any
+ * symbol added to DRIVER_SPECS before this map is updated — the same
+ * "English word beats a raw slug" tradeoff market-map.tsx's `themeLabel`
+ * and technical-map.tsx's `familyLabel` make for their own closed sets.
+ */
+export const DRIVER_LABEL_KEY: Record<string, string> = {
+  "DX-Y.NYB": "driver.dxy",
+  "^TNX": "driver.us10y",
+  "USDJPY": "driver.usdjpy",
+  "^GSPC": "driver.sp500",
+  "BTC-USD": "driver.btc",
+  "DFII10": "driver.realYield",
+};
+
+export function driverLabel(d: { symbol: string; label: string }, messages: Messages): string {
+  const key = DRIVER_LABEL_KEY[d.symbol];
+  return key ? t(messages, key) : d.label;
+}
 
 export type DriverRead = {
   symbol: string;

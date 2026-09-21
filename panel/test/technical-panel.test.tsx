@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest";
 import { TechnicalPanel } from "../components/technical-panel";
 import type { PricePoint } from "../lib/db";
 import type { GoldTechnicals } from "../lib/technicals";
+import { getMessages } from "../lib/i18n";
 
 const NOW = new Date("2026-08-01T12:00:00Z");
+const messages = getMessages("en");
 
 const full: GoldTechnicals = {
   spot: { value: 3325, ts: "2026-08-01T08:00:00Z", delta24h: 14.5, pct24h: 0.438 },
@@ -27,10 +29,10 @@ const SERIES: PricePoint[] = [
 ];
 
 const render = (tech: GoldTechnicals) =>
-  renderToStaticMarkup(<TechnicalPanel tech={tech} series={[]} now={NOW} />);
+  renderToStaticMarkup(<TechnicalPanel tech={tech} series={[]} now={NOW} messages={messages} />);
 
 const renderWithSeries = (tech: GoldTechnicals, series = SERIES) =>
-  renderToStaticMarkup(<TechnicalPanel tech={tech} series={series} now={NOW} />);
+  renderToStaticMarkup(<TechnicalPanel tech={tech} series={series} now={NOW} messages={messages} />);
 
 describe("TechnicalPanel", () => {
   it("renders the regime and indicator readout when data is present", () => {

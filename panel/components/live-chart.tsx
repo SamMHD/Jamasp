@@ -5,6 +5,7 @@ import {
   advancedChartConfig, TV_LIVE_LABEL, TV_PALETTE_ROLES, TV_SCRIPT_SRC,
   type ChartAppearance,
 } from "@/lib/tradingview";
+import { t, type Messages } from "@/lib/i18n";
 
 /**
  * The live half of the technical panel: TradingView's Advanced Chart for the
@@ -83,7 +84,7 @@ function readAppearance(): ChartAppearance {
   };
 }
 
-export function LiveChart({ symbol, label = TV_LIVE_LABEL, children }: {
+export function LiveChart({ symbol, label = TV_LIVE_LABEL, children, messages }: {
   symbol: string;
   /**
    * How to name the instrument in prose. The caption prints this AND the raw
@@ -93,6 +94,7 @@ export function LiveChart({ symbol, label = TV_LIVE_LABEL, children }: {
    */
   label?: string;
   children?: React.ReactNode;
+  messages: Messages;
 }) {
   const host = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<Status>("pending");
@@ -174,7 +176,7 @@ export function LiveChart({ symbol, label = TV_LIVE_LABEL, children }: {
 
   const live = status === "live";
   return (
-    <div>
+    <div dir="ltr">
       <div className="relative h-[300px] w-full overflow-hidden rounded-md border border-border/60 md:h-[380px]">
         {/* Always mounted, always sized: TradingView needs a laid-out box to
             autosize into, so it cannot be conditionally rendered. */}
@@ -183,7 +185,7 @@ export function LiveChart({ symbol, label = TV_LIVE_LABEL, children }: {
           <div className="absolute inset-0 overflow-auto bg-background p-2">
             {children ?? (
               <p className="flex h-full items-center justify-center text-center text-sm text-muted-foreground">
-                no stored price history to fall back on
+                {t(messages, "tech.noStoredHistory")}
               </p>
             )}
           </div>
@@ -192,13 +194,15 @@ export function LiveChart({ symbol, label = TV_LIVE_LABEL, children }: {
       <p className="mt-1 text-meta text-ink-dim">
         {status === "unavailable" ? (
           <span className="text-amber-600 dark:text-amber-400">
-            live chart unavailable — TradingView could not be loaded; showing
-            Jamasp&rsquo;s stored series instead
+            {t(messages, "tech.liveChartUnavailable")}
           </span>
         ) : live ? (
-          <>live · {label} · {symbol} · TradingView · hourly, UTC</>
+          // TradingView/hourly/UTC are the product name and Latin units — see
+          // Global constraints: tickers and time units stay Latin.
+          <>{t(messages, "tech.liveWord")} · {label} · {symbol} · TradingView · hourly, UTC</>
         ) : (
-          <>loading live {label} from TradingView — Jamasp&rsquo;s stored series meanwhile</>
+          <>{t(messages, "tech.loadingLivePrefix")} {label} from TradingView —{" "}
+            {t(messages, "tech.storedSeriesMeanwhile")}</>
         )}
       </p>
     </div>

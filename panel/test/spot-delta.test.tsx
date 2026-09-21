@@ -14,6 +14,9 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { beforeAll, describe, expect, it } from "vitest";
 import { TechnicalPanel } from "../components/technical-panel";
 import { deriveTechnicals, TECHNICAL_SYMBOLS } from "../lib/technicals";
+import { getMessages } from "../lib/i18n";
+
+const messages = getMessages("en");
 
 let db: typeof import("../lib/db");
 
@@ -47,7 +50,8 @@ function overviewTechnical(now: Date) {
   return {
     tech,
     html: renderToStaticMarkup(<TechnicalPanel tech={tech} series={[]}
-      gvzDelta={gvz && gvzRef !== null ? gvz.value - gvzRef : null} now={now} />),
+      gvzDelta={gvz && gvzRef !== null ? gvz.value - gvzRef : null} now={now}
+      messages={messages} />),
   };
 }
 

@@ -3,8 +3,10 @@ import { layoutMap, tone, type MapRange, type ScoredItem } from "@/lib/marketmap
 import { FullscreenButton } from "@/components/fullscreen-button";
 import {
   MapGroupHeader, MapHatchDefs, MapLegend, MapTile, GROUP_HEADER_H, fitLabel,
-  importanceInsets, tierFate, type ImportanceTreatment, type TierGates,
+  fallbackMarkerBand, importanceInsets, tierFate,
+  type ImportanceTreatment, type TierGates,
 } from "@/components/map-tiles";
+import { localized, t, type Locale, type Messages } from "@/lib/i18n";
 
 /**
  * Fundamental market map: a two-level treemap of scored news, drawn as
@@ -51,25 +53,38 @@ const THEME_HEADER_H = GROUP_HEADER_H;
 /** Shared between the section and the button that fullscreens it. */
 export const MAP_ELEMENT_ID = "market-map";
 
-const THEME_LABELS: Record<string, string> = {
-  rates_dollar: "Rates & dollar",
-  physical_cb: "Physical / CB",
-  etf_flows: "ETF flows",
-  supply_mining: "Supply & mining",
-  geopolitics: "Geopolitics",
-  other: "Other",
-};
-
-/** Unrecognised slugs degrade to a readable label rather than crashing. */
-function themeLabel(theme: string): string {
-  return THEME_LABELS[theme] ??
-    theme.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+/**
+ * `theme` is the fixed taxonomy config/weights.yaml#themes defines — chrome,
+ * not content, so it renders through the dictionary (`theme.*`) rather than
+ * the raw slug the fit and the DB pass around. Unrecognised slugs (there
+ * shouldn't be any: "other" is the fallback slot the config itself reserves)
+ * degrade to a readable label rather than the literal `theme.foo` key `t()`
+ * would otherwise return, or a crash.
+ */
+function themeLabel(theme: string, messages: Messages): string {
+  const key = `theme.${theme}`;
+  const label = t(messages, key);
+  return label !== key ? label
+    : theme.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 }
 
-const WINDOW_LABEL: Record<MapRange, string> = {
-  "24h": "in the last 24h",
-  week: "this week",
+const WINDOW_LABEL_KEY: Record<MapRange, string> = {
+  "24h": "map.windowLast24h",
+  week: "map.windowThisWeek",
 };
+
+function windowLabel(range: MapRange, messages: Messages): string {
+  return t(messages, WINDOW_LABEL_KEY[range]);
+}
+
+/**
+ * English-only, deliberately, in both locales: the svg's own aria-label
+ * below is a dynamically composed accessibility sentence (item counts
+ * folded in), not visible chrome with a Persian rendering to match against
+ * — see this task's report for the full reasoning next to the section
+ * aria-label just above it, which gets the identical treatment.
+ */
+const WINDOW_LABEL_EN: Record<MapRange, string> = { "24h": "in the last 24h", week: "this week" };
 
 
 const FATE_WORD = {
@@ -78,12 +93,38 @@ const FATE_WORD = {
   quiet: "not sent to the channel",
 } as const;
 
-function tileTitle(item: ScoredItem, now: Date, gates?: TierGates): string {
+/**
+ * `headline` is passed in already resolved for the locale (Persian when
+ * available, English otherwise) rather than read off `item` directly — this
+ * is the one string on the tile that must agree with what the label itself
+ * renders, so there is exactly one place (market-map.tsx's cell loop) that
+ * decides it.
+ *
+ * When Persian fell back to English, the title says so too, in the same
+ * dictionary voice `SourceLang`'s chip uses elsewhere (`content.
+ * sourceEnglishTitle`) — on top of, not instead of, the visible "EN" mark
+ * `MapTile` now draws on the tile itself (see map-tiles.tsx's
+ * fallbackMarkerBand). Both exist because the tile's own label is drawn as
+ * raw SVG `<text>`/`<tspan>`, not HTML: an HTML element such as
+ * `SourceLang` renders is not part of SVG's content model for `<text>`, and
+ * a browser parsing that markup breaks it OUT of the SVG tree entirely (the
+ * HTML parser's "foreign content" rules pop `span` back into the
+ * surrounding HTML content) rather than rendering it in place — silently
+ * wrong output, not a crash, and a hydration mismatch besides. The title
+ * stays because it is free and still useful on hover; the visible mark
+ * exists because a hover-only signal is not enough on the panel's most-
+ * scanned, least-hovered surface.
+ */
+function tileTitle(
+  item: ScoredItem, headline: string, fallback: boolean, now: Date,
+  messages: Messages, gates?: TierGates,
+): string {
   const dirWord = item.direction > 0 ? "bullish" : item.direction < 0 ? "bearish" : "neutral";
   const sign = item.direction > 0 ? "+" : "";
-  return `${item.headline} — tier ${item.tier} (${FATE_WORD[tierFate(item.tier, gates)]}), `
+  const base = `${headline} — tier ${item.tier} (${FATE_WORD[tierFate(item.tier, gates)]}), `
     + `${dirWord} ${sign}${item.direction} `
     + `(conviction ${item.conviction.toFixed(2)}), ${item.source}, ${fmtAge(item.publishedAt, now)}`;
+  return fallback ? `${base} — ${t(messages, "content.sourceEnglishTitle")}` : base;
 }
 
 /**
@@ -94,7 +135,7 @@ function tileTitle(item: ScoredItem, now: Date, gates?: TierGates): string {
  * turn off.
  */
 export function MarketMap({ items, width, height, range, coverage,
-  themeMultipliers, fittedAt, importance = "none", tierGates }: {
+  themeMultipliers, fittedAt, importance = "none", tierGates, locale, messages }: {
   items: ScoredItem[];
   width: number;
   height: number;
@@ -104,16 +145,25 @@ export function MarketMap({ items, width, height, range, coverage,
   fittedAt?: string | null;
   importance?: ImportanceTreatment;
   tierGates?: TierGates;
+  locale: Locale;
+  messages: Messages;
 }) {
   const now = new Date();
 
   if (items.length === 0) {
+    // aria-label deliberately English-only in both locales: it names an
+    // SVG-accessibility surface, not visible chrome, and has no visible
+    // counterpart elsewhere on the page for a Persian rendering to match
+    // against — see this task's report for the full reasoning.
     return (
       <section aria-label="Scored news treemap" className="rounded border border-border p-4">
         <p className="text-sm text-muted-foreground">
-          No scored stories {WINDOW_LABEL[range]}
+          {t(messages, "map.noScoredStoriesTemplate").replace("{window}", windowLabel(range, messages))}
           {coverage.unscored > 0
-            ? ` — ${coverage.unscored} unscored item${coverage.unscored === 1 ? "" : "s"} not shown.`
+            ? // English keeps its own singular/plural word ("item"/"items");
+              // Persian has no such distinction, so the same word covers both.
+              ` — ${coverage.unscored} ${t(messages, "map.unscoredItemWord")}` +
+              `${locale === "en" && coverage.unscored !== 1 ? "s" : ""} ${t(messages, "map.notShown")}.`
             : "."}
         </p>
       </section>
@@ -138,20 +188,30 @@ export function MarketMap({ items, width, height, range, coverage,
     // or hand over a ref. bg-background is load-bearing rather than cosmetic —
     // a fullscreened element inherits no background, so the browser paints
     // behind it black and the map would float on it.
-    <section id={MAP_ELEMENT_ID} aria-label="Scored news treemap"
+    // Pinned LTR: the panel flips to dir="rtl" in Persian, and every
+    // instrument here is positioned along a left-to-right time axis.
+    // Mirroring them would reverse the axis for no reader's benefit.
+    <section id={MAP_ELEMENT_ID} aria-label="Scored news treemap" dir="ltr"
       className="rounded border border-border p-4 bg-background">
       <div className="mb-2 flex items-center justify-end">
         <FullscreenButton targetId={MAP_ELEMENT_ID} />
       </div>
       <svg viewBox={`0 0 ${width} ${height}`} className="w-full" role="img"
-        aria-label={`scored news treemap, ${items.length} scored stories ${WINDOW_LABEL[range]}`}>
+        aria-label={`scored news treemap, ${items.length} scored stories ${WINDOW_LABEL_EN[range]}`}>
         <MapHatchDefs />
         {boxes.map(box => (
           <g key={box.theme}>
             <MapGroupHeader x={box.x} y={box.y} w={box.w}
-              label={themeLabel(box.theme)} />
+              label={themeLabel(box.theme, messages)} />
             {box.items.map(cell => {
-              const t = tone(cell.node.direction, cell.node.conviction);
+              const tn = tone(cell.node.direction, cell.node.conviction);
+              // Persian when the translate pass has filled it, English
+              // otherwise — this is the ONE resolution of the headline for
+              // the tile, shared by both the wrapped label below and the
+              // hover title, so the two can never disagree about which
+              // language is on screen.
+              const { text: headline, fallback } =
+                localized(cell.node, "headline", locale);
               // The headline is sized to its own tile rather than to one
               // map-wide constant — see map-tiles.tsx#fitLabel. When an
               // importance treatment reserves a band, the label is fitted to
@@ -159,31 +219,51 @@ export function MarketMap({ items, width, height, range, coverage,
               // to the whole tile and then sliding it down is exactly how a
               // reserved band turns into an overflow at the other edge.
               const inset = importanceInsets(importance, cell.w, cell.h);
-              const label = fitLabel(cell.node.headline, cell.w,
-                cell.h - inset.top - inset.bottom);
+              // Reserved the same way importanceInsets' own bands are: out
+              // of the label's box before fitLabel runs, never appended
+              // into the headline text itself — see map-tiles.tsx's
+              // fallbackMarkerBand for why, and for why market-map.tsx
+              // (sizing the label) and MapTile (positioning the marker)
+              // both call this one function rather than each computing
+              // their own answer.
+              const fbBand = fallbackMarkerBand(importance, cell.w, cell.h, fallback);
+              const label = fitLabel(headline, cell.w,
+                cell.h - inset.top - inset.bottom - fbBand);
               return (
                 <MapTile key={cell.node.itemId}
                   x={cell.x} y={cell.y} w={cell.w} h={cell.h}
-                  tone={t} title={tileTitle(cell.node, now, tierGates)}
+                  tone={tn}
+                  title={tileTitle(cell.node, headline, fallback, now, messages, tierGates)}
                   lines={label.lines} fontSize={label.fontSize}
-                  importance={importance} tier={cell.node.tier} gates={tierGates} />
+                  importance={importance} tier={cell.node.tier} gates={tierGates}
+                  fallback={fallback} />
               );
             })}
           </g>
         ))}
       </svg>
-      <MapLegend importance={importance} />
+      <MapLegend importance={importance} messages={messages} />
       <p className="mt-2 text-xs text-muted-foreground">
-        {coverage.scored} scored {coverage.scored === 1 ? "story" : "stories"} {WINDOW_LABEL[range]}
-        {" "}· {coverage.unscored} unscored not shown
+        {/* English keeps "scored story"/"scored stories" (adjective-noun,
+            pluralized); Persian's natural order is noun-then-adjective, and
+            has no plural to carry, so the two locales compose the same three
+            dictionary words in a different order rather than forcing one
+            template to read naturally in both. */}
+        {locale === "fa"
+          ? <>{coverage.scored} {t(messages, "map.storyWord")} {t(messages, "map.scoredWord")}</>
+          : <>{coverage.scored} {t(messages, "map.scoredWord")}{" "}
+              {t(messages, coverage.scored === 1 ? "map.storyWord" : "map.storiesWord")}</>}
+        {" "}{windowLabel(range, messages)}
+        {" "}· {coverage.unscored} {t(messages, "map.unscoredNotShownFooter")}
         {/* Area is the triage tier, full stop — see the header comment. The
             theme fit is still worth dating here because it is the other
             number this map is built from and the desk has no other view of
             its freshness; it is named as NOT an area term so the line cannot
             be read as the rescale claim it replaced. */}
         {fittedAt && hasMultipliers
-          ? ` · area is the triage tier · theme fit ${fmtAge(fittedAt, now)}, not applied to area`
-          : " · area is the triage tier · theme fit not yet run"}
+          ? <> · {t(messages, "map.areaIsTier")} · {t(messages, "map.themeFit")}{" "}
+              {fmtAge(fittedAt, now)}, {t(messages, "map.notAppliedToArea")}</>
+          : <> · {t(messages, "map.areaIsTier")} · {t(messages, "map.themeFitNotRun")}</>}
       </p>
     </section>
   );

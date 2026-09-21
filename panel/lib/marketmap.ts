@@ -35,6 +35,7 @@ export type ScoredItem = {
   conviction: number;  // 0..1
   theme: string;
   headline: string;
+  headline_fa: string | null;
   source: string;
   url: string;
   publishedAt: string;

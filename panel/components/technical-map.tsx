@@ -5,6 +5,7 @@ import {
   MapGroupHeader, MapHatchDefs, MapLegend, MapTile, GROUP_HEADER_H, fitLabel,
 } from "@/components/map-tiles";
 import { FullscreenButton } from "@/components/fullscreen-button";
+import { t, type Messages } from "@/lib/i18n";
 
 /**
  * Technical market map: a two-level treemap of signal states, drawn as
@@ -39,18 +40,19 @@ const FAMILY_HEADER_H = GROUP_HEADER_H;
 
 export const TECHNICAL_MAP_ELEMENT_ID = "technical-map";
 
-const FAMILY_LABELS: Record<string, string> = {
-  trend: "Trend",
-  momentum: "Momentum",
-  levels: "Levels",
-  volatility: "Volatility",
-  positioning: "Positioning",
-};
-
-/** Unrecognised slugs degrade to a readable label rather than crashing. */
-function familyLabel(family: string): string {
-  return FAMILY_LABELS[family] ??
-    family.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+/**
+ * `family` is the fixed grouping config/weights.yaml#signals defines (one
+ * per signal, in `trend`/`momentum`/`levels`/`volatility`/`positioning`) —
+ * chrome, not content, so it renders through the dictionary (`signal.*`)
+ * rather than the raw slug. Unrecognised slugs degrade to a readable label
+ * rather than the literal `signal.foo` key `t()` would otherwise return, or
+ * a crash.
+ */
+function familyLabel(family: string, messages: Messages): string {
+  const key = `signal.${family}`;
+  const label = t(messages, key);
+  return label !== key ? label
+    : family.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 }
 
 function tileTitle(t: SignalTile, now: Date): string {
@@ -70,21 +72,24 @@ function tileTitle(t: SignalTile, now: Date): string {
     + `${weight}${via}, ${fmtAge(t.ts, now)}`;
 }
 
-export function TechnicalMap({ tiles, width, height, fittedAt }: {
+export function TechnicalMap({ tiles, width, height, fittedAt, messages }: {
   tiles: SignalTile[];
   width: number;
   height: number;
   fittedAt: string | null;
+  messages: Messages;
 }) {
   const now = new Date();
 
   if (tiles.length === 0) {
+    // aria-label deliberately English-only in both locales: see
+    // components/market-map.tsx's identical section for the reasoning.
     return (
       <section aria-label="Technical signal treemap"
         className="rounded border border-border p-4">
         <p className="text-sm text-muted-foreground">
-          No technical signals yet — run <code>jamasp bars backfill</code> and{" "}
-          <code>jamasp signals refresh</code>.
+          {t(messages, "tech.noSignalsPrefix")} <code>jamasp bars backfill</code>{" "}
+          {t(messages, "tech.noSignalsAnd")} <code>jamasp signals refresh</code>.
         </p>
       </section>
     );
@@ -99,7 +104,7 @@ export function TechnicalMap({ tiles, width, height, fittedAt }: {
   const unfitted = tiles.filter(t => !t.fitted && !t.pinned).length;
 
   return (
-    <section id={TECHNICAL_MAP_ELEMENT_ID} aria-label="Technical signal treemap"
+    <section id={TECHNICAL_MAP_ELEMENT_ID} aria-label="Technical signal treemap" dir="ltr"
       className="rounded border border-border p-4 bg-background">
       <div className="mb-2 flex items-center justify-end">
         <FullscreenButton targetId={TECHNICAL_MAP_ELEMENT_ID} />
@@ -110,7 +115,7 @@ export function TechnicalMap({ tiles, width, height, fittedAt }: {
         {boxes.map(box => (
           <g key={box.group}>
             <MapGroupHeader x={box.x} y={box.y} w={box.w}
-              label={familyLabel(box.group)} />
+              label={familyLabel(box.group, messages)} />
             {box.items.map(cell => {
               // The label is sized to its own tile rather than to one
               // map-wide constant — see map-tiles.tsx#fitLabel.
@@ -128,11 +133,13 @@ export function TechnicalMap({ tiles, width, height, fittedAt }: {
           </g>
         ))}
       </svg>
-      <MapLegend />
+      <MapLegend messages={messages} />
       <p className="mt-2 text-xs text-muted-foreground">
-        {tiles.length} signals
-        {unfitted > 0 ? ` · ${unfitted} not yet fitted (dashed)` : ""}
-        {fittedAt ? ` · weights fitted ${fmtAge(fittedAt, now)}` : " · no fit yet"}
+        {tiles.length} {t(messages, "tech.signalsWord")}
+        {unfitted > 0 ? <> · {unfitted} {t(messages, "tech.notYetFitted")}</> : ""}
+        {fittedAt
+          ? <> · {t(messages, "tech.weightsFitted")} {fmtAge(fittedAt, now)}</>
+          : <> · {t(messages, "tech.noFitYet")}</>}
       </p>
     </section>
   );

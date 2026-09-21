@@ -17,7 +17,7 @@ let db: typeof import("../lib/db");
 const item = (id: string, source: string, publishedAt: string, topic: string,
   clusterId: string | null, headline = `headline ${id}`) =>
   `('${id}','${source}','${publishedAt}','${headline}',NULL,'https://x.test/${id}','${topic}',` +
-  (clusterId === null ? "NULL" : `'${clusterId}'`) + `,'${publishedAt}',NULL)`;
+  (clusterId === null ? "NULL" : `'${clusterId}'`) + `,'${publishedAt}',NULL,NULL,NULL,NULL)`;
 
 beforeAll(async () => {
   const root = mkdtempSync(path.join(tmpdir(), "jamasp-db-news-"));
@@ -27,7 +27,8 @@ beforeAll(async () => {
     CREATE TABLE items (id TEXT PRIMARY KEY, source TEXT NOT NULL,
       published_at TEXT NOT NULL, headline TEXT NOT NULL, lede TEXT,
       url TEXT NOT NULL, topic TEXT NOT NULL, cluster_id TEXT,
-      fetched_at TEXT NOT NULL, read_at TEXT);
+      fetched_at TEXT NOT NULL, read_at TEXT,
+      headline_fa TEXT, lede_fa TEXT, fa_source TEXT);
     INSERT INTO items VALUES
       ${item("a1", "reuters", "2026-08-10T08:00:00Z", "regional", "a1", "Strait strike claim")},
       ${item("a2", "cnbc_finance", "2026-08-10T08:30:00Z", "regional", "a1")},
@@ -93,5 +94,15 @@ describe("topStory", () => {
   });
   it("returns null when nothing clusters in the window", () => {
     expect(db.topStory("2026-08-11T00:00:00Z")).toBeNull();
+  });
+});
+
+describe("getItems", () => {
+  it("carries the Persian columns through getItems", () => {
+    // getItems is SELECT *, so this is really asserting the TYPE admits them
+    // and that no projection drops them on the way out.
+    const rows = db.getItems({ limit: 1 });
+    expect(rows[0]).toHaveProperty("headline_fa");
+    expect(rows[0]).toHaveProperty("lede_fa");
   });
 });

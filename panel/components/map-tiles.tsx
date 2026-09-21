@@ -1,4 +1,5 @@
 import { type Tone } from "@/lib/marketmap";
+import { t, type Messages } from "@/lib/i18n";
 
 /**
  * Tile primitives shared by both market maps.
@@ -337,6 +338,71 @@ export function importanceInsets(
   // "boundary" paints inside the tile's own edge and "none" paints nothing,
   // so neither costs the label a pixel.
   return { top: 0, bottom: 0 };
+}
+
+/**
+ * The "still in English" marker on a tile whose Persian headline has not
+ * landed — the map's own instance of the signal `SourceLang` renders as an
+ * HTML chip everywhere else on the panel (news flow, inbox). This tile's
+ * label is raw SVG `<text>`/`<tspan>`, and `SourceLang`'s `<span>` cannot be
+ * nested inside it: a browser's HTML parser treats `span` as one of the tags
+ * that break OUT of foreign (SVG) content (WHATWG HTML §13.2.6.5) rather
+ * than rendering it in place — the marker would land as stray text after the
+ * `</svg>` instead of on its own tile, and disagree with what React's SSR
+ * markup says the tree looks like (a hydration mismatch). So this is its own
+ * independent `<text>` element instead, positioned directly off the tile's
+ * own `x`/`y`/`w`/`h` — the same shape `metaText` and the pip band already
+ * use — and it must NEVER be appended into `fitLabel`'s wrapped `lines`:
+ * doing that would feed extra characters into the fitting math and put the
+ * zero-overflow guarantee the rest of this file protects so carefully at
+ * risk.
+ *
+ * `FALLBACK_MARKER_BAND` stacks ABOVE any importance-treatment top inset —
+ * pips and this marker can both be showing on one tile, each in its own
+ * strip — and is reserved out of the label's box BEFORE `fitLabel` runs,
+ * the same up-front-reservation rule `importanceInsets` documents for its
+ * own bands, and for the same reason: a band taken out after the label is
+ * sized is a band that overflows.
+ *
+ * A hover-only marker (the tile's `<title>`, still carried in
+ * `market-map.tsx#tileTitle`) is not enough on its own: this is the panel's
+ * most-scanned, least-hovered surface, and a stalled translate job should
+ * not look identical to a healthy one to someone who never hovers.
+ */
+export const FALLBACK_MARKER_TEXT = "EN";
+export const FALLBACK_MARKER_FONT = 9;
+export const FALLBACK_MARKER_BAND = 14;
+
+/**
+ * Whether a tile can hold the marker's band ON TOP OF a legible label — not
+ * just the label alone. `availH` is the height already left after any
+ * importance-treatment inset, matching how the caller sizes the label: the
+ * marker's own gate is checked against what actually remains for it to add
+ * to, never against the raw tile, so it can never claim room the label
+ * needed first. `MIN_LABEL_W`/`MIN_LABEL_H` are the exact floor that already
+ * suppresses the label itself on tiny tiles, reused here so the marker never
+ * appears on a tile too small to carry a label under it in the first place —
+ * an "EN" chip with no headline beneath it would be a stray, unreadable mark
+ * rather than a useful one.
+ */
+function fallbackMarkerFits(w: number, availH: number): boolean {
+  return w >= MIN_LABEL_W && availH >= MIN_LABEL_H + FALLBACK_MARKER_BAND;
+}
+
+/**
+ * The marker's band, or 0 when there is nothing to mark or no room for it.
+ * A single function so `market-map.tsx` (sizing the label) and `MapTile`
+ * (positioning it) read the identical value — the same discipline
+ * `importanceInsets` follows for its own bands, and for the same reason:
+ * two independent computations of "how much room does this take" are two
+ * chances to disagree about where the label box ends.
+ */
+export function fallbackMarkerBand(
+  importance: ImportanceTreatment, w: number, h: number, fallback: boolean,
+): number {
+  if (!fallback) return 0;
+  const inset = importanceInsets(importance, w, h);
+  return fallbackMarkerFits(w, h - inset.top - inset.bottom) ? FALLBACK_MARKER_BAND : 0;
 }
 
 /** Truncate `text` to whatever fits `w` px at `fontSize`, ellipsis-safe. */
@@ -693,14 +759,21 @@ export function MapGroupHeader({ x, y, w, label }: {
  * When it is on, the caller MUST have sized `lines`/`fontSize` against
  * `h - importanceInsets(...).top - .bottom`, which is what keeps the label
  * inside the box the treatment left it.
+ *
+ * `fallback` is independent of `importance` entirely — it marks a headline
+ * still showing its English source (see `fallbackMarkerBand` above) and
+ * needs no `tier`. When it reserves a band, the caller MUST also have sized
+ * `lines`/`fontSize` against `h - fallbackMarkerBand(...)` on top of
+ * whatever `importanceInsets` already took, for the same reason.
  */
 export function MapTile({ x, y, w, h, tone, title, lines,
   fontSize = LABEL_FONT, dashed = false,
-  importance = "none", tier, gates = DEFAULT_TIER_GATES }: {
+  importance = "none", tier, gates = DEFAULT_TIER_GATES, fallback = false }: {
   x: number; y: number; w: number; h: number;
   tone: Tone; title: string; lines: string[];
   fontSize?: number; dashed?: boolean;
   importance?: ImportanceTreatment; tier?: number; gates?: TierGates;
+  fallback?: boolean;
 }) {
   // The wrapped block is centred on BOTH axes.
   //
@@ -731,8 +804,12 @@ export function MapTile({ x, y, w, h, tone, title, lines,
   const showImportance = importance !== "none" && tier !== undefined;
   const inset = showImportance
     ? importanceInsets(importance, w, h) : { top: 0, bottom: 0 };
-  const boxY = y + inset.top;
-  const boxH = Math.max(0, h - inset.top - inset.bottom);
+  // Independent of `importance`/`tier` entirely — see fallbackMarkerBand's
+  // own doc comment for why it stacks above `inset.top` rather than
+  // competing with it.
+  const markerBand = fallbackMarkerBand(importance, w, h, fallback);
+  const boxY = y + inset.top + markerBand;
+  const boxH = Math.max(0, h - inset.top - inset.bottom - markerBand);
 
   const lineH = fontSize * LINE_RATIO;
   const blockH = fontSize * (ASCENT + DESCENT)
@@ -743,7 +820,9 @@ export function MapTile({ x, y, w, h, tone, title, lines,
   // --- pips: five fixed marks, `tier` of them filled ---
   const pipsOn = showImportance && importance === "pips" && inset.top > 0;
   const pipX0 = cx - PIPS_W / 2;
-  const pipY = y + (PIP_BAND - PIP_H) / 2;
+  // Pushed down by the marker's own band when both are showing, so the
+  // two never share the same strip at the top of the tile.
+  const pipY = y + markerBand + (PIP_BAND - PIP_H) / 2;
 
   // --- boundary: a stroke on the pipeline's own gates, inset so it paints
   // inside the tile rather than over the 1px separator its neighbour shares.
@@ -803,6 +882,19 @@ export function MapTile({ x, y, w, h, tone, title, lines,
           ))}
         </g>
       )}
+      {markerBand > 0 && (
+        // Corner-anchored and right-aligned, in its own reserved band — see
+        // fallbackMarkerBand's doc comment for why this cannot be the
+        // SourceLang chip used everywhere else on the panel.
+        <text x={x + w - LABEL_PAD}
+          y={y + (markerBand - FALLBACK_MARKER_FONT * (ASCENT + DESCENT)) / 2
+            + FALLBACK_MARKER_FONT * ASCENT}
+          textAnchor="end" fontSize={FALLBACK_MARKER_FONT} fill={TONE_INK[tone]}
+          fillOpacity={0.6} pointerEvents="none"
+          style={{ fontWeight: 600, letterSpacing: "0.02em" }}>
+          {FALLBACK_MARKER_TEXT}
+        </text>
+      )}
       {metaFits && (
         <text x={cx} y={y + h - inset.bottom
           + (META_BAND - metaFont * (ASCENT + DESCENT)) / 2 + metaFont * ASCENT}
@@ -833,12 +925,39 @@ export function MapTile({ x, y, w, h, tone, title, lines,
   );
 }
 
-const LEGEND_STEPS: { tone: Tone; label: string }[] = [
-  { tone: "bear", label: "bearish" },
-  { tone: "bear-mid", label: "bearish (mid)" },
-  { tone: "neutral", label: "neutral" },
-  { tone: "bull-mid", label: "bullish (mid)" },
-  { tone: "bull", label: "bullish" },
+/**
+ * `Tone` (lib/marketmap.ts) is a closed, code-defined enum — chrome, not
+ * content — so the legend's words render through the dictionary rather
+ * than the literal English this used to hardcode. Typed as
+ * `Record<Tone, string>`, like TONE_FILL/TONE_INK above: a fifth Tone value
+ * added to the union without a matching entry here fails `tsc`, the same
+ * guard those two already give the colour tables.
+ *
+ * Only THREE keys exist (`tone.bearish`/`tone.neutral`/`tone.bullish`) for
+ * FIVE tone values: the "-mid" steps are an intensity of their pole, not a
+ * distinct direction, so they share its word — the swatch colour is what
+ * tells a bear tile from a bear-mid one. The "(mid)" intensity marker
+ * itself is a SEPARATE closed-set chrome string, `legend.mid` below, not
+ * a fourth entry here — it qualifies whichever tone word it follows rather
+ * than naming a stance of its own, so folding it into `TONE_LABEL_KEY`
+ * would make an unmapped fourth `Tone` value silently pass this table's
+ * exhaustiveness check by accident (a `legend.mid`-shaped key would look
+ * like a mistaken entry, not a missing one).
+ */
+export const TONE_LABEL_KEY: Record<Tone, string> = {
+  bear: "tone.bearish",
+  "bear-mid": "tone.bearish",
+  neutral: "tone.neutral",
+  "bull-mid": "tone.bullish",
+  bull: "tone.bullish",
+};
+
+const LEGEND_STEPS: { tone: Tone; mid: boolean }[] = [
+  { tone: "bear", mid: false },
+  { tone: "bear-mid", mid: true },
+  { tone: "neutral", mid: false },
+  { tone: "bull-mid", mid: true },
+  { tone: "bull", mid: false },
 ];
 
 /**
@@ -850,7 +969,7 @@ const LEGEND_STEPS: { tone: Tone; label: string }[] = [
  * a url(#map-hatch) reference, which the compliance test reads as "a bearish
  * tile".
  */
-function ImportanceKey({ treatment }: { treatment: ImportanceTreatment }) {
+function ImportanceKey({ treatment, messages }: { treatment: ImportanceTreatment; messages: Messages }) {
   if (treatment === "none") return null;
   if (treatment === "pips") {
     return (
@@ -864,10 +983,15 @@ function ImportanceKey({ treatment }: { treatment: ImportanceTreatment }) {
               }} />
           ))}
         </span>
-        filled pips = tier (of {MAX_TIER})
+        {t(messages, "map.pipsLegend").replace("{n}", String(MAX_TIER))}
       </span>
     );
   }
+  // "boundary" and the unnamed default treatment below are unreachable from
+  // any current caller (market-map.tsx passes "pips", technical-map.tsx
+  // passes no `importance` at all, defaulting to "none") — left in their
+  // original English rather than translated, since there is no live surface
+  // to verify a Persian rendering against. See this task's report.
   if (treatment === "boundary") {
     return (
       <>
@@ -892,16 +1016,20 @@ function ImportanceKey({ treatment }: { treatment: ImportanceTreatment }) {
   );
 }
 
-export function MapLegend({ importance = "none" }: {
+export function MapLegend({ importance = "none", messages }: {
   importance?: ImportanceTreatment;
+  messages: Messages;
 }) {
   return (
-    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-meta text-muted-foreground">
+    // The steps are a fixed reading order (bearish -> neutral -> bullish),
+    // not an unordered set — see market-map.tsx for why that axis must not
+    // mirror under Persian's dir="rtl".
+    <div dir="ltr" className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-meta text-muted-foreground">
       {LEGEND_STEPS.map(s => (
         <span key={s.tone} className="flex items-center gap-1">
           <span aria-hidden className="h-2.5 w-2.5 rounded-[2px]"
             style={{ background: TONE_FILL[s.tone] }} />
-          {s.label}
+          {t(messages, TONE_LABEL_KEY[s.tone])}{s.mid ? ` (${t(messages, "legend.mid")})` : ""}
         </span>
       ))}
       <span className="flex items-center gap-1">
@@ -915,9 +1043,9 @@ export function MapLegend({ importance = "none" }: {
               "repeating-linear-gradient(45deg, currentColor 0, currentColor 1px, transparent 1px, transparent 4px)",
             color: "var(--map-bear)",
           }} />
-        hatched = bearish
+        {t(messages, "map.hatchedLabel")} = {t(messages, TONE_LABEL_KEY.bear)}
       </span>
-      <ImportanceKey treatment={importance} />
+      <ImportanceKey treatment={importance} messages={messages} />
     </div>
   );
 }

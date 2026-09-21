@@ -1,5 +1,6 @@
 import type { Level } from "@/lib/technicals";
 import { cls } from "@/lib/format";
+import { t, type Messages } from "@/lib/i18n";
 
 /**
  * Vertical spacing between consecutive ladder rows, proportional to the
@@ -24,6 +25,28 @@ function fmt(v: number): string {
 }
 
 /**
+ * `label` comes straight from lib/technicals.ts#deriveTechnicals, which is
+ * paired byte-for-byte with jamasp/pricesummary.py#_tech_line and asserted
+ * exactly by test/technicals.test.ts — so this component translates for
+ * DISPLAY only, never by changing what deriveTechnicals returns.
+ *
+ * Only "spot" gets a dictionary entry. "200DMA"/"50DMA"/"pivot R1"/"pivot
+ * S1" are judged ticker-like technical shorthand — the same register as
+ * `signal.rsi14: "RSI14"` or `driver.dxy: "DXY"`, which this dictionary
+ * already keeps Latin in Persian — and this ladder is a narrow, dense
+ * column where a fuller Persian phrase ("میانگین متحرک 200 روزه") would not
+ * fit beside the tabular price column. "spot" is different: a plain English
+ * common noun for "the current price," not an acronym or ticker, so it
+ * translates like any other prose word.
+ */
+const LEVEL_LABEL_KEY: Record<string, string> = { spot: "tech.levelSpot" };
+
+function levelLabel(label: string, messages: Messages): string {
+  const key = LEVEL_LABEL_KEY[label];
+  return key ? t(messages, key) : label;
+}
+
+/**
  * The level map as a price rail: a vertical axis line with a tick per
  * stored level and a gold dot where spot sits. Above/below is carried by
  * sorted position (levels arrive descending); MA ticks are longer than
@@ -31,13 +54,13 @@ function fmt(v: number): string {
  * never colour- or length-alone. The dot is the only coloured mark — text
  * stays in text tokens.
  */
-export function LevelLadder({ levels }: { levels: Level[] }) {
+export function LevelLadder({ levels, messages }: { levels: Level[]; messages: Messages }) {
   if (levels.length === 0) {
-    return <p className="text-sm text-muted-foreground">no levels available</p>;
+    return <p className="text-sm text-muted-foreground">{t(messages, "tech.noLevelsAvailable")}</p>;
   }
   const gaps = ladderGaps(levels.map(l => l.value));
   return (
-    <ol className="relative ml-1 border-l-2 border-border py-1 pl-5 tabular-nums">
+    <ol dir="ltr" className="relative ml-1 border-l-2 border-border py-1 pl-5 tabular-nums">
       {levels.map((l, i) => (
         <li key={l.label}
           style={i === 0 ? undefined : { marginTop: `${gaps[i - 1]}px` }}
@@ -56,7 +79,7 @@ export function LevelLadder({ levels }: { levels: Level[] }) {
               style={{ left: "-22px" }} />
           )}
           <span className="w-16 shrink-0 text-right">{fmt(l.value)}</span>
-          <span className="text-xs">{l.label}</span>
+          <span className="text-xs">{levelLabel(l.label, messages)}</span>
         </li>
       ))}
     </ol>

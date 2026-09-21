@@ -25,6 +25,7 @@
  * the unscored branch rather than being treated as a fourth outcome.
  */
 import type { Prediction } from "./files";
+import { t, type Messages } from "./i18n";
 
 export type PredictionState = "due" | "open" | "hit" | "miss" | "unclear";
 
@@ -107,4 +108,19 @@ export function countByState(rows: LedgerRow[]): Record<PredictionState, number>
   };
   for (const r of rows) counts[r.state]++;
   return counts;
+}
+
+/**
+ * `direction` (up/down/flat) is a prediction's own closed-set field — chrome,
+ * the same treatment components/prediction-list.tsx's stateLabel gives
+ * `state`. Lives beside the rest of this module's prediction-shape logic
+ * rather than in a component, so both app/state/page.tsx's table and
+ * components/prediction-list.tsx's row share one lookup and cannot disagree
+ * about what "down" says in Persian. Falls back to the raw value for
+ * anything outside the set, never a raw dictionary key.
+ */
+export function directionLabel(direction: string, messages: Messages): string {
+  const key = `direction.${direction}`;
+  const label = t(messages, key);
+  return label !== key ? label : direction;
 }

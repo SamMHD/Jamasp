@@ -1,9 +1,11 @@
 import { mkdtempSync, rmSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { renderToStaticMarkup } from "react-dom/server";
+import { renderToReadableStream } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ingestTone } from "@/components/shell/app-shell";
+
+vi.mock("next/headers", () => ({ cookies: async () => ({ get: () => undefined }) }));
 
 // SideNav/TabBar/TopBar all call usePathname() — needed for the full
 // AppShell render further down, harmless for the pure ingestTone tests above.
@@ -63,7 +65,18 @@ describe("AppShell against an isolated root with no db file yet", () => {
     process.env.JAMASP_ROOT = tmpRoot;
     vi.resetModules();
     const { AppShell } = await import("@/components/shell/app-shell");
-    return renderToStaticMarkup(<AppShell>{<div>page content</div>}</AppShell>);
+    // AppShell is now async (it awaits cookies() to resolve the locale), so
+    // the synchronous renderToStaticMarkup used everywhere else in this
+    // suite can no longer render it — a sync renderer errors the instant an
+    // async component suspends. renderToReadableStream is the streaming
+    // renderer that actually waits out that suspension; stream.allReady
+    // blocks until every async component has resolved, giving back the same
+    // fully-settled markup renderToStaticMarkup used to hand back directly.
+    const stream = await renderToReadableStream(
+      <AppShell>{<div>page content</div>}</AppShell>,
+    );
+    await stream.allReady;
+    return new Response(stream).text();
   }
 
   it("renders instead of throwing when the db file doesn't exist yet", async () => {

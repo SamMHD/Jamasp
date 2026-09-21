@@ -94,7 +94,7 @@ export function SpotChart({ points, levels }: {
   const last = points[points.length - 1];
 
   return (
-    <div>
+    <div dir="ltr">
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img"
         aria-label={`gold futures, ${points.length} points from ${fmtUtc(points[0].ts)} to ${fmtUtc(last.ts)}, latest ${fmtValue(last.value)}`}>
         {/* hairline horizontal grid + y labels */}

@@ -3,9 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ALL, isActive } from "@/lib/nav";
+import { LangToggle } from "@/components/lang-toggle";
 import { NavItemBody } from "@/components/shell/nav-pending";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cls } from "@/lib/format";
+import { t } from "@/lib/i18n";
+import type { Locale, Messages } from "@/lib/i18n";
 
 /**
  * Desktop navigation, rendered at >=1024px only (AppShell hides it below).
@@ -18,16 +21,19 @@ import { cls } from "@/lib/format";
  * chrome a desktop reader sees, so without it desktop has no way to change
  * theme at all.
  */
-export function SideNav() {
+export function SideNav({ locale, messages }: { locale: Locale; messages: Messages }) {
   const path = usePathname();
   return (
     <aside className="hidden w-56 shrink-0 border-r border-border bg-card lg:block">
       <div className="flex h-14 items-center gap-2 px-2 pl-4">
         <span className="text-heading font-semibold text-primary">Jamasp</span>
-        <span className="ml-auto"><ThemeToggle /></span>
+        <span className="ml-auto flex items-center gap-1">
+          <LangToggle locale={locale} messages={messages} />
+          <ThemeToggle />
+        </span>
       </div>
       <nav aria-label="Sections" className="flex flex-col gap-0.5 px-2 pb-4">
-        {ALL.map(({ href, label, icon: Icon }) => {
+        {ALL.map(({ href, labelKey, icon: Icon }) => {
           const active = isActive(path, href);
           return (
             <Link
@@ -42,7 +48,7 @@ export function SideNav() {
                   : "border-l-transparent text-muted-foreground hover:bg-secondary hover:text-foreground",
               )}
             >
-              <NavItemBody icon={Icon} label={label} />
+              <NavItemBody icon={Icon} label={t(messages, labelKey)} />
             </Link>
           );
         })}

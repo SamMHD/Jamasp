@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { Inter, Vazirmatn } from "next/font/google";
+import { cookies } from "next/headers";
 import "./globals.css";
 import { AppShell } from "@/components/shell/app-shell";
 import { Toaster } from "@/components/ui/sonner";
 import { THEME_STORAGE_KEY } from "@/lib/theme";
+import { dirFor, LANG_COOKIE, resolveLocale } from "@/lib/i18n";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
 const vazirmatn = Vazirmatn({ subsets: ["arabic"], variable: "--font-fa", display: "swap" });
@@ -27,9 +29,18 @@ var d=p==="dark"||(p==="system"&&matchMedia("(prefers-color-scheme: dark)").matc
 document.documentElement.classList.add(d?"dark":"light");
 }catch(e){}})();`;
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+// Unlike the theme (client-only, hence THEME_SCRIPT above), the locale is
+// decided on the server from the request's cookie jar, so the first byte
+// already carries the right lang/dir — no pre-paint script needed here.
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = resolveLocale((await cookies()).get(LANG_COOKIE)?.value);
   return (
-    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${vazirmatn.variable}`}>
+    <html
+      lang={locale}
+      dir={dirFor(locale)}
+      suppressHydrationWarning
+      className={`${inter.variable} ${vazirmatn.variable}`}
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>

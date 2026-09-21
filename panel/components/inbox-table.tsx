@@ -11,8 +11,31 @@ import {
 import type { ItemRow } from "@/lib/db";
 import { markInboxRead } from "@/lib/actions";
 import { fmtAge, fmtUtc } from "@/lib/format";
+import { localized, t, type Locale, type Messages } from "@/lib/i18n";
+import { SourceLang } from "@/components/source-lang";
 
 const PAGE_SIZE = 50;
+
+/**
+ * Shared by the list row and the detail dialog's title, which is what makes
+ * the two provably agree rather than merely both remembering to call
+ * `localized(..., "headline", locale)` + `<SourceLang>` the same way: there
+ * is exactly one call site left to get the field name wrong, and both
+ * surfaces render through it.
+ *
+ * Exported so test/inbox-table.test.tsx can render the dialog title's exact
+ * code path directly: the dialog only mounts after a click sets
+ * `selectedKey`, and this project has no DOM/interaction simulation
+ * (no jsdom, no @testing-library/react) to drive that click and read the
+ * result back. Testing this component IS testing that call site, because
+ * `DialogTitle` renders nothing else.
+ */
+export function ItemHeadline({ item, locale, messages }: {
+  item: ItemRow; locale: Locale; messages: Messages;
+}) {
+  const { text, fallback } = localized(item, "headline", locale);
+  return <SourceLang fallback={fallback} messages={messages}>{text}</SourceLang>;
+}
 
 const fetcher = async (url: string) => {
   const r = await fetch(url);
@@ -23,7 +46,9 @@ const fetcher = async (url: string) => {
   return r.json();
 };
 
-export function InboxTable({ sources, topics }: { sources: string[]; topics: string[] }) {
+export function InboxTable({ sources, topics, locale, messages }: {
+  sources: string[]; topics: string[]; locale: Locale; messages: Messages;
+}) {
   const [source, setSource] = useState("");
   const [topic, setTopic] = useState("");
   const [unread, setUnread] = useState(true);
@@ -33,8 +58,8 @@ export function InboxTable({ sources, topics }: { sources: string[]; topics: str
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
-    const t = setTimeout(() => setSearch(searchInput.trim()), 300);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setSearch(searchInput.trim()), 300);
+    return () => clearTimeout(timer);
   }, [searchInput]);
 
   const baseQs = new URLSearchParams({
@@ -96,20 +121,20 @@ export function InboxTable({ sources, topics }: { sources: string[]; topics: str
     <div>
       <div className="mb-4 flex flex-wrap items-center gap-2 text-sm">
         <Input value={searchInput} onChange={e => setSearchInput(e.target.value)}
-          placeholder="search headlines…" className="h-8 w-56" />
+          placeholder={t(messages, "inboxTable.searchPlaceholder")} className="h-8 w-56" />
         <select value={source} onChange={e => setSource(e.target.value)}
           className="rounded border border-border bg-background px-2 py-1">
-          <option value="">all sources</option>
+          <option value="">{t(messages, "inboxTable.allSources")}</option>
           {sources.map(s => <option key={s}>{s}</option>)}
         </select>
         <select value={topic} onChange={e => setTopic(e.target.value)}
           className="rounded border border-border bg-background px-2 py-1">
-          <option value="">all topics</option>
-          {topics.map(t => <option key={t}>{t}</option>)}
+          <option value="">{t(messages, "inboxTable.allTopics")}</option>
+          {topics.map(tp => <option key={tp}>{tp}</option>)}
         </select>
         <label className="flex items-center gap-1">
           <input type="checkbox" checked={unread} onChange={e => setUnread(e.target.checked)} />
-          unread only
+          {t(messages, "inboxTable.unreadOnly")}
         </label>
         <Button size="sm" variant="outline" disabled={pending}
           onClick={() => startTransition(async () => {
@@ -117,7 +142,7 @@ export function InboxTable({ sources, topics }: { sources: string[]; topics: str
             if (r.ok) toast.success(r.message); else toast.error(r.message);
             mutate();
           })}>
-          Mark delta read
+          {t(messages, "inboxTable.markDeltaRead")}
         </Button>
       </div>
       <ul className="space-y-3">
@@ -131,21 +156,25 @@ export function InboxTable({ sources, topics }: { sources: string[]; topics: str
                   className={`text-left ${rep.read_at
                     ? "text-muted-foreground hover:text-foreground"
                     : "font-medium hover:text-primary"}`}>
-                  {rep.headline}
+                  <ItemHeadline item={rep} locale={locale} messages={messages} />
                 </button>
-                {!rep.read_at && <Badge>unread</Badge>}
+                {!rep.read_at && <Badge>{t(messages, "inboxTable.unreadBadge")}</Badge>}
               </div>
               {rep.lede && <p className="mt-1 text-sm text-muted-foreground">{rep.lede}</p>}
               <div className="mt-1 text-xs text-muted-foreground">
                 {rep.source} · {rep.topic} · {fmtAge(rep.published_at)}
-                {others.length > 0 && <> · also: {others.map(o => o.source).join(", ")}</>}
+                {others.length > 0 && (
+                  <> · {t(messages, "inboxTable.alsoWord")}: {others.map(o => o.source).join(", ")}</>
+                )}
               </div>
             </li>
           );
         })}
         {!error && items.length === 0 && (
           <li className="text-sm text-muted-foreground">
-            {search ? `nothing matches “${search}”` : "nothing here"}
+            {search
+              ? t(messages, "inboxTable.nothingMatches").replace("{q}", search)
+              : t(messages, "inboxTable.nothingHere")}
           </li>
         )}
       </ul>
@@ -153,13 +182,13 @@ export function InboxTable({ sources, topics }: { sources: string[]; topics: str
         <div ref={sentinelRef} className="mt-3 flex justify-center">
           <Button size="sm" variant="outline" disabled={loadingMore}
             onClick={() => setSize(s => s + 1)}>
-            {loadingMore ? "loading…" : "Load more"}
+            {loadingMore ? t(messages, "common.loadingEllipsis") : t(messages, "inboxTable.loadMore")}
           </Button>
         </div>
       )}
       {error && (
         <div className="mt-3 rounded border border-destructive p-3 text-sm text-destructive">
-          Could not load the inbox: {error.message}
+          {t(messages, "inboxTable.couldNotLoad")} {error.message}
         </div>
       )}
       <Dialog open={!!selectedRep} onOpenChange={open => { if (!open) setSelectedKey(null); }}>
@@ -167,30 +196,40 @@ export function InboxTable({ sources, topics }: { sources: string[]; topics: str
           {selectedRep && (
             <>
               <DialogHeader>
-                <DialogTitle className="leading-snug">{selectedRep.headline}</DialogTitle>
+                <DialogTitle className="leading-snug">
+                  <ItemHeadline item={selectedRep} locale={locale} messages={messages} />
+                </DialogTitle>
                 {selectedRep.lede && <DialogDescription>{selectedRep.lede}</DialogDescription>}
               </DialogHeader>
               <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1.5 text-sm">
-                <dt className="text-muted-foreground">source</dt>
+                <dt className="text-muted-foreground">{t(messages, "inboxTable.dtSource")}</dt>
                 <dd>{selectedRep.source}</dd>
-                <dt className="text-muted-foreground">topic</dt>
+                <dt className="text-muted-foreground">{t(messages, "inboxTable.dtTopic")}</dt>
                 <dd>{selectedRep.topic}</dd>
-                <dt className="text-muted-foreground">published</dt>
+                <dt className="text-muted-foreground">{t(messages, "inboxTable.dtPublished")}</dt>
                 <dd>{fmtUtc(selectedRep.published_at)} · {fmtAge(selectedRep.published_at)}</dd>
-                <dt className="text-muted-foreground">ingested</dt>
+                <dt className="text-muted-foreground">{t(messages, "inboxTable.dtIngested")}</dt>
                 <dd>{fmtUtc(selectedRep.fetched_at)} · {fmtAge(selectedRep.fetched_at)}</dd>
-                <dt className="text-muted-foreground">status</dt>
-                <dd>{selectedRep.read_at ? `read ${fmtAge(selectedRep.read_at)}` : "unread"}</dd>
-                <dt className="text-muted-foreground">item id</dt>
+                <dt className="text-muted-foreground">{t(messages, "inboxTable.dtStatus")}</dt>
+                <dd>
+                  {selectedRep.read_at
+                    ? `${t(messages, "inboxTable.readPrefix")} ${fmtAge(selectedRep.read_at)}`
+                    : t(messages, "inboxTable.unreadWord")}
+                </dd>
+                <dt className="text-muted-foreground">{t(messages, "inboxTable.dtItemId")}</dt>
                 <dd className="font-mono text-xs leading-5">{selectedRep.id}</dd>
-                <dt className="text-muted-foreground">cluster</dt>
+                <dt className="text-muted-foreground">{t(messages, "inboxTable.dtCluster")}</dt>
                 <dd className="font-mono text-xs leading-5">
                   {selectedRep.cluster_id ?? "—"}
-                  {selectedOthers.length > 0 && <span className="font-sans"> · {selectedOthers.length + 1} sources</span>}
+                  {selectedOthers.length > 0 && (
+                    <span className="font-sans">
+                      {" "}· {selectedOthers.length + 1} {t(messages, "inboxTable.sourcesWord")}
+                    </span>
+                  )}
                 </dd>
                 {selectedOthers.length > 0 && (
                   <>
-                    <dt className="text-muted-foreground">also covered by</dt>
+                    <dt className="text-muted-foreground">{t(messages, "inboxTable.dtAlsoCoveredBy")}</dt>
                     <dd className="space-y-0.5">
                       {selectedOthers.map(o => (
                         <div key={o.id}>
@@ -203,12 +242,14 @@ export function InboxTable({ sources, topics }: { sources: string[]; topics: str
                     </dd>
                   </>
                 )}
-                <dt className="text-muted-foreground">url</dt>
+                <dt className="text-muted-foreground">{t(messages, "inboxTable.dtUrl")}</dt>
                 <dd className="break-all text-xs text-muted-foreground">{selectedRep.url}</dd>
               </dl>
               <DialogFooter>
                 <Button asChild>
-                  <a href={selectedRep.url} target="_blank" rel="noreferrer">Open article ↗</a>
+                  <a href={selectedRep.url} target="_blank" rel="noreferrer">
+                    {t(messages, "inboxTable.openArticle")}
+                  </a>
                 </Button>
               </DialogFooter>
             </>

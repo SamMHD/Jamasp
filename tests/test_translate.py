@@ -1416,3 +1416,62 @@ def test_a_stance_sidecar_of_stale_persian_still_matches_the_source(tmp_path):
     assert "OLD:" in text                       # stale Persian, not English
     meta, _ = tt.parse_front_matter(text)
     assert meta["src_hash"] == tt.src_hash(changed)
+
+
+FLOOR_CFG = {**CFG, "translate_from": "2026-09-20"}
+
+
+def test_floor_for_pins_the_window_when_translate_from_is_later():
+    # The rolling window would reach back 7 days; the floor is 1 day back, so
+    # the floor wins and history is out of scope.
+    assert translate.floor_for(
+        FLOOR_CFG, 7, "2026-09-21T12:00:00Z") == "2026-09-20T00:00:00Z"
+
+
+def test_floor_for_keeps_the_window_when_it_is_the_later_of_the_two():
+    # An old floor must not WIDEN the window past window_days, or clearing a
+    # backfill would silently re-open one.
+    assert translate.floor_for(
+        {**CFG, "translate_from": "2020-01-01"}, 7,
+        "2026-09-21T12:00:00Z") == translate._since(7, "2026-09-21T12:00:00Z")
+
+
+def test_floor_for_falls_back_to_the_plain_window_when_unset():
+    for cfg in (CFG, {**CFG, "translate_from": ""}, {**CFG, "translate_from": None}):
+        assert translate.floor_for(cfg, 7, "2026-09-21T12:00:00Z") == \
+            translate._since(7, "2026-09-21T12:00:00Z")
+
+
+def test_floor_for_accepts_an_exact_moment_not_only_a_date():
+    assert translate.floor_for(
+        {**CFG, "translate_from": "2026-09-20T13:45:00Z"}, 7,
+        "2026-09-21T12:00:00Z") == "2026-09-20T13:45:00Z"
+
+
+def test_rows_pass_skips_history_behind_the_floor(tmp_path):
+    """The whole point: an old item is never selected once the floor is set."""
+    conn = db.connect(tmp_path / "t.db")
+    old, fresh = seed(conn, [("Ancient news", 24 * 5), ("Todays news", 1)])
+    ids = [r["id"] for r in translate.pending_rows(
+        conn, 7, 10, since=translate.floor_for(FLOOR_CFG, 7))]
+    assert fresh in ids
+    assert old not in ids, "an item behind translate_from must never be selected"
+
+
+def test_rows_pass_still_sees_history_with_no_floor(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    old, fresh = seed(conn, [("Ancient news", 24 * 5), ("Todays news", 1)])
+    ids = [r["id"] for r in translate.pending_rows(conn, 7, 10)]
+    assert {old, fresh} <= set(ids)
+
+
+def test_floor_for_tolerates_an_unquoted_yaml_date():
+    """`translate_from: 2026-09-20` with no quotes yields a datetime.date.
+
+    An operator editing settings.yaml will write it unquoted sooner or later,
+    and a config typo must not take the pass down at the first tick.
+    """
+    import datetime as _dt
+    assert translate.floor_for(
+        {**CFG, "translate_from": _dt.date(2026, 9, 20)}, 7,
+        "2026-09-21T12:00:00Z") == "2026-09-20T00:00:00Z"

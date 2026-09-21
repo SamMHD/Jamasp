@@ -1,7 +1,9 @@
+import { cookies } from "next/headers";
 import { SideNav } from "@/components/shell/side-nav";
 import { TabBar } from "@/components/shell/tab-bar";
 import { TopBar } from "@/components/shell/top-bar";
 import { getMeta } from "@/lib/db";
+import { getMessages, LANG_COOKIE, resolveLocale, t } from "@/lib/i18n";
 
 export type IngestTone = "fresh" | "stale" | "unknown";
 
@@ -41,7 +43,13 @@ export function ingestTone(lastIngest: string | null, now: Date): IngestTone {
  * growing: the slack above the bar is a constant 15px — (64px + inset) −
  * (49px + inset) — at any inset ≥7px, not a value tied to one device.
  */
-export function AppShell({ children }: { children: React.ReactNode }) {
+export async function AppShell({ children }: { children: React.ReactNode }) {
+  // Resolved once, here, and threaded down as props: the cookie is
+  // httpOnly (see lib/actions.ts's setLocale), so no client component below
+  // this point may read it directly — TopBar, SideNav and LangToggle all
+  // receive the locale as a prop like any other server-supplied data.
+  const locale = resolveLocale((await cookies()).get(LANG_COOKIE)?.value);
+  const messages = getMessages(locale);
   // getMeta can throw here for real reasons: a fresh host before the first
   // CLI run, a deploy that's mid-swap on state/jamasp.db, or a
   // misconfigured JAMASP_ROOT. lib/db.ts's q() deliberately rethrows
@@ -69,10 +77,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                    focus:rounded-md focus:bg-card focus:px-3 focus:py-2 focus:text-body
                    focus:outline-2 focus:outline-ring"
       >
-        Skip to content
+        {t(messages, "nav.skipToContent")}
       </a>
-      <TopBar ingestTone={tone} />
-      <SideNav />
+      <TopBar ingestTone={tone} locale={locale} messages={messages} />
+      <SideNav locale={locale} messages={messages} />
       <main
         id="main"
         // WCAG technique G1: the skip link's target must itself be
@@ -86,7 +94,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       >
         {children}
       </main>
-      <TabBar />
+      <TabBar messages={messages} />
     </div>
   );
 }

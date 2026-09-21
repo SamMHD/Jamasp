@@ -3,8 +3,11 @@ import { describe, expect, it } from "vitest";
 import { PredictionList } from "@/components/prediction-list";
 import type { Prediction } from "@/lib/files";
 import { buildLedger } from "@/lib/predictions";
+import { getMessages } from "@/lib/i18n";
+import fa from "@/messages/fa.json";
 
 const NOW = new Date("2026-08-10T00:00:00Z");
+const messages = { en: getMessages("en"), fa: getMessages("fa") };
 
 function pred(over: Partial<Prediction> = {}): Prediction {
   return {
@@ -15,8 +18,13 @@ function pred(over: Partial<Prediction> = {}): Prediction {
   };
 }
 
-const render = (preds: Prediction[]) => renderToStaticMarkup(
-  <PredictionList rows={buildLedger(preds, NOW)} now={NOW} empty="nothing here" />);
+const render = (
+  preds: Prediction[],
+  locale: "en" | "fa" = "en",
+  predictionsFa: Record<string, string> = {},
+) => renderToStaticMarkup(
+  <PredictionList rows={buildLedger(preds, NOW)} now={NOW} empty="nothing here"
+    locale={locale} messages={messages[locale]} predictionsFa={predictionsFa} />);
 
 describe("PredictionList", () => {
   it("renders the claim, direction, confidence, horizon and made-date of a row", () => {
@@ -90,5 +98,65 @@ describe("PredictionList", () => {
 
   it("says so when there is nothing to list", () => {
     expect(render([])).toContain("nothing here");
+  });
+});
+
+// /predictions is one of the two surfaces the brief names explicitly for
+// readPredictionsFa() wiring (the other, app/state/page.tsx, is covered by
+// test/state-page-fa.test.tsx). Asserted against the real fa.json rather
+// than a hand-typed guess, so a wording edit there cannot silently desync
+// this test — per lib/i18n.ts#localized's own warning (carried since Task
+// 5), a mistyped field here would render blank with no marker, so every
+// case below asserts the actual Persian text, never just "did not crash".
+describe("PredictionList — Persian", () => {
+  it("renders the Persian claim with no EN marker when the sidecar has it", () => {
+    const html = render(
+      [pred({ id: "p1", claim: "Gold clears 3400 before the next FOMC." })],
+      "fa",
+      { p1: "طلا قبل از نشست بعدی FOMC از ۳۴۰۰ عبور می‌کند." },
+    );
+    expect(html).toContain("طلا قبل از نشست بعدی FOMC از ۳۴۰۰ عبور می‌کند.");
+    expect(html).not.toContain("Gold clears 3400 before the next FOMC.");
+    expect(html).not.toContain(fa["content.sourceEnglish"]);
+  });
+
+  it("falls back to the English claim with the EN marker when untranslated", () => {
+    const html = render([pred({ id: "p2", claim: "DXY breaks below 100." })], "fa", {});
+    expect(html).toContain("DXY breaks below 100.");
+    expect(html).toContain(fa["content.sourceEnglish"]);
+  });
+
+  it("translates the state badge and direction word from the dictionary", () => {
+    // created_at + horizon_days must land after NOW (2026-08-10) for this
+    // row to classify as "open" rather than "due" (lib/predictions.ts).
+    const html = render(
+      [pred({ direction: "down", created_at: "2026-08-09T00:00:00Z", horizon_days: 5 })], "fa");
+    expect(html).toContain(fa["predictions.wordOpen"]);
+    expect(html).toContain(fa["direction.down"]);
+    expect(html).not.toContain(">open<");
+    expect(html).not.toContain(">down<");
+  });
+
+  it("translates the conf/horizon/made words and timing verbs, keeping numbers and units Latin", () => {
+    const html = render([pred({
+      id: "d1", created_at: "2026-08-05T00:00:00Z", horizon_days: 2, confidence: 0.65,
+    })], "fa");
+    expect(html).toContain(fa["predictions.confSuffix"]);
+    expect(html).toContain(fa["predictions.horizonSuffix"]);
+    expect(html).toContain(fa["predictions.madePrefix"]);
+    expect(html).toContain(fa["predictions.timingMatured"]);
+    expect(html).toContain("65%"); // confidence stays a Latin number
+    expect(html).toContain("2d");  // horizon unit stays Latin
+    expect(html).not.toMatch(/[۰-۹]/); // no Persian-Indic digits anywhere
+  });
+
+  it("keeps English rendering unaffected when a Persian sidecar exists", () => {
+    const html = render(
+      [pred({ id: "p1", claim: "Gold clears 3400 before the next FOMC." })],
+      "en",
+      { p1: "طلا قبل از نشست بعدی FOMC از ۳۴۰۰ عبور می‌کند." },
+    );
+    expect(html).toContain("Gold clears 3400 before the next FOMC.");
+    expect(html).not.toContain("طلا");
   });
 });

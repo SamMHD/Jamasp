@@ -8,6 +8,10 @@ import {
   type ImportanceTreatment,
 } from "../components/map-tiles";
 import type { ScoredItem } from "../lib/marketmap";
+import type { Messages } from "../lib/i18n";
+import en from "../messages/en.json";
+
+const messages = en as Messages;
 
 /**
  * The importance channel is a THIRD encoding on a map that already carries
@@ -31,6 +35,7 @@ function item(over: Partial<ScoredItem> = {}): ScoredItem {
   return {
     itemId: "a", tier: 4, direction: 2, conviction: 0.8, theme: "rates_dollar",
     headline: "Gold jumps as Treasury buyback plans push yields lower",
+    headline_fa: null,
     source: "investing_commodities", url: "https://x/1",
     publishedAt: "2026-08-19T18:46:13Z", ...over,
   };
@@ -39,7 +44,8 @@ function item(over: Partial<ScoredItem> = {}): ScoredItem {
 const render = (items: ScoredItem[], importance: ImportanceTreatment) =>
   renderToStaticMarkup(
     <MarketMap items={items} width={800} height={500} range="24h"
-      coverage={{ scored: items.length, unscored: 0 }} importance={importance} />);
+      coverage={{ scored: items.length, unscored: 0 }} importance={importance}
+      locale="en" messages={messages} />);
 
 describe("tierFate", () => {
   it("splits on the news pipeline's own gates", () => {
@@ -74,7 +80,7 @@ describe("MarketMap importance channel", () => {
     // for it must get the map exactly as it shipped.
     const before = renderToStaticMarkup(
       <MarketMap items={[item()]} width={800} height={500} range="24h"
-        coverage={{ scored: 1, unscored: 0 }} />);
+        coverage={{ scored: 1, unscored: 0 }} locale="en" messages={messages} />);
     expect(before).toBe(render([item()], "none"));
     expect(before).not.toContain("POSTED");
   });
@@ -97,10 +103,12 @@ describe("MarketMap importance channel", () => {
     // the tile, so the same tier renders identical geometry at both sizes.
     const wide = renderToStaticMarkup(
       <MarketMap items={[item({ tier: 4 })]} width={1200} height={600} range="24h"
-        coverage={{ scored: 1, unscored: 0 }} importance="pips" />);
+        coverage={{ scored: 1, unscored: 0 }} importance="pips"
+        locale="en" messages={messages} />);
     const narrow = renderToStaticMarkup(
       <MarketMap items={[item({ tier: 4 })]} width={300} height={600} range="24h"
-        coverage={{ scored: 1, unscored: 0 }} importance="pips" />);
+        coverage={{ scored: 1, unscored: 0 }} importance="pips"
+        locale="en" messages={messages} />);
     const widths = (h: string) =>
       [...h.matchAll(/<rect[^>]*height="3"[^>]*width="(\d+)"/g)].map(m => m[1]);
     const alt = (h: string) =>
