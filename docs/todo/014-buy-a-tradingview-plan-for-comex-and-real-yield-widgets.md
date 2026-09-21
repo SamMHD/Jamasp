@@ -63,8 +63,14 @@ Negatives already checked, so nobody re-probes them:
 
 - Every CME-group spelling of the gold future is refused the same way:
   `COMEX:GC1!`, `COMEX_MINI:GC1!`, `CME:GC1!`, `NYMEX:GC1!`.
-- Also "Permission denied" in a keyless widget: all of `TVC:*`, `SP:SPX`,
-  `CBOE:SPX`.
+- Also "Permission denied" in a keyless widget: `TVC:DXY`, `TVC:VIX`,
+  `SP:SPX`, `CBOE:SPX`, `CBOE:GVZ`, and the whole `ECONOMICS:*` class
+  (`ECONOMICS:USINTR`, so no policy-rate row either).
+  **Corrected 2026-09-06:** this line previously read "all of `TVC:*`". That
+  is wrong — entitlement is per SYMBOL, not per namespace. Re-probed while
+  building the /markets reference desk, `TVC:GOLD` and `TVC:UKOIL` both
+  render live prices keyless, and `TVC:UKOIL` is what the watchlist now uses
+  for Brent. Never infer a symbol's entitlement from its prefix; mount it.
 - `INDEX:DXY` resolves but refuses every range except 6M ("Unsupported
   interval"), which is why the dollar tile is a broker feed.
 - The whole FRED "economic" class is dead in the widget, not just DFII10:

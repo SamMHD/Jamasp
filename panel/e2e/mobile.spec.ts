@@ -10,7 +10,8 @@ test.beforeEach(async ({ page }) => {
 });
 
 const ROUTES = ["/", "/inbox", "/crawl", "/briefs", "/schedule",
-                "/calendar", "/alerts", "/state", "/predictions", "/prices"];
+                "/calendar", "/alerts", "/state", "/predictions", "/prices",
+                "/markets"];
 
 for (const path of ROUTES) {
   test(`${path} fits the viewport`, async ({ page }) => {
@@ -51,7 +52,8 @@ test("the More sheet reaches the overflow destinations", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "More" }).click();
   const sheet = page.getByRole("dialog");
-  for (const label of ["Crawl", "Calendar", "Alerts", "State", "Predictions", "Prices"]) {
+  for (const label of ["Crawl", "Calendar", "Alerts", "State", "Predictions",
+                       "Prices", "Markets"]) {
     await expect(sheet.getByRole("link", { name: label })).toBeVisible();
   }
 });
