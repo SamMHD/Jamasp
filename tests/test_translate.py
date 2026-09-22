@@ -2210,8 +2210,15 @@ def test_a_successful_unit_re_arms_everything_the_cap_abandoned(tmp_path):
     # — is attempted even though everything else is abandoned, and succeeds.
     (tmp_path / "reports" / "2026" / "09" / "2026-09-13-brief.md").write_text(
         "Fresh.\n", encoding="utf-8")
-    translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY, doc_run(),
-                             now=clock(200), conn=conn)
+    stats = translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY, doc_run(),
+                                     now=clock(200), conn=conn)
+    # This SAME pass both counted the other six units abandoned (via
+    # ledger.state(), before the success below was known) and re-armed all
+    # of them (ledger.succeeded, from the fresh report) — the summary must
+    # say what is true at the END of the pass, not what was true when each
+    # unit was visited, or an operator is told to run --force for a state
+    # that no longer exists by the time they read it.
+    assert stats["abandoned"] == 0
     assert conn.execute(
         "SELECT COUNT(*) FROM doc_translations").fetchone()[0] == 0
 

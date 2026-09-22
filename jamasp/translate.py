@@ -1449,13 +1449,23 @@ def translate_docs(
         totals["quota_message"] = str(exc)
     if ledger is not None and enumerated:
         ledger.prune_unseen()
+    rearmed = 0
     if ledger is not None and ledger.succeeded:
         # Something translated, so the translator works — see
         # `DocLedger.rearm_abandoned`. At the END of the pass rather than the
         # moment of the first success, so a unit's fate does not depend on
         # where it happens to sit in the pass order; the re-armed units are
         # picked up on the next tick, ten minutes later.
-        ledger.rearm_abandoned()
+        rearmed = ledger.rearm_abandoned()
+    # `totals["abandoned"]` was accumulated from `ledger.state()` calls made
+    # DURING this pass — before the rearm above ran. A unit counted abandoned
+    # there can be exactly one this pass's own tail just cleared: observed, a
+    # pass that abandoned 6 units and re-armed all 6 in the same tick still
+    # reported "6 abandoned after 3 failed attempts — --force retries", which
+    # tells the operator to run --force for a state that no longer exists by
+    # the time they read it. Reporting what is true at the END of the pass,
+    # not at the moment each unit happened to be visited.
+    totals["abandoned"] = max(0, totals["abandoned"] - rearmed)
     totals["skipped"] = budget.skipped
     return totals
 
