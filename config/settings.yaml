@@ -111,14 +111,20 @@ translate:
   # report in a single tick: a 21KB report is now ~8 calls rather than 1, so
   # a heavy day converges over two ticks (20 minutes) instead of one. That is
   # the deliberate trade — before chunking that report took ONE call and then
-  # timed out, every tick, forever. Left at 10 rather than raised because
-  # TimeoutStartSec in ops/systemd/jamasp-translate.service is sized from
-  # this number times timeout_seconds (10 x 180 = 30 minutes, inside the
-  # 40-minute limit); raise both together or neither.
+  # timed out, every tick, forever.
+  #
+  # Left at 10 rather than raised, but NOT because 10 fits inside
+  # TimeoutStartSec in ops/systemd/jamasp-translate.service — it does not.
+  # This ceiling is per-pass, and rows and events spend their own in the same
+  # tick: 6 + 6 + 10 = 22 calls at timeout_seconds 180 is 3,960 seconds
+  # against a 2,400-second limit, so a heavy tick is killed part-way. That
+  # over-run is pre-existing and is docs/todo/027; raising this number makes
+  # it worse, so raise it only together with TimeoutStartSec.
   #
   # A single document needing MORE chunks than this whole ceiling is let
-  # through anyway (see DocBudget.take): it could never fit, and refusing it
-  # every tick would be permanent starvation reported as a deferral.
+  # through anyway — once per tick, and only from a budget nothing has spent
+  # yet (see DocBudget.take): it could never fit, and refusing it every tick
+  # would be permanent starvation reported as a deferral.
   max_doc_calls_per_run: 10
   # Above this many bytes of UTF-8 source, a document is translated section
   # by section instead of in one call. MEASURED on the live host on

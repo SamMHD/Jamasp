@@ -278,7 +278,17 @@ DOC_RULES = (
     "- Translate faithfully. Do not editorialize, summarise, or reorder.\n"
     "- Preserve markdown structure exactly: lists stay lists, emphasis stays"
     " emphasis, and every number, ticker and percentage keeps its Latin form.\n"
-    "- Do not translate headings; they are not included.\n"
+    # "they are not included" was true only above translate.doc_chunk_bytes,
+    # where `doc_segments` holds headings out of the prompt entirely. A
+    # document under the threshold goes in one call with its `## ` lines in
+    # it, so the old rule described a document the model was not looking at —
+    # and a small report's headings could come back Persian while a large
+    # one's were guaranteed English. Asking for them verbatim makes the two
+    # paths agree on the output instead of on a claim about the input.
+    "- Leave heading lines (any line beginning with #) exactly as they are,"
+    " unchanged, in their original language: a heading is an anchor, not"
+    " prose. A large document is split at its headings before it reaches you"
+    " and will contain none; a small one contains all of them.\n"
     "- Apply the glossary.\n"
     '- Return a JSON object: {"text": "<the Persian document>"}.'
 )

@@ -528,6 +528,16 @@ Persian.
   abandoned rather than retried every tick. `--force` clears the table, the
   way it re-arms abandoned rows. A "unit" here is one stance section, one
   watchlist theme, one prediction line, or a whole playbook or report.
+  *Amended again the same day, on review:* abandonment must not be permanent,
+  because the overwhelming cause of a document failing is not the document —
+  an outage longer than ~75 minutes walked all seven units to the cap and no
+  amount of healthy ticks afterwards translated anything. So it self-heals
+  two ways: any successful unit re-arms every unit at the cap, and a unit at
+  the cap whose last failure is older than `DOC_RETRY_AFTER_HOURS` (24) gets
+  one more attempt regardless, which is what breaks the deadlock when every
+  unit is abandoned. Rows for units that no longer exist are pruned by the
+  next pass that enumerates their file, so the table stays exactly "what is
+  broken right now".
 - **Per-document size.** *Added 2026-09-22:* a document over
   `translate.doc_chunk_bytes` is translated section by section at its `## `
   headings — and, inside a section still over the threshold, at blank lines —

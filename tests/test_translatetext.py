@@ -368,3 +368,16 @@ def test_doc_segments_never_splits_a_fence_at_an_interior_blank_line():
     holding = [s for s in whole if "FIRST" in s]
     assert len(holding) == 1
     assert "SECOND" in holding[0] and holding[0].count("```") == 2
+
+
+def test_the_document_rules_never_claim_headings_were_held_back():
+    """`DOC_RULES` said "Do not translate headings; they are not included",
+    which is true only ABOVE the chunk threshold. Below it the whole document
+    goes to the model, `## ` lines and all, so a small report's headings could
+    come back Persian while a large one's are guaranteed English. The rule now
+    asks for the same outcome on both paths."""
+    assert "not included" not in tt.DOC_RULES
+    prompt = tt.build_doc_prompt("## A\n\nShort.\n", {})
+    assert "## A" in prompt                      # it really is in there
+    rules = tt.DOC_RULES.lower()
+    assert "heading" in rules and "unchanged" in rules

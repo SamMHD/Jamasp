@@ -139,3 +139,31 @@ so an abandoned document is visible in the run summary and in
 as `docs/todo/026`, because it is a watchdog change rather than a translate
 one and the cost bleed — the thing that made this urgent — is stopped either
 way.
+
+## Amendment, 2026-09-22 (review of the shipping commit)
+
+A review of `d977c72` found the cap as shipped could abandon every document
+permanently: a 3-hour `ModelError` outage walks all seven units to
+`attempts = 3`, and 24 hours of healthy ticks afterwards translate nothing —
+measured at `{'translated': 0, 'failed': 0, 'abandoned': 7}`. `--force` was
+the only way back, and `docs/todo/026` is open, so nothing pages anyone.
+Before this item shipped, that scenario self-healed.
+
+Fixed on the same branch, and the shape above is now the tested one:
+
+- **Success re-arms.** `DocLedger.rearm_abandoned` drops every row at the cap
+  once anything in the pass has translated — a working translator is evidence
+  the abandonments were environmental.
+- **Time re-arms.** `DOC_RETRY_AFTER_HOURS = 24`: a row at the cap whose last
+  failure is older than a day gets one more attempt regardless. This is what
+  breaks the deadlock when *every* unit is abandoned and no success can
+  occur. Cost is one call per unit per day, measured from the last failure.
+- **Orphans are pruned.** `DocLedger.prune_unseen` drops rows for units a
+  completed pass did not find, so a watchlist theme dropped from
+  `watchlist.yaml` no longer leaves a row behind forever.
+- **`--force` clears before the rows pass**, so a quota stop in rows cannot
+  swallow the recovery.
+- **`translate --check` now asks the translator to answer** (`translate.probe`)
+  rather than only checking the binary is on PATH. An unauthenticated `codex`
+  is still a `codex` on PATH, and it is what produces the outage above.
+- **`backoff` is counted and reported** alongside `abandoned`.
