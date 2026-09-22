@@ -285,10 +285,18 @@ DOC_RULES = (
     # and a small report's headings could come back Persian while a large
     # one's were guaranteed English. Asking for them verbatim makes the two
     # paths agree on the output instead of on a claim about the input.
+    #
+    # A later rewrite made the same mistake in the other direction, restating
+    # a claim about the input instead of dropping it: "a large document ...
+    # will contain none" is false twice over. `doc_segments` splits only at
+    # `## `, so a `# ` (H1) line always reaches the model regardless of
+    # document size, and a `## ` inside a fenced code block deliberately
+    # stays in the prose too (see `_inside_fence`). The instruction below
+    # needs no claim about what the input does or does not contain — it is
+    # unconditional on purpose.
     "- Leave heading lines (any line beginning with #) exactly as they are,"
     " unchanged, in their original language: a heading is an anchor, not"
-    " prose. A large document is split at its headings before it reaches you"
-    " and will contain none; a small one contains all of them.\n"
+    " prose.\n"
     "- Apply the glossary.\n"
     '- Return a JSON object: {"text": "<the Persian document>"}.'
 )
