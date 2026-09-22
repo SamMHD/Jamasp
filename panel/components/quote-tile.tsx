@@ -68,11 +68,22 @@ export function QuoteTile({ label, value, digits = 2, ts, delta, deltaLabel = "2
   note?: string;
   now: Date;
   className?: string;
-  /** Optional, defaulting to English: this is a leaf reused by both
-   *  DriverPanel and TechnicalPanel, and every caller already has `messages`
-   *  in scope — but defaulting rather than requiring it keeps the handful of
-   *  chrome strings here (English-default) from forcing a prop through every
-   *  existing call site and test that never cared about locale. */
+  /**
+   * REQUIRED, and it has to stay that way.
+   *
+   * This prop used to default to getMessages("en") on the argument that a
+   * leaf shared by DriverPanel and TechnicalPanel should not force a prop
+   * through call sites "that never cared about locale". Every call site
+   * cares: the default made the compiler accept a caller that forgot, and
+   * components/driver-panel.tsx forgot — it held a dictionary and passed
+   * none, so the overview's driver tiles printed this component's "no data"
+   * and "no timestamp" in English in Persian mode, in production, with
+   * nothing failing.
+   *
+   * An English default is a second place the panel decides its language,
+   * which is exactly what centralising DEFAULT_LOCALE in lib/i18n.ts was
+   * meant to prevent.
+   */
   messages: Messages;
 }) {
   return (

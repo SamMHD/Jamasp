@@ -48,8 +48,10 @@ export function ArcGauge({ label, value, min, max, digits = 1, ticks = [], class
   digits?: number;
   ticks?: { at: number; text: string }[];
   className?: string;
-  /** Optional, defaulting to English — see quote-tile.tsx#QuoteTile's
-   *  identical reasoning; this leaf's only literal is the "no data" word. */
+  /** Required — see quote-tile.tsx#QuoteTile for why these props no longer
+   *  default to English. This leaf's only literal is the "no data" word,
+   *  which is precisely the kind of string a default leaves English
+   *  unnoticed. */
   messages: Messages;
 }) {
   const span = max - min;

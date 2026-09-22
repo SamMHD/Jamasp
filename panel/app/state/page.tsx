@@ -91,13 +91,71 @@ export default async function StatePage() {
   // honest English page than a silent, unmarked splice of English into
   // Persian.
   const stanceFa = files.readStanceFa();
-  const stanceFaBody = stanceFa && stanceFa.sections.every(s => s.hash !== "")
-    ? stanceFa.sections.map(s => {
+  // USABILITY IS DECIDED ON THE BODIES, BEFORE ANY HEADING IS ASSEMBLED.
+  //
+  // That ordering is the whole point. Prepending "## <heading>" to each
+  // section makes an all-blank sidecar join to a NON-blank string
+  // ("## دیدگاه\n\n## ...\n"), which sails past LocalizedDocument's
+  // `.trim()` guard and renders Persian headings standing over nothing,
+  // unmarked, with the English stance gone. The guard downstream cannot see
+  // the difference once the headings are in the string; only this check can.
+  //
+  // Three conditions, each discarding the WHOLE sidecar — the coarse,
+  // all-or-nothing treatment this page has always used, because it has no
+  // per-section marker to hang on one bad section:
+  //
+  //  1. Any empty per-section hash: a failed or budget-skipped section that
+  //     carries English instead of Persian (see lib/files.ts#readStanceFa).
+  //  2. Any HEADING-BEARING section with a blank body: a real hash means the
+  //     job ran and returned nothing for a section that has English content.
+  //     Rendering its heading over emptiness does not merely look
+  //     unfinished — it silently deletes the analyst's reasoning, and a
+  //     "What flips me" with nothing under it reads as "there are none",
+  //     which is a substantive false claim on a trading desk. Measured
+  //     before choosing strictness: across all 121 stance.md versions in
+  //     this repo's history (712 sections), ZERO had an empty body, so this
+  //     has no realistic false positive.
+  //  3. Nothing anywhere: catches a sidecar that is only an empty preamble,
+  //     which clause 2 passes vacuously.
+  //
+  // Position 0 — everything before the first "## " — is exempt from clause
+  // 2 precisely because it has no heading: a stance that opens straight into
+  // a section legitimately has an empty preamble.
+  const stanceFaUsable = stanceFa !== null
+    && stanceFa.sections.every(s => s.hash !== "")
+    && stanceFa.sections.every(s => !s.heading.trim() || s.body.trim() !== "")
+    && stanceFa.sections.some(s => s.body.trim() !== "");
+
+  // Sections reassembled with their front matter and per-section hash
+  // markers stripped, each back under a heading.
+  //
+  // The sidecar's own heading line is an ENGLISH anchor — jamasp/translatetext.py
+  // writes it to identify the section, never to be rendered — so printing it
+  // would put English headings over Persian prose. Instead the anchor is
+  // classified back to its canonical StanceKey and the heading is rendered
+  // from STANCE_HEADING_KEYS, the same table components/fundamental-panel.tsx
+  // renders "## View" and "## What flips me" through. Headings are a closed
+  // enum and hand-translated, so this is chrome, not content, and wears no
+  // marker. A section whose anchor classifies to nothing is a free-form
+  // "extra" the agent wrote — there is no key for it, so its own heading is
+  // the only one available and it stays as written.
+  //
+  // Without this the page concatenated bodies alone and Persian was one flat
+  // blob where English had structure.
+  const stanceFaBody = stanceFaUsable
+    ? stanceFa!.sections.map(s => {
         // Position 0 is the preamble: everything before the first "## ", and
         // it has no heading by construction.
         if (!s.heading.trim()) return s.body;
-        const key = classifyHeading(s.heading);
-        const heading = key ? t(messages, STANCE_HEADING_KEYS[key]) : s.heading;
+        // readStanceFa hands back the whole heading LINE, "## View" and not
+        // "View" (lib/files.ts#splitMarkdownSections keeps it; pinned by
+        // test/files-fa.test.ts). lib/stance.ts#parseStance strips the
+        // marker before classifying, so this has to as well — classifying
+        // "## View" matches no canonical prefix, and the page rendered a
+        // literal "## View" over Persian prose until this strip went in.
+        const anchor = s.heading.replace(/^#{1,6}\s*/, "").trim();
+        const key = classifyHeading(anchor);
+        const heading = key ? t(messages, STANCE_HEADING_KEYS[key]) : anchor;
         return `## ${heading}\n${s.body}`;
       }).join("\n")
     : null;

@@ -37,8 +37,8 @@ function ChartTooltip({ active, payload, label }: TooltipContentProps) {
 
 export function PriceChart({ symbol, messages }: {
   symbol: string;
-  /** Optional, defaulting to English — see quote-tile.tsx#QuoteTile's
-   *  identical reasoning; app/prices/page.tsx already passes it. */
+  /** Required — see quote-tile.tsx#QuoteTile for why these props no longer
+   *  default to English. app/prices/page.tsx passes it. */
   messages: Messages;
 }) {
   const [range, setRange] = useState<(typeof RANGES)[number]>("7d");

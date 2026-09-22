@@ -18,9 +18,10 @@ import { t, type Messages } from "@/lib/i18n";
 export function SeriesTable({ points, label, messages }: {
   points: PricePoint[];
   label?: string;
-  /** Optional, defaulting to English — its only call site (technical-panel.tsx)
-   *  already passes a locale-resolved `label`; `messages` here is only for
-   *  the two column headers, which no test asserts on. */
+  /** Required — see quote-tile.tsx#QuoteTile for why these props no longer
+   *  default to English. Its only call site (technical-panel.tsx) passes a
+   *  locale-resolved `label`; `messages` here carries the two column
+   *  headers and the default "view as table" summary. */
   messages: Messages;
 }) {
   if (points.length === 0) return null;
