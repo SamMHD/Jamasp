@@ -307,9 +307,26 @@
      @layer, and this stylesheet's own `@layer base` (theme < base <
      components < utilities is Tailwind's fixed order) loses to it on LAYER
      alone — a `base`-layer rule cannot outrank a `utilities`-layer one no
-     matter how specific its selector is. `!important` is the one thing
-     available here that outranks a utility class from outside
-     `@layer utilities` itself, so that is what actually wins the tie.
+     matter how specific its selector is, confirmed by hand against this
+     exact stylesheet (see test/source-lang.test.tsx).
+     Three things cross that boundary, not one. Moving this same selector
+     into `@layer utilities` would also win, on ordinary specificity, since
+     `html[dir="rtl"] body` outranks a bare `.font-sans` class — rejected
+     because every other hand-authored rule in this file (this one's
+     neighbours included) lives in `@layer base`; splitting one font rule
+     into `@layer utilities` to win a layer fight nothing else in the file
+     needs to fight would read as arbitrary to the next person here unless
+     they already know this history. Leaving the rule fully unlayered would
+     also win, since unlayered styles outrank every named layer regardless
+     of specificity — rejected because that victory wouldn't be scoped to
+     this property or this bug: an unlayered rule sits permanently above
+     *every* future utility touching <body>'s font-family, app-wide, for as
+     long as this file exists, which is a subtler foot-gun than a commented
+     `!important` sitting right next to the rule it overrides.
+     `!important` inside `@layer base` wins the same tie without either
+     cost: it stays with its sibling rules, and its effect is legible
+     exactly where it's written rather than depending on which `@layer`
+     the rule happens to sit in.
      Keyed off <html>'s attributes rather than <body>'s class list, so this
      keeps working if someone later edits which classes app/layout.tsx puts
      on <body> — the exact fragility that caused this bug. */

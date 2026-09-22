@@ -109,3 +109,50 @@ test("an untranslated row shows the EN marker; a translated one does not", async
   // The English headline must not leak through under the translated row either.
   await expect(page.getByText("Fed officials split on September cut")).toHaveCount(0);
 });
+
+// app/globals.css's font-family: var(--font-fa) rule sits on
+// :where([dir="rtl"], [lang="fa"]) — i.e. on <html> — and font-family only
+// INHERITS from there. e2e/mobile.spec.ts's "Persian alerts render
+// right-to-left in Vazirmatn" test already covers the one case that worked
+// even before that inheritance was fixed: a <p> carrying its OWN
+// dir="rtl", which matches the :where() rule directly on itself and never
+// has to inherit anything. It proves nothing about ordinary content that
+// only ever inherits its font-family from an ancestor — which was, in
+// fact, everything else on the panel: <body> carries Tailwind's
+// `font-sans` utility class, which sets font-family DIRECTLY on <body>,
+// and an element's own declaration always beats an inherited one. So
+// html's Vazirmatn never reached anything, and this exact scenario shipped
+// past a green suite and several review passes until someone looked at the
+// screen. These two tests are the live proof that ordinary body-inherited
+// content — no dir or lang of its own — actually renders in the right
+// face in both directions.
+test("body-inherited Persian content actually renders in Vazirmatn, not just RTL", async ({ page }) => {
+  await page.goto("/");
+  await switchToFaFromEnglish(page).click();
+  await expect(page.locator("html")).toHaveAttribute("lang", "fa");
+
+  const link = page.getByRole("navigation", { name: "Sections" })
+    .getByRole("link", { name: fa["nav.overview"] });
+  await expect(link).toBeVisible();
+  // Confirms this element is the scenario the bug actually broke: it has
+  // no dir/lang of its own, so whatever font it renders in was inherited,
+  // not matched directly.
+  await expect(link).not.toHaveAttribute("lang");
+  await expect(link).not.toHaveAttribute("dir");
+
+  const fontFamily = await link.evaluate(el => getComputedStyle(el).fontFamily);
+  expect(fontFamily).toContain("Vazirmatn");
+});
+
+test("the same body-inherited content stays in the Latin face in English mode", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.locator("html")).toHaveAttribute("lang", "en");
+
+  const link = page.getByRole("navigation", { name: "Sections" })
+    .getByRole("link", { name: en["nav.overview"] });
+  await expect(link).toBeVisible();
+
+  const fontFamily = await link.evaluate(el => getComputedStyle(el).fontFamily);
+  expect(fontFamily).toContain("Inter");
+  expect(fontFamily).not.toContain("Vazirmatn");
+});
