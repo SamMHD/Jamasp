@@ -804,6 +804,23 @@ class DocLedger:
         the ledger — every attempt count with it. `translate_docs` is what
         holds that guarantee, and
         `test_a_pass_that_stopped_on_quota_prunes_nothing` is what keeps it.
+
+        A momentarily missing or truncated state file looks identical to a
+        genuinely deleted unit from here: the state files this reads
+        (stance.md, watchlist.yaml, predictions.jsonl) are written directly
+        by an agent run, not through `write_atomic`, so a tick that races
+        that write can see the file absent or half-written and never call
+        `saw()` for its units at all — pruning then drops their rows the
+        same as it would for a theme actually removed from watchlist.yaml.
+        The cost is a lost attempt count: the unit looks new next tick and
+        starts its backoff over. Accepted on purpose rather than guarded
+        against — the alternative is to hold rows back whenever this pass's
+        view of a file might be incomplete, which reintroduces the
+        removable-only-by-`--force` bug this method exists to fix, just
+        moved from "the unit was deleted" to "the read raced a write". A
+        false prune costs one extra retry cycle; refusing to prune ever
+        would freeze a genuinely deleted unit's row forever. Retrying is the
+        direction that self-heals, so that is the one this errs toward.
         """
         stale = [row[0] for row in self.conn.execute(
             "SELECT unit FROM doc_translations") if row[0] not in self._seen]
@@ -893,10 +910,17 @@ class DocLedger:
         gets a full set of attempts again, because what it spent was spent on
         a broken translator and proves nothing about the unit.
 
-        Bounded by there being something to translate at all. On a quiet host
-        the pass makes no calls, nothing succeeds, and this never fires; on a
-        busy one a genuinely untranslatable report is re-armed a few times a
-        day instead of retried every ten minutes forever.
+        Bounded by there being something to translate at all, but not by
+        much on a host where something else succeeds often: every re-arm
+        gives the unit a full fresh set of MAX_DOC_ATTEMPTS, so the cost
+        scales with how often the REST of the pass succeeds, not with how
+        broken this one document is. Measured: one permanently-
+        untranslatable report on a host where state/stance.md is rewritten
+        every 2 hours (12 successes a day) costs 36 calls a day — 12 re-arm
+        cycles × 3 attempts — about a quarter of the ~144 calls a day the
+        cap exists to stop, not an order of magnitude below it. A quiet
+        host, with roughly one success a day, costs 3. A host that makes no
+        calls at all has nothing succeed, and this never fires.
         """
         cur = self.conn.execute(
             "DELETE FROM doc_translations WHERE attempts >= ?",
