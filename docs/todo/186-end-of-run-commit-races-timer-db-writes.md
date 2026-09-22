@@ -81,3 +81,19 @@ one `jamasp: scan …` commit per scan run with no gaps).
 
 - CLAUDE.md rule 4; `.claude/skills/scan/SKILL.md` step 4.
 - todo-184 (silent scans and the delta) — same close-out step.
+
+## Update 2026-09-22 (scan 05:00Z)
+
+The journal-mode question above is answered: `pragma journal_mode` on
+`state/jamasp.db` returns `delete` (rollback journal), and this session
+opened with `?? state/jamasp.db-journal` in `git status` — a live rollback
+journal from a timer write in progress. `git check-ignore -v
+state/jamasp.db-journal` reports it is **not ignored** (`.gitignore` has no
+`*.db*` pattern), so the skills' `git add -A state/` will stage a transient
+sqlite journal into the run commit whenever one exists at close-out. This
+scan avoided it with `git add -A -- state/ ':(exclude)state/jamasp.db-journal'`;
+the journal had vanished by the time the commit ran (the `--mark-read` write
+closed it). The fix here — whether the retry loop or the `jamasp commit`
+subcommand — should also add `state/jamasp.db-journal` (and `-wal`/`-shm`
+for safety) to `.gitignore`, otherwise a committed journal alongside a
+mid-write DB blob is the worst-case artefact of the race.
