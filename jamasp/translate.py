@@ -524,11 +524,15 @@ class DocBudget:
     """A per-run ceiling on the model calls the document pass may make.
 
     Rows and events are bounded by `max_batches_per_run`; documents were
-    bounded by nothing. One document the translator always refuses therefore
-    cost a call every tick — 144 a day, indefinitely — and the first run after
-    a deploy made one serial call per line of the append-only predictions file.
-    With `timeout_seconds: 180` that is hours of a unit that fires every ten
-    minutes.
+    bounded by nothing. HISTORY, not current behaviour: before `DocLedger`,
+    one document the translator always refuses cost a call every tick — 144 a
+    day, indefinitely. That part is now fixed upstream of the budget, by the
+    attempt cap; a permanently-refused document costs three calls and stops.
+    What remains, and what this class is still for, is the SHAPE of a single
+    tick: the first run after a deploy still wants one serial call per line of
+    the append-only predictions file plus one per pending report, and at
+    `timeout_seconds: 180` that is hours of work offered to a unit that fires
+    every ten minutes.
 
     The ceiling spans the WHOLE pass — stance sections, playbook, watchlist
     entries, prediction lines and reports together — because the cost that
@@ -544,6 +548,7 @@ class DocBudget:
         self.limit = limit
         self.remaining = limit
         self.skipped = 0
+        self.oversize_taken = False
 
     def take(self, n: int = 1) -> bool:
         """Claim `n` calls for ONE unit. False when this tick cannot cover it.
@@ -554,15 +559,39 @@ class DocBudget:
         translated.
 
         A unit needing more calls than the WHOLE ceiling is let through
-        anyway. It can never fit, so refusing it is not a deferral, it is
-        permanent starvation reported as "deferred to the next tick" — a 60KB
-        report would sit English forever while the summary implied it was
-        queued. One long tick is the lesser harm, and the unit's
-        TimeoutStartSec still bounds it.
+        anyway — ONCE per run, and only from a budget nothing has spent yet.
+        It can never fit, so refusing it forever is not a deferral, it is
+        permanent starvation reported as "deferred to the next tick": a 60KB
+        report would sit English while the summary implied it was queued.
+
+        Both halves of that guard are load-bearing, and the unguarded version
+        shipped first. `DocBudget(10)` then five `take(15)` calls returned
+        True five times and counted nothing skipped — 75 calls, 3.75 hours at
+        timeout_seconds 180, against a TimeoutStartSec of 2,400 seconds.
+        systemd does not bound that run, it KILLS it: the sidecars are never
+        written, no ledger row is recorded (a SIGTERM is not a ModelError),
+        and the next tick starts over identically. That is the same
+        forever-loop DocLedger exists to end. Nor is the shape exotic — every
+        `## ` section is at least one chunk, so a 10KB document of 30 short
+        sections wants 31 chunks while being smaller than a brief that used
+        to translate in a single call.
+
+        So: one oversized unit per tick, taken before anything else has been
+        paid for, and the rest of the tick is then spent. A second oversized
+        unit, or one arriving after ordinary spending, waits for the next
+        tick like any other deferral — which it will get, because nothing
+        else can be spending an untouched budget ahead of it forever.
         """
         if self.remaining is None:
             return True
         if n > self.limit:
+            # `remaining == limit` is "nothing spent yet"; `limit` itself
+            # must be non-zero, or a ceiling of 0 — no document calls at all
+            # this tick — would read as room for an unbounded one.
+            if self.oversize_taken or self.remaining != self.limit or not self.limit:
+                self.skipped += 1
+                return False
+            self.oversize_taken = True
             self.remaining = 0
             return True
         if self.remaining < n:

@@ -2032,3 +2032,36 @@ def test_the_same_report_still_fails_when_chunking_is_switched_off(
         root=tmp_path, glossary=GLOSSARY, only="docs")
     assert stats["docs"]["failed"] == 1
     assert not (reports / "2026-09-16-brief.fa.md").exists()
+
+
+# -------------------------------------------------------- the oversize hatch
+
+def test_the_oversize_escape_hatch_fires_at_most_once_per_run():
+    """Measured before this fix: DocBudget(10) then five take(15) calls
+    returned True five times and counted nothing skipped — 75 model calls,
+    3.75 hours at 180s each, against a 2,400-second TimeoutStartSec. systemd
+    SIGTERMs that run, nothing is written, no ledger row is recorded (a kill
+    is not a ModelError) and the next tick starts over identically."""
+    budget = translate.DocBudget(10)
+    assert [budget.take(15) for _ in range(5)] == [True, False, False, False,
+                                                   False]
+    assert budget.skipped == 4
+
+
+def test_an_oversized_document_waits_when_the_budget_is_already_spent():
+    """The hatch exists so a unit that can never fit is not starved forever.
+    One that arrives after the tick has already spent calls is not starved by
+    waiting for the next tick, and letting it through stacks its cost on top
+    of everything already paid for."""
+    budget = translate.DocBudget(10)
+    assert budget.take(4) is True
+    assert budget.take(15) is False
+    assert budget.skipped == 1
+
+
+def test_a_zero_document_ceiling_lets_nothing_through():
+    """`max_doc_calls_per_run: 0` means no document calls this tick. An
+    untouched budget of zero must not read as room for an oversized one."""
+    budget = translate.DocBudget(0)
+    assert budget.take(1) is False
+    assert budget.take(9) is False
