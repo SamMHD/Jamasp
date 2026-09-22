@@ -2231,3 +2231,52 @@ def test_probe_sends_one_tiny_payload():
     assert translate.probe(CFG, run=counting_doc_run(calls)) is None
     assert len(calls) == 1
     assert len(calls[0].encode("utf-8")) < 2000
+
+
+# ----------------------------------------------------------- orphaned rows
+
+def ledger_units(conn):
+    return {r[0] for r in conn.execute("SELECT unit FROM doc_translations")}
+
+
+def test_a_ledger_row_for_a_unit_that_disappeared_is_pruned(tmp_path):
+    """A watchlist theme that fails once and is then dropped from
+    watchlist.yaml left its row behind permanently — verified still at
+    attempts = 1 after five healthy ticks, removable only by --force. That
+    falsifies jamasp/db.py's claim that `SELECT * FROM doc_translations` is
+    exactly "what is broken right now", and undercuts the stated reason for
+    choosing a table over `meta` keys."""
+    conn = db.connect(tmp_path / "t.db")
+    build_state(tmp_path)
+    translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY, always_fails,
+                             now=clock(0), conn=conn)
+    assert {"state/watchlist.yaml#t",
+            "reports/2026/09/2026-09-12-brief.md"} <= ledger_units(conn)
+
+    (tmp_path / "state" / "watchlist.yaml").write_text(
+        yaml.safe_dump({"watchlist": []}), encoding="utf-8")
+    (tmp_path / "reports" / "2026" / "09" / "2026-09-12-brief.md").unlink()
+    for minutes in (200, 210, 220, 230, 240):
+        translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY, doc_run(),
+                                 now=clock(minutes), conn=conn)
+    assert ledger_units(conn) == set()
+
+
+def test_a_pass_that_stopped_on_quota_prunes_nothing(tmp_path):
+    """Pruning from a pass that never enumerated its units would let one
+    quota outage wipe the ledger, and with it every attempt count — the
+    attempt counts are the whole point of the table."""
+    conn = db.connect(tmp_path / "t.db")
+    build_state(tmp_path)
+    translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY, always_fails,
+                             now=clock(0), conn=conn)
+    before = ledger_units(conn)
+    assert len(before) >= 5
+
+    def out_of_quota(prompt, schema):
+        raise modelrun.QuotaExhausted("usage limit")
+
+    stats = translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY, out_of_quota,
+                                     now=clock(200), conn=conn)
+    assert stats["quota_exhausted"] is True
+    assert ledger_units(conn) == before

@@ -217,8 +217,14 @@ CREATE INDEX IF NOT EXISTS idx_weight_fits_key ON weight_fits(fit, key, fitted_a
 -- the end of every agent run, and an abandonment must not outlive the text
 -- that earned it.
 --
--- Only failures live here. A unit that translates has its row DELETED, so
--- `SELECT * FROM doc_translations` is exactly "what is broken right now".
+-- Only failures live here. A unit that translates has its row DELETED, and a
+-- unit that disappears — a watchlist theme dropped from watchlist.yaml, a
+-- stance section a brief removes, a report deleted from the archive — is
+-- pruned by the next document pass that enumerates its file
+-- (`translate.DocLedger.prune_unseen`). So `SELECT * FROM doc_translations`
+-- is exactly "what is broken right now", which is also the argument for a
+-- table over `meta` keys above: an orphan row would make it no better than
+-- the `meta` accumulation it was chosen to avoid.
 CREATE TABLE IF NOT EXISTS doc_translations (
     unit       TEXT PRIMARY KEY,
     src_hash   TEXT NOT NULL,

@@ -718,6 +718,9 @@ class DocLedger:
         # Set by `clear`, which every pass calls on a unit that translated.
         # A single success is the evidence `rearm_abandoned` acts on.
         self.succeeded = False
+        # Every unit this pass ENUMERATED, whatever became of it. What is in
+        # the table and not in here is an orphan; see `prune_unseen`.
+        self._seen: set[str] = set()
 
     def key(self, source: Path, sub: str = "") -> str:
         """`path/relative/to/root` plus `#<sub-unit>` where a file has parts.
@@ -731,6 +734,43 @@ class DocLedger:
         except ValueError:
             rel = source.name
         return f"{rel}#{sub}" if sub else rel
+
+    def saw(self, source: Path, sub: str = "") -> None:
+        """Note that this pass enumerated this unit. See `prune_unseen`.
+
+        Called before anything branches on the unit's state — including the
+        "unchanged, skip it" branch — so the set is "every unit that exists
+        right now", not "every unit this tick considered translating".
+        """
+        self._seen.add(self.key(source, sub))
+
+    def prune_unseen(self) -> int:
+        """Drop rows for units the pass did not find. Returns how many.
+
+        A watchlist theme that fails once and is then dropped from
+        watchlist.yaml, a stance section a brief removes, a report deleted
+        from the archive: each left a row behind permanently, removable only
+        by `--force`. That falsifies this table's contract — `jamasp/db.py`
+        says `SELECT * FROM doc_translations` is exactly "what is broken
+        right now" — and undercuts the reason a table was chosen over one
+        `meta` key per unit, which was that `meta` would accumulate a key per
+        broken unit forever.
+
+        ONLY safe from a pass that actually enumerated its units. A pass that
+        stopped on quota, or was never run because `--only` selected another
+        track, has an empty or partial `_seen` and pruning from it would wipe
+        the ledger — every attempt count with it. `translate_docs` is what
+        holds that guarantee, and
+        `test_a_pass_that_stopped_on_quota_prunes_nothing` is what keeps it.
+        """
+        stale = [row[0] for row in self.conn.execute(
+            "SELECT unit FROM doc_translations") if row[0] not in self._seen]
+        if stale:
+            self.conn.executemany(
+                "DELETE FROM doc_translations WHERE unit = ?",
+                [(unit,) for unit in stale])
+            self.conn.commit()
+        return len(stale)
 
     def state(self, source: Path, digest: str, sub: str = "") -> str:
         """`'ready'`, `'backoff'` or `'abandoned'` for one unit.
@@ -900,6 +940,8 @@ def translate_stance(
     out: list[tuple[str, str, str]] = []
     for heading, body in translatetext.split_sections(text):
         digest = translatetext.src_hash(body)
+        if ledger:
+            ledger.saw(source, heading or "(preamble)")
         previous = existing.get(heading)
         if not force and previous and previous[0] == digest:
             out.append((heading, digest, previous[1]))
@@ -1035,6 +1077,8 @@ def translate_document(
         return _doc_counts()
     text = source.read_text(encoding="utf-8")
     digest = translatetext.src_hash(text)
+    if ledger:
+        ledger.saw(source)
 
     if not force and sidecar.exists():
         meta, _ = translatetext.parse_front_matter(
@@ -1119,6 +1163,8 @@ def translate_watchlist(
     for entry in entries:
         theme, why = entry.get("theme", ""), entry.get("why", "")
         digest = translatetext.src_hash(why)
+        if ledger:
+            ledger.saw(source, theme)
         previous = existing.get(theme)
         if not force and previous and previous.get("src_hash") == digest:
             out.append(previous)
@@ -1201,6 +1247,8 @@ def translate_predictions(
             continue   # an interrupted append; the source reader skips it too
         pid, claim = row.get("id"), row.get("claim", "")
         digest = translatetext.src_hash(claim)
+        if ledger:
+            ledger.saw(source, pid)
         previous = existing.get(pid)
         if not force and previous and previous.get("src_hash") == digest:
             out.append(previous)
@@ -1326,6 +1374,7 @@ def translate_docs(
     # the point is the same as translate_rows/translate_events: stop at the
     # FIRST one, not after paying to discover it again in playbook,
     # watchlist, predictions and every pending report in turn.
+    enumerated = False
     try:
         merge(translate_stance(state / "stance.md", state / "stance.fa.md",
                                glossary, run, now, force=force, budget=budget,
@@ -1346,9 +1395,14 @@ def translate_docs(
                 report, report.with_name(report.name[:-3] + ".fa.md"),
                 glossary, run, now, force=force, budget=budget,
                 chunk_bytes=chunk_bytes, ledger=ledger))
+        # Reached only when every pass above enumerated its units, which is
+        # what makes `prune_unseen` safe below.
+        enumerated = True
     except modelrun.QuotaExhausted as exc:
         totals["quota_exhausted"] = True
         totals["quota_message"] = str(exc)
+    if ledger is not None and enumerated:
+        ledger.prune_unseen()
     if ledger is not None and ledger.succeeded:
         # Something translated, so the translator works — see
         # `DocLedger.rearm_abandoned`. At the END of the pass rather than the
