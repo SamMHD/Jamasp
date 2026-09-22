@@ -127,7 +127,8 @@ export function TechnicalMap({ tiles, width, height, fittedAt, messages }: {
                   tone={toneFromIntensity(cell.node.state)}
                   title={tileTitle(cell.node, now, messages)}
                   dashed={!cell.node.fitted && !cell.node.pinned}
-                  lines={label.lines} fontSize={label.fontSize} />
+                  lines={label.lines} fontSize={label.fontSize}
+                  messages={messages} />
               );
             })}
           </g>

@@ -236,7 +236,7 @@ export function MarketMap({ items, width, height, range, coverage,
                   title={tileTitle(cell.node, headline, fallback, now, messages, tierGates)}
                   lines={label.lines} fontSize={label.fontSize}
                   importance={importance} tier={cell.node.tier} gates={tierGates}
-                  fallback={fallback} />
+                  fallback={fallback} messages={messages} />
               );
             })}
           </g>
