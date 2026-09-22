@@ -81,13 +81,13 @@ function pct(confidence: number): string {
 function timing(row: LedgerRow, now: Date, messages: Messages): string | null {
   if (!Number.isFinite(row.maturesAt) && !row.resolved) return t(messages, "predictions.maturityUnknown");
   if (row.state === "due") {
-    return `${t(messages, "predictions.timingMatured")} ${fmtAge(iso(row.maturesAt), now)}`;
+    return `${t(messages, "predictions.timingMatured")} ${fmtAge(iso(row.maturesAt), messages, now)}`;
   }
   if (row.state === "open") {
-    return `${t(messages, "predictions.timingMatures")} ${fmtAge(iso(row.maturesAt), now)}`;
+    return `${t(messages, "predictions.timingMatures")} ${fmtAge(iso(row.maturesAt), messages, now)}`;
   }
   return row.pred.scored_at
-    ? `${t(messages, "predictions.timingScored")} ${fmtAge(row.pred.scored_at, now)}`
+    ? `${t(messages, "predictions.timingScored")} ${fmtAge(row.pred.scored_at, messages, now)}`
     : t(messages, "predictions.timingScored");
 }
 

@@ -1,7 +1,7 @@
 import { Sparkline } from "@/components/sparkline";
 import type { PricePoint } from "@/lib/db";
 import { cls, fmtAge } from "@/lib/format";
-import { getMessages, t, type Messages } from "@/lib/i18n";
+import { t, type Messages } from "@/lib/i18n";
 
 function num(v: number, digits: number): string {
   return v.toLocaleString(undefined, { maximumFractionDigits: digits });
@@ -56,7 +56,7 @@ export function Delta({ delta, digits = 2, label = "24h", tone = "direction" }: 
  * not something the desk reads) — no delta slot renders.
  */
 export function QuoteTile({ label, value, digits = 2, ts, delta, deltaLabel = "24h",
-  deltaTone = "direction", series, note, now, className, messages = getMessages("en") }: {
+  deltaTone = "direction", series, note, now, className, messages }: {
   label: string;
   value: number | null;
   digits?: number;
@@ -68,12 +68,23 @@ export function QuoteTile({ label, value, digits = 2, ts, delta, deltaLabel = "2
   note?: string;
   now: Date;
   className?: string;
-  /** Optional, defaulting to English: this is a leaf reused by both
-   *  DriverPanel and TechnicalPanel, and every caller already has `messages`
-   *  in scope — but defaulting rather than requiring it keeps the handful of
-   *  chrome strings here (English-default) from forcing a prop through every
-   *  existing call site and test that never cared about locale. */
-  messages?: Messages;
+  /**
+   * REQUIRED, and it has to stay that way.
+   *
+   * This prop used to default to getMessages("en") on the argument that a
+   * leaf shared by DriverPanel and TechnicalPanel should not force a prop
+   * through call sites "that never cared about locale". Every call site
+   * cares: the default made the compiler accept a caller that forgot, and
+   * components/driver-panel.tsx forgot — it held a dictionary and passed
+   * none, so the overview's driver tiles printed this component's "no data"
+   * and "no timestamp" in English in Persian mode, in production, with
+   * nothing failing.
+   *
+   * An English default is a second place the panel decides its language,
+   * which is exactly what centralising DEFAULT_LOCALE in lib/i18n.ts was
+   * meant to prevent.
+   */
+  messages: Messages;
 }) {
   return (
     <div className={cls("rounded-md border border-border/60 p-3", className)}>
@@ -95,7 +106,7 @@ export function QuoteTile({ label, value, digits = 2, ts, delta, deltaLabel = "2
               className="mt-1.5 h-6 opacity-70" />
           )}
           <div className="mt-1.5 text-meta text-ink-dim">
-            {note ? `${note} · ` : ""}{ts ? fmtAge(ts, now) : t(messages, "common.noTimestamp")}
+            {note ? `${note} · ` : ""}{ts ? fmtAge(ts, messages, now) : t(messages, "common.noTimestamp")}
           </div>
         </>
       )}

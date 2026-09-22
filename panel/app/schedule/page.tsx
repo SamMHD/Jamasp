@@ -64,7 +64,7 @@ export default async function SchedulePage() {
           {pending.map(w => (
             <TableRow key={w.id}>
               <TableCell>{w.id}</TableCell><TableCell>{fmtUtc(w.due_at)}</TableCell>
-              <TableCell>{fmtAge(w.due_at, now)}</TableCell><TableCell>{runTypeLabel(w.run_type, messages)}</TableCell>
+              <TableCell>{fmtAge(w.due_at, messages, now)}</TableCell><TableCell>{runTypeLabel(w.run_type, messages)}</TableCell>
               <TableCell className="max-w-md truncate">{w.task}</TableCell>
               <TableCell><CancelButton id={w.id} messages={messages} /></TableCell>
             </TableRow>

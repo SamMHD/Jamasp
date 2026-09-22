@@ -1,5 +1,5 @@
 import { cls } from "@/lib/format";
-import { getMessages, t, type Messages } from "@/lib/i18n";
+import { t, type Messages } from "@/lib/i18n";
 
 /**
  * Server-rendered semicircular gauge, for a measure with a *genuinely*
@@ -40,7 +40,7 @@ function num(v: number, digits: number): string {
 }
 
 export function ArcGauge({ label, value, min, max, digits = 1, ticks = [], className,
-  messages = getMessages("en") }: {
+  messages }: {
   label: string;
   value: number | null;
   min: number;
@@ -48,9 +48,11 @@ export function ArcGauge({ label, value, min, max, digits = 1, ticks = [], class
   digits?: number;
   ticks?: { at: number; text: string }[];
   className?: string;
-  /** Optional, defaulting to English — see quote-tile.tsx#QuoteTile's
-   *  identical reasoning; this leaf's only literal is the "no data" word. */
-  messages?: Messages;
+  /** Required — see quote-tile.tsx#QuoteTile for why these props no longer
+   *  default to English. This leaf's only literal is the "no data" word,
+   *  which is precisely the kind of string a default leaves English
+   *  unnoticed. */
+  messages: Messages;
 }) {
   const span = max - min;
   const f = value === null || span <= 0

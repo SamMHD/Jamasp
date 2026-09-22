@@ -142,7 +142,7 @@ export function NewsFlow({ pulse, heads, top, lastItemTs, now, locale, messages 
         </h2>
         {lastItemTs && (
           <span className="text-xs text-muted-foreground">
-            {t(messages, "news.lastItemPrefix")} {fmtAge(lastItemTs, now)}
+            {t(messages, "news.lastItemPrefix")} {fmtAge(lastItemTs, messages, now)}
           </span>
         )}
       </div>
@@ -225,7 +225,7 @@ export function NewsFlow({ pulse, heads, top, lastItemTs, now, locale, messages 
             return (
               <li key={i.id} className="flex items-baseline gap-2">
                 <span className="w-14 shrink-0 text-xs text-muted-foreground">
-                  {fmtAge(i.published_at, now)}
+                  {fmtAge(i.published_at, messages, now)}
                 </span>
                 <span className="w-24 shrink-0 truncate text-xs text-muted-foreground">
                   {i.source}

@@ -1,7 +1,10 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import { AddWakeupDialog, CancelButton, RunNowButtons } from "@/components/schedule-forms";
+import {
+  AddWakeupDialog, CancelButton, RunNowButtons, RunTypeOptions,
+} from "@/components/schedule-forms";
 import { getMessages } from "@/lib/i18n";
+import { RUN_TYPES } from "@/lib/validate";
 import en from "@/messages/en.json";
 import fa from "@/messages/fa.json";
 
@@ -45,10 +48,14 @@ describe("AddWakeupDialog — Persian", () => {
   // `open` from its caller and IS tested that way. renderToStaticMarkup on
   // the closed dialog therefore renders only the trigger button; verified
   // empirically (the initial version of this test asserted on dialog-content
-  // text and failed with the trigger's markup alone in the diff). The
-  // translated <option value={rt}>{label}</option> shape (Persian text, the
-  // Latin run_type slug still as `value`) is exercised for real by
-  // e2e/i18n.spec.ts instead, which can actually click the trigger open.
+  // text and failed with the trigger's markup alone in the diff).
+  //
+  // The <option> list inside that dialog is therefore covered by rendering
+  // the exported RunTypeOptions directly — the same escape hatch
+  // components/inbox-table.tsx's ItemHeadline uses, and for the same reason.
+  // An earlier version of this comment claimed e2e/i18n.spec.ts exercised
+  // the open dialog: it does not, and never did. No e2e spec in this repo
+  // opens it, so that path had no coverage at all.
   it("translates the trigger button", () => {
     const html = renderToStaticMarkup(<AddWakeupDialog messages={messages.fa} />);
     expect(html).toContain(fa["schedule.scheduleWakeupBtn"]);
@@ -58,6 +65,44 @@ describe("AddWakeupDialog — Persian", () => {
   it("keeps the English trigger text in the English locale", () => {
     const html = renderToStaticMarkup(<AddWakeupDialog messages={messages.en} />);
     expect(html).toContain("Schedule wakeup");
+  });
+});
+
+describe("RunTypeOptions (the wakeup dialog's <select>)", () => {
+  it("renders the translated label as the option's text", () => {
+    const html = renderToStaticMarkup(<RunTypeOptions messages={messages.fa} />);
+    for (const rt of ["brief", "scan", "deepdive", "retro"] as const) {
+      expect(html).toContain(`>${fa[`runType.${rt}` as keyof typeof fa]}</option>`);
+    }
+  });
+
+  /**
+   * The load-bearing half. A <select> with no explicit `value` submits its
+   * option's TEXT CONTENT — so once the text became Persian, a missing
+   * `value` would schedule a wakeup with a Persian string where addWakeup
+   * expects the Latin run_type slug, and the failure would surface in the
+   * CLI, not here.
+   */
+  it("keeps the Latin run_type slug as the option's value", () => {
+    const html = renderToStaticMarkup(<RunTypeOptions messages={messages.fa} />);
+    for (const rt of ["brief", "scan", "deepdive", "retro"] as const) {
+      expect(html).toContain(`value="${rt}"`);
+    }
+    // Persian text AND the Latin value on the same element, not one or the
+    // other: this is the exact shape the dialog needs.
+    expect(html).toContain(`value="deepdive">${fa["runType.deepdive"]}</option>`);
+  });
+
+  it("renders every run type the CLI accepts, not a hand-picked subset", () => {
+    // Unlike RunNowButtons, which filters "retro" out, the dialog offers all
+    // of RUN_TYPES — a missing one is a wakeup the desk cannot schedule.
+    const html = renderToStaticMarkup(<RunTypeOptions messages={messages.fa} />);
+    expect((html.match(/<option/g) ?? []).length).toBe(RUN_TYPES.length);
+  });
+
+  it("keeps the English labels in the English locale", () => {
+    const html = renderToStaticMarkup(<RunTypeOptions messages={messages.en} />);
+    expect(html).toContain(`>${en["runType.deepdive"]}</option>`);
   });
 });
 

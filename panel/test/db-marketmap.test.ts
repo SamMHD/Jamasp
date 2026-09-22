@@ -11,9 +11,11 @@ import Database from "better-sqlite3";
  */
 let db: typeof import("../lib/db");
 
-const item = (id: string, url: string, publishedAt: string, headline: string) =>
+const item = (id: string, url: string, publishedAt: string, headline: string,
+  headlineFa: string | null = null) =>
   `('${id}','reuters','${publishedAt}','${headline}',NULL,'${url}','gold',NULL,` +
-  `'${publishedAt}',NULL,NULL,NULL,NULL)`;
+  `'${publishedAt}',NULL,` +
+  (headlineFa === null ? "NULL" : `'${headlineFa}'`) + `,NULL,NULL)`;
 
 const score = (id: string, tier: number, dir: number, conv: number, theme: string) =>
   `('${id}',${tier},${dir},${conv},'${theme}','2026-08-19T22:00:00Z')`;
@@ -32,7 +34,7 @@ beforeAll(async () => {
       direction INTEGER NOT NULL, conviction REAL NOT NULL, theme TEXT NOT NULL,
       scored_at TEXT NOT NULL);
     INSERT INTO items VALUES
-      ${item("w1", "https://x.test/w1", "2026-08-19T20:00:00Z", "Late story")},
+      ${item("w1", "https://x.test/w1", "2026-08-19T20:00:00Z", "Late story", "خبر دیرهنگام")},
       ${item("w2", "https://x.test/w2", "2026-08-19T18:00:00Z", "Earlier story")},
       ${item("old", "https://x.test/old", "2026-08-01T12:00:00Z", "Outside window")},
       ${item("dupA", "https://x.test/dup", "2026-08-19T19:00:00Z", "Gold at 4400")},
@@ -190,8 +192,19 @@ describe("getScoredItems", () => {
   it("selects the Persian headline for the map", () => {
     // getScoredItems names its columns explicitly, unlike getItems — a
     // Persian headline reaches the map only if it is in that list.
+    //
+    // Asserted by VALUE, not toHaveProperty: every fixture row used to carry
+    // headline_fa NULL, so the old assertion passed against `headline_fa:
+    // null` and proved only that the type admits the field. Selecting the
+    // wrong column, or aliasing `headline` into it, would have passed too.
     const items = db.getScoredItems("2000-01-01T00:00:00Z");
-    expect(items[0]).toHaveProperty("headline_fa");
+    const w1 = items.find(i => i.itemId === "w1");
+    expect(w1?.headline_fa).toBe("خبر دیرهنگام");
+    // ...and it is a DISTINCT column from the English headline, not an alias.
+    expect(w1?.headline).toBe("Late story");
+    // A row the translate job has not reached yet still comes back, with the
+    // field null — which is what localized() reads as "no Persian".
+    expect(items.find(i => i.itemId === "w2")?.headline_fa).toBeNull();
   });
 });
 

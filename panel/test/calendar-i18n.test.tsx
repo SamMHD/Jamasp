@@ -110,6 +110,34 @@ describe("calendar page", () => {
     expect(html).toContain(messages.en["calendar.impactHigh"]);
   });
 
+  // The page's OWN chrome, not the event rows. A Persian nav link reading
+  // تقویم used to land on a page headed "Calendar", with an English
+  // subtitle, an English empty state and an English "(Dubai)" — in a file
+  // that already had `messages`/`t` wired and used them a paragraph below.
+  it("translates its own header, subtitle and day suffix", async () => {
+    const html = await renderPage("fa", [translated]);
+    expect(html).toContain(messages.fa["nav.calendar"]);
+    expect(html).not.toContain(">Calendar<");
+    expect(html).toContain(messages.fa["calendar.dubaiSuffix"]);
+    expect(html).not.toContain("(Dubai)");
+    // The subtitle is a template: the count stays a Latin digit.
+    expect(html).toContain(messages.fa["calendar.eventsInNext30Days"].replace("{n}", "1"));
+    expect(html).not.toContain("events in the next 30 days");
+  });
+
+  it("translates the empty state", async () => {
+    const html = await renderPage("fa", []);
+    expect(html).toContain(messages.fa["calendar.nothingUpcoming"]);
+    expect(html).not.toContain("nothing upcoming");
+  });
+
+  it("renders the same chrome in English from the same keys", async () => {
+    const html = await renderPage("en", [translated]);
+    expect(html).toContain(messages.en["nav.calendar"]);
+    expect(html).toContain(messages.en["calendar.dubaiSuffix"]);
+    expect(html).toContain(messages.en["calendar.eventsInNext30Days"].replace("{n}", "1"));
+  });
+
   // Global constraint: times and country codes are the same in both
   // locales — no numeral conversion, no Jalali.
   it("keeps the Dubai/UTC time and the country code identical across locales", async () => {

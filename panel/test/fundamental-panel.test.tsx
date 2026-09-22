@@ -4,6 +4,12 @@ import { describe, expect, it } from "vitest";
 import { FundamentalPanel } from "../components/fundamental-panel";
 import { parseStance } from "../lib/stance";
 import type { WatchlistEntry } from "../lib/files";
+import { getMessages } from "../lib/i18n";
+
+// `messages` is a REQUIRED prop: the component used to default it to
+// getMessages("en"), which let a caller silently drop it — see
+// components/driver-panel.tsx, which did exactly that in production.
+const messages = getMessages("en");
 
 const NOW = new Date("2026-08-01T12:00:00Z");
 
@@ -36,7 +42,7 @@ const WATCH: WatchlistEntry[] = [
 const render = (stance: ReturnType<typeof parseStance> | null,
   watchlist: WatchlistEntry[] = []) =>
   renderToStaticMarkup(
-    <FundamentalPanel stance={stance} watchlist={watchlist} now={NOW} />);
+    <FundamentalPanel stance={stance} watchlist={watchlist} now={NOW} locale="en" messages={messages} />);
 
 /** Every key that appears twice among the same array of siblings. */
 function duplicateSiblingKeys(node: ReactNode): string[] {
@@ -165,7 +171,8 @@ second block
     expect(parsed.extra.map(s => s.heading)).toEqual(["Watching", "Watching"]);
 
     expect(duplicateSiblingKeys(
-      FundamentalPanel({ stance: parsed, watchlist: [], now: NOW })))
+      FundamentalPanel({ stance: parsed, watchlist: [], now: NOW,
+        locale: "en", messages })))
       .toEqual([]);
 
     const html = render(parsed);

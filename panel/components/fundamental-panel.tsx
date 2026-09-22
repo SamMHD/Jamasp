@@ -4,7 +4,7 @@ import { SourceLang } from "@/components/source-lang";
 import { SLOT_VARS, WeightBar } from "@/components/weight-bar";
 import { Badge } from "@/components/ui/badge";
 import type { StanceFaSection, WatchlistEntry } from "@/lib/files";
-import { getMessages, localized, t, type Locale, type Messages } from "@/lib/i18n";
+import { localized, t, type Locale, type Messages } from "@/lib/i18n";
 import type { ParsedStance, StanceKey, StanceSection, StanceWeight } from "@/lib/stance";
 import { extractBullets, scenarioSlot, splitFalsifier, stanceAgeDays } from "@/lib/stance";
 import { cls, fmtAge } from "@/lib/format";
@@ -62,7 +62,7 @@ const H3 = "mb-1 text-xs uppercase tracking-wide text-muted-foreground";
  * rest exist so the dictionary carries the whole enum, not just the part
  * this component currently uses.
  */
-const STANCE_HEADING_KEYS: Record<StanceKey, string> = {
+export const STANCE_HEADING_KEYS: Record<StanceKey, string> = {
   view: "stance.view",
   whatFlipsMe: "stance.whatFlipsMe",
   openPredictions: "stance.openPredictions",
@@ -236,8 +236,21 @@ function FlipsSection({ heading, body, fallback, messages }: {
   );
 }
 
-function Watching({ watchlist, now, messages }: {
-  watchlist: WatchlistEntry[]; now: Date; messages: Messages;
+/**
+ * `watchlistFa` is keyed by theme, per lib/files.ts#readWatchlistFa: a theme
+ * missing from it (untranslated, or stale against the current `why`) is
+ * simply absent, which `localized` reads as "no Persian" — the same shape
+ * app/state/page.tsx uses for the same field.
+ *
+ * The tooltip is a `title` attribute, a plain string, so it cannot hold a
+ * <SourceLang> element. An untranslated one appends
+ * content.sourceEnglishTitle instead — exactly what
+ * components/market-map.tsx#tileTitle does for the same problem, so the
+ * panel has one convention for marking English inside an attribute.
+ */
+function Watching({ watchlist, watchlistFa, now, locale, messages }: {
+  watchlist: WatchlistEntry[]; watchlistFa: Record<string, string>;
+  now: Date; locale: Locale; messages: Messages;
 }) {
   return (
     <div className="mt-6 border-t border-border pt-3">
@@ -251,15 +264,21 @@ function Watching({ watchlist, now, messages }: {
         <p className="text-sm text-muted-foreground">{t(messages, "fundamental.watchlistEmpty")}</p>
       ) : (
         <div className="flex flex-wrap gap-1.5">
-          {watchlist.map(w => (
-            <span key={w.theme} title={w.why}
-              className="rounded-full border border-border px-2.5 py-0.5 text-xs">
-              {w.theme}
-              {w.since && (
-                <span className="text-muted-foreground"> · {fmtAge(w.since, now)}</span>
-              )}
-            </span>
-          ))}
+          {watchlist.map(w => {
+            const { text, fallback } = localized(
+              { why: w.why, why_fa: watchlistFa[w.theme] }, "why", locale);
+            const title = fallback
+              ? `${text} — ${t(messages, "content.sourceEnglishTitle")}` : text;
+            return (
+              <span key={w.theme} title={title}
+                className="rounded-full border border-border px-2.5 py-0.5 text-xs">
+                {w.theme}
+                {w.since && (
+                  <span className="text-muted-foreground"> · {fmtAge(w.since, messages, now)}</span>
+                )}
+              </span>
+            );
+          })}
         </div>
       )}
     </div>
@@ -267,11 +286,15 @@ function Watching({ watchlist, now, messages }: {
 }
 
 export function FundamentalPanel({
-  stance, watchlist, now, locale = "en", messages = getMessages("en"), stanceFa = null,
+  stance, watchlist, now, locale, messages, stanceFa = null, watchlistFa = {},
 }: {
   stance: ParsedStance | null; watchlist: WatchlistEntry[]; now: Date;
-  locale?: Locale; messages?: Messages;
+  locale: Locale; messages: Messages;
   stanceFa?: { sections: StanceFaSection[] } | null;
+  // Defaults to "no Persian for any theme", which is what an absent sidecar
+  // means — and `localized` turns that into a MARKED English fallback, so
+  // unlike an English `messages` default this one cannot hide anything.
+  watchlistFa?: Record<string, string>;
 }) {
   const age = stance?.asOf ? stanceAgeDays(stance.asOf, now) : null;
 
@@ -354,7 +377,8 @@ export function FundamentalPanel({
         </>
       )}
 
-      <Watching watchlist={watchlist} now={now} messages={messages} />
+      <Watching watchlist={watchlist} watchlistFa={watchlistFa} now={now}
+        locale={locale} messages={messages} />
     </section>
   );
 }

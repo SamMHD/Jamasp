@@ -35,7 +35,7 @@ export function StatusStrip({ lastIngest, runsToday, cap, sourceErrors, lastRuns
       <Link href="/crawl" className="hover:underline">
         <span className="text-muted-foreground">{t(messages, "status.ingestWord")} </span>
         <span className={cls("tabular-nums", ingestStale ? "text-destructive" : "text-up")}>
-          {lastIngest ? fmtAge(lastIngest, now) : t(messages, "common.never")}
+          {lastIngest ? fmtAge(lastIngest, messages, now) : t(messages, "common.never")}
         </span>
       </Link>
       <Link href="/schedule" className="hover:underline">
@@ -61,7 +61,7 @@ export function StatusStrip({ lastIngest, runsToday, cap, sourceErrors, lastRuns
           const label = runTypeLabel(runType, messages).toLowerCase();
           return (
             <Link key={runType} href="/schedule" className="flex items-center gap-1 hover:underline"
-              title={r ? `${label}: ${r.status}, ${fmtAge(r.started_at, now)}` : `${label}: ${t(messages, "status.neverRun")}`}>
+              title={r ? `${label}: ${r.status}, ${fmtAge(r.started_at, messages, now)}` : `${label}: ${t(messages, "status.neverRun")}`}>
               <span className={cls("inline-block h-2 w-2 rounded-full",
                 r ? DOT[r.status] ?? "bg-muted-foreground" : "bg-muted-foreground/40")} />
               <span className="text-muted-foreground">{label}</span>
@@ -87,7 +87,7 @@ export function FooterStrip({ wakeup, event, lastAlert, now, locale, messages }:
               {/* .toLowerCase(): this footer's own register is all-lowercase
                   ("next wakeup:", "none pending") — see StatusStrip's
                   identical call for the same reasoning. */}
-              #{wakeup.id} {runTypeLabel(wakeup.run_type, messages).toLowerCase()} {fmtAge(wakeup.due_at, now)}
+              #{wakeup.id} {runTypeLabel(wakeup.run_type, messages).toLowerCase()} {fmtAge(wakeup.due_at, messages, now)}
             </Link>
           : t(messages, "status.noneWakeupPending")}
       </span>
@@ -104,7 +104,7 @@ export function FooterStrip({ wakeup, event, lastAlert, now, locale, messages }:
         {t(messages, "status.lastAlertPrefix")}{" "}
         {lastAlert
           ? <Link href="/alerts" className="text-foreground hover:underline">
-              {fmtAge(lastAlert.ts, now)}
+              {fmtAge(lastAlert.ts, messages, now)}
             </Link>
           : t(messages, "common.none")}
       </span>

@@ -101,7 +101,7 @@ function LastReading({ spot, now, messages }: {
       </div>
       <p className="mt-2 text-meta text-ink-dim">
         {JAMASP_INSTRUMENT} · {t(messages, "tech.comexFrontMonth")} · {t(messages, "tech.readPrefix")}{" "}
-        {fmtAge(spot.ts, now)}
+        {fmtAge(spot.ts, messages, now)}
       </p>
       {/* The one thing a side-by-side must not leave the reader to guess.
           The widget charts SPOT (lib/tradingview.ts explains why it cannot
@@ -223,8 +223,10 @@ export function TechnicalPanel({ tech, series, tvSymbol = TV_LIVE_SYMBOL, gvzSer
               now={now} messages={messages} />
             {/* "w/w" (week-over-week) is compact chrome notation in the same
                 register as "24h" elsewhere on this panel — Latin in both
-                locales, same reasoning as fmtAge's own "ago"/"in" (see
-                lib/format.ts, deliberately not locale-aware). */}
+                locales, the same reasoning that keeps fmtAge's magnitude and
+                unit Latin ("3h", "2d"). fmtAge's "ago"/"in" wrapper is NOT
+                notation but an English word, and does go through the
+                dictionary; see lib/format.ts. */}
             <QuoteTile label={t(messages, "signal.netSpec")} value={tech.indicators.netSpec} digits={1}
               ts={tech.netSpecAsOf} delta={netSpecDelta} deltaLabel="w/w"
               deltaTone="neutral" note={t(messages, "tech.cftcWeekly")} now={now} messages={messages} />
@@ -233,7 +235,7 @@ export function TechnicalPanel({ tech, series, tvSymbol = TV_LIVE_SYMBOL, gvzSer
           {tech.indicatorsAsOf && (
             <p className={cls("mt-2 text-xs",
               tech.stale ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground")}>
-              {t(messages, "tech.indicatorsPrefix")} {fmtAge(tech.indicatorsAsOf, now)}
+              {t(messages, "tech.indicatorsPrefix")} {fmtAge(tech.indicatorsAsOf, messages, now)}
               {tech.stale && <> — {t(messages, "tech.stale")}</>}
             </p>
           )}

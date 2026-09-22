@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Maximize2, Minimize2 } from "lucide-react";
+import { t, type Messages } from "@/lib/i18n";
 
 /**
  * Puts the market map on the whole screen.
@@ -15,12 +16,21 @@ import { Maximize2, Minimize2 } from "lucide-react";
  * It targets an element by id rather than taking a ref, so the map can remain
  * a server component — a server component cannot hold or pass a ref.
  *
+ * `messages` is required, not optional-with-an-English-default: this is a
+ * client component and cannot read the httpOnly locale cookie itself, so the
+ * dictionary has to be threaded in from the server component that renders it
+ * (MarketMap and TechnicalMap both already hold one). A default would make
+ * the compiler accept a caller that forgot, which is exactly how a control
+ * ends up English on a Persian page with nothing to catch it.
+ *
  * The button always renders and guards the call instead of hiding itself when
  * the API is unavailable: detecting support means waiting for hydration, which
  * makes the control pop in after paint. A button that does nothing on a
  * browser this panel is never opened in is the cheaper failure.
  */
-export function FullscreenButton({ targetId }: { targetId: string }) {
+export function FullscreenButton({ targetId, messages }: {
+  targetId: string; messages: Messages;
+}) {
   const [isFull, setIsFull] = useState(false);
 
   useEffect(() => {
@@ -38,7 +48,7 @@ export function FullscreenButton({ targetId }: { targetId: string }) {
     void el?.requestFullscreen?.();
   };
 
-  const label = isFull ? "Exit full screen" : "Full screen";
+  const label = t(messages, isFull ? "common.exitFullScreen" : "common.fullScreen");
   const Icon = isFull ? Minimize2 : Maximize2;
 
   return (

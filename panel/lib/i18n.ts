@@ -67,7 +67,16 @@ export function localized(
   if (typeof persian === "string" && persian.trim()) {
     return { text: persian, fallback: false };
   }
-  // No Persian and no English either: nothing to mark, because there is
-  // nothing missing — the row simply has no such field.
+  // Persian locale, no usable Persian text. Two cases land here, and the
+  // flag is what separates them:
+  //
+  //  - English present: the COMMON path, and the whole reason this function
+  //    returns a flag at all. The translate job has not reached this row
+  //    yet, so the caller renders the English and `fallback: true` makes it
+  //    wear the EN marker.
+  //  - Neither present: nothing to mark, because nothing is missing — the
+  //    row simply has no such field. `english !== ""` reports false, and the
+  //    caller renders an empty string with no marker rather than an
+  //    accusing badge attached to nothing.
   return { text: english, fallback: english !== "" };
 }
