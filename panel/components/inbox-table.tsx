@@ -37,6 +37,25 @@ export function ItemHeadline({ item, locale, messages }: {
   return <SourceLang fallback={fallback} messages={messages}>{text}</SourceLang>;
 }
 
+/**
+ * The lede, shared by the list row and the detail dialog's description for
+ * exactly the reason `ItemHeadline` is shared: one `localized(..., "lede")`
+ * call site rather than two that must remember to agree.
+ *
+ * Returns null when neither language has a lede, so a caller can render it
+ * unconditionally — the `{rep.lede && ...}` guard that used to sit at each
+ * call site tested the *English* field, which would have hidden a row that
+ * has only `lede_fa` once the reuse pass starts filling one in without the
+ * other.
+ */
+export function ItemLede({ item, locale, messages }: {
+  item: ItemRow; locale: Locale; messages: Messages;
+}) {
+  const { text, fallback } = localized(item, "lede", locale);
+  if (!text.trim()) return null;
+  return <SourceLang fallback={fallback} messages={messages}>{text}</SourceLang>;
+}
+
 const fetcher = async (url: string) => {
   const r = await fetch(url);
   if (!r.ok) {
@@ -160,7 +179,11 @@ export function InboxTable({ sources, topics, locale, messages }: {
                 </button>
                 {!rep.read_at && <Badge>{t(messages, "inboxTable.unreadBadge")}</Badge>}
               </div>
-              {rep.lede && <p className="mt-1 text-sm text-muted-foreground">{rep.lede}</p>}
+              {(rep.lede || rep.lede_fa) && (
+                <p className="mt-1 text-sm text-muted-foreground">
+                  <ItemLede item={rep} locale={locale} messages={messages} />
+                </p>
+              )}
               <div className="mt-1 text-xs text-muted-foreground">
                 {rep.source} · {rep.topic} · {fmtAge(rep.published_at)}
                 {others.length > 0 && (
@@ -199,7 +222,11 @@ export function InboxTable({ sources, topics, locale, messages }: {
                 <DialogTitle className="leading-snug">
                   <ItemHeadline item={selectedRep} locale={locale} messages={messages} />
                 </DialogTitle>
-                {selectedRep.lede && <DialogDescription>{selectedRep.lede}</DialogDescription>}
+                {(selectedRep.lede || selectedRep.lede_fa) && (
+                  <DialogDescription>
+                    <ItemLede item={selectedRep} locale={locale} messages={messages} />
+                  </DialogDescription>
+                )}
               </DialogHeader>
               <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1.5 text-sm">
                 <dt className="text-muted-foreground">{t(messages, "inboxTable.dtSource")}</dt>

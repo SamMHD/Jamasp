@@ -28,7 +28,7 @@ vi.mock("swr/infinite", () => ({
 // enough — same precedent as test/lang-toggle.test.tsx.
 vi.mock("@/lib/actions", () => ({ markInboxRead: vi.fn() }));
 
-const { InboxTable, ItemHeadline } = await import("@/components/inbox-table");
+const { InboxTable, ItemHeadline, ItemLede } = await import("@/components/inbox-table");
 
 function item(over: Partial<ItemRow> = {}): ItemRow {
   return {
@@ -83,6 +83,27 @@ describe("InboxTable list row", () => {
     expect(html).not.toContain("طلا در ۴۳۸۰ ثابت ماند");
     expect(html).not.toContain(messages.en["content.sourceEnglish"]);
   });
+
+  it("renders the Persian lede when it exists, with no EN marker", () => {
+    const html = renderTable([item({
+      headline_fa: "طلا در ۴۳۸۰ ثابت ماند",
+      lede: "Bullion steadied in Asian trade.", lede_fa: "شمش در معاملات آسيا آرام گرفت.",
+    })], "fa");
+    expect(html).toContain("شمش در معاملات آسيا آرام گرفت.");
+    expect(html).not.toContain("Bullion steadied in Asian trade.");
+    expect(html).not.toContain(messages.fa["content.sourceEnglish"]);
+  });
+
+  it("falls back to the English lede WITH the EN marker when untranslated", () => {
+    const html = renderTable([item({
+      headline_fa: "طلا در ۴۳۸۰ ثابت ماند",
+      lede: "Bullion steadied in Asian trade.", lede_fa: null,
+    })], "fa");
+    expect(html).toContain("Bullion steadied in Asian trade.");
+    // The headline is translated, so the only thing that can be wearing the
+    // marker is the lede.
+    expect(html).toContain(messages.fa["content.sourceEnglish"]);
+  });
 });
 
 // The dialog title (components/inbox-table.tsx's DialogTitle) only mounts
@@ -115,6 +136,45 @@ describe("InboxTable dialog title (via the shared ItemHeadline)", () => {
         locale="en" messages={messages.en} />);
     expect(html).toContain("Gold holds 4380");
     expect(html).not.toContain("طلا در ۴۳۸۰ ثابت ماند");
+    expect(html).not.toContain(messages.en["content.sourceEnglish"]);
+  });
+});
+
+// The dialog's DialogDescription renders the lede through the same shared
+// ItemLede the list row uses, for the same reason ItemHeadline is shared:
+// one call site, two surfaces, nothing left to diverge. See ItemHeadline's
+// doc comment for why the dialog cannot be driven directly here.
+describe("InboxTable lede (via the shared ItemLede)", () => {
+  it("renders the Persian lede when it exists, with no EN marker", () => {
+    const html = renderToStaticMarkup(
+      <ItemLede item={item({ lede: "Bullion steadied.", lede_fa: "شمش آرام گرفت." })}
+        locale="fa" messages={messages.fa} />);
+    expect(html).toContain("شمش آرام گرفت.");
+    expect(html).not.toContain("Bullion steadied.");
+    expect(html).not.toContain(messages.fa["content.sourceEnglish"]);
+  });
+
+  it("falls back to the English lede WITH the EN marker when untranslated", () => {
+    const html = renderToStaticMarkup(
+      <ItemLede item={item({ lede: "Bullion steadied.", lede_fa: null })}
+        locale="fa" messages={messages.fa} />);
+    expect(html).toContain("Bullion steadied.");
+    expect(html).toContain(messages.fa["content.sourceEnglish"]);
+  });
+
+  it("renders nothing at all when the item has no lede in either language", () => {
+    const html = renderToStaticMarkup(
+      <ItemLede item={item({ lede: null, lede_fa: null })}
+        locale="fa" messages={messages.fa} />);
+    expect(html).toBe("");
+  });
+
+  it("leaves the English-locale lede alone even when Persian exists", () => {
+    const html = renderToStaticMarkup(
+      <ItemLede item={item({ lede: "Bullion steadied.", lede_fa: "شمش آرام گرفت." })}
+        locale="en" messages={messages.en} />);
+    expect(html).toContain("Bullion steadied.");
+    expect(html).not.toContain("شمش آرام گرفت.");
     expect(html).not.toContain(messages.en["content.sourceEnglish"]);
   });
 });
