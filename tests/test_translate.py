@@ -2065,3 +2065,50 @@ def test_a_zero_document_ceiling_lets_nothing_through():
     budget = translate.DocBudget(0)
     assert budget.take(1) is False
     assert budget.take(9) is False
+
+
+# ------------------------------------------------- config typos in settings
+
+# The `translate:` block as an operator would actually write it, with the
+# empty-value spelling `translate_from:` already uses three lines above
+# `doc_chunk_bytes` to mean "unset".
+BLANK_NUMBERS_YAML = """
+translate:
+  cmd: ["codex"]
+  protocol: codex
+  timeout_seconds: 180
+  translate_from:
+  window_days: 7
+  batch_size: 20
+  max_batches_per_run: 6
+  max_doc_calls_per_run:
+  doc_chunk_bytes:
+  reports_since: "2026-09-01"
+"""
+
+
+def test_an_empty_doc_chunk_bytes_falls_back_to_the_measured_default(tmp_path):
+    """YAML reads `doc_chunk_bytes:` with no value as None, and
+    `len(text) <= None` is a TypeError that takes the WHOLE docs pass down —
+    stance, playbook, watchlist, predictions and every report with it. Same
+    class of typo as test_floor_for_tolerates_an_unquoted_yaml_date."""
+    cfg = yaml.safe_load(BLANK_NUMBERS_YAML)["translate"]
+    one_doc(tmp_path, big_brief())
+    calls = []
+    stats = translate.translate_docs(tmp_path, cfg, GLOSSARY,
+                                     counting_doc_run(calls))
+    assert stats["translated"] == 1
+    assert len(calls) > 1          # chunked at the default, not "never chunk"
+    for prompt in calls:
+        payload = prompt.split("---\n", 1)[1]
+        assert len(payload.encode("utf-8")) <= translate.DEFAULT_CHUNK_BYTES
+
+
+def test_an_unreadable_document_ceiling_does_not_take_the_pass_down(tmp_path):
+    """`max_doc_calls_per_run: ten` reaches DocBudget as a string, and
+    `n > "ten"` is a TypeError. It degrades to the same "no ceiling" an
+    absent key has always meant, rather than killing the tick."""
+    cfg = {**DOC_CFG, "max_doc_calls_per_run": "ten"}
+    build_state(tmp_path)
+    stats = translate.translate_docs(tmp_path, cfg, GLOSSARY, doc_run())
+    assert stats["translated"] >= 6

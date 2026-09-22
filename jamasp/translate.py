@@ -601,6 +601,36 @@ class DocBudget:
         return True
 
 
+def _int_setting(cfg: dict, key: str, default: int | None) -> int | None:
+    """`cfg[key]` as an int, or `default` if it is missing, empty or garbage.
+
+    YAML reads `doc_chunk_bytes:` with nothing after it as None, and
+    `len(text) <= None` is a TypeError that takes the whole document pass
+    down — stance, playbook, watchlist, predictions and every pending report
+    with it. That spelling is not a stretch: `translate_from:` three lines
+    above it in the same block uses exactly an empty value to mean "unset",
+    so an operator will write it that way sooner or later. `floor_for`
+    already tolerates the analogous typo for a date, for the same reason — a
+    config typo must not take the pass down at the first tick.
+
+    A value that is present but unreadable (`max_doc_calls_per_run: ten`)
+    takes the same path rather than raising. It degrades to whatever the key
+    means when absent, which for the ceiling is "no ceiling" — deliberately,
+    because that is what the key has always meant when missing and a
+    surprising ceiling is harder to diagnose than a missing one.
+
+    Booleans are rejected explicitly: `int(True)` is 1, and a chunk
+    threshold of one byte would be a far stranger failure than falling back.
+    """
+    raw = cfg.get(key, default)
+    if raw is None or isinstance(raw, bool):
+        return default
+    try:
+        return int(raw)
+    except (TypeError, ValueError):
+        return default
+
+
 # Above this many bytes of UTF-8 source, a document is translated in pieces
 # rather than in one call.
 #
@@ -1185,8 +1215,9 @@ def translate_docs(
         # such a state.
         ledger.clear_all()
     # Chunking threshold, named and configurable rather than a magic number.
-    # Absent means the measured default — NOT "never chunk", which is the bug.
-    chunk_bytes = cfg.get("doc_chunk_bytes", DEFAULT_CHUNK_BYTES)
+    # Absent, empty or unreadable means the measured default — NOT "never
+    # chunk", which is the bug this key exists to fix. See `_int_setting`.
+    chunk_bytes = _int_setting(cfg, "doc_chunk_bytes", DEFAULT_CHUNK_BYTES)
     # One budget across every document type: the ceiling that matters is the
     # tick's total, not any single file's. See DocBudget.
     #
@@ -1204,7 +1235,8 @@ def translate_docs(
     # The ceiling exists to bound an UNATTENDED timer tick. The timer never
     # passes --force; --force is an attended operator action, and the unit's
     # TimeoutStartSec does not constrain a manual invocation either.
-    budget = DocBudget(None if force else cfg.get("max_doc_calls_per_run"))
+    budget = DocBudget(
+        None if force else _int_setting(cfg, "max_doc_calls_per_run", None))
 
     def merge(result):
         totals["translated"] += result["translated"]
