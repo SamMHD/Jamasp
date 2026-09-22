@@ -10,6 +10,8 @@ import { fmtAge } from "@/lib/format";
 import { getMessages, LANG_COOKIE, localized, resolveLocale, t, type Locale, type Messages } from "@/lib/i18n";
 import { directionLabel } from "@/lib/predictions";
 import { STATE_LABEL_KEY } from "@/components/prediction-list";
+import { STANCE_HEADING_KEYS } from "@/components/fundamental-panel";
+import { classifyHeading } from "@/lib/stance";
 
 /** `outcome` is null (open) | "hit" | "miss" | "unclear" — reuses the same
  *  `predictions.word*` keys components/prediction-list.tsx's STATE_LABEL_KEY
@@ -64,11 +66,22 @@ export default async function StatePage() {
   const messages = getMessages(locale);
 
   const stance = files.readStance();
-  // Sections concatenated with their front matter AND per-section hash
-  // markers stripped — "the sidecar's body" readStanceFa hands back, with
-  // headings dropped: jamasp/translatetext.py's own note is that a
-  // section's heading line is "an anchor, never rendered," and this page
-  // has no dictionary to render a canonical heading through anyway.
+  // Sections reassembled with their front matter and per-section hash
+  // markers stripped, each back under a heading.
+  //
+  // The sidecar's own heading line is an ENGLISH anchor — jamasp/translatetext.py
+  // writes it to identify the section, never to be rendered — so printing it
+  // would put English headings over Persian prose. Instead the anchor is
+  // classified back to its canonical StanceKey and the heading is rendered
+  // from STANCE_HEADING_KEYS, the same table components/fundamental-panel.tsx
+  // renders "## View" and "## What flips me" through. Headings are a closed
+  // enum and hand-translated, so this is chrome, not content, and wears no
+  // marker. A section whose anchor classifies to nothing is a free-form
+  // "extra" the agent wrote — there is no key for it, so its own heading is
+  // the only one available and it stays as written.
+  //
+  // Without this the page concatenated bodies alone and Persian was one flat
+  // blob where English had structure.
   //
   // A sidecar can pass its OWN top-level hash check while one section still
   // carries the empty-hash hazard (a failed or budget-skipped section with
@@ -79,7 +92,14 @@ export default async function StatePage() {
   // Persian.
   const stanceFa = files.readStanceFa();
   const stanceFaBody = stanceFa && stanceFa.sections.every(s => s.hash !== "")
-    ? stanceFa.sections.map(s => s.body).join("")
+    ? stanceFa.sections.map(s => {
+        // Position 0 is the preamble: everything before the first "## ", and
+        // it has no heading by construction.
+        if (!s.heading.trim()) return s.body;
+        const key = classifyHeading(s.heading);
+        const heading = key ? t(messages, STANCE_HEADING_KEYS[key]) : s.heading;
+        return `## ${heading}\n${s.body}`;
+      }).join("\n")
     : null;
   const playbook = files.readPlaybook();
   const playbookFa = files.readPlaybookFa();

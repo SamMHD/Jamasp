@@ -168,6 +168,82 @@ describe("state page (stance/playbook Persian sidecars)", () => {
     expect((html.match(/lang="en"/g) ?? []).length).toBe(1);
   });
 
+  /**
+   * The page concatenated section BODIES and dropped every heading anchor,
+   * so Persian was one flat blob where English has "## View" and
+   * "## What flips me". The old code comment said the page "has no
+   * dictionary to render a canonical heading through" — but
+   * STANCE_HEADING_KEYS in fundamental-panel.tsx is exactly that dictionary.
+   */
+  it("renders canonical Persian headings for the stance's sections", async () => {
+    mockFiles.stance = [
+      "# Stance — 2026-08-01", "", "Preamble line.", "",
+      "## View", "", "Gold constructive.", "",
+      "## What flips me", "", "A hot CPI print.", "",
+    ].join("\n");
+    mockFiles.stanceFa = { sections: [
+      { heading: "", hash: "h0", body: "خط آغازین.\n" },
+      { heading: "View", hash: "h1", body: "طلا رو به رشد.\n" },
+      { heading: "What flips me", hash: "h2", body: "یک شاخص قیمت داغ.\n" },
+    ] };
+    mockFiles.playbook = null;
+    mockFiles.playbookFa = null;
+
+    const html = await renderPage("fa");
+    // The Persian bodies are all there...
+    expect(html).toContain("خط آغازین.");
+    expect(html).toContain("طلا رو به رشد.");
+    expect(html).toContain("یک شاخص قیمت داغ.");
+    // ...each under its canonical Persian heading, rendered as a real
+    // heading element rather than swallowed into the prose.
+    expect(html).toContain(`>${fa["stance.view"]}<`);
+    expect(html).toContain(`>${fa["stance.whatFlipsMe"]}<`);
+    // The English anchors never reach the screen.
+    expect(html).not.toContain(">View<");
+    expect(html).not.toContain(">What flips me<");
+    // Still no marker: this is a complete translation.
+    expect(html).not.toContain('lang="en"');
+  });
+
+  it("keeps an ad-hoc section's own heading, which has no canonical key", async () => {
+    mockFiles.stance = [
+      "# Stance — 2026-08-01", "", "Preamble.", "",
+      "## View", "", "Gold constructive.", "",
+      "## Watching the Strait", "", "Tanker traffic thinning.", "",
+    ].join("\n");
+    mockFiles.stanceFa = { sections: [
+      { heading: "", hash: "h0", body: "پیش‌درآمد.\n" },
+      { heading: "View", hash: "h1", body: "طلا رو به رشد.\n" },
+      { heading: "Watching the Strait", hash: "h2", body: "ترافیک نفتکش‌ها کم شده.\n" },
+    ] };
+    mockFiles.playbook = null;
+    mockFiles.playbookFa = null;
+
+    const html = await renderPage("fa");
+    expect(html).toContain(fa["stance.view"]);
+    // Free-form agent prose, not a closed enum — there is no dictionary key
+    // for it, so the anchor the job wrote is the only heading available.
+    expect(html).toContain("Watching the Strait");
+    expect(html).toContain("ترافیک نفتکش‌ها کم شده.");
+  });
+
+  it("leaves the English stance's own headings alone in the English locale", async () => {
+    mockFiles.stance = [
+      "# Stance — 2026-08-01", "", "Preamble.", "", "## View", "", "Gold constructive.", "",
+    ].join("\n");
+    mockFiles.stanceFa = { sections: [
+      { heading: "", hash: "h0", body: "پیش‌درآمد.\n" },
+      { heading: "View", hash: "h1", body: "طلا رو به رشد.\n" },
+    ] };
+    mockFiles.playbook = null;
+    mockFiles.playbookFa = null;
+
+    const html = await renderPage("en");
+    expect(html).toContain("View");
+    expect(html).toContain("Gold constructive.");
+    expect(html).not.toContain("طلا رو به رشد.");
+  });
+
   it("renders the playbook sidecar independently of the stance sidecar", async () => {
     mockFiles.stance = null;
     mockFiles.stanceFa = null;

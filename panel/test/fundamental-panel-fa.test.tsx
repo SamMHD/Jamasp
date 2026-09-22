@@ -163,3 +163,60 @@ describe("FundamentalPanel — Persian chrome", () => {
     expect(aged).not.toMatch(/[۰-۹]/);
   });
 });
+
+/**
+ * The Watching chips' tooltip. /state localizes the very same `why` field
+ * through localized() + SourceLang, and this panel rendered the raw English
+ * one — so the same sentence was Persian on one page and English on the
+ * other.
+ *
+ * A `title` attribute is a plain string and cannot hold a <SourceLang>
+ * element, so an untranslated one appends content.sourceEnglishTitle
+ * instead: exactly the shape components/market-map.tsx#tileTitle already
+ * uses for the same problem.
+ */
+describe("FundamentalPanel — Watching chip tooltips", () => {
+  const watchlist = [
+    { theme: "real_yields", why: "Real yields lead gold.", since: "2026-07-01" },
+    { theme: "cb_buying", why: "Central banks keep bidding.", since: "2026-06-15" },
+  ];
+
+  it("uses the Persian why as the tooltip when the sidecar has it", () => {
+    const html = renderToStaticMarkup(
+      <FundamentalPanel stance={null} watchlist={watchlist} now={NOW}
+        locale="fa" messages={messages.fa}
+        watchlistFa={{ real_yields: "بازده واقعی طلا را هدایت می‌کند." }} />);
+    expect(html).toContain('title="بازده واقعی طلا را هدایت می‌کند."');
+    expect(html).not.toContain('title="Real yields lead gold."');
+  });
+
+  it("marks an untranslated tooltip rather than showing bare English", () => {
+    const html = renderToStaticMarkup(
+      <FundamentalPanel stance={null} watchlist={watchlist} now={NOW}
+        locale="fa" messages={messages.fa}
+        watchlistFa={{ real_yields: "بازده واقعی طلا را هدایت می‌کند." }} />);
+    // cb_buying has no sidecar entry: English, but said so.
+    expect(html).toContain("Central banks keep bidding.");
+    expect(html).toContain(messages.fa["content.sourceEnglishTitle"]);
+  });
+
+  it("keeps the English tooltip unmarked in the English locale", () => {
+    const html = renderToStaticMarkup(
+      <FundamentalPanel stance={null} watchlist={watchlist} now={NOW}
+        locale="en" messages={messages.en}
+        watchlistFa={{ real_yields: "بازده واقعی طلا را هدایت می‌کند." }} />);
+    expect(html).toContain('title="Real yields lead gold."');
+    expect(html).not.toContain("بازده واقعی");
+    expect(html).not.toContain(messages.en["content.sourceEnglishTitle"]);
+  });
+
+  it("marks every tooltip when no sidecar has been written at all", () => {
+    const html = renderToStaticMarkup(
+      <FundamentalPanel stance={null} watchlist={watchlist} now={NOW}
+        locale="fa" messages={messages.fa} />);
+    expect(html).toContain("Real yields lead gold.");
+    expect(html).toContain("Central banks keep bidding.");
+    expect((html.match(new RegExp(messages.fa["content.sourceEnglishTitle"], "g")) ?? []))
+      .toHaveLength(2);
+  });
+});

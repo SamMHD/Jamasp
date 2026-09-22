@@ -85,7 +85,15 @@ const SECTION_PREFIXES: readonly (readonly [StanceKey, string])[] = [
   ["sourcingHealth", "sourcing health"],
 ] as const;
 
-function classify(heading: string): StanceKey | null {
+/**
+ * A heading line -> its canonical key, or null for a free-form "extra".
+ *
+ * Exported because app/state/page.tsx needs the same classification to pick
+ * a canonical Persian heading for a translated section: the sidecar carries
+ * the ENGLISH heading as an anchor (never rendered), so the page has to map
+ * that anchor back to a key before it can look the Persian up.
+ */
+export function classifyHeading(heading: string): StanceKey | null {
   const h = heading.trim().toLowerCase();
   for (const [key, prefix] of SECTION_PREFIXES) if (h.startsWith(prefix)) return key;
   return null;
@@ -223,7 +231,7 @@ export function parseStance(text: string): ParsedStance {
     if (h2) {
       const heading = h2[1].trim();
       current = { heading, body: "" };
-      const key = classify(heading);
+      const key = classifyHeading(heading);
       // First occurrence wins; a repeated heading lands in extra rather than
       // silently overwriting the earlier one.
       if (key && !sections[key]) sections[key] = current;
