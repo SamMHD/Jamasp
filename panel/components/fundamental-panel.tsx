@@ -4,7 +4,7 @@ import { SourceLang } from "@/components/source-lang";
 import { SLOT_VARS, WeightBar } from "@/components/weight-bar";
 import { Badge } from "@/components/ui/badge";
 import type { StanceFaSection, WatchlistEntry } from "@/lib/files";
-import { getMessages, localized, t, type Locale, type Messages } from "@/lib/i18n";
+import { localized, t, type Locale, type Messages } from "@/lib/i18n";
 import type { ParsedStance, StanceKey, StanceSection, StanceWeight } from "@/lib/stance";
 import { extractBullets, scenarioSlot, splitFalsifier, stanceAgeDays } from "@/lib/stance";
 import { cls, fmtAge } from "@/lib/format";
@@ -267,10 +267,10 @@ function Watching({ watchlist, now, messages }: {
 }
 
 export function FundamentalPanel({
-  stance, watchlist, now, locale = "en", messages = getMessages("en"), stanceFa = null,
+  stance, watchlist, now, locale, messages, stanceFa = null,
 }: {
   stance: ParsedStance | null; watchlist: WatchlistEntry[]; now: Date;
-  locale?: Locale; messages?: Messages;
+  locale: Locale; messages: Messages;
   stanceFa?: { sections: StanceFaSection[] } | null;
 }) {
   const age = stance?.asOf ? stanceAgeDays(stance.asOf, now) : null;

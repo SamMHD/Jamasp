@@ -1,6 +1,6 @@
 import type { PricePoint } from "@/lib/db";
 import { fmtUtc } from "@/lib/format";
-import { getMessages, t, type Messages } from "@/lib/i18n";
+import { t, type Messages } from "@/lib/i18n";
 
 /**
  * The value-exact twin of whatever chart sits above it: every stored reading,
@@ -15,13 +15,13 @@ import { getMessages, t, type Messages } from "@/lib/i18n";
  * Renders nothing with no points: an empty disclosure inviting a click that
  * reveals an empty table is worse than silence.
  */
-export function SeriesTable({ points, label, messages = getMessages("en") }: {
+export function SeriesTable({ points, label, messages }: {
   points: PricePoint[];
   label?: string;
   /** Optional, defaulting to English — its only call site (technical-panel.tsx)
    *  already passes a locale-resolved `label`; `messages` here is only for
    *  the two column headers, which no test asserts on. */
-  messages?: Messages;
+  messages: Messages;
 }) {
   if (points.length === 0) return null;
   return (

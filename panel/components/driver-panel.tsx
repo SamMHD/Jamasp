@@ -76,7 +76,7 @@ export function DriverPanel({ drivers, now, messages }: {
               // the card is one family with one provenance convention rather
               // than five upgraded tiles and a leftover.
               note={embed === null ? "jamasp" : undefined}
-              series={d.series} now={now} />
+              series={d.series} now={now} messages={messages} />
           );
           if (embed === null) return <div key={d.symbol} className="h-full">{tile}</div>;
           return (

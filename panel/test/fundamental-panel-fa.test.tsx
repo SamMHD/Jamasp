@@ -118,12 +118,15 @@ describe("FundamentalPanel Persian rendering", () => {
     expect(fallbackCount(html)).toBe(0);
   });
 
-  it("defaults to English, unmarked, when locale/messages/stanceFa are all omitted", () => {
-    // The exact call shape test/fundamental-panel.test.tsx uses — this is
-    // what keeps that file's assertions valid without ever passing these
-    // new props.
+  it("renders unmarked English when the English locale is passed explicitly", () => {
+    // This used to assert that locale/messages could be OMITTED, which is
+    // precisely the defaulting that let components/driver-panel.tsx drop
+    // `messages` on its QuoteTiles and print English in Persian mode with
+    // nothing failing. Both props are required now, so the English path is
+    // stated rather than inherited.
     const html = renderToStaticMarkup(
-      <FundamentalPanel stance={parseStance(STANCE)} watchlist={[]} now={NOW} />);
+      <FundamentalPanel stance={parseStance(STANCE)} watchlist={[]} now={NOW}
+        locale="en" messages={messages.en} />);
     expect(html).toContain("dips toward 3300 get bought");
     expect(fallbackCount(html)).toBe(0);
   });

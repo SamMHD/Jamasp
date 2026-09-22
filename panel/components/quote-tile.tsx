@@ -1,7 +1,7 @@
 import { Sparkline } from "@/components/sparkline";
 import type { PricePoint } from "@/lib/db";
 import { cls, fmtAge } from "@/lib/format";
-import { getMessages, t, type Messages } from "@/lib/i18n";
+import { t, type Messages } from "@/lib/i18n";
 
 function num(v: number, digits: number): string {
   return v.toLocaleString(undefined, { maximumFractionDigits: digits });
@@ -56,7 +56,7 @@ export function Delta({ delta, digits = 2, label = "24h", tone = "direction" }: 
  * not something the desk reads) — no delta slot renders.
  */
 export function QuoteTile({ label, value, digits = 2, ts, delta, deltaLabel = "24h",
-  deltaTone = "direction", series, note, now, className, messages = getMessages("en") }: {
+  deltaTone = "direction", series, note, now, className, messages }: {
   label: string;
   value: number | null;
   digits?: number;
@@ -73,7 +73,7 @@ export function QuoteTile({ label, value, digits = 2, ts, delta, deltaLabel = "2
    *  in scope — but defaulting rather than requiring it keeps the handful of
    *  chrome strings here (English-default) from forcing a prop through every
    *  existing call site and test that never cared about locale. */
-  messages?: Messages;
+  messages: Messages;
 }) {
   return (
     <div className={cls("rounded-md border border-border/60 p-3", className)}>

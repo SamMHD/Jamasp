@@ -1,11 +1,17 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { ArcGauge } from "../components/arc-gauge";
+import { getMessages } from "../lib/i18n";
+
+// `messages` is a REQUIRED prop: the component used to default it to
+// getMessages("en"), which let a caller silently drop it — see
+// components/driver-panel.tsx, which did exactly that in production.
+const messages = getMessages("en");
 
 const render = (value: number | null) =>
   renderToStaticMarkup(
     <ArcGauge label="RSI14" value={value} min={0} max={100}
-      ticks={[{ at: 30, text: "30" }, { at: 70, text: "70" }]} />);
+      ticks={[{ at: 30, text: "30" }, { at: 70, text: "70" }]} messages={messages} />);
 
 describe("ArcGauge", () => {
   it("renders the value, a value arc and an end marker", () => {
@@ -42,14 +48,14 @@ describe("ArcGauge", () => {
 
   it("clamps an out-of-range value visually but displays the true number", () => {
     const html = renderToStaticMarkup(
-      <ArcGauge label="RSI14" value={104.2} min={0} max={100} />);
+      <ArcGauge label="RSI14" value={104.2} min={0} max={100} messages={messages} />);
     expect(html).toContain("104.2");
     expect(html).not.toContain("NaN");
   });
 
   it("survives a degenerate min===max scale without drawing a fabricated arc", () => {
     const html = renderToStaticMarkup(
-      <ArcGauge label="X" value={5} min={5} max={5} />);
+      <ArcGauge label="X" value={5} min={5} max={5} messages={messages} />);
     expect(html).not.toContain("NaN");
     expect(html).not.toContain("<circle");
   });

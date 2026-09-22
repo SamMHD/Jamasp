@@ -8,7 +8,7 @@ import type { TooltipContentProps } from "recharts";
 import { Button } from "@/components/ui/button";
 import type { PricePoint } from "@/lib/db";
 import { fmtUtc } from "@/lib/format";
-import { getMessages, t, type Messages } from "@/lib/i18n";
+import { t, type Messages } from "@/lib/i18n";
 
 const fetcher = (url: string) => fetch(url).then(r => {
   if (!r.ok) throw new Error(`price fetch failed (${r.status})`);
@@ -35,11 +35,11 @@ function ChartTooltip({ active, payload, label }: TooltipContentProps) {
   );
 }
 
-export function PriceChart({ symbol, messages = getMessages("en") }: {
+export function PriceChart({ symbol, messages }: {
   symbol: string;
   /** Optional, defaulting to English — see quote-tile.tsx#QuoteTile's
    *  identical reasoning; app/prices/page.tsx already passes it. */
-  messages?: Messages;
+  messages: Messages;
 }) {
   const [range, setRange] = useState<(typeof RANGES)[number]>("7d");
   const url = `/api/prices?symbol=${encodeURIComponent(symbol)}&range=${range}`;
