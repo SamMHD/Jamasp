@@ -415,14 +415,27 @@ export function priceDeltaReference(
  * throwing, so the panel keeps rendering (with its existing "no scored
  * stories" empty state) through that window instead of taking the whole
  * overview page down with it.
+ *
+ * Guard 4 — the same deploy window, one level down: `headline_fa` arrives on
+ * an already-existing `items` table via jamasp/db.py's ADDED_COLUMNS, which
+ * only runs when a `jamasp` CLI command opens the database. The panel is
+ * read-only and may render first. Unlike every other items reader here,
+ * which is `SELECT *` and simply yields undefined for a column that has not
+ * landed, this query NAMES its columns — so `i.headline_fa` throws at
+ * prepare time, and q() rethrows anything that is not SQLITE_BUSY. That
+ * takes the whole overview route down, not just the map. Selecting a literal
+ * NULL in its place degrades to English headlines, which localized() already
+ * reads as "no Persian yet" and marks with SourceLang.
  */
 export function getScoredItems(sinceIso: string): ScoredItem[] {
   return q(db => {
     if (!hasTable(db, "item_scores")) return [];
+    const headlineFa = hasColumn(db, "items", "headline_fa")
+      ? "i.headline_fa" : "NULL AS headline_fa";
     return db.prepare(`
       WITH windowed AS (
         SELECT s.item_id AS itemId, s.tier, s.direction, s.conviction, s.theme,
-               i.headline, i.headline_fa, i.source, i.url, i.published_at AS publishedAt
+               i.headline, ${headlineFa}, i.source, i.url, i.published_at AS publishedAt
           FROM item_scores s JOIN items i ON i.id = s.item_id
          WHERE i.published_at >= ? AND i.published_at >= '2000-01-01T00:00:00Z'
       )
