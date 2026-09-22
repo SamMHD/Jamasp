@@ -223,7 +223,7 @@ def _translate_line(stats: dict) -> str:
                 f" {stats['pending_events']} events,"
                 f" {stats['pending_reports']} reports pending")
     rows, events, docs = stats["rows"], stats["events"], stats["docs"]
-    return (
+    line = (
         f"reused {stats['reused']}; "
         f"rows {rows.get('translated', 0)}/{rows.get('failed', 0)} in"
         f" {rows.get('batches', 0)} batches; "
@@ -232,6 +232,15 @@ def _translate_line(stats: dict) -> str:
         + (f" ({docs['skipped']} deferred to the next tick)"
            if docs.get("skipped") else "")
     )
+    if stats.get("quota_exhausted"):
+        # Without this, a quota stop reads exactly like a quiet tick — "rows
+        # 0/0" and empty events/docs — and an operator has to go read the
+        # database to learn the run stopped on a billing state rather than
+        # simply having nothing pending. See docs/todo/025.
+        message = (rows.get("quota_message") or events.get("quota_message")
+                   or docs.get("quota_message") or "")
+        line += f"; STOPPED on quota exhaustion, remaining passes skipped: {message}"
+    return line
 
 
 @main.command()
@@ -268,6 +277,18 @@ def translate(dry_run, force, only, check_only, db_path, config_dir):
         only=only,
     )
     click.echo(_translate_line(stats))
+    if stats.get("quota_exhausted"):
+        # Deliberately non-zero, unlike an ordinary translation failure (see
+        # the comment on jamasp-translate.service's ExecStart) — codex being
+        # out of quota is a billing state worth a desk alert, where a handful
+        # of refused headlines is not. `jamasp-alert@%n` is what turns this
+        # into a Telegram message, and its own hour-long per-unit suppression
+        # (see the `alerting` skill) is what keeps a multi-hour outage from
+        # paging the desk on every 10-minute tick — so raising here every
+        # time is safe rather than the storm this fix exists to stop.
+        raise click.ClickException(
+            "codex is out of quota; stopped rather than fan out into calls"
+            " that would fail the same way (docs/todo/025)")
 
 
 @main.command()

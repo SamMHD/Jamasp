@@ -277,10 +277,20 @@ def _batch_with_fallback(
 
     A malformed or refused response costs the whole batch, so one bad headline
     must not be allowed to poison nineteen good ones.
+
+    modelrun.QuotaExhausted is deliberately NOT caught here — it propagates
+    straight out to the caller. Retrying it, let alone falling back to one
+    call per row, spends calls that are guaranteed to fail identically: every
+    other call in the run is subject to the same exhausted allowance. That
+    fan-out (1 call becomes 22) is what drove 1,861 rows to the attempt cap
+    across three outages on the live host (docs/todo/025); the fix is to cost
+    exactly the one call that discovered the outage and stop.
     """
     for attempt in (1, 2):
         try:
             answers = _translate_batch(rows, fields, glossary, run)
+        except modelrun.QuotaExhausted:
+            raise   # see the docstring above — no retry, no singles fallback
         except ROW_FAILURES:
             if attempt == 2:
                 break
@@ -308,6 +318,12 @@ def _batch_with_fallback(
     for row in rows:
         try:
             answers = _translate_batch([row], fields, glossary, run)
+        except modelrun.QuotaExhausted:
+            # Quota can also run out mid-fallback (the batch failed for an
+            # ordinary reason, singles started, and THEN the allowance hit
+            # zero). Same rule applies: stop paying for calls guaranteed to
+            # fail, rather than working through the rest of the batch.
+            raise
         except ROW_FAILURES as exc:
             _record(conn, fail, row["id"], str(exc), now)
             failed += 1
@@ -335,6 +351,44 @@ def _record(conn, fail, row_id: str, error: str, now: str) -> None:
     _commit(conn, lambda: fail(conn, row_id, error, now))
 
 
+def _run_batches(
+    conn, rows, batch_size: int, fields, glossary, run, now, write, fail
+) -> dict:
+    """Split `rows` into batches and translate each in turn. Returns counts.
+
+    Stops the moment a batch raises modelrun.QuotaExhausted, instead of
+    moving on to the next one: every remaining batch in this pass is subject
+    to the same exhausted allowance and would fail identically, so continuing
+    would only spend calls to confirm what the first failure already proved.
+    The rows in the batch that triggered it are left exactly as they were —
+    `_batch_with_fallback` raises before writing anything for them — so
+    nothing is recorded as failed and no attempt is spent (see
+    modelrun.QuotaExhausted's docstring).
+
+    The caller (translate_rows / translate_events) learns about the stop
+    through `quota_exhausted` in the returned dict, which is how
+    `run_translate` knows to skip the passes after this one too.
+    """
+    translated = failed = batches = 0
+    for start in range(0, len(rows), batch_size):
+        chunk = rows[start:start + batch_size]
+        try:
+            ok, bad = _batch_with_fallback(
+                conn, chunk, fields, glossary, run, now, write, fail,
+            )
+        except modelrun.QuotaExhausted as exc:
+            batches += 1   # one call WAS made — the one that found this out
+            return {
+                "translated": translated, "failed": failed,
+                "batches": batches, "quota_exhausted": True,
+                "quota_message": str(exc),
+            }
+        translated += ok
+        failed += bad
+        batches += 1
+    return {"translated": translated, "failed": failed, "batches": batches}
+
+
 def translate_rows(
     conn: sqlite3.Connection, cfg: dict, glossary: dict,
     run: Callable[[str, dict], object], now: str | None = None,
@@ -350,17 +404,8 @@ def translate_rows(
         conn, cfg["window_days"], batch_size * ceiling, stamp, force,
         since=floor_for(cfg, cfg["window_days"], stamp))
 
-    translated = failed = batches = 0
-    for start in range(0, len(rows), batch_size):
-        chunk = rows[start:start + batch_size]
-        ok, bad = _batch_with_fallback(
-            conn, chunk, ROW_FIELDS, glossary, run, stamp,
-            _write_row, _record_failure,
-        )
-        translated += ok
-        failed += bad
-        batches += 1
-    return {"translated": translated, "failed": failed, "batches": batches}
+    return _run_batches(conn, rows, batch_size, ROW_FIELDS, glossary, run,
+                        stamp, _write_row, _record_failure)
 
 
 EVENT_FIELDS = ("title",)
@@ -420,17 +465,8 @@ def translate_events(
         conn, cfg["window_days"], batch_size * ceiling, stamp, force,
         since=floor_for(cfg, cfg["window_days"], stamp))
 
-    translated = failed = batches = 0
-    for start in range(0, len(rows), batch_size):
-        chunk = rows[start:start + batch_size]
-        ok, bad = _batch_with_fallback(
-            conn, chunk, EVENT_FIELDS, glossary, run, stamp,
-            _write_event, _record_event_failure,
-        )
-        translated += ok
-        failed += bad
-        batches += 1
-    return {"translated": translated, "failed": failed, "batches": batches}
+    return _run_batches(conn, rows, batch_size, EVENT_FIELDS, glossary, run,
+                        stamp, _write_event, _record_event_failure)
 
 
 DEFAULT_TRANSLATOR = "codex"
@@ -537,6 +573,14 @@ def translate_stance(
         try:
             out.append((heading, digest, _translate_text(body, glossary, run)))
             translated += 1
+        except modelrun.QuotaExhausted:
+            # Unlike an ordinary failure, this is not "this section is bad" —
+            # every remaining section (and the rest of the docs pass behind
+            # it) would fail the same way. Raise straight out without
+            # appending anything for this section or writing the sidecar:
+            # the sections done so far in THIS call are simply retried, at no
+            # extra cost, on the next tick that finds codex funded again.
+            raise
         except (modelrun.ModelError, translatetext.ParseError):
             # Keep the previous Persian for this section, and keep its OLD
             # hash so the next run tries again rather than believing it is done.
@@ -615,6 +659,8 @@ def translate_document(
 
     try:
         persian = _translate_text(text, glossary, run)
+    except modelrun.QuotaExhausted:
+        raise   # see translate_stance's comment on the same exception
     except (modelrun.ModelError, translatetext.ParseError):
         return {"translated": 0, "failed": 1}
 
@@ -665,6 +711,8 @@ def translate_watchlist(
                         "why_fa": _translate_text(why, glossary, run),
                         "src_hash": digest})
             translated += 1
+        except modelrun.QuotaExhausted:
+            raise   # see translate_stance's comment on the same exception
         except (modelrun.ModelError, translatetext.ParseError):
             if previous:
                 out.append(previous)
@@ -729,6 +777,8 @@ def translate_predictions(
                         "claim_fa": _translate_text(claim, glossary, run),
                         "src_hash": digest})
             translated += 1
+        except modelrun.QuotaExhausted:
+            raise   # see translate_stance's comment on the same exception
         except (modelrun.ModelError, translatetext.ParseError):
             if previous:
                 out.append(previous)
@@ -794,20 +844,31 @@ def translate_docs(
         totals["translated"] += result["translated"]
         totals["failed"] += result["failed"]
 
-    merge(translate_stance(state / "stance.md", state / "stance.fa.md",
-                           glossary, run, now, force=force, budget=budget))
-    merge(translate_document(state / "playbook.md", state / "playbook.fa.md",
-                             glossary, run, now, force=force, budget=budget))
-    merge(translate_watchlist(state / "watchlist.yaml",
-                              state / "watchlist.fa.yaml",
-                              glossary, run, now, force=force, budget=budget))
-    merge(translate_predictions(state / "predictions.jsonl",
-                                state / "predictions.fa.jsonl",
-                                glossary, run, now, force=force, budget=budget))
-    for report in new_reports(reports, cfg["reports_since"]):
-        merge(translate_document(
-            report, report.with_name(report.name[:-3] + ".fa.md"),
-            glossary, run, now, force=force, budget=budget))
+    # Each of the four calls below (and each report in the loop) can raise
+    # modelrun.QuotaExhausted from inside its own per-item loop — see the
+    # `raise` beside every `except modelrun.QuotaExhausted` upstream. One
+    # try/except around the whole chain, rather than one per call, because
+    # the point is the same as translate_rows/translate_events: stop at the
+    # FIRST one, not after paying to discover it again in playbook,
+    # watchlist, predictions and every pending report in turn.
+    try:
+        merge(translate_stance(state / "stance.md", state / "stance.fa.md",
+                               glossary, run, now, force=force, budget=budget))
+        merge(translate_document(state / "playbook.md", state / "playbook.fa.md",
+                                 glossary, run, now, force=force, budget=budget))
+        merge(translate_watchlist(state / "watchlist.yaml",
+                                  state / "watchlist.fa.yaml",
+                                  glossary, run, now, force=force, budget=budget))
+        merge(translate_predictions(state / "predictions.jsonl",
+                                    state / "predictions.fa.jsonl",
+                                    glossary, run, now, force=force, budget=budget))
+        for report in new_reports(reports, cfg["reports_since"]):
+            merge(translate_document(
+                report, report.with_name(report.name[:-3] + ".fa.md"),
+                glossary, run, now, force=force, budget=budget))
+    except modelrun.QuotaExhausted as exc:
+        totals["quota_exhausted"] = True
+        totals["quota_message"] = str(exc)
     totals["skipped"] = budget.skipped
     return totals
 
@@ -873,15 +934,26 @@ def run_translate(
         }
 
     stats: dict = {"reused": 0, "rows": {}, "events": {}, "docs": {}}
+    # A quota outage found in one pass means every remaining pass would hit
+    # the same wall — codex does not distinguish rows from events from docs,
+    # it is simply out of allowance — so `quota_hit` short-circuits the rest
+    # of this run the moment any pass reports it, rather than paying to
+    # rediscover the outage in events and again in docs (docs/todo/025).
+    quota_hit = False
     if want_rows:
         # Always before the model pass, and not separately selectable: a rows
         # pass that ran first would pay to translate what flash already wrote.
         stats["reused"] = reuse_flash_persian(conn, now)
         stats["rows"] = translate_rows(conn, cfg, glossary, run, now, force)
-    if want_events:
+        quota_hit = bool(stats["rows"].get("quota_exhausted"))
+    if want_events and not quota_hit:
         stats["events"] = translate_events(conn, cfg, glossary, run, now, force)
-    if want_docs:
+        quota_hit = bool(stats["events"].get("quota_exhausted"))
+    if want_docs and not quota_hit:
         stats["docs"] = translate_docs(root, cfg, glossary, run, now, force)
+        quota_hit = quota_hit or bool(stats["docs"].get("quota_exhausted"))
+    if quota_hit:
+        stats["quota_exhausted"] = True
 
     # Evidence that the job runs on this host, mirroring meta.last_ingest_at.
     # The watchdog's backlog and abandoned probes gate on this rather than on

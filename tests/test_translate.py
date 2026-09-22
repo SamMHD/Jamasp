@@ -194,6 +194,92 @@ def test_a_failing_batch_retries_once_then_falls_back_to_singles(tmp_path):
     assert heads == {"FA-single"}
 
 
+def test_a_quota_error_aborts_the_batch_without_falling_back_to_singles(tmp_path):
+    """The whole point of docs/todo/025: a batch that hits quota must cost
+    exactly the one call that discovered it, not the 22 an ordinary failure
+    costs (batch, retry, then one call per row)."""
+    conn = db.connect(tmp_path / "t.db")
+    seed(conn, [(f"Item {i}", 1) for i in range(20)])
+    calls = []
+
+    def run(prompt, schema):
+        calls.append(prompt)
+        raise modelrun.QuotaExhausted("boom: usage limit, upgrade to Pro")
+
+    cfg = {**CFG, "batch_size": 20, "max_batches_per_run": 10}
+    stats = translate.translate_rows(conn, cfg, GLOSSARY, run)
+
+    assert len(calls) == 1
+    assert stats["quota_exhausted"] is True
+    assert stats["translated"] == 0
+    assert stats["failed"] == 0
+
+
+def test_a_quota_error_leaves_fa_attempts_and_fa_failed_at_untouched(tmp_path):
+    """The row is not the problem — a billing state is — so nothing about it
+    should look like a translation failure, and it must stay eligible to be
+    tried again the moment the quota resets."""
+    conn = db.connect(tmp_path / "t.db")
+    seed(conn, [("One", 1), ("Two", 2)])
+
+    def run(prompt, schema):
+        raise modelrun.QuotaExhausted("usage limit; upgrade to Pro")
+
+    translate.translate_rows(conn, CFG, GLOSSARY, run)
+
+    rows = conn.execute(
+        "SELECT fa_attempts, fa_failed_at, fa_error, headline_fa FROM items"
+    ).fetchall()
+    assert all(r["fa_attempts"] == 0 for r in rows)
+    assert all(r["fa_failed_at"] is None for r in rows)
+    assert all(r["fa_error"] is None for r in rows)
+    assert all(r["headline_fa"] is None for r in rows)
+    # And still pending, exactly as before the run — not held back by a
+    # backoff or an attempt count that isn't there.
+    assert len(translate.pending_rows(conn, 7, 10)) == 2
+
+
+def test_an_ordinary_batch_failure_still_falls_back_to_singles(tmp_path):
+    """The regression guard: QuotaExhausted must not swallow the trade the
+    fallback exists for — one bad headline must not poison nineteen good
+    ones when the failure is ordinary, not a quota outage."""
+    conn = db.connect(tmp_path / "t.db")
+    seed(conn, [("One", 1), ("Two", 2)])
+    calls = []
+
+    def run(prompt, schema):
+        calls.append(prompt)
+        if prompt.count("headline:") > 1:   # the batch, either attempt
+            raise modelrun.ModelError("batch failed")
+        return {"items": [{"n": 1, "headline": "FA-single"}]}
+
+    stats = translate.translate_rows(conn, CFG, GLOSSARY, run)
+    assert len(calls) == 4   # batch, batch retry, then one call per row
+    assert stats["translated"] == 2
+    assert "quota_exhausted" not in stats
+
+
+def test_a_quota_error_in_the_events_batch_also_costs_one_call(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    add_event(conn, "e1", "US CPI (MoM)", 24)
+    add_event(conn, "e2", "FOMC Statement", 48)
+    calls = []
+
+    def run(prompt, schema):
+        calls.append(prompt)
+        raise modelrun.QuotaExhausted("usage limit — purchase more credits")
+
+    cfg = {**CFG, "batch_size": 20, "max_batches_per_run": 10}
+    stats = translate.translate_events(conn, cfg, GLOSSARY, run)
+    assert len(calls) == 1
+    assert stats["quota_exhausted"] is True
+    row = conn.execute(
+        "SELECT fa_attempts, fa_failed_at FROM events WHERE id = 'e1'"
+    ).fetchone()
+    assert row["fa_attempts"] == 0
+    assert row["fa_failed_at"] is None
+
+
 def test_the_singles_loop_never_holds_the_write_lock_across_a_model_call(tmp_path):
     """The singles fallback makes one model call per row, each of which can take
     `timeout_seconds` (180) to return. A transaction spanning those calls holds
@@ -806,6 +892,71 @@ def test_run_translate_only_rows_still_runs_the_reuse_pass(tmp_path):
         run=fake_run(calls=calls), only="rows")
     assert calls == []   # the flash Persian covered it; no model call
     assert conn.execute("SELECT fa_source FROM items").fetchone()[0] == "flash"
+
+
+def test_run_translate_stops_the_whole_run_when_rows_hit_quota(tmp_path):
+    """docs/todo/025's second half: a quota hit in the rows pass must not go
+    on to spend calls in events or docs — every one of them would fail the
+    same way, so the run stops rather than rediscovering that three times."""
+    conn = db.connect(tmp_path / "t.db")
+    seed(conn, [("One", 1)])
+    add_event(conn, "e1", "US CPI (MoM)", 24)
+    build_state(tmp_path)
+
+    def run(prompt, schema):
+        raise modelrun.QuotaExhausted("usage limit; upgrade to Pro")
+
+    stats = translate.run_translate(
+        conn, {"translate": {**FULL_CFG, "reports_since": "2026-09-01"}},
+        root=tmp_path, glossary=GLOSSARY, run=run)
+
+    assert stats["quota_exhausted"] is True
+    assert stats["rows"]["quota_exhausted"] is True
+    # events and docs never ran at all — not "ran and failed"
+    assert stats["events"] == {}
+    assert stats["docs"] == {}
+    assert not (tmp_path / "state" / "stance.fa.md").exists()
+
+
+def test_run_translate_stops_docs_when_events_hit_quota(tmp_path):
+    """Symmetric with the rows case: rows can be clean (nothing pending) while
+    events is the pass that meets the outage, and docs must still not run."""
+    conn = db.connect(tmp_path / "t.db")
+    add_event(conn, "e1", "US CPI (MoM)", 24)
+    build_state(tmp_path)
+
+    def run(prompt, schema):
+        raise modelrun.QuotaExhausted("usage limit; upgrade to Pro")
+
+    stats = translate.run_translate(
+        conn, {"translate": {**FULL_CFG, "reports_since": "2026-09-01"}},
+        root=tmp_path, glossary=GLOSSARY, run=run)
+
+    assert stats["quota_exhausted"] is True
+    assert stats["events"]["quota_exhausted"] is True
+    assert stats["docs"] == {}
+    assert not (tmp_path / "state" / "stance.fa.md").exists()
+
+
+def test_run_translate_docs_pass_stops_on_its_own_quota_hit(tmp_path):
+    """`--only docs` (or events already clean) can be the pass that first
+    meets the outage; it must abort itself rather than burn through every
+    remaining document."""
+    conn = db.connect(tmp_path / "t.db")
+    build_state(tmp_path)
+    calls = []
+
+    def run(prompt, schema):
+        calls.append(prompt)
+        raise modelrun.QuotaExhausted("usage limit; upgrade to Pro")
+
+    stats = translate.run_translate(
+        conn, {"translate": {**FULL_CFG, "reports_since": "2026-09-01"}},
+        root=tmp_path, glossary=GLOSSARY, run=run, only="docs")
+
+    assert len(calls) == 1   # stance's preamble section; nothing else tried
+    assert stats["quota_exhausted"] is True
+    assert stats["docs"]["quota_exhausted"] is True
 
 
 def test_run_translate_reports_every_pass(tmp_path):

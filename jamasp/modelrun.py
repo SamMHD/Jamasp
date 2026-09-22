@@ -27,6 +27,42 @@ class ModelError(RuntimeError):
     """The translator failed, timed out, or returned unusable output."""
 
 
+class QuotaExhausted(ModelError):
+    """The translator refused because its usage/billing allowance is spent.
+
+    A subclass, not a sibling, of ModelError: a caller that only knows about
+    ModelError (there were none left to update) still catches this. But it is
+    a distinct type because it is not a property of the call that failed —
+    every OTHER call in the run will fail identically until the quota resets
+    elsewhere, at a time this process does not control. `translate.py`'s
+    batch-then-singles fallback existed to stop one bad headline poisoning
+    nineteen good ones; pointed at a quota outage instead, it turned one
+    exhausted batch into 21 more calls that were guaranteed to fail the same
+    way, deepening the very shortage that caused them. That fan-out is what
+    drove 1,861 rows to the attempt cap and abandoned them across three
+    separate outages on the live host (docs/todo/025) — so `translate.py`
+    catches this type ahead of ModelError and aborts instead of retrying.
+    """
+
+
+# The signature codex prints on stderr when its usage allowance is spent, e.g.
+#   ERROR: You've hit your usage limit. Upgrade to Pro
+#   (https://chatgpt.com/explore/pro), visit
+#   https://chatgpt.com/codex/settings/usage to purchase more credits or
+#   try again at 10:00 PM.
+# Matched on "usage limit" plus either "credit" or "upgrade" — the pair that
+# identifies a BILLING state — rather than the whole sentence, so a reworded
+# reset time or URL still trips it. An ordinary content refusal never pairs
+# "usage limit" with either word, so this should not fire on one; a refusal
+# that manages to say all three, whatever it is refusing, IS a quota message
+# for this purpose.
+def _is_quota_exhausted(text: str) -> bool:
+    lowered = text.lower()
+    return "usage limit" in lowered and (
+        "credit" in lowered or "upgrade" in lowered
+    )
+
+
 def _last_json_object(text: str) -> dict:
     """The last top-level JSON object in `text`.
 
@@ -78,7 +114,11 @@ def run_json(
             raise ModelError(f"translator could not be run: {exc}") from exc
 
         if proc.returncode != 0:
-            tail = (proc.stderr or proc.stdout or "").strip()[-300:]
+            combined = proc.stderr or proc.stdout or ""
+            tail = combined.strip()[-300:]
+            if _is_quota_exhausted(combined):
+                raise QuotaExhausted(
+                    f"translator exit {proc.returncode}: {tail}")
             raise ModelError(f"translator exit {proc.returncode}: {tail}")
 
         if protocol == "codex":
