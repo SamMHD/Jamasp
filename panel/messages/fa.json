@@ -87,6 +87,8 @@
   "common.unknownError": "خطای نامشخص",
   "common.fullScreen": "تمام‌صفحه",
   "common.exitFullScreen": "خروج از تمام‌صفحه",
+  "time.agoTemplate": "{age} پیش",
+  "time.inTemplate": "تا {age}",
   "table.claim": "ادعا",
   "table.direction": "جهت",
   "table.confidence": "اطمینان",

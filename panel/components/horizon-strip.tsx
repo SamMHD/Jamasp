@@ -175,7 +175,7 @@ export function HorizonStrip({ horizon, now, messages }: {
                   </span>
                   <span className={cls("w-14 shrink-0 text-xs",
                     e.overdue ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground")}>
-                    {e.overdue ? t(messages, "horizon.overdueWord") : fmtAge(e.ts, now)}
+                    {e.overdue ? t(messages, "horizon.overdueWord") : fmtAge(e.ts, messages, now)}
                   </span>
                   <span className="min-w-0 flex-1 truncate">
                     {/* e.label is a wakeup's "#{id} {run_type}" (built in

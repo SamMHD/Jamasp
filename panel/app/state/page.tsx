@@ -165,7 +165,7 @@ export default async function StatePage() {
                   <TableCell>{directionLabel(p.direction, messages)}</TableCell>
                   <TableCell>{Math.round(p.confidence * 100)}%</TableCell>
                   <TableCell>{p.horizon_days}d</TableCell>
-                  <TableCell>{fmtAge(p.created_at)}</TableCell>
+                  <TableCell>{fmtAge(p.created_at, messages)}</TableCell>
                   <TableCell>
                     {p.outcome
                       ? <Badge variant={p.outcome === "hit" ? "secondary" : p.outcome === "miss" ? "destructive" : "outline"}>

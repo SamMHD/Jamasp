@@ -123,7 +123,7 @@ function tileTitle(
   const sign = item.direction > 0 ? "+" : "";
   const base = `${headline} — tier ${item.tier} (${FATE_WORD[tierFate(item.tier, gates)]}), `
     + `${dirWord} ${sign}${item.direction} `
-    + `(conviction ${item.conviction.toFixed(2)}), ${item.source}, ${fmtAge(item.publishedAt, now)}`;
+    + `(conviction ${item.conviction.toFixed(2)}), ${item.source}, ${fmtAge(item.publishedAt, messages, now)}`;
   return fallback ? `${base} — ${t(messages, "content.sourceEnglishTitle")}` : base;
 }
 
@@ -262,7 +262,7 @@ export function MarketMap({ items, width, height, range, coverage,
             be read as the rescale claim it replaced. */}
         {fittedAt && hasMultipliers
           ? <> · {t(messages, "map.areaIsTier")} · {t(messages, "map.themeFit")}{" "}
-              {fmtAge(fittedAt, now)}, {t(messages, "map.notAppliedToArea")}</>
+              {fmtAge(fittedAt, messages, now)}, {t(messages, "map.notAppliedToArea")}</>
           : <> · {t(messages, "map.areaIsTier")} · {t(messages, "map.themeFitNotRun")}</>}
       </p>
     </section>

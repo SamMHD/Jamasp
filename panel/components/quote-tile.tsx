@@ -95,7 +95,7 @@ export function QuoteTile({ label, value, digits = 2, ts, delta, deltaLabel = "2
               className="mt-1.5 h-6 opacity-70" />
           )}
           <div className="mt-1.5 text-meta text-ink-dim">
-            {note ? `${note} · ` : ""}{ts ? fmtAge(ts, now) : t(messages, "common.noTimestamp")}
+            {note ? `${note} · ` : ""}{ts ? fmtAge(ts, messages, now) : t(messages, "common.noTimestamp")}
           </div>
         </>
       )}

@@ -80,7 +80,7 @@ export function DriverPanel({ drivers, now, messages }: {
           );
           if (embed === null) return <div key={d.symbol} className="h-full">{tile}</div>;
           return (
-            <DriverLiveTile key={d.symbol} embed={embed} reading={jamaspReading(d, now)}>
+            <DriverLiveTile key={d.symbol} embed={embed} reading={jamaspReading(d, now, messages)}>
               {tile}
             </DriverLiveTile>
           );
@@ -113,9 +113,9 @@ export function DriverPanel({ drivers, now, messages }: {
  * Formatted here, on the server, so the client wrapper takes a plain string
  * and neither `now` nor the number formatting crosses into the bundle.
  */
-function jamaspReading(d: DriverRead, now: Date): string {
+function jamaspReading(d: DriverRead, now: Date, messages: Messages): string {
   const q = d.quote;
   if (!q) return "jamasp: no data";
   const v = q.value.toLocaleString(undefined, { maximumFractionDigits: d.digits });
-  return `jamasp ${v} · ${fmtAge(q.ts, now)}`;
+  return `jamasp ${v} · ${fmtAge(q.ts, messages, now)}`;
 }

@@ -256,7 +256,7 @@ function Watching({ watchlist, now, messages }: {
               className="rounded-full border border-border px-2.5 py-0.5 text-xs">
               {w.theme}
               {w.since && (
-                <span className="text-muted-foreground"> · {fmtAge(w.since, now)}</span>
+                <span className="text-muted-foreground"> · {fmtAge(w.since, messages, now)}</span>
               )}
             </span>
           ))}

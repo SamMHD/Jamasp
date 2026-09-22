@@ -55,7 +55,7 @@ function familyLabel(family: string, messages: Messages): string {
     : family.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 }
 
-function tileTitle(t: SignalTile, now: Date): string {
+function tileTitle(t: SignalTile, now: Date, messages: Messages): string {
   const read = t.state > 0.15 ? "bullish" : t.state < -0.15 ? "bearish" : "neutral";
   // A pin overrides the fitted value outright (jamasp/fit.py's run_fit
   // applies it regardless of `fitted`), so it takes priority here too.
@@ -69,7 +69,7 @@ function tileTitle(t: SignalTile, now: Date): string {
   // the tile rather than having to know which host has bars.
   const via = t.source === "tradingview" ? ", via TradingView" : "";
   return `${t.signal} ${t.timeframe} — ${read} ${t.state.toFixed(2)}, `
-    + `${weight}${via}, ${fmtAge(t.ts, now)}`;
+    + `${weight}${via}, ${fmtAge(t.ts, messages, now)}`;
 }
 
 export function TechnicalMap({ tiles, width, height, fittedAt, messages }: {
@@ -125,7 +125,7 @@ export function TechnicalMap({ tiles, width, height, fittedAt, messages }: {
                 <MapTile key={cell.node.key}
                   x={cell.x} y={cell.y} w={cell.w} h={cell.h}
                   tone={toneFromIntensity(cell.node.state)}
-                  title={tileTitle(cell.node, now)}
+                  title={tileTitle(cell.node, now, messages)}
                   dashed={!cell.node.fitted && !cell.node.pinned}
                   lines={label.lines} fontSize={label.fontSize} />
               );
@@ -138,7 +138,7 @@ export function TechnicalMap({ tiles, width, height, fittedAt, messages }: {
         {tiles.length} {t(messages, "tech.signalsWord")}
         {unfitted > 0 ? <> · {unfitted} {t(messages, "tech.notYetFitted")}</> : ""}
         {fittedAt
-          ? <> · {t(messages, "tech.weightsFitted")} {fmtAge(fittedAt, now)}</>
+          ? <> · {t(messages, "tech.weightsFitted")} {fmtAge(fittedAt, messages, now)}</>
           : <> · {t(messages, "tech.noFitYet")}</>}
       </p>
     </section>

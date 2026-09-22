@@ -87,6 +87,8 @@
   "common.unknownError": "unknown error",
   "common.fullScreen": "Full screen",
   "common.exitFullScreen": "Exit full screen",
+  "time.agoTemplate": "{age} ago",
+  "time.inTemplate": "in {age}",
   "table.claim": "Claim",
   "table.direction": "Dir",
   "table.confidence": "Conf",

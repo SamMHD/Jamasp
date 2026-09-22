@@ -185,7 +185,7 @@ export function InboxTable({ sources, topics, locale, messages }: {
                 </p>
               )}
               <div className="mt-1 text-xs text-muted-foreground">
-                {rep.source} · {rep.topic} · {fmtAge(rep.published_at)}
+                {rep.source} · {rep.topic} · {fmtAge(rep.published_at, messages)}
                 {others.length > 0 && (
                   <> · {t(messages, "inboxTable.alsoWord")}: {others.map(o => o.source).join(", ")}</>
                 )}
@@ -234,13 +234,13 @@ export function InboxTable({ sources, topics, locale, messages }: {
                 <dt className="text-muted-foreground">{t(messages, "inboxTable.dtTopic")}</dt>
                 <dd>{selectedRep.topic}</dd>
                 <dt className="text-muted-foreground">{t(messages, "inboxTable.dtPublished")}</dt>
-                <dd>{fmtUtc(selectedRep.published_at)} · {fmtAge(selectedRep.published_at)}</dd>
+                <dd>{fmtUtc(selectedRep.published_at)} · {fmtAge(selectedRep.published_at, messages)}</dd>
                 <dt className="text-muted-foreground">{t(messages, "inboxTable.dtIngested")}</dt>
-                <dd>{fmtUtc(selectedRep.fetched_at)} · {fmtAge(selectedRep.fetched_at)}</dd>
+                <dd>{fmtUtc(selectedRep.fetched_at)} · {fmtAge(selectedRep.fetched_at, messages)}</dd>
                 <dt className="text-muted-foreground">{t(messages, "inboxTable.dtStatus")}</dt>
                 <dd>
                   {selectedRep.read_at
-                    ? `${t(messages, "inboxTable.readPrefix")} ${fmtAge(selectedRep.read_at)}`
+                    ? `${t(messages, "inboxTable.readPrefix")} ${fmtAge(selectedRep.read_at, messages)}`
                     : t(messages, "inboxTable.unreadWord")}
                 </dd>
                 <dt className="text-muted-foreground">{t(messages, "inboxTable.dtItemId")}</dt>
@@ -263,7 +263,7 @@ export function InboxTable({ sources, topics, locale, messages }: {
                           <a href={o.url} target="_blank" rel="noreferrer" className="hover:text-primary underline underline-offset-2">
                             {o.source}
                           </a>{" "}
-                          <span className="text-muted-foreground">· {fmtAge(o.published_at)}</span>
+                          <span className="text-muted-foreground">· {fmtAge(o.published_at, messages)}</span>
                         </div>
                       ))}
                     </dd>
