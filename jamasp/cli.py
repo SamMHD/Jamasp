@@ -270,7 +270,8 @@ def _translate_line(stats: dict) -> str:
 @click.option("--only", type=click.Choice(["rows", "events", "docs"]),
               help="run one track (rows always includes the flash reuse pass)")
 @click.option("--check", "check_only", is_flag=True,
-              help="verify the translator is installed and configured")
+              help="verify the translator is installed, configured, and"
+                   " answers a one-line round trip (costs one model call)")
 @db_opt
 @cfg_opt
 def translate(dry_run, force, only, check_only, db_path, config_dir):
@@ -278,9 +279,14 @@ def translate(dry_run, force, only, check_only, db_path, config_dir):
     conn, _, settings = _common(db_path, config_dir)
     problem = translate_mod.check(settings["translate"])
     if check_only:
+        # Two questions, in order: is it wired up, and does it ANSWER. Only
+        # the second one catches the failure that matters — an
+        # unauthenticated codex is still a codex on PATH, refuses every call
+        # and leaves the unit exiting zero. See translate.probe.
+        problem = problem or translate_mod.probe(settings["translate"])
         if problem:
             raise click.ClickException(problem)
-        click.echo("translate: ok")
+        click.echo("translate: ok — the translator answered")
         return
     if problem and not dry_run:
         raise click.ClickException(problem)

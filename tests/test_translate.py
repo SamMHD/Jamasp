@@ -2136,3 +2136,98 @@ def test_a_backed_off_document_is_counted_in_the_summary(tmp_path):
     assert calls == []                      # inside the 15-minute backoff
     assert stats["backoff"] == 1
     assert stats["failed"] == 0 and stats["abandoned"] == 0
+
+
+# ------------------------------------------------- the ledger must self-heal
+
+def test_a_successful_unit_re_arms_everything_the_cap_abandoned(tmp_path):
+    """A 3-hour outage walks all seven units to the cap, and 24 hours of
+    healthy ticks afterwards then translate NOTHING: stance.fa.md freezes
+    holding English bodies under empty per-section hashes and the panel falls
+    back to English wholesale. A working translator is evidence the
+    abandonments were environmental, so a success re-arms them."""
+    conn = db.connect(tmp_path / "t.db")
+    build_state(tmp_path)
+    for minutes in (0, 20, 90):
+        translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY, always_fails,
+                                 now=clock(minutes), conn=conn)
+    stuck = conn.execute("SELECT COUNT(*) FROM doc_translations").fetchone()[0]
+    assert stuck >= 5
+
+    # One unit the ledger has never seen — a report written after the outage
+    # — is attempted even though everything else is abandoned, and succeeds.
+    (tmp_path / "reports" / "2026" / "09" / "2026-09-13-brief.md").write_text(
+        "Fresh.\n", encoding="utf-8")
+    translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY, doc_run(),
+                             now=clock(200), conn=conn)
+    assert conn.execute(
+        "SELECT COUNT(*) FROM doc_translations").fetchone()[0] == 0
+
+    stats = translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY, doc_run(),
+                                     now=clock(210), conn=conn)
+    assert stats["abandoned"] == 0
+    assert stats["translated"] >= 5
+
+
+def test_an_abandoned_document_gets_one_more_attempt_a_day_later(tmp_path):
+    """The deadlock a success cannot break: when EVERY unit is abandoned
+    there is no success left to prove the translator came back, and recovery
+    is --force only. `translate.check()` only verifies the binary is on PATH,
+    not that it is authenticated, so the CLAUDE.md credentials trap produces
+    exactly this shape and those outages last days."""
+    conn = db.connect(tmp_path / "t.db")
+    one_doc(tmp_path)
+    for minutes in (0, 20, 90):
+        translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY, always_fails,
+                                 now=clock(minutes), conn=conn)
+    day = 60 * translate.DOC_RETRY_AFTER_HOURS
+
+    calls = []
+    translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY,
+                             failing_doc_run(calls), now=clock(day - 60),
+                             conn=conn)
+    assert calls == []                      # still inside the day
+
+    translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY, doc_run(),
+                             now=clock(day + 100), conn=conn)
+    assert (tmp_path / "state" / "playbook.fa.md").exists()
+    assert conn.execute(
+        "SELECT COUNT(*) FROM doc_translations").fetchone()[0] == 0
+
+
+def test_the_daily_retry_costs_one_call_per_unit_per_day(tmp_path):
+    """The cost of the escape above, pinned: an abandoned unit is retried
+    once a day, not once a tick. Measured from its LAST failure, so each
+    refusal buys another day of silence."""
+    conn = db.connect(tmp_path / "t.db")
+    one_doc(tmp_path)
+    day = 60 * translate.DOC_RETRY_AFTER_HOURS
+    calls = []
+    for minutes in (0, 20, 90, day + 100, day + 110, 2 * day + 110):
+        translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY,
+                                 failing_doc_run(calls), now=clock(minutes),
+                                 conn=conn)
+    assert len(calls) == translate.MAX_DOC_ATTEMPTS + 2
+
+
+def test_probe_reports_a_translator_that_does_not_answer():
+    """`check()` verifies the binary is on PATH. An unauthenticated codex is
+    still a codex on PATH, and it fails every call identically while the unit
+    exits zero — the credentials trap CLAUDE.md records, which is what walks
+    every document to the attempt cap in the first place."""
+    assert "did not answer" in translate.probe(CFG, run=always_fails)
+
+    def out_of_quota(prompt, schema):
+        raise modelrun.QuotaExhausted("usage limit")
+
+    assert "quota" in translate.probe(CFG, run=out_of_quota).lower()
+    assert translate.probe(CFG, run=doc_run()) is None
+
+
+def test_probe_sends_one_tiny_payload():
+    """A preflight that cost a real document's worth of tokens would be a
+    reason not to run it."""
+    calls = []
+    assert translate.probe(CFG, run=counting_doc_run(calls)) is None
+    assert len(calls) == 1
+    assert len(calls[0].encode("utf-8")) < 2000

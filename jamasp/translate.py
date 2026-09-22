@@ -665,6 +665,26 @@ DEFAULT_CHUNK_BYTES = 8000
 # rather than ~144 a day forever.
 MAX_DOC_ATTEMPTS = 3
 
+# How long an abandoned unit stays abandoned before it is offered one more
+# attempt anyway.
+#
+# The cap without this was permanent: a `codex` outage longer than about 75
+# minutes walks every unit to MAX_DOC_ATTEMPTS, and 24 hours of healthy ticks
+# afterwards then translate NOTHING — measured at
+# `{'translated': 0, 'failed': 0, 'abandoned': 7}`. stance.fa.md freezes
+# holding English bodies under empty per-section hashes, so the panel falls
+# back to English wholesale, and `--force` is the only way out. Nothing pages
+# anyone about it (docs/todo/026), and `check()`'s PATH test cannot see it,
+# because an unauthenticated `codex` is still a `codex` on PATH — which is the
+# credentials trap CLAUDE.md records for Claude, and those outages last days.
+#
+# A success anywhere in the pass re-arms the rest (DocLedger.rearm_abandoned),
+# which covers every partial outage. This covers the total one, where there is
+# no success left to prove anything. One attempt per unit per day is the whole
+# cost: at timeout_seconds 180 and seven units that is 21 minutes of calls a
+# day in the worst case, against the ~144 calls a day the cap exists to stop.
+DOC_RETRY_AFTER_HOURS = 24
+
 
 class DocLedger:
     """Attempt counter, backoff and abandonment for documents (docs/todo/019).
@@ -695,6 +715,9 @@ class DocLedger:
         self.conn = conn
         self.root = root
         self.now = now or utcnow()
+        # Set by `clear`, which every pass calls on a unit that translated.
+        # A single success is the evidence `rearm_abandoned` acts on.
+        self.succeeded = False
 
     def key(self, source: Path, sub: str = "") -> str:
         """`path/relative/to/root` plus `#<sub-unit>` where a file has parts.
@@ -724,15 +747,29 @@ class DocLedger:
         if row is None or row["src_hash"] != digest:
             return "ready"
         if row["attempts"] >= MAX_DOC_ATTEMPTS:
+            # Time re-arms. Measured from the LAST failure, so a unit that
+            # takes its daily attempt and fails again buys another day of
+            # silence rather than a second attempt an hour later. See
+            # DOC_RETRY_AFTER_HOURS for why a permanent cap was the wrong
+            # shape. The row is deliberately NOT cleared here: the attempt
+            # count stays where it is, so this stays one call a day rather
+            # than handing the unit a fresh set of three.
+            if self._since(row["failed_at"]) >= timedelta(
+                    hours=DOC_RETRY_AFTER_HOURS):
+                return "ready"
             return "abandoned"
         # The same delays the rows pass uses, indexed by the attempt just
         # spent. ELSE-style clamping for the same reason as `_backoff`: a
         # raised MAX_DOC_ATTEMPTS without a longer tuple should back a unit
         # off further, never let it retry on every tick.
         delay = BACKOFF_MINUTES[min(row["attempts"], len(BACKOFF_MINUTES)) - 1]
-        failed = datetime.strptime(row["failed_at"], "%Y-%m-%dT%H:%M:%SZ")
-        current = datetime.strptime(self.now, "%Y-%m-%dT%H:%M:%SZ")
-        return "backoff" if current < failed + timedelta(minutes=delay) else "ready"
+        return ("backoff" if self._since(row["failed_at"])
+                < timedelta(minutes=delay) else "ready")
+
+    def _since(self, failed_at: str) -> timedelta:
+        """How long ago `failed_at` was, on this run's clock."""
+        return (datetime.strptime(self.now, "%Y-%m-%dT%H:%M:%SZ")
+                - datetime.strptime(failed_at, "%Y-%m-%dT%H:%M:%SZ"))
 
     def record_failure(self, source: Path, digest: str, error: str,
                        sub: str = "") -> None:
@@ -755,9 +792,35 @@ class DocLedger:
 
     def clear(self, source: Path, sub: str = "") -> None:
         """Forget a unit that translated. Keeps the table to what is broken."""
+        self.succeeded = True
         self.conn.execute("DELETE FROM doc_translations WHERE unit = ?",
                           (self.key(source, sub),))
         self.conn.commit()
+
+    def rearm_abandoned(self) -> int:
+        """Forget every unit at the cap. Called when something translated.
+
+        A working translator is evidence the abandonments were environmental:
+        the overwhelming cause of a document failing is not the document, it
+        is codex being unauthenticated, out of quota or wedged, and all of
+        those fail every unit alike. Once one unit has come back, holding the
+        others at a cap they reached during the outage is holding them
+        against evidence.
+
+        Rows rather than attempts, i.e. the counter resets to zero: the unit
+        gets a full set of attempts again, because what it spent was spent on
+        a broken translator and proves nothing about the unit.
+
+        Bounded by there being something to translate at all. On a quiet host
+        the pass makes no calls, nothing succeeds, and this never fires; on a
+        busy one a genuinely untranslatable report is re-armed a few times a
+        day instead of retried every ten minutes forever.
+        """
+        cur = self.conn.execute(
+            "DELETE FROM doc_translations WHERE attempts >= ?",
+            (MAX_DOC_ATTEMPTS,))
+        self.conn.commit()
+        return cur.rowcount
 
     def clear_all(self) -> None:
         """`--force`'s document half, the analogue of `rearm` for rows.
@@ -1286,6 +1349,13 @@ def translate_docs(
     except modelrun.QuotaExhausted as exc:
         totals["quota_exhausted"] = True
         totals["quota_message"] = str(exc)
+    if ledger is not None and ledger.succeeded:
+        # Something translated, so the translator works — see
+        # `DocLedger.rearm_abandoned`. At the END of the pass rather than the
+        # moment of the first success, so a unit's fate does not depend on
+        # where it happens to sit in the pass order; the re-armed units are
+        # picked up on the next tick, ten minutes later.
+        ledger.rearm_abandoned()
     totals["skipped"] = budget.skipped
     return totals
 
@@ -1314,6 +1384,47 @@ def check(cfg: dict) -> str | None:
     if not binary or shutil.which(binary) is None:
         return (f"translator {binary!r} is not on PATH —"
                 " install it, or point translate.cmd elsewhere")
+    return None
+
+
+# A preflight round-trip must not be able to hang an operator's terminal for
+# as long as a real document is allowed to take, and it has a tiny payload, so
+# it is capped well under translate.timeout_seconds.
+PROBE_TIMEOUT_SECONDS = 60
+
+# Small enough to cost nothing, real enough to exercise the whole path: the
+# prompt builder, the subprocess, the protocol, the strict schema and the
+# response parser.
+PROBE_TEXT = "Gold is bid."
+
+
+def probe(cfg: dict, run=None) -> str | None:
+    """Ask the translator to answer once. Returns a problem, or None.
+
+    `check()` verifies the binary resolves. That is not the failure that
+    matters: an unauthenticated `codex` is still a `codex` on PATH, and it
+    refuses every call identically while the unit exits zero — the credentials
+    trap CLAUDE.md records for Claude, which is exactly the shape that walks
+    every document to MAX_DOC_ATTEMPTS and leaves the panel on English.
+
+    Deliberately NOT part of `check()`, which runs on every invocation of the
+    command: the timer fires every ten minutes, and a model call per tick to
+    ask whether model calls work is a cost with no owner. This runs for
+    `--check` only, which is an attended operator action.
+    """
+    if run is None:
+        def run(prompt, schema):
+            return modelrun.run_json(
+                cfg["cmd"], cfg["protocol"], prompt, schema,
+                min(_int_setting(cfg, "timeout_seconds",
+                                 PROBE_TIMEOUT_SECONDS),
+                    PROBE_TIMEOUT_SECONDS))
+    try:
+        _translate_text(PROBE_TEXT, {}, run)
+    except modelrun.QuotaExhausted as exc:
+        return f"translator is out of quota: {exc}"
+    except (modelrun.ModelError, translatetext.ParseError) as exc:
+        return f"translator did not answer: {exc}"
     return None
 
 
