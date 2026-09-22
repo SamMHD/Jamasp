@@ -118,6 +118,56 @@ describe("state page (stance/playbook Persian sidecars)", () => {
     expect(html).toContain(fa["content.sourceEnglishTitle" as keyof typeof fa]);
   });
 
+  /**
+   * The per-section twin of readWholeDocumentFa's blank-body hazard: every
+   * section can carry a real hash and still have an empty body, and joining
+   * them produced "" — which LocalizedDocument's `=== null` gate read as
+   * "translation present" and rendered as a blank stance with no EN marker.
+   * A blank stance on a trading desk is the worst failure this feature has,
+   * and nothing on screen says anything is wrong.
+   */
+  it("falls back to the marked English stance when every section body is blank", async () => {
+    mockFiles.stance = englishStance;
+    mockFiles.stanceFa = { sections: [{ heading: "", hash: "h0", body: "" }] };
+    mockFiles.playbook = null;
+    mockFiles.playbookFa = null;
+
+    const html = await renderPage("fa");
+    expect(html).toContain("Gold constructive on soft CPI");
+    expect((html.match(/lang="en"/g) ?? []).length).toBe(1);
+    expect(html).toContain(fa["content.sourceEnglishTitle" as keyof typeof fa]);
+  });
+
+  it("falls back to the marked English stance when the joined sections are only whitespace", async () => {
+    mockFiles.stance = englishStance;
+    mockFiles.stanceFa = { sections: [
+      { heading: "", hash: "h0", body: "\n" }, { heading: "", hash: "h1", body: "  \n" },
+    ] };
+    mockFiles.playbook = null;
+    mockFiles.playbookFa = null;
+
+    const html = await renderPage("fa");
+    expect(html).toContain("Gold constructive on soft CPI");
+    expect((html.match(/lang="en"/g) ?? []).length).toBe(1);
+  });
+
+  /**
+   * A blank PLAYBOOK sidecar reaches the page as null already, because
+   * readPlaybookFa now collapses blank to absent (see lib/files.ts). This
+   * asserts the page's own behaviour given that null, so the two halves of
+   * the blank-body fix are both pinned.
+   */
+  it("falls back to the marked English playbook when its sidecar body is blank", async () => {
+    mockFiles.stance = null;
+    mockFiles.stanceFa = null;
+    mockFiles.playbook = englishPlaybook;
+    mockFiles.playbookFa = "   \n";
+
+    const html = await renderPage("fa");
+    expect(html).toContain("Hold the line on real yields");
+    expect((html.match(/lang="en"/g) ?? []).length).toBe(1);
+  });
+
   it("renders the playbook sidecar independently of the stance sidecar", async () => {
     mockFiles.stance = null;
     mockFiles.stanceFa = null;

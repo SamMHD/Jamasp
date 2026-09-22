@@ -248,7 +248,18 @@ export function readStanceFa(): { sections: StanceFaSection[] } | null {
   return { sections: parseStanceSidecar(raw) };
 }
 
-/** One whole-document sidecar: front matter stripped, body returned as-is. */
+/**
+ * One whole-document sidecar: front matter stripped, body returned as-is.
+ *
+ * A BLANK body is "absent", not "present and empty". A sidecar that is valid
+ * front matter and nothing else — an interrupted write, a model that returned
+ * nothing, a file truncated to its header — parses cleanly and hashes
+ * correctly, so without this it returned "" and every caller's `!== null`
+ * gate read that as "the translation is here". The page then rendered an
+ * empty document with no EN marker: a blank stance or brief that looks
+ * deliberate. Absent and blank must reach callers as the same answer, so
+ * they take the English-with-marker path either way.
+ */
 function readWholeDocumentFa(englishPath: string, sidecarPath: string): string | null {
   const english = readText(englishPath);
   if (english === null) return null;
@@ -256,7 +267,7 @@ function readWholeDocumentFa(englishPath: string, sidecarPath: string): string |
   if (raw === null) return null;
   const { meta, body } = parseFrontMatter(raw);
   if (meta.src_hash !== srcHash(english)) return null;
-  return body;
+  return body.trim() ? body : null;
 }
 
 /** `state/playbook.fa.md` — the whole document, nothing parsed out of it. */

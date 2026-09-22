@@ -32,6 +32,16 @@ export const dynamic = "force-dynamic";
  * a coarse page gets the coarse treatment, all-or-nothing, rather than
  * splicing that one section's literal English into an otherwise-Persian
  * block with no way to mark it.
+ *
+ * BLANK counts as absent, hence `.trim()` rather than a `=== null` test. A
+ * sidecar can be structurally valid and hash-correct while carrying nothing
+ * — an interrupted write, a model that returned empty, every section body
+ * blank behind real hashes — and rendering `<Markdown text="" />` for that
+ * put an empty stance or playbook on screen wearing no EN marker at all.
+ * Nothing about the page would say the translation had failed. The guard
+ * lives here as well as in lib/files.ts#readWholeDocumentFa because this
+ * component also takes the CONCATENATED per-section stance body, which no
+ * reader-level check covers.
  */
 function LocalizedDocument({ english, sidecarBody, locale, messages }: {
   english: string;
@@ -39,7 +49,7 @@ function LocalizedDocument({ english, sidecarBody, locale, messages }: {
   locale: Locale;
   messages: Messages;
 }) {
-  if (locale === "en" || sidecarBody === null) {
+  if (locale === "en" || !sidecarBody?.trim()) {
     return (
       <SourceLang fallback={locale === "fa"} messages={messages} block>
         <Markdown text={english} />
