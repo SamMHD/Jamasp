@@ -100,3 +100,61 @@ describe("SourceLang typography (app/globals.css)", () => {
     expect(line).not.toContain(":where(");
   });
 });
+
+/**
+ * The rule above only ever reaches a lang="en" *island* — it says nothing
+ * about the Persian page around it. That's a second, independent bug: the
+ * :where([dir="rtl"], [lang="fa"]) rule sits on <html> and font-family only
+ * inherits, but <body> carries Tailwind's `font-sans` utility class, which
+ * sets font-family DIRECTLY on <body> itself. An element's own declaration
+ * always beats an inherited one, so body's Inter wins over html's Vazirmatn
+ * for literally everything rendered on the panel, regardless of the html
+ * rule's specificity — nothing above targets <body>, so there is no
+ * specificity contest to win in the first place.
+ *
+ * Same shape as the describe block above: asserted against the stylesheet,
+ * not the component, because the fix lives entirely in CSS.
+ */
+describe("Persian body typography (app/globals.css)", () => {
+  const css = readFileSync(
+    path.join(import.meta.dirname, "..", "app/globals.css"), "utf8");
+  const rule = css.match(/html\[dir="rtl"\]\s*body\s*,\s*html\[lang="fa"\]\s*body\s*\{[^}]*\}/);
+
+  it("targets <body> directly instead of relying on inheritance from <html>", () => {
+    // A rule that only matches <html> can never win this: <body> has its
+    // own font-family declaration (Tailwind's `font-sans` utility), so
+    // nothing below <html> ever inherits <html>'s value. The fix has to
+    // name <body> to have any effect at all.
+    expect(rule, 'expected a rule matching html[dir="rtl"] body / html[lang="fa"] body ' +
+      "with font-family: var(--font-fa)").not.toBeNull();
+    expect(rule![0]).toMatch(/font-family:\s*var\(--font-fa\)/);
+  });
+
+  it("carries !important — the only thing that outranks a utilities-layer class from @layer base", () => {
+    // Naming <body> is necessary but not sufficient. `.font-sans` lives in
+    // Tailwind's `utilities` @layer, and this stylesheet's own `@layer
+    // base` (Tailwind's fixed layer order is theme < base < components <
+    // utilities) loses to it on LAYER ALONE — a `base`-layer rule cannot
+    // outrank a `utilities`-layer one no matter how specific its selector
+    // is made. Verified by hand against this exact stylesheet: even
+    // `html body.min-h-screen.bg-background.font-sans.text-foreground
+    // .antialiased { font-family: var(--font-fa); }` inside `@layer base`
+    // does not move body's computed font-family. `!important` is the one
+    // thing here that outranks a utility class from outside
+    // `@layer utilities` itself. Drop it and this rule looks correct,
+    // parses fine, and silently does nothing — exactly the original bug.
+    expect(rule).not.toBeNull();
+    expect(rule![0]).toContain("!important");
+  });
+
+  it("stays keyed to <html>'s attributes, not <body>'s class list", () => {
+    // The original bug exists BECAUSE a rule's effect depended on which
+    // classes <body> happened to carry. Anchoring the fix to <body>'s
+    // class list in turn (e.g. `body.font-sans`) would be the same
+    // fragility with the polarity flipped: it would silently stop applying
+    // the next time someone edits app/layout.tsx's <body> className.
+    // Keying off <html>'s dir/lang attributes instead survives that edit.
+    expect(rule).not.toBeNull();
+    expect(rule![0]).not.toMatch(/body\.[\w-]/);
+  });
+});
