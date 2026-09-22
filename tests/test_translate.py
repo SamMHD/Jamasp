@@ -2120,6 +2120,58 @@ def test_an_unreadable_document_ceiling_does_not_take_the_pass_down(tmp_path):
     assert stats["translated"] >= 6
 
 
+# A zero or negative number PARSES fine, so `_int_setting`'s type coercion
+# alone does not catch it — same real-YAML spelling style as
+# BLANK_NUMBERS_YAML above, this time with values that are wrong in kind
+# rather than absent.
+NEGATIVE_NUMBERS_YAML = """
+translate:
+  cmd: ["codex"]
+  protocol: codex
+  timeout_seconds: 180
+  translate_from:
+  window_days: 7
+  batch_size: 20
+  max_batches_per_run: 6
+  max_doc_calls_per_run: -1
+  doc_chunk_bytes: 0
+  reports_since: "2026-09-01"
+"""
+
+
+def test_a_zero_doc_chunk_bytes_falls_back_to_the_measured_default(tmp_path):
+    """`doc_chunk_bytes: 0` parses fine and becomes a real 0: every document
+    then chunks at every paragraph rather than every few kilobytes — this
+    21KB-shaped brief goes from 7 chunks at the measured default to 38.
+    `DocBudget`'s once-per-run oversize hatch then lets all of them through
+    in a single tick, which is well past what systemd's TimeoutStartSec
+    allows."""
+    cfg = yaml.safe_load(NEGATIVE_NUMBERS_YAML)["translate"]
+    one_doc(tmp_path, big_brief())
+    calls = []
+    stats = translate.translate_docs(tmp_path, cfg, GLOSSARY,
+                                     counting_doc_run(calls))
+    assert stats["translated"] == 1
+    assert len(calls) < 20   # chunked at the default, not one per paragraph
+    for prompt in calls:
+        payload = prompt.split("---\n", 1)[1]
+        assert len(payload.encode("utf-8")) <= translate.DEFAULT_CHUNK_BYTES
+
+
+def test_a_negative_document_ceiling_falls_back_to_no_ceiling(tmp_path):
+    """`max_doc_calls_per_run: -1` reaches `DocBudget` as -1, and
+    `DocBudget.take` reads `n > limit` as true for EVERY call once the limit
+    itself is negative — the first unit a tick sees, whatever its size,
+    takes the once-per-run oversize hatch meant for something that could
+    never fit otherwise, and every unit after it is skipped. It must degrade
+    the same way an unreadable value does: to no ceiling at all."""
+    cfg = yaml.safe_load(NEGATIVE_NUMBERS_YAML)["translate"]
+    build_state(tmp_path)
+    stats = translate.translate_docs(tmp_path, cfg, GLOSSARY, doc_run())
+    assert stats["translated"] >= 6
+    assert stats["skipped"] == 0
+
+
 def test_a_backed_off_document_is_counted_in_the_summary(tmp_path):
     """A backed-off unit was counted in nothing — not `failed`, not
     `abandoned`, not `skipped` — so a tick where every document is waiting

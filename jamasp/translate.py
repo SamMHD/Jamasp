@@ -601,8 +601,10 @@ class DocBudget:
         return True
 
 
-def _int_setting(cfg: dict, key: str, default: int | None) -> int | None:
-    """`cfg[key]` as an int, or `default` if it is missing, empty or garbage.
+def _int_setting(cfg: dict, key: str, default: int | None,
+                  floor: int | None = None) -> int | None:
+    """`cfg[key]` as an int, or `default` if it is missing, empty, garbage,
+    or — when `floor` is given — parses to something below it.
 
     YAML reads `doc_chunk_bytes:` with nothing after it as None, and
     `len(text) <= None` is a TypeError that takes the whole document pass
@@ -621,14 +623,54 @@ def _int_setting(cfg: dict, key: str, default: int | None) -> int | None:
 
     Booleans are rejected explicitly: `int(True)` is 1, and a chunk
     threshold of one byte would be a far stranger failure than falling back.
+
+    A value that parses cleanly can still be nonsense for what it bounds —
+    type-valid is not the same as usable. `doc_chunk_bytes: 0` (or negative)
+    parses to a real int and chunks a document at every paragraph instead of
+    every few kilobytes; `max_doc_calls_per_run: -1` parses to a real int
+    too, and `DocBudget.take` reads `n > limit` as true for every call once
+    the limit itself is negative, so the ceiling bounds nothing. `floor`
+    catches both the same way the missing/unreadable cases above are
+    caught: a value below it is treated as though it had not parsed. See
+    `MIN_CHUNK_BYTES` and `MIN_DOC_CALLS_PER_RUN` for where each is set and
+    why.
     """
     raw = cfg.get(key, default)
     if raw is None or isinstance(raw, bool):
         return default
     try:
-        return int(raw)
+        value = int(raw)
     except (TypeError, ValueError):
         return default
+    if floor is not None and value < floor:
+        return default
+    return value
+
+
+# `_int_setting`'s floor for `doc_chunk_bytes`. Below this a document chunks
+# at (or near) every paragraph instead of every few kilobytes: the 21,728-byte
+# brief DEFAULT_CHUNK_BYTES was measured against goes from 7 chunks at the
+# default to 38 at a threshold of 0. `DocBudget.take` then lets ALL of them
+# through in one tick — a unit that needs more chunks than the whole run
+# ceiling is admitted once, unconditionally, on the theory that it could
+# never fit otherwise (see `DocBudget.take`) — so a config typo turns into
+# dozens of calls in a single tick and systemd's TimeoutStartSec kills the
+# unit mid-run rather than the next tick simply picking up where this one
+# left off. 500 is comfortably under the default and still large enough to
+# hold an ordinary paragraph as one chunk rather than splitting inside it.
+MIN_CHUNK_BYTES = 500
+
+# `_int_setting`'s floor for `max_doc_calls_per_run`. Below zero,
+# `DocBudget.take`'s own assumption — that the ceiling is non-negative —
+# breaks: with `limit = -1`, `n > limit` is true for every call regardless of
+# size, so the FIRST document a tick sees takes the once-per-run oversize
+# hatch meant for a unit that could never fit otherwise, and nothing after it
+# is bounded at all; it is admitted, not refused, which is the opposite of
+# what a negative "ceiling" was presumably meant to do. Zero itself stays
+# valid — it is the tested, meaningful "no document calls this tick"
+# (`test_a_zero_document_ceiling_lets_nothing_through`), not a value in need
+# of a floor.
+MIN_DOC_CALLS_PER_RUN = 0
 
 
 # Above this many bytes of UTF-8 source, a document is translated in pieces
@@ -1338,9 +1380,12 @@ def translate_docs(
         # such a state.
         ledger.clear_all()
     # Chunking threshold, named and configurable rather than a magic number.
-    # Absent, empty or unreadable means the measured default — NOT "never
-    # chunk", which is the bug this key exists to fix. See `_int_setting`.
-    chunk_bytes = _int_setting(cfg, "doc_chunk_bytes", DEFAULT_CHUNK_BYTES)
+    # Absent, empty, unreadable or below MIN_CHUNK_BYTES means the measured
+    # default — NOT "never chunk" and NOT "chunk at every paragraph", which
+    # are the two bugs this key and its floor exist to fix. See
+    # `_int_setting` and `MIN_CHUNK_BYTES`.
+    chunk_bytes = _int_setting(cfg, "doc_chunk_bytes", DEFAULT_CHUNK_BYTES,
+                               MIN_CHUNK_BYTES)
     # One budget across every document type: the ceiling that matters is the
     # tick's total, not any single file's. See DocBudget.
     #
@@ -1359,7 +1404,8 @@ def translate_docs(
     # passes --force; --force is an attended operator action, and the unit's
     # TimeoutStartSec does not constrain a manual invocation either.
     budget = DocBudget(
-        None if force else _int_setting(cfg, "max_doc_calls_per_run", None))
+        None if force else _int_setting(cfg, "max_doc_calls_per_run", None,
+                                        MIN_DOC_CALLS_PER_RUN))
 
     def merge(result):
         totals["translated"] += result["translated"]
