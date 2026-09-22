@@ -5,13 +5,30 @@ OnFailure=jamasp-alert@%n.service
 [Service]
 Type=oneshot
 # oneshot units have no start timeout by default (ingest 600, weights 900,
-# alert 90 — every other unit here sets one). Worst case for a healthy tick is
-# the document pass: max_doc_calls_per_run (10) calls at timeout_seconds
-# (180) each is 30 minutes, plus the rows and events passes. 40 minutes is
-# that with slack; past it the run is wedged, not slow, and a
-# wedged `codex exec` must not hold the 10-minute timer down for hours. Safe
-# to kill at any point: the rows pass commits every row as it goes and the
-# document sidecars are written atomically, so the next tick resumes.
+# alert 90 — every other unit here sets one). 40 minutes, and state it
+# honestly: this number bounds the DAMAGE, not the work. A heavy tick is
+# already larger than it.
+#
+# The real worst case, at timeout_seconds 180, is every pass spending its own
+# ceiling in the same tick: rows max_batches_per_run (6) + events (6) + docs
+# max_doc_calls_per_run (10) = 22 calls = 3,960 seconds. Two things push it
+# further. A batch the translator refuses retries once and then fans out to
+# one call per row, so one bad batch of 20 costs 22 calls rather than 1. And
+# ONE document per tick that needs more chunks than the whole document
+# ceiling is let through anyway (translate.DocBudget.take, which explains
+# why) — a report of 30 short `## ` sections is 31 calls on its own, since
+# every section is at least one chunk.
+#
+# Past this limit systemd SIGTERMs the run. That is safe to do at any point —
+# the rows pass commits every row as it goes and document sidecars are
+# written atomically, so the next tick resumes — but it is not free: the
+# document the run was in the middle of loses the chunks it had already paid
+# for, and a kill records no attempt against it, because a SIGTERM is not a
+# ModelError. A wedged `codex exec` holding the 10-minute timer down for
+# hours is still the worse outcome, which is why the limit stays.
+#
+# Sizing the caps so that a heavy tick actually fits inside this number is
+# docs/todo/027; do not read 2400 as evidence that it does.
 TimeoutStartSec=2400
 WorkingDirectory=%h/Jamasp
 Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin

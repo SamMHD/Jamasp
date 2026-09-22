@@ -249,3 +249,135 @@ def test_stance_sidecar_front_matter_carries_the_whole_source_hash():
     meta, _ = tt.parse_front_matter(text)
     assert meta["src_hash"] == "wholefilehash"
     assert "<!-- src_hash: aaa -->" in text
+
+
+BRIEF = """# Jamasp Brief — 2026-09-16
+
+Gold at 3,681.
+
+## Market snapshot
+
+GC=F 3,681.40, DXY 97.2.
+
+Real yields 1.81%.
+
+## What happened
+
+The Fed cut 25bp.
+
+## Outlook
+
+Constructive.
+"""
+
+
+def test_doc_segments_reassemble_to_the_source_byte_for_byte():
+    """The invariant the whole chunked path rests on: a reassembled document
+    differs from its source only in the prose, never in its structure."""
+    segments = tt.doc_segments(BRIEF, 10_000)
+    assert "".join(b + p + a for b, p, a in segments) == BRIEF
+
+
+def test_doc_segments_keeps_every_heading_out_of_the_translated_prose():
+    """Headings are structure, and DOC_RULES already tells the model not to
+    translate them. Splitting a document is how they stop being sent at all."""
+    segments = tt.doc_segments(BRIEF, 40)
+    for _, prose, _ in segments:
+        assert "## " not in prose
+
+
+def test_doc_segments_keeps_the_preamble_before_the_first_heading():
+    segments = tt.doc_segments(BRIEF, 10_000)
+    assert "Gold at 3,681." in segments[0][1]
+    assert "Market snapshot" not in segments[0][1]
+
+
+def test_doc_segments_splits_a_section_that_is_itself_too_large():
+    """A single `## ` section over the threshold is the case heading-splitting
+    alone cannot serve; it is packed into paragraph-sized chunks instead."""
+    body = "\n\n".join(f"Paragraph {i} about gold." for i in range(40))
+    text = f"## Deep dive\n\n{body}\n"
+    segments = tt.doc_segments(text, 200)
+    assert len([p for _, p, _ in segments if p]) > 1
+    assert "".join(b + p + a for b, p, a in segments) == text
+    for _, prose, _ in segments:
+        assert len(prose.encode("utf-8")) <= 200
+
+
+def test_doc_segments_emits_an_unsplittable_paragraph_whole():
+    """A single paragraph larger than the threshold has no safe split point —
+    prose is not chunkable below a paragraph without mangling it. It goes as
+    one oversized chunk rather than being cut mid-sentence."""
+    text = "x" * 500 + "\n"
+    segments = tt.doc_segments(text, 100)
+    assert len([p for _, p, _ in segments if p]) == 1
+    assert "".join(b + p + a for b, p, a in segments) == text
+
+
+def test_doc_segments_never_sends_whitespace_only_prose():
+    text = "## Empty\n\n## Also empty\n\n"
+    assert [p for _, p, _ in tt.doc_segments(text, 10)] == ["", ""]
+    assert "".join(b + p + a for b, p, a in tt.doc_segments(text, 10)) == text
+
+
+FENCED = """# Jamasp Brief — 2026-09-16
+
+Gold at 3,681.
+
+## Example
+
+Reports quote markdown at the desk:
+
+```markdown
+## Not a heading
+
+The body of the quoted example.
+```
+
+Back to prose.
+
+## After
+
+Done.
+"""
+
+
+def test_doc_segments_does_not_treat_a_heading_inside_a_fence_as_one():
+    """A report quoting markdown carries `## ` lines that are CONTENT. Split
+    on one and the fence opener goes to one model call and its closer to the
+    next, which is how a code block comes back with an unterminated fence."""
+    segments = tt.doc_segments(FENCED, 10_000)
+    assert "".join(b + p + a for b, p, a in segments) == FENCED
+    whole = [b + p + a for b, p, a in segments]
+    holding = [s for s in whole if "```markdown" in s]
+    assert len(holding) == 1
+    assert holding[0].count("```") == 2          # opener AND closer together
+    assert "## Not a heading" in holding[0]
+
+
+def test_doc_segments_never_splits_a_fence_at_an_interior_blank_line():
+    """The second shape of the same bug: an over-limit section is packed at
+    blank lines, and a fence containing one is cut in half — the closing
+    fence arrives in the NEXT model call with nothing it closes."""
+    first, second = "FIRST" + "x" * 150, "SECOND" + "x" * 150
+    text = ("## Deep dive\n\nIntro.\n\n"
+            f"```\n{first}\n\n{second}\n```\n\nOutro.\n")
+    segments = tt.doc_segments(text, 200)
+    assert "".join(b + p + a for b, p, a in segments) == text
+    whole = [b + p + a for b, p, a in segments]
+    holding = [s for s in whole if "FIRST" in s]
+    assert len(holding) == 1
+    assert "SECOND" in holding[0] and holding[0].count("```") == 2
+
+
+def test_the_document_rules_never_claim_headings_were_held_back():
+    """`DOC_RULES` said "Do not translate headings; they are not included",
+    which is true only ABOVE the chunk threshold. Below it the whole document
+    goes to the model, `## ` lines and all, so a small report's headings could
+    come back Persian while a large one's are guaranteed English. The rule now
+    asks for the same outcome on both paths."""
+    assert "not included" not in tt.DOC_RULES
+    prompt = tt.build_doc_prompt("## A\n\nShort.\n", {})
+    assert "## A" in prompt                      # it really is in there
+    rules = tt.DOC_RULES.lower()
+    assert "heading" in rules and "unchanged" in rules

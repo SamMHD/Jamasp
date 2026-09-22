@@ -25,6 +25,17 @@ Mode comes from FAKE_CODEX_MODE:
   hang     sleep past any sane timeout
   stdout   print the JSON to stdout instead (the `stdout` protocol)
   lax      skip strict-schema validation (for tests about other failures)
+  oversize refuse a document payload over FAKE_CODEX_MAX_BYTES (default
+           12000) and answer anything smaller normally
+
+`oversize` reproduces the failure that took the translate timer down. On the
+live host, at `timeout_seconds: 180`, an 11,362-byte and an 11,455-byte brief
+both translated in one call; a 21,728-byte brief timed out, and every report
+above roughly 12KB did the same — with the pending queue running 19,767 to
+26,968 bytes, not one of them could ever have succeeded. This mode refuses on
+exactly that boundary so the chunked path is proved against a translator that
+says no to what the real one said no to, without a test sleeping for 180
+seconds.
 """
 import json
 import os
@@ -104,6 +115,21 @@ if mode == "quota":
 if mode == "hang":
     time.sleep(30)
     sys.exit(0)
+if mode == "oversize":
+    # The document payload only — build_doc_prompt puts the source after a
+    # `---` fence, and the rules and glossary ahead of it are fixed overhead
+    # that no amount of chunking can remove.
+    payload = prompt.split("---\n", 1)[-1]
+    limit = int(os.environ.get("FAKE_CODEX_MAX_BYTES", "12000"))
+    if len(payload.encode("utf-8")) > limit:
+        # Non-zero with a timeout-shaped message, which modelrun turns into
+        # the same ModelError a real `subprocess` timeout raises. Deliberately
+        # says nothing about usage limits or credits, so it cannot be mistaken
+        # for a quota outage by modelrun._is_quota_exhausted.
+        print(f"codex: request of {len(payload.encode('utf-8'))} bytes"
+              f" exceeded the {limit}-byte envelope and timed out",
+              file=sys.stderr)
+        sys.exit(1)
 
 if "<?document?>" in prompt or '"text"' in prompt:
     body = json.dumps({"text": "FA:" + prompt.split("---\n", 1)[-1]},
