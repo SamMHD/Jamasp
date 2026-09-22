@@ -181,16 +181,24 @@ def pending_rows(
 
     `scored_only` (config key `translate.scored_only`) narrows the candidate
     set to items carrying an `item_scores` row — the same join
-    `getScoredItems` (panel/lib/db.ts) makes onto the technical map. The map
-    is the only surface that reads `headline_fa`/`lede_fa` on `items`, so this
-    ties translation spend to what is actually ON SCREEN rather than merely
-    recent: measured on the live host, the 7-day window's pending backlog was
-    1,971 items under the plain rolling window; of the 1,332 items in that
-    window that are actually scored, only 814 were untranslated — a 59% cut
-    to the backlog, to roughly 41 batches for the whole thing. `item_scores.
-    item_id` is that table's primary key, so the EXISTS check costs an index
-    lookup, not a scan. Defaults to off so an unconfigured deployment keeps
-    the old "everything in the window" behaviour.
+    `getScoredItems` (panel/lib/db.ts) makes onto the technical map. This is
+    NOT the only panel surface that reads `headline_fa`/`lede_fa`: the inbox
+    (`getItems`, `panel/components/inbox-table.tsx`) and the dashboard's
+    cluster/top-story views (`getClusterHeads`/`topStory`,
+    `panel/components/news-flow.tsx`) read them too, over plain `SELECT *
+    FROM items` with no `item_scores` join. The map is only the surface we
+    are PAYING to translate for — a deliberate desk choice, not a technical
+    limit — so a Persian viewer will keep seeing the English-with-EN-marker
+    fallback on the inbox and dashboard for any item this filter excludes.
+    Ties translation spend to what the map actually renders rather than to
+    mere recency: measured on the live host, the 7-day window's pending
+    backlog was 1,971 items under the plain rolling window; of the 1,332
+    items in that window that are actually scored, only 814 were
+    untranslated — a 59% cut to the backlog, to roughly 41 batches for the
+    whole thing. `item_scores.item_id` is that table's primary key, so the
+    EXISTS check costs an index lookup, not a scan. Defaults to off so an
+    unconfigured deployment keeps the old "everything in the window"
+    behaviour.
     """
     stamp = now or utcnow()
     clause, thresholds = _backoff(stamp)

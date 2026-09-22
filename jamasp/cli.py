@@ -282,10 +282,15 @@ def translate(dry_run, force, only, check_only, db_path, config_dir):
         # the comment on jamasp-translate.service's ExecStart) — codex being
         # out of quota is a billing state worth a desk alert, where a handful
         # of refused headlines is not. `jamasp-alert@%n` is what turns this
-        # into a Telegram message, and its own hour-long per-unit suppression
-        # (see the `alerting` skill) is what keeps a multi-hour outage from
-        # paging the desk on every 10-minute tick — so raising here every
-        # time is safe rather than the storm this fix exists to stop.
+        # into a Telegram message. Its hour-long per-unit suppression (see
+        # the `alerting` skill) does NOT collapse an outage into one alert —
+        # `should_send()` re-arms every hour the outage continues, so the
+        # 1:13 PM to 10:00 PM outage that motivated this fix would still
+        # produce roughly nine alerts, not one. What it does do is bound a
+        # 10-minute-tick outage to ~9/day instead of ~144/day: a real
+        # reduction, not the full fix the "not every ten minutes" ask
+        # implied — raising here every time is still the right call, just on
+        # a weaker guarantee than a single page per outage.
         raise click.ClickException(
             "codex is out of quota; stopped rather than fan out into calls"
             " that would fail the same way (docs/todo/025)")

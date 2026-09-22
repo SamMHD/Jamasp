@@ -107,10 +107,14 @@ Fixed across `jamasp/modelrun.py`, `jamasp/translate.py` and `jamasp/cli.py`.
   exhaustion, remaining passes skipped: <message>") instead of letting it read
   as `rows 0/0; events 0/0; docs 0/0` — indistinguishable from a quiet tick.
   `jamasp translate` then exits non-zero, which fires
-  `jamasp-alert@jamasp-translate.service` — already wired on the unit and
-  already rate-limited to once an hour per unit by `jamasp/alert.py`'s
-  `should_send()`, so a multi-hour outage pages the desk once, not every
-  10-minute tick.
+  `jamasp-alert@jamasp-translate.service` — already wired on the unit. Its
+  per-unit suppression (`jamasp/alert.py`'s `should_send()`,
+  `ALERT_WINDOW_MINUTES = 60`) does not collapse a whole outage into one
+  alert — it re-arms every hour the outage continues, so the 1:13 PM to
+  10:00 PM outage that motivated this fix would still have produced roughly
+  nine alerts, not one. What the non-zero exit does buy is a real reduction
+  from the 10-minute-tick baseline (~9/day instead of ~144/day), not the
+  single-page-per-outage guarantee an earlier draft of this fix claimed.
 - `tests/fake_codex.py` gained a `quota` mode that exits non-zero with the
   real production message (verbatim, modulo the reset time) so the signature
   match is exercised against real text end to end, not a paraphrase.

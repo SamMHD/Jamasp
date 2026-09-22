@@ -72,15 +72,22 @@ translate:
   # bounds one tick — a larger backlog drains over subsequent ticks, newest
   # first.
   #
-  # Only items the map actually renders are worth paying to translate: the
-  # map joins item_scores onto items (getScoredItems, panel/lib/db.ts), so an
-  # item with no item_scores row never reaches that surface however recent it
-  # is. Ties spend to VISIBILITY rather than recency — measured on the live
-  # host, the 7-day pending backlog was 1,971 items under the plain rolling
-  # window; only 814 of the window's 1,332 scored items were untranslated, a
-  # 59% cut. Leaves the events pass untouched: calendar events are not map
-  # news, and there are only ~194 of them. Absent means the old "everything
-  # in the window" behaviour.
+  # The map is the only surface we are PAYING to translate for — a
+  # deliberate desk choice, not a technical limit. It joins item_scores onto
+  # items (getScoredItems, panel/lib/db.ts), and this key mirrors that join
+  # so translation spend tracks it. It is NOT the only panel surface that
+  # reads headline_fa/lede_fa: the inbox and the dashboard's cluster/top-
+  # story views (getItems, getClusterHeads, topStory — panel/lib/db.ts) read
+  # them too, over plain `SELECT * FROM items` with no item_scores join. A
+  # Persian viewer will keep seeing the English-with-EN-marker fallback on
+  # the inbox and dashboard for any unscored item, however recent it is —
+  # this key does not close that gap, it only decides what we pay for. Ties
+  # spend to VISIBILITY rather than recency for the map itself — measured on
+  # the live host, the 7-day pending backlog was 1,971 items under the plain
+  # rolling window; only 814 of the window's 1,332 scored items were
+  # untranslated, a 59% cut. Leaves the events pass untouched: calendar
+  # events are not map news, and there are only ~194 of them. Absent means
+  # the old "everything in the window" behaviour.
   scored_only: true
   # Hard floor under the rolling window, SUPERSEDED by scored_only above and
   # deliberately left empty. This bounded the backlog by RECENCY — added to
