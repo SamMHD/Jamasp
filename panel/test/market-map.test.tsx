@@ -385,3 +385,42 @@ describe("MarketMap — Persian chrome", () => {
     expect(html).toContain(fa["tone.bearish"]);
   });
 });
+
+/**
+ * The two aria-labels that used to be English in both locales, deferring to
+ * "this task's report" for the reasoning — a report that was never written.
+ *
+ * They are the region's ONLY name: there is no visible heading beside them,
+ * which is precisely why they have to be translated. A Persian
+ * screen-reader user would otherwise be the one reader served no Persian.
+ * Closed strings, hand-translated, so no EN marker: chrome, not content.
+ */
+describe("MarketMap region labels", () => {
+  it("names the populated region through the dictionary", () => {
+    const html = render([item({})], { locale: "fa", messages: messages.fa });
+    expect(html).toContain(`aria-label="${messages.fa["map.regionLabel"]}"`);
+    expect(html).not.toContain('aria-label="Scored news treemap"');
+  });
+
+  it("names the EMPTY region through the same key", () => {
+    // A separate return branch, and the one a freshly deployed host shows.
+    const html = render([], { locale: "fa", messages: messages.fa });
+    expect(html).toContain(`aria-label="${messages.fa["map.regionLabel"]}"`);
+    expect(html).not.toContain("Scored news treemap");
+  });
+
+  it("composes the svg's counted sentence in Persian with Latin digits", () => {
+    const html = render([item({}), item({ itemId: "i2", url: "https://x.test/2" })],
+      { locale: "fa", messages: messages.fa });
+    const expected = messages.fa["map.svgAriaTemplate"]
+      .replace("{n}", "2")
+      .replace("{window}", messages.fa["map.windowLast24h"]);
+    expect(html).toContain(expected);
+    expect(html).not.toContain("scored news treemap,");
+  });
+
+  it("keeps the English labels in the English locale", () => {
+    const html = render([item({})], { locale: "en", messages: messages.en });
+    expect(html).toContain(`aria-label="${messages.en["map.regionLabel"]}"`);
+  });
+});

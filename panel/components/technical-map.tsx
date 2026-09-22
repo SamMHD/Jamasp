@@ -82,10 +82,12 @@ export function TechnicalMap({ tiles, width, height, fittedAt, messages }: {
   const now = new Date();
 
   if (tiles.length === 0) {
-    // aria-label deliberately English-only in both locales: see
-    // components/market-map.tsx's identical section for the reasoning.
+    // Localized, for the reason spelled out in components/market-map.tsx's
+    // identical section: the aria-label is this region's only name, so
+    // English here leaves the Persian screen-reader user the one reader
+    // served no Persian.
     return (
-      <section aria-label="Technical signal treemap"
+      <section aria-label={t(messages, "tech.regionLabel")}
         className="rounded border border-border p-4">
         <p className="text-sm text-muted-foreground">
           {t(messages, "tech.noSignalsPrefix")} <code>jamasp bars backfill</code>{" "}
@@ -104,13 +106,15 @@ export function TechnicalMap({ tiles, width, height, fittedAt, messages }: {
   const unfitted = tiles.filter(t => !t.fitted && !t.pinned).length;
 
   return (
-    <section id={TECHNICAL_MAP_ELEMENT_ID} aria-label="Technical signal treemap" dir="ltr"
+    <section id={TECHNICAL_MAP_ELEMENT_ID} aria-label={t(messages, "tech.regionLabel")}
+      dir="ltr"
       className="rounded border border-border p-4 bg-background">
       <div className="mb-2 flex items-center justify-end">
         <FullscreenButton targetId={TECHNICAL_MAP_ELEMENT_ID} messages={messages} />
       </div>
       <svg viewBox={`0 0 ${width} ${height}`} className="w-full" role="img"
-        aria-label={`technical signal treemap, ${tiles.length} signals`}>
+        aria-label={t(messages, "tech.svgAriaTemplate")
+          .replace("{n}", String(tiles.length))}>
         <MapHatchDefs />
         {boxes.map(box => (
           <g key={box.group}>
