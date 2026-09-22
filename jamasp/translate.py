@@ -160,6 +160,7 @@ def _backoff(now: str) -> tuple[str, list[str]]:
 def pending_rows(
     conn: sqlite3.Connection, window_days: int, limit: int,
     now: str | None = None, force: bool = False, since: str | None = None,
+    scored_only: bool = False,
 ) -> list[sqlite3.Row]:
     """Untranslated items inside the window, newest first.
 
@@ -177,31 +178,73 @@ def pending_rows(
     from the reuse pass, and re-translating it would both spend a call and give
     the same story two different Persian headlines. The reuse pass owns those
     rows.
+
+    `scored_only` (config key `translate.scored_only`) narrows the candidate
+    set to items carrying an `item_scores` row — the same join
+    `getScoredItems` (panel/lib/db.ts) makes onto the technical map. This is
+    NOT the only panel surface that reads `headline_fa`/`lede_fa`: the inbox
+    (`getItems`, `panel/components/inbox-table.tsx`) and the dashboard's
+    cluster/top-story views (`getClusterHeads`/`topStory`,
+    `panel/components/news-flow.tsx`) read them too, over plain `SELECT *
+    FROM items` with no `item_scores` join. The map is only the surface we
+    are PAYING to translate for — a deliberate desk choice, not a technical
+    limit — so a Persian viewer will keep seeing the English-with-EN-marker
+    fallback on the inbox and dashboard for any item this filter excludes.
+    Ties translation spend to what the map actually renders rather than to
+    mere recency: measured on the live host, the 7-day window's pending
+    backlog was 1,971 items under the plain rolling window; of the 1,332
+    items in that window that are actually scored, only 814 were
+    untranslated — a 59% cut to the backlog, to roughly 41 batches for the
+    whole thing. `item_scores.item_id` is that table's primary key, so the
+    EXISTS check costs an index lookup, not a scan. Defaults to off so an
+    unconfigured deployment keeps the old "everything in the window"
+    behaviour.
     """
     stamp = now or utcnow()
     clause, thresholds = _backoff(stamp)
     selector = ("(fa_source IS NULL OR fa_source = 'model')" if force
                 else "headline_fa IS NULL")
+    scored_clause = (
+        " AND EXISTS (SELECT 1 FROM item_scores s WHERE s.item_id = items.id)"
+        if scored_only else ""
+    )
     return conn.execute(
         f"SELECT id, headline, lede FROM items"
-        f" WHERE {selector} AND published_at >= ? AND fa_attempts < ?{clause}"
+        f" WHERE {selector} AND published_at >= ? AND fa_attempts < ?"
+        f"{clause}{scored_clause}"
         " ORDER BY published_at DESC LIMIT ?",
         (since or _since(window_days, stamp), MAX_ATTEMPTS, *thresholds, limit),
     ).fetchall()
 
 
 def rearm(conn: sqlite3.Connection, table: str, column: str,
-          window_days: int, now: str | None = None) -> int:
+          window_days: int, now: str | None = None,
+          scored_only: bool = False) -> int:
     """`--force`'s first half: clear the abandonment state inside the window.
 
     The spec is explicit that --force does not merely ignore the cap, it
     resets it — "an operator clearing a known-bad state does not have to edit
     the database". Scoped to the window because rows outside it are never
     translated anyway.
+
+    `scored_only` mirrors `pending_rows`'s own filter of the same name, and
+    for the same reason: without it, `--force` run against a `scored_only`
+    config would re-arm every abandoned row in the window but then actually
+    retranslate only the scored ones, leaving the rest sitting at
+    `fa_attempts = 0` with nothing to pick them up until `scored_only` is
+    turned off — a state that quietly outlives the run that created it and
+    contradicts "re-arms exactly the map set and nothing wider". Meaningful
+    only for `table == "items"`, since `item_scores` keys off `items.id`; the
+    events pass never sets it.
     """
+    scored_clause = (
+        f" AND EXISTS (SELECT 1 FROM item_scores s WHERE s.item_id = {table}.id)"
+        if scored_only else ""
+    )
     cur = conn.execute(
         f"UPDATE {table} SET fa_attempts = 0, fa_error = NULL"
-        f" WHERE {column} >= ? AND (fa_attempts > 0 OR fa_error IS NOT NULL)",
+        f" WHERE {column} >= ? AND (fa_attempts > 0 OR fa_error IS NOT NULL)"
+        f"{scored_clause}",
         (_since(window_days, now),),
     )
     conn.commit()
@@ -277,10 +320,20 @@ def _batch_with_fallback(
 
     A malformed or refused response costs the whole batch, so one bad headline
     must not be allowed to poison nineteen good ones.
+
+    modelrun.QuotaExhausted is deliberately NOT caught here — it propagates
+    straight out to the caller. Retrying it, let alone falling back to one
+    call per row, spends calls that are guaranteed to fail identically: every
+    other call in the run is subject to the same exhausted allowance. That
+    fan-out (1 call becomes 22) is what drove 1,861 rows to the attempt cap
+    across three outages on the live host (docs/todo/025); the fix is to cost
+    exactly the one call that discovered the outage and stop.
     """
     for attempt in (1, 2):
         try:
             answers = _translate_batch(rows, fields, glossary, run)
+        except modelrun.QuotaExhausted:
+            raise   # see the docstring above — no retry, no singles fallback
         except ROW_FAILURES:
             if attempt == 2:
                 break
@@ -308,6 +361,12 @@ def _batch_with_fallback(
     for row in rows:
         try:
             answers = _translate_batch([row], fields, glossary, run)
+        except modelrun.QuotaExhausted:
+            # Quota can also run out mid-fallback (the batch failed for an
+            # ordinary reason, singles started, and THEN the allowance hit
+            # zero). Same rule applies: stop paying for calls guaranteed to
+            # fail, rather than working through the rest of the batch.
+            raise
         except ROW_FAILURES as exc:
             _record(conn, fail, row["id"], str(exc), now)
             failed += 1
@@ -335,6 +394,44 @@ def _record(conn, fail, row_id: str, error: str, now: str) -> None:
     _commit(conn, lambda: fail(conn, row_id, error, now))
 
 
+def _run_batches(
+    conn, rows, batch_size: int, fields, glossary, run, now, write, fail
+) -> dict:
+    """Split `rows` into batches and translate each in turn. Returns counts.
+
+    Stops the moment a batch raises modelrun.QuotaExhausted, instead of
+    moving on to the next one: every remaining batch in this pass is subject
+    to the same exhausted allowance and would fail identically, so continuing
+    would only spend calls to confirm what the first failure already proved.
+    The rows in the batch that triggered it are left exactly as they were —
+    `_batch_with_fallback` raises before writing anything for them — so
+    nothing is recorded as failed and no attempt is spent (see
+    modelrun.QuotaExhausted's docstring).
+
+    The caller (translate_rows / translate_events) learns about the stop
+    through `quota_exhausted` in the returned dict, which is how
+    `run_translate` knows to skip the passes after this one too.
+    """
+    translated = failed = batches = 0
+    for start in range(0, len(rows), batch_size):
+        chunk = rows[start:start + batch_size]
+        try:
+            ok, bad = _batch_with_fallback(
+                conn, chunk, fields, glossary, run, now, write, fail,
+            )
+        except modelrun.QuotaExhausted as exc:
+            batches += 1   # one call WAS made — the one that found this out
+            return {
+                "translated": translated, "failed": failed,
+                "batches": batches, "quota_exhausted": True,
+                "quota_message": str(exc),
+            }
+        translated += ok
+        failed += bad
+        batches += 1
+    return {"translated": translated, "failed": failed, "batches": batches}
+
+
 def translate_rows(
     conn: sqlite3.Connection, cfg: dict, glossary: dict,
     run: Callable[[str, dict], object], now: str | None = None,
@@ -344,23 +441,19 @@ def translate_rows(
     stamp = now or utcnow()
     batch_size = cfg["batch_size"]
     ceiling = cfg["max_batches_per_run"]
+    # Absent means the old "everything in the window" behaviour — opt-in at
+    # the config layer, see pending_rows's docstring.
+    scored_only = cfg.get("scored_only", False)
     if force:
-        rearm(conn, "items", "published_at", cfg["window_days"], stamp)
+        rearm(conn, "items", "published_at", cfg["window_days"], stamp,
+              scored_only=scored_only)
     rows = pending_rows(
         conn, cfg["window_days"], batch_size * ceiling, stamp, force,
-        since=floor_for(cfg, cfg["window_days"], stamp))
+        since=floor_for(cfg, cfg["window_days"], stamp),
+        scored_only=scored_only)
 
-    translated = failed = batches = 0
-    for start in range(0, len(rows), batch_size):
-        chunk = rows[start:start + batch_size]
-        ok, bad = _batch_with_fallback(
-            conn, chunk, ROW_FIELDS, glossary, run, stamp,
-            _write_row, _record_failure,
-        )
-        translated += ok
-        failed += bad
-        batches += 1
-    return {"translated": translated, "failed": failed, "batches": batches}
+    return _run_batches(conn, rows, batch_size, ROW_FIELDS, glossary, run,
+                        stamp, _write_row, _record_failure)
 
 
 EVENT_FIELDS = ("title",)
@@ -420,17 +513,8 @@ def translate_events(
         conn, cfg["window_days"], batch_size * ceiling, stamp, force,
         since=floor_for(cfg, cfg["window_days"], stamp))
 
-    translated = failed = batches = 0
-    for start in range(0, len(rows), batch_size):
-        chunk = rows[start:start + batch_size]
-        ok, bad = _batch_with_fallback(
-            conn, chunk, EVENT_FIELDS, glossary, run, stamp,
-            _write_event, _record_event_failure,
-        )
-        translated += ok
-        failed += bad
-        batches += 1
-    return {"translated": translated, "failed": failed, "batches": batches}
+    return _run_batches(conn, rows, batch_size, EVENT_FIELDS, glossary, run,
+                        stamp, _write_event, _record_event_failure)
 
 
 DEFAULT_TRANSLATOR = "codex"
@@ -537,6 +621,14 @@ def translate_stance(
         try:
             out.append((heading, digest, _translate_text(body, glossary, run)))
             translated += 1
+        except modelrun.QuotaExhausted:
+            # Unlike an ordinary failure, this is not "this section is bad" —
+            # every remaining section (and the rest of the docs pass behind
+            # it) would fail the same way. Raise straight out without
+            # appending anything for this section or writing the sidecar:
+            # the sections done so far in THIS call are simply retried, at no
+            # extra cost, on the next tick that finds codex funded again.
+            raise
         except (modelrun.ModelError, translatetext.ParseError):
             # Keep the previous Persian for this section, and keep its OLD
             # hash so the next run tries again rather than believing it is done.
@@ -615,6 +707,8 @@ def translate_document(
 
     try:
         persian = _translate_text(text, glossary, run)
+    except modelrun.QuotaExhausted:
+        raise   # see translate_stance's comment on the same exception
     except (modelrun.ModelError, translatetext.ParseError):
         return {"translated": 0, "failed": 1}
 
@@ -665,6 +759,8 @@ def translate_watchlist(
                         "why_fa": _translate_text(why, glossary, run),
                         "src_hash": digest})
             translated += 1
+        except modelrun.QuotaExhausted:
+            raise   # see translate_stance's comment on the same exception
         except (modelrun.ModelError, translatetext.ParseError):
             if previous:
                 out.append(previous)
@@ -729,6 +825,8 @@ def translate_predictions(
                         "claim_fa": _translate_text(claim, glossary, run),
                         "src_hash": digest})
             translated += 1
+        except modelrun.QuotaExhausted:
+            raise   # see translate_stance's comment on the same exception
         except (modelrun.ModelError, translatetext.ParseError):
             if previous:
                 out.append(previous)
@@ -794,20 +892,31 @@ def translate_docs(
         totals["translated"] += result["translated"]
         totals["failed"] += result["failed"]
 
-    merge(translate_stance(state / "stance.md", state / "stance.fa.md",
-                           glossary, run, now, force=force, budget=budget))
-    merge(translate_document(state / "playbook.md", state / "playbook.fa.md",
-                             glossary, run, now, force=force, budget=budget))
-    merge(translate_watchlist(state / "watchlist.yaml",
-                              state / "watchlist.fa.yaml",
-                              glossary, run, now, force=force, budget=budget))
-    merge(translate_predictions(state / "predictions.jsonl",
-                                state / "predictions.fa.jsonl",
-                                glossary, run, now, force=force, budget=budget))
-    for report in new_reports(reports, cfg["reports_since"]):
-        merge(translate_document(
-            report, report.with_name(report.name[:-3] + ".fa.md"),
-            glossary, run, now, force=force, budget=budget))
+    # Each of the four calls below (and each report in the loop) can raise
+    # modelrun.QuotaExhausted from inside its own per-item loop — see the
+    # `raise` beside every `except modelrun.QuotaExhausted` upstream. One
+    # try/except around the whole chain, rather than one per call, because
+    # the point is the same as translate_rows/translate_events: stop at the
+    # FIRST one, not after paying to discover it again in playbook,
+    # watchlist, predictions and every pending report in turn.
+    try:
+        merge(translate_stance(state / "stance.md", state / "stance.fa.md",
+                               glossary, run, now, force=force, budget=budget))
+        merge(translate_document(state / "playbook.md", state / "playbook.fa.md",
+                                 glossary, run, now, force=force, budget=budget))
+        merge(translate_watchlist(state / "watchlist.yaml",
+                                  state / "watchlist.fa.yaml",
+                                  glossary, run, now, force=force, budget=budget))
+        merge(translate_predictions(state / "predictions.jsonl",
+                                    state / "predictions.fa.jsonl",
+                                    glossary, run, now, force=force, budget=budget))
+        for report in new_reports(reports, cfg["reports_since"]):
+            merge(translate_document(
+                report, report.with_name(report.name[:-3] + ".fa.md"),
+                glossary, run, now, force=force, budget=budget))
+    except modelrun.QuotaExhausted as exc:
+        totals["quota_exhausted"] = True
+        totals["quota_message"] = str(exc)
     totals["skipped"] = budget.skipped
     return totals
 
@@ -864,7 +973,8 @@ def run_translate(
             "pending_rows": len(pending_rows(
                 conn, cfg["window_days"],
                 cfg["batch_size"] * cfg["max_batches_per_run"], now, force,
-                since=floor_for(cfg, cfg["window_days"], now))),
+                since=floor_for(cfg, cfg["window_days"], now),
+                scored_only=cfg.get("scored_only", False))),
             "pending_events": len(pending_events(
                 conn, cfg["window_days"],
                 cfg["batch_size"] * cfg["max_batches_per_run"], now, force,
@@ -873,15 +983,26 @@ def run_translate(
         }
 
     stats: dict = {"reused": 0, "rows": {}, "events": {}, "docs": {}}
+    # A quota outage found in one pass means every remaining pass would hit
+    # the same wall — codex does not distinguish rows from events from docs,
+    # it is simply out of allowance — so `quota_hit` short-circuits the rest
+    # of this run the moment any pass reports it, rather than paying to
+    # rediscover the outage in events and again in docs (docs/todo/025).
+    quota_hit = False
     if want_rows:
         # Always before the model pass, and not separately selectable: a rows
         # pass that ran first would pay to translate what flash already wrote.
         stats["reused"] = reuse_flash_persian(conn, now)
         stats["rows"] = translate_rows(conn, cfg, glossary, run, now, force)
-    if want_events:
+        quota_hit = bool(stats["rows"].get("quota_exhausted"))
+    if want_events and not quota_hit:
         stats["events"] = translate_events(conn, cfg, glossary, run, now, force)
-    if want_docs:
+        quota_hit = bool(stats["events"].get("quota_exhausted"))
+    if want_docs and not quota_hit:
         stats["docs"] = translate_docs(root, cfg, glossary, run, now, force)
+        quota_hit = quota_hit or bool(stats["docs"].get("quota_exhausted"))
+    if quota_hit:
+        stats["quota_exhausted"] = True
 
     # Evidence that the job runs on this host, mirroring meta.last_ingest_at.
     # The watchdog's backlog and abandoned probes gate on this rather than on

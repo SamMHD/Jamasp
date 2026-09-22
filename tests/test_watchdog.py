@@ -483,3 +483,91 @@ def test_both_translate_probes_resume_once_the_job_has_run(tmp_path):
                                 translate_window_days=7)
     assert any("translate backlog" in v for v in violations), violations
     assert any("gave up" in v for v in violations), violations
+
+
+def _add_score(conn, item_id, tier=2):
+    """A minimal item_scores row — enough for the backlog probe's EXISTS
+    join under scored_only. Mirrors tests/test_translate.py's add_score."""
+    conn.execute(
+        "INSERT INTO item_scores (item_id, tier, direction, conviction,"
+        " theme, scored_at) VALUES (?, ?, 1, 0.5, 'gold', ?)",
+        (item_id, tier, "2026-09-13T10:00:00Z"),
+    )
+    conn.commit()
+
+
+def test_scored_only_clears_the_backlog_probe_for_unscored_rows(tmp_path):
+    """The critical regression: under scored_only, an unscored row is NEVER
+    selected for translation by design — translate.pending_rows filters it
+    out — so it sits at headline_fa NULL, fa_attempts 0 forever. Without the
+    same EXISTS filter here, a fully successful scored_only run still trips
+    this probe, permanently, which is worse than no probe at all."""
+    conn = db.connect(tmp_path / "t.db")
+    conn.execute(
+        "INSERT INTO items (id, source, published_at, headline, url, topic,"
+        " fetched_at) VALUES ('i1','a','2026-09-13T10:00:00Z','H',"
+        " 'https://e/1','gold','2026-09-13T10:00:00Z')"
+    )
+    conn.commit()
+    db.set_meta(conn, "last_translate_at", "2026-09-13T11:55:00Z")
+    violations = watchdog.check(conn, tmp_path, now="2026-09-13T12:00:00Z",
+                                credentials_path=tmp_path / "none.json",
+                                translate_window_days=7,
+                                translate_scored_only=True)
+    assert not any("translate backlog" in v for v in violations), violations
+
+
+def test_scored_only_still_reports_a_genuinely_stalled_scored_row(tmp_path):
+    """The other half: scored_only must not blind the probe entirely — a
+    SCORED row sitting untranslated past the threshold is a real stall and
+    must still violate."""
+    conn = db.connect(tmp_path / "t.db")
+    conn.execute(
+        "INSERT INTO items (id, source, published_at, headline, url, topic,"
+        " fetched_at) VALUES ('i1','a','2026-09-13T10:00:00Z','H',"
+        " 'https://e/1','gold','2026-09-13T10:00:00Z')"
+    )
+    conn.commit()
+    _add_score(conn, "i1")
+    db.set_meta(conn, "last_translate_at", "2026-09-13T11:55:00Z")
+    violations = watchdog.check(conn, tmp_path, now="2026-09-13T12:00:00Z",
+                                credentials_path=tmp_path / "none.json",
+                                translate_window_days=7,
+                                translate_scored_only=True)
+    assert any("translate backlog" in v for v in violations), violations
+
+
+def test_scored_only_off_still_reports_every_untranslated_row(tmp_path):
+    """Default behaviour unchanged: translate_scored_only defaults False, so
+    an unscored row still violates exactly as it always has."""
+    conn = db.connect(tmp_path / "t.db")
+    conn.execute(
+        "INSERT INTO items (id, source, published_at, headline, url, topic,"
+        " fetched_at) VALUES ('i1','a','2026-09-13T10:00:00Z','H',"
+        " 'https://e/1','gold','2026-09-13T10:00:00Z')"
+    )
+    conn.commit()
+    db.set_meta(conn, "last_translate_at", "2026-09-13T11:55:00Z")
+    violations = watchdog.check(conn, tmp_path, now="2026-09-13T12:00:00Z",
+                                credentials_path=tmp_path / "none.json",
+                                translate_window_days=7)
+    assert any("translate backlog" in v for v in violations), violations
+
+
+def test_watchdog_run_reads_scored_only_from_settings(tmp_path):
+    """`run()` must thread translate.scored_only out of the real settings
+    dict, not just accept it as a `check()` parameter — this is what a bare
+    `scored_only: true` in settings.yaml actually wires up for the probe."""
+    conn = db.connect(tmp_path / "t.db")
+    conn.execute(
+        "INSERT INTO items (id, source, published_at, headline, url, topic,"
+        " fetched_at) VALUES ('i1','a','2026-09-13T10:00:00Z','H',"
+        " 'https://e/1','gold','2026-09-13T10:00:00Z')"
+    )
+    conn.commit()
+    db.set_meta(conn, "last_translate_at", "2026-09-13T11:55:00Z")
+    settings = {"translate": {"window_days": 7, "scored_only": True}}
+    violations = watchdog.run(conn, settings, tmp_path,
+                              now="2026-09-13T12:00:00Z",
+                              credentials_path=tmp_path / "none.json")
+    assert not any("translate backlog" in v for v in violations), violations

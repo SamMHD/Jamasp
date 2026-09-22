@@ -696,6 +696,14 @@ def test_translate_dry_run_reports_pending_and_writes_nothing(tmp_path, monkeypa
         " fetched_at) VALUES ('i1','a',?,'Gold climbs','https://e/1','gold',?)",
         (utcnow(), utcnow()),
     )
+    # The shipped config now sets translate.scored_only: true — only items
+    # the map actually renders (an item_scores row) count as pending, so this
+    # fixture needs one to still exercise "one row pending" rather than zero.
+    conn.execute(
+        "INSERT INTO item_scores (item_id, tier, direction, conviction,"
+        " theme, scored_at) VALUES ('i1', 2, 1, 0.5, 'gold', ?)",
+        (utcnow(),),
+    )
     conn.commit()
     conn.close()
 
@@ -756,6 +764,14 @@ def test_translate_dry_run_survives_a_broken_translator(tmp_path):
         " fetched_at) VALUES ('i1','a',?,'Gold climbs','https://e/1','gold',?)",
         (utcnow(), utcnow()),
     )
+    # This config is a copy of the real settings.yaml (only `cmd` swapped),
+    # which sets translate.scored_only: true — an item_scores row is what
+    # makes this fixture count as pending under that default.
+    conn.execute(
+        "INSERT INTO item_scores (item_id, tier, direction, conviction,"
+        " theme, scored_at) VALUES ('i1', 2, 1, 0.5, 'gold', ?)",
+        (utcnow(),),
+    )
     conn.commit()
     conn.close()
 
@@ -788,3 +804,73 @@ def test_the_translate_line_only_claims_a_deferral_when_there_was_one():
         {**base, "docs": {"translated": 7, "failed": 0, "skipped": 0}})
     assert "4 deferred" in cli._translate_line(
         {**base, "docs": {"translated": 3, "failed": 0, "skipped": 4}})
+
+
+def test_the_translate_line_names_a_quota_stop_instead_of_small_numbers():
+    """docs/todo/025: `rows 0/0; events 0/0; docs 0/0` reads exactly like a
+    quiet tick with nothing pending. An operator must not have to check the
+    database to tell the two apart."""
+    stats = {
+        "reused": 0,
+        "rows": {"translated": 0, "failed": 0, "batches": 1,
+                 "quota_exhausted": True, "quota_message": "usage limit"},
+        "events": {}, "docs": {},
+        "quota_exhausted": True,
+    }
+    line = cli._translate_line(stats)
+    assert "quota" in line.lower()
+    assert "usage limit" in line
+
+
+def test_translate_exits_non_zero_and_leaves_the_row_untouched_on_quota(
+    tmp_path, monkeypatch
+):
+    """End to end through the real CLI command and the real fake_codex.py
+    harness: a quota response must stop the run, be visible in the output,
+    exit non-zero (so the systemd unit's OnFailure alert fires — see
+    jamasp/cli.py's comment on the same line), and leave the row exactly as
+    it was, not bumped toward the attempt cap."""
+    monkeypatch.setenv("FAKE_CODEX_MODE", "quota")
+    cfgdir = tmp_path / "config"
+    cfgdir.mkdir()
+    (cfgdir / "sources.yaml").write_text(
+        Path("config/sources.yaml").read_text(encoding="utf-8"), encoding="utf-8")
+    (cfgdir / "glossary.fa.yaml").write_text("Fed: فدرال رزرو\n", encoding="utf-8")
+    settings = yaml.safe_load(Path("config/settings.yaml").read_text(encoding="utf-8"))
+    settings["translate"]["cmd"] = [sys.executable, "tests/fake_codex.py"]
+    (cfgdir / "settings.yaml").write_text(
+        yaml.safe_dump(settings, allow_unicode=True), encoding="utf-8")
+
+    db_path = tmp_path / "t.db"
+    conn = db.connect(db_path)
+    conn.execute(
+        "INSERT INTO items (id, source, published_at, headline, url, topic,"
+        " fetched_at) VALUES ('i1','a',?,'Gold climbs','https://e/1','gold',?)",
+        (utcnow(), utcnow()),
+    )
+    # The real settings.yaml (copied above, only `cmd` swapped) sets
+    # translate.scored_only: true — without an item_scores row this item
+    # would never reach the rows pass at all, and the test would end up
+    # exercising the docs pass against this checkout's own state/ instead.
+    conn.execute(
+        "INSERT INTO item_scores (item_id, tier, direction, conviction,"
+        " theme, scored_at) VALUES ('i1', 2, 1, 0.5, 'gold', ?)",
+        (utcnow(),),
+    )
+    conn.commit()
+    conn.close()
+
+    result = CliRunner().invoke(
+        cli.main,
+        ["translate", "--db", str(db_path), "--config-dir", str(cfgdir)],
+    )
+    assert result.exit_code != 0
+    assert "quota" in result.output.lower()
+
+    conn = db.connect(db_path)
+    row = conn.execute(
+        "SELECT fa_attempts, fa_failed_at, headline_fa FROM items"
+    ).fetchone()
+    assert row["fa_attempts"] == 0
+    assert row["fa_failed_at"] is None
+    assert row["headline_fa"] is None
