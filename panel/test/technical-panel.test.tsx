@@ -4,6 +4,8 @@ import { TechnicalPanel } from "../components/technical-panel";
 import type { PricePoint } from "../lib/db";
 import type { GoldTechnicals } from "../lib/technicals";
 import { getMessages } from "../lib/i18n";
+import { deriveTechnicals } from "../lib/technicals";
+import fa from "../messages/fa.json";
 
 const NOW = new Date("2026-08-01T12:00:00Z");
 const messages = getMessages("en");
@@ -181,5 +183,73 @@ describe("TechnicalPanel", () => {
     const html = render({ ...full, stale: false, indicatorsAsOf: "2026-08-01T11:59:00Z" });
     expect(html).toContain("1m ago");   // indicators, freshly fetched
     expect(html).toContain("4h ago");   // spot, four hours behind them
+  });
+});
+
+/**
+ * The Persian path through REGIME_KEY, which had no test at all.
+ *
+ * `regime` is the only prose string this panel renders (a reading, not an
+ * identifier), so it gets a full Persian rendering rather than staying
+ * Latin — via an exact-match lookup on deriveRegime's own return value.
+ * That makes the mapping silently breakable from either end: reword
+ * deriveRegime, or mistype a key here, and regimeLabel quietly falls back
+ * to the raw English string with nothing failing.
+ */
+describe("TechnicalPanel — regime in Persian", () => {
+  const faMessages = getMessages("fa");
+  const renderFa = (regime: string) => renderToStaticMarkup(
+    <TechnicalPanel tech={{ ...full, regime }} series={[]} now={NOW} messages={faMessages} />);
+
+  const CASES = [
+    ["above both", "tech.regimeAboveBoth"],
+    ["below both", "tech.regimeBelowBoth"],
+    ["above 50DMA, below 200DMA", "tech.regimeAbove50Below200"],
+    ["below 50DMA, above 200DMA", "tech.regimeBelow50Above200"],
+  ] as const;
+
+  for (const [regime, key] of CASES) {
+    it(`renders "${regime}" through the dictionary`, () => {
+      const html = renderFa(regime);
+      expect(html).toContain(fa[key]);
+      // The raw English shape must not survive alongside it. "above both" is
+      // not a substring of any other regime string, so this is an exact check.
+      expect(html).not.toContain(`>${regime}<`);
+    });
+  }
+
+  /**
+   * The guard that makes the four cases above meaningful: they are hand-typed
+   * literals, so on their own they only prove the dictionary agrees with the
+   * TEST. This drives the real producer across every spot/SMA arrangement and
+   * asserts each string it emits is one REGIME_KEY covers — so rewording
+   * deriveRegime fails here rather than degrading to English on the panel.
+   */
+  it("covers every regime deriveRegime can actually produce", () => {
+    const q = (value: number) => ({ value, ts: "2026-08-01T08:00:00Z" });
+    const base = {
+      spot24hAgo: null, pivotS1: null, pivotR1: null,
+      rsi14: null, atr14: null, gvz: null, netSpec: null,
+    };
+    // spot vs (sma50, sma200): above/above, below/below, above/below, below/above
+    const arrangements = [
+      [3500, 3250, 3400], [3100, 3250, 3400], [3300, 3250, 3400], [3300, 3400, 3250],
+    ] as const;
+
+    const produced = new Set<string>();
+    for (const [spot, sma50, sma200] of arrangements) {
+      const tech = deriveTechnicals(
+        { ...base, spot: q(spot), sma50: q(sma50), sma200: q(sma200) }, NOW);
+      expect(tech.regime).not.toBeNull();
+      produced.add(tech.regime!);
+    }
+
+    expect(produced.size).toBe(CASES.length);
+    for (const regime of produced) {
+      expect(CASES.map(c => c[0])).toContain(regime);
+      // ...and it actually reaches the screen in Persian.
+      expect(renderFa(regime)).toContain(
+        fa[CASES.find(c => c[0] === regime)![1]]);
+    }
   });
 });
