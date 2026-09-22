@@ -522,7 +522,20 @@ Persian.
 - **Per-document.** A failed document leaves the existing sidecar in place
   untouched and records the failure; a stale Persian document is better than
   none, and the hash mismatch keeps the panel honest about it by falling back
-  to English.
+  to English. *Amended 2026-09-22 (docs/todo/019):* the failure is recorded in
+  the `doc_translations` table as well, one row per unit currently failing,
+  and after `MAX_DOC_ATTEMPTS` with the rows pass's backoff the unit is
+  abandoned rather than retried every tick. `--force` clears the table, the
+  way it re-arms abandoned rows. A "unit" here is one stance section, one
+  watchlist theme, one prediction line, or a whole playbook or report.
+- **Per-document size.** *Added 2026-09-22:* a document over
+  `translate.doc_chunk_bytes` is translated section by section at its `## `
+  headings — and, inside a section still over the threshold, at blank lines —
+  then reassembled around the untranslated structure. Measured on the live
+  host at `timeout_seconds: 180`, 11,362 and 11,455-byte briefs translated in
+  one call and a 21,728-byte brief timed out; every pending report was larger
+  than the ones that had succeeded, so the whole-document path could not have
+  finished any of them.
 - **Unit failure.** `jamasp-translate.service` carries
   `OnFailure=jamasp-alert@%n.service` like every other unit, so a crashed run
   reaches the desk chat rather than the journal.

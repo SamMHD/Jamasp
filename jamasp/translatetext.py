@@ -311,3 +311,112 @@ def parse_doc_response(payload: object) -> str:
     if not isinstance(payload, dict) or not isinstance(payload.get("text"), str):
         raise ParseError("document response has no `text` string")
     return payload["text"]
+
+
+def _paragraph_blocks(body: str) -> list[str]:
+    """`body` cut at blank lines into blocks that concatenate back to it.
+
+    A block is one paragraph together with the blank lines that follow it, so
+    the separators live inside a block rather than between blocks and nothing
+    has to be re-invented when the pieces are joined again.
+
+    Blank lines rather than any finer boundary because a paragraph is the
+    smallest unit of prose a translator can be handed without changing its
+    meaning: cutting mid-sentence would hand the model half a thought and get
+    half a translation back.
+    """
+    blocks: list[str] = []
+    cur: list[str] = []
+    has_text = pending_blank = False
+    for line in body.splitlines(keepends=True):
+        blank = not line.strip()
+        if not blank and pending_blank and has_text:
+            blocks.append("".join(cur))
+            cur, has_text = [], False
+        cur.append(line)
+        has_text = has_text or not blank
+        pending_blank = blank
+    if cur:
+        blocks.append("".join(cur))
+    return blocks
+
+
+def _pack(blocks: Sequence[str], limit: int) -> list[str]:
+    """Greedily group `blocks` into chunks of at most `limit` bytes.
+
+    A single block larger than `limit` is emitted alone and OVERSIZED rather
+    than cut: see `doc_segments` for why that is the right trade.
+    """
+    chunks: list[str] = []
+    cur = ""
+    for block in blocks:
+        if cur and len((cur + block).encode("utf-8")) > limit:
+            chunks.append(cur)
+            cur = block
+        else:
+            cur += block
+    if cur:
+        chunks.append(cur)
+    return chunks
+
+
+def doc_segments(markdown: str, limit: int) -> list[tuple[str, str, str]]:
+    """Split a document into translatable segments of at most `limit` bytes.
+
+    Returns `[(before, prose, after)]` with the invariant that
+
+        "".join(before + prose + after for ...) == markdown
+
+    byte for byte. `before` and `after` are structure that must survive
+    untranslated — the `## ` heading line and the blank lines around a
+    paragraph — and `prose` is the only part a model ever sees. Reassembly is
+    therefore `"".join(before + translate(prose) + after)`, and a document
+    that comes back differs from its source in the prose and in nothing else:
+    same headings, same order, same preamble, same blank lines.
+
+    Two levels of splitting, in this order:
+
+    1. At `## ` headings, exactly as `split_sections` does — same rule, so the
+       panel's TypeScript twin of that function still agrees with this file
+       about where a document's sections are. Headings do not go to the model
+       at all, which is what `DOC_RULES` already asks for.
+    2. Inside a section that is STILL over `limit`, at blank lines, packed
+       greedily into paragraph-sized chunks.
+
+    A single paragraph longer than `limit` is the one case neither level can
+    serve. It is emitted whole and oversized, on purpose: prose has no safe
+    split point below a paragraph, and half a sentence would come back as half
+    a translation. Such a chunk may well fail the way the whole document used
+    to — and that is now bounded, because `DocLedger` abandons a document that
+    keeps failing instead of retrying it every tick forever.
+
+    A segment that is wholly empty is dropped, so a document with no preamble
+    does not open with a segment of nothing.
+    """
+    pieces: list[tuple[str, str]] = []
+    heading, body = "", []
+    for line in markdown.splitlines(keepends=True):
+        if line.startswith("## "):
+            pieces.append((heading, "".join(body)))
+            heading, body = line, []
+        else:
+            body.append(line)
+    pieces.append((heading, "".join(body)))
+
+    out: list[tuple[str, str, str]] = []
+    for head, text in pieces:
+        chunks = ([text] if len(text.encode("utf-8")) <= limit
+                  else _pack(_paragraph_blocks(text), limit))
+        for chunk in chunks:
+            core = chunk.strip()
+            if core:
+                lead = chunk[:len(chunk) - len(chunk.lstrip())]
+                tail = chunk[len(chunk.rstrip()):]
+            else:
+                # All whitespace: it is ALL structure. Splitting it into a
+                # lead and a tail would duplicate it on reassembly.
+                lead, tail = chunk, ""
+            if head or core or lead or tail:
+                out.append((head + lead, core, tail))
+            head = ""
+    return out

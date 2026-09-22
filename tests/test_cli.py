@@ -874,3 +874,24 @@ def test_translate_exits_non_zero_and_leaves_the_row_untouched_on_quota(
     assert row["fa_attempts"] == 0
     assert row["fa_failed_at"] is None
     assert row["headline_fa"] is None
+
+
+def test_the_translate_line_separates_abandoned_documents_from_failures():
+    """docs/todo/019: an operator must be able to tell "3 documents failed
+    this run" from "3 documents are being skipped because they keep failing"
+    — the second never fixes itself."""
+    base = {"reused": 0, "rows": {}, "events": {}}
+    quiet = cli._translate_line(
+        {**base, "docs": {"translated": 1, "failed": 2, "abandoned": 0}})
+    assert "abandoned" not in quiet
+
+    loud = cli._translate_line(
+        {**base, "docs": {"translated": 0, "failed": 0, "abandoned": 3}})
+    assert "docs 0/0" in loud
+    assert "3 abandoned" in loud
+    assert "--force" in loud
+
+    both = cli._translate_line(
+        {**base, "docs": {"translated": 0, "failed": 1, "abandoned": 2,
+                          "skipped": 4}})
+    assert "docs 0/1" in both and "4 deferred" in both and "2 abandoned" in both

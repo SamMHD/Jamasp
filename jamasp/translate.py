@@ -541,18 +541,188 @@ class DocBudget:
     """
 
     def __init__(self, limit: int | None = None):
+        self.limit = limit
         self.remaining = limit
         self.skipped = 0
 
-    def take(self) -> bool:
-        """Claim one call. False when this tick has none left."""
+    def take(self, n: int = 1) -> bool:
+        """Claim `n` calls for ONE unit. False when this tick cannot cover it.
+
+        All or nothing per unit, because a large document is translated in
+        pieces and half a document is not a document: writing it would put
+        Persian sections beside English ones under a hash claiming both were
+        translated.
+
+        A unit needing more calls than the WHOLE ceiling is let through
+        anyway. It can never fit, so refusing it is not a deferral, it is
+        permanent starvation reported as "deferred to the next tick" — a 60KB
+        report would sit English forever while the summary implied it was
+        queued. One long tick is the lesser harm, and the unit's
+        TimeoutStartSec still bounds it.
+        """
         if self.remaining is None:
             return True
-        if self.remaining <= 0:
+        if n > self.limit:
+            self.remaining = 0
+            return True
+        if self.remaining < n:
             self.skipped += 1
             return False
-        self.remaining -= 1
+        self.remaining -= n
         return True
+
+
+# Above this many bytes of UTF-8 source, a document is translated in pieces
+# rather than in one call.
+#
+# MEASURED ON THE LIVE HOST, 2026-09-14..16, at translate.timeout_seconds 180:
+#
+#   2026-09-14-brief.md  11,362 bytes  -> succeeded
+#   2026-09-15-brief.md  11,455 bytes  -> succeeded
+#   2026-09-16-brief.md  21,728 bytes  -> FAILED: translator timed out
+#
+# Everything above roughly 12,000 bytes timed out the same way, and the
+# pending reports ran 19,767 to 26,968 bytes — so not one of them could ever
+# have succeeded. A two-hour --force run produced zero new report sidecars
+# while burning a call per attempt.
+#
+# 8,000 rather than 12,000, because 12,000 is where it BROKE, not where it is
+# safe. The two documents that did succeed were within 5% of the break, and a
+# 180-second wall clock moves with model load, so a threshold at the observed
+# edge would time out on a slow afternoon. Two-thirds of the break point puts
+# a chunk well inside the envelope that demonstrably worked, while still
+# leaving the largest real section anyone has written — the 8,434-byte FOMC
+# deep dive of 2026-09-16 — a two-chunk split rather than a twenty-chunk one.
+#
+# Raising it trades safety for fewer calls; lowering it trades calls for
+# safety. Both are bounded by max_doc_calls_per_run, which counts CHUNKS.
+DEFAULT_CHUNK_BYTES = 8000
+
+# What a document may fail before it stops being attempted, mirroring
+# MAX_ATTEMPTS for rows. Combined with BACKOFF_MINUTES (shared with the rows
+# pass, for the reason written out there) a document's attempts land at t+0,
+# t+15 and t+75: long enough to ride out a restart or a short auth wobble,
+# and short enough that a permanently-refused document costs three calls
+# rather than ~144 a day forever.
+MAX_DOC_ATTEMPTS = 3
+
+
+class DocLedger:
+    """Attempt counter, backoff and abandonment for documents (docs/todo/019).
+
+    Rows and events carry `fa_attempts` on their own database row. Documents
+    are files on disk with no row anywhere, and the sidecar records only what
+    SUCCEEDED — so a document the translator refuses was offered again every
+    tick, indefinitely. At max_doc_calls_per_run 10 on a 10-minute timer that
+    is ~1,440 wasted calls a day, each able to tie up 180 seconds.
+
+    The state lives in the `doc_translations` table; `jamasp/db.py` carries
+    the argument for a table over a `meta` key per document. A row exists only
+    while a unit is failing, so the table is normally empty.
+
+    A "unit" is the smallest thing that is translated in one decision: a whole
+    report or playbook, but one stance SECTION, one watchlist theme, one
+    prediction line — matching how each pass already decides what to retry.
+
+    The counter is tied to the English it was earned against. When a unit's
+    source changes, its record no longer applies and the unit is offered again
+    from zero: stance.md is rewritten at the end of every agent run, and an
+    abandonment that outlived its text would silently freeze a section in
+    English for good.
+    """
+
+    def __init__(self, conn: sqlite3.Connection, root: Path,
+                 now: str | None = None):
+        self.conn = conn
+        self.root = root
+        self.now = now or utcnow()
+
+    def key(self, source: Path, sub: str = "") -> str:
+        """`path/relative/to/root` plus `#<sub-unit>` where a file has parts.
+
+        Relative to the repo root so the ledger survives the checkout moving,
+        and so a second checkout pointed at a copy of the database reads the
+        same units rather than a disjoint set of absolute paths.
+        """
+        try:
+            rel = source.relative_to(self.root).as_posix()
+        except ValueError:
+            rel = source.name
+        return f"{rel}#{sub}" if sub else rel
+
+    def state(self, source: Path, digest: str, sub: str = "") -> str:
+        """`'ready'`, `'backoff'` or `'abandoned'` for one unit.
+
+        `'backoff'` and `'abandoned'` both mean "do not attempt this now" and
+        differ only in what the operator is told: a backed-off unit is coming
+        back on a later tick, an abandoned one is not coming back without
+        `--force`.
+        """
+        row = self.conn.execute(
+            "SELECT src_hash, attempts, failed_at FROM doc_translations"
+            " WHERE unit = ?", (self.key(source, sub),),
+        ).fetchone()
+        if row is None or row["src_hash"] != digest:
+            return "ready"
+        if row["attempts"] >= MAX_DOC_ATTEMPTS:
+            return "abandoned"
+        # The same delays the rows pass uses, indexed by the attempt just
+        # spent. ELSE-style clamping for the same reason as `_backoff`: a
+        # raised MAX_DOC_ATTEMPTS without a longer tuple should back a unit
+        # off further, never let it retry on every tick.
+        delay = BACKOFF_MINUTES[min(row["attempts"], len(BACKOFF_MINUTES)) - 1]
+        failed = datetime.strptime(row["failed_at"], "%Y-%m-%dT%H:%M:%SZ")
+        current = datetime.strptime(self.now, "%Y-%m-%dT%H:%M:%SZ")
+        return "backoff" if current < failed + timedelta(minutes=delay) else "ready"
+
+    def record_failure(self, source: Path, digest: str, error: str,
+                       sub: str = "") -> None:
+        """Count one failed attempt against this unit's current English."""
+        self.conn.execute(
+            "INSERT INTO doc_translations"
+            " (unit, src_hash, attempts, last_error, failed_at)"
+            " VALUES (?, ?, 1, ?, ?)"
+            " ON CONFLICT(unit) DO UPDATE SET"
+            "   attempts = CASE WHEN doc_translations.src_hash ="
+            "                        excluded.src_hash"
+            "                   THEN doc_translations.attempts + 1"
+            "                   ELSE 1 END,"
+            "   src_hash = excluded.src_hash,"
+            "   last_error = excluded.last_error,"
+            "   failed_at = excluded.failed_at",
+            (self.key(source, sub), digest, error[:500], self.now),
+        )
+        self.conn.commit()
+
+    def clear(self, source: Path, sub: str = "") -> None:
+        """Forget a unit that translated. Keeps the table to what is broken."""
+        self.conn.execute("DELETE FROM doc_translations WHERE unit = ?",
+                          (self.key(source, sub),))
+        self.conn.commit()
+
+    def clear_all(self) -> None:
+        """`--force`'s document half, the analogue of `rearm` for rows.
+
+        Everything, not just the units this run will visit: the spec's escape
+        hatch is "an operator clearing a known-bad state does not have to edit
+        the database", and a row left behind for a report that has since been
+        deleted would never be cleared by anything else.
+        """
+        self.conn.execute("DELETE FROM doc_translations")
+        self.conn.commit()
+
+
+def _doc_counts(translated: int = 0, failed: int = 0,
+                abandoned: int = 0) -> dict:
+    """The shape every document pass returns, so `translate_docs` can sum it.
+
+    `failed` and `abandoned` are deliberately separate numbers: "3 documents
+    failed this run" and "3 documents are being skipped because they keep
+    failing" are different operator situations, and the first one is the one
+    that might fix itself.
+    """
+    return {"translated": translated, "failed": failed,
+            "abandoned": abandoned}
 
 
 def _translate_text(text: str, glossary: dict, run) -> str:
@@ -567,6 +737,7 @@ def translate_stance(
     source: Path, sidecar: Path, glossary: dict, run,
     now: str | None = None, translator: str = DEFAULT_TRANSLATOR,
     force: bool = False, budget: DocBudget | None = None,
+    ledger: DocLedger | None = None,
 ) -> dict:
     """Translate stance.md section by section into its sidecar.
 
@@ -581,7 +752,7 @@ def translate_stance(
     comment above the write.
     """
     if not source.exists():
-        return {"translated": 0, "failed": 0}
+        return _doc_counts()
 
     text = source.read_text(encoding="utf-8")
     # The front matter carries the hash of the WHOLE English file; the comment
@@ -598,7 +769,7 @@ def translate_stance(
         prior = translatetext.parse_stance_sidecar(raw)
     existing = {heading: (h, body) for heading, h, body in prior}
 
-    translated = failed = 0
+    translated = failed = abandoned = 0
     out: list[tuple[str, str, str]] = []
     for heading, body in translatetext.split_sections(text):
         digest = translatetext.src_hash(body)
@@ -608,6 +779,23 @@ def translate_stance(
             continue
         if not body.strip():
             out.append((heading, digest, body))
+            continue
+        # A section is a unit of its own in the ledger, the same way it is a
+        # unit of its own for hashing: one section the translator refuses must
+        # not abandon the other five. Checked BEFORE the budget, so a section
+        # nobody will attempt cannot spend a call slot another section wanted.
+        state = (ledger.state(source, digest, heading or "(preamble)")
+                 if ledger else "ready")
+        if state != "ready":
+            # Identical bookkeeping to the budget path below — keep whatever
+            # Persian this section had and its OLD hash, so nothing claims it
+            # is current. `abandoned` is the only difference, and only so the
+            # summary can say which of the two happened.
+            if state == "abandoned":
+                abandoned += 1
+            out.append((heading,
+                        previous[0] if previous else "",
+                        previous[1] if previous else body))
             continue
         if budget is not None and not budget.take():
             # Out of calls for this tick. Keep whatever Persian this section
@@ -619,8 +807,7 @@ def translate_stance(
                         previous[1] if previous else body))
             continue
         try:
-            out.append((heading, digest, _translate_text(body, glossary, run)))
-            translated += 1
+            persian = _translate_text(body, glossary, run)
         except modelrun.QuotaExhausted:
             # Unlike an ordinary failure, this is not "this section is bad" —
             # every remaining section (and the rest of the docs pass behind
@@ -628,21 +815,34 @@ def translate_stance(
             # appending anything for this section or writing the sidecar:
             # the sections done so far in THIS call are simply retried, at no
             # extra cost, on the next tick that finds codex funded again.
+            #
+            # The ledger is deliberately untouched here: a quota outage is not
+            # this section's fault, and counting it would walk every section
+            # to the cap during an outage nobody could have avoided.
             raise
-        except (modelrun.ModelError, translatetext.ParseError):
+        except (modelrun.ModelError, translatetext.ParseError) as exc:
             # Keep the previous Persian for this section, and keep its OLD
             # hash so the next run tries again rather than believing it is done.
+            if ledger:
+                ledger.record_failure(source, digest, str(exc),
+                                      heading or "(preamble)")
             out.append((
                 heading,
                 previous[0] if previous else "",
                 previous[1] if previous else body,
             ))
             failed += 1
+        else:
+            if ledger:
+                ledger.clear(source, heading or "(preamble)")
+            out.append((heading, digest, persian))
+            translated += 1
 
     # The whole-file hash goes in the front matter only when every section
-    # actually carries Persian. A section that failed or was deferred with no
-    # previous translation is written out as its ENGLISH body under an empty
-    # per-section hash (the two paths above) — and an empty per-section hash is
+    # actually carries Persian. A section that failed, was deferred, or was
+    # abandoned by the attempt cap, with no previous translation to keep, is
+    # written out as its ENGLISH body under an empty per-section hash (the
+    # three paths above) — and an empty per-section hash is
     # the only way one occurs, since sha256 of even an empty body is not empty.
     # Stamping the real hash over that would tell the panel the sidecar is
     # current, and PR 2's reader would render English text as Persian with no
@@ -675,23 +875,35 @@ def translate_stance(
             translatetext.render_stance_sidecar(
                 out, now or utcnow(), translator, stamp),
         )
-    return {"translated": translated, "failed": failed}
+    return _doc_counts(translated, failed, abandoned)
 
 
 def translate_document(
     source: Path, sidecar: Path, glossary: dict, run,
     now: str | None = None, translator: str = DEFAULT_TRANSLATOR,
     force: bool = False, budget: DocBudget | None = None,
+    chunk_bytes: int = DEFAULT_CHUNK_BYTES, ledger: DocLedger | None = None,
 ) -> dict:
     """Whole-document sidecar: playbook and reports.
 
-    Nothing parses these structurally, so unlike stance they translate as one
-    unit, headings included. A failure leaves the existing sidecar byte-
-    identical: a stale Persian document is better than none, and the hash
-    mismatch is what keeps the panel honest about it.
+    Nothing parses these structurally, so a document that fits in one call
+    still goes in one call, headings included. A LARGE one does not: measured
+    on the live host, a 21,728-byte brief timed the translator out after 180
+    seconds where 11,362 and 11,455-byte ones succeeded, and every pending
+    report was bigger than the ones that failed — so the whole-document path
+    could never have finished a single one of them. Above
+    `chunk_bytes` (see DEFAULT_CHUNK_BYTES for the measurements) the document
+    is cut into segments at its `## ` headings, and inside an over-large
+    section at blank lines, and reassembled around the untranslated
+    structure — so what comes back differs from the source in its prose and
+    in nothing else.
+
+    A failure leaves the existing sidecar byte-identical: a stale Persian
+    document is better than none, and the hash mismatch is what keeps the
+    panel honest about it.
     """
     if not source.exists():
-        return {"translated": 0, "failed": 0}
+        return _doc_counts()
     text = source.read_text(encoding="utf-8")
     digest = translatetext.src_hash(text)
 
@@ -699,31 +911,62 @@ def translate_document(
         meta, _ = translatetext.parse_front_matter(
             sidecar.read_text(encoding="utf-8"))
         if meta.get("src_hash") == digest:
-            return {"translated": 0, "failed": 0}
+            return _doc_counts()
+
+    # Before the budget: a document nobody is going to attempt must not spend
+    # a call slot that another document could have used.
+    state = ledger.state(source, digest) if ledger else "ready"
+    if state != "ready":
+        return _doc_counts(abandoned=1 if state == "abandoned" else 0)
+
+    # Only documents over the threshold are cut up. Chunking a 2KB playbook
+    # into a single chunk buys nothing and adds a reassembly step that can be
+    # wrong; below the threshold this is byte-for-byte the old single call.
+    segments = (
+        [("", text, "")] if len(text.encode("utf-8")) <= chunk_bytes
+        else translatetext.doc_segments(text, chunk_bytes)
+    )
+    # Reserved together, not one at a time: a document abandoned halfway
+    # through because the tick ran out of budget would have paid for the
+    # chunks it did translate and thrown them away.
+    wanted = sum(1 for _, prose, _ in segments if prose)
 
     # Checked after the hash, so an unchanged document costs no budget.
-    if budget is not None and not budget.take():
-        return {"translated": 0, "failed": 0}
+    if budget is not None and not budget.take(wanted):
+        return _doc_counts()
 
+    parts: list[str] = []
     try:
-        persian = _translate_text(text, glossary, run)
+        for before, prose, after in segments:
+            parts.append(before)
+            if prose:
+                parts.append(_translate_text(prose, glossary, run))
+            parts.append(after)
     except modelrun.QuotaExhausted:
         raise   # see translate_stance's comment on the same exception
-    except (modelrun.ModelError, translatetext.ParseError):
-        return {"translated": 0, "failed": 1}
+    except (modelrun.ModelError, translatetext.ParseError) as exc:
+        # The chunks already translated in THIS call are discarded rather
+        # than written beside untranslated English under a hash that claims
+        # the whole document is Persian. The same trade translate_stance
+        # makes when it loses the sections it had already done.
+        if ledger:
+            ledger.record_failure(source, digest, str(exc))
+        return _doc_counts(failed=1)
 
+    if ledger:
+        ledger.clear(source)
     translatetext.write_atomic(
         sidecar,
         translatetext.render_front_matter(digest, now or utcnow(), translator)
-        + persian,
+        + "".join(parts),
     )
-    return {"translated": 1, "failed": 0}
+    return _doc_counts(translated=1)
 
 
 def translate_watchlist(
     source: Path, sidecar: Path, glossary: dict, run,
     now: str | None = None, force: bool = False,
-    budget: DocBudget | None = None,
+    budget: DocBudget | None = None, ledger: DocLedger | None = None,
 ) -> dict:
     """Sidecar keyed by theme, carrying only Persian and a hash.
 
@@ -731,7 +974,7 @@ def translate_watchlist(
     create a second copy that drifts the moment a brief rewrites the original.
     """
     if not source.exists():
-        return {"translated": 0, "failed": 0}
+        return _doc_counts()
     entries = (yaml.safe_load(source.read_text(encoding="utf-8")) or {}).get(
         "watchlist") or []
 
@@ -741,7 +984,7 @@ def translate_watchlist(
             "watchlist") or []
         existing = {e.get("theme"): e for e in prior}
 
-    translated = failed = 0
+    translated = failed = abandoned = 0
     out = []
     for entry in entries:
         theme, why = entry.get("theme", ""), entry.get("why", "")
@@ -750,21 +993,35 @@ def translate_watchlist(
         if not force and previous and previous.get("src_hash") == digest:
             out.append(previous)
             continue
+        # One theme is one unit: see translate_stance for why the ledger is
+        # consulted ahead of the budget.
+        state = ledger.state(source, digest, theme) if ledger else "ready"
+        if state != "ready":
+            if state == "abandoned":
+                abandoned += 1
+            if previous:
+                out.append(previous)
+            continue
         if budget is not None and not budget.take():
             if previous:
                 out.append(previous)      # stale, and still pending next tick
             continue
         try:
-            out.append({"theme": theme,
-                        "why_fa": _translate_text(why, glossary, run),
-                        "src_hash": digest})
-            translated += 1
+            why_fa = _translate_text(why, glossary, run)
         except modelrun.QuotaExhausted:
             raise   # see translate_stance's comment on the same exception
-        except (modelrun.ModelError, translatetext.ParseError):
+        except (modelrun.ModelError, translatetext.ParseError) as exc:
+            if ledger:
+                ledger.record_failure(source, digest, str(exc), theme)
             if previous:
                 out.append(previous)
             failed += 1
+        else:
+            if ledger:
+                ledger.clear(source, theme)
+            out.append({"theme": theme, "why_fa": why_fa,
+                        "src_hash": digest})
+            translated += 1
 
     # Same rule as stance: compare the computed file with the one on disk, so
     # a theme removed from watchlist.yaml is removed here too. A run where
@@ -774,13 +1031,13 @@ def translate_watchlist(
                           sort_keys=False)
     if not sidecar.exists() or sidecar.read_text(encoding="utf-8") != text:
         translatetext.write_atomic(sidecar, text)
-    return {"translated": translated, "failed": failed}
+    return _doc_counts(translated, failed, abandoned)
 
 
 def translate_predictions(
     source: Path, sidecar: Path, glossary: dict, run,
     now: str | None = None, force: bool = False,
-    budget: DocBudget | None = None,
+    budget: DocBudget | None = None, ledger: DocLedger | None = None,
 ) -> dict:
     """Sidecar keyed by prediction id, one JSON object per line.
 
@@ -789,7 +1046,7 @@ def translate_predictions(
     an append and could lose a prediction.
     """
     if not source.exists():
-        return {"translated": 0, "failed": 0}
+        return _doc_counts()
 
     existing = {}
     if sidecar.exists():
@@ -801,7 +1058,7 @@ def translate_predictions(
                     continue
                 existing[row.get("id")] = row
 
-    translated = failed = 0
+    translated = failed = abandoned = 0
     out = []
     for line in source.read_text(encoding="utf-8").splitlines():
         if not line.strip():
@@ -816,26 +1073,40 @@ def translate_predictions(
         if not force and previous and previous.get("src_hash") == digest:
             out.append(previous)
             continue
+        # One prediction line is one unit: see translate_stance for why the
+        # ledger is consulted ahead of the budget.
+        state = ledger.state(source, digest, pid) if ledger else "ready"
+        if state != "ready":
+            if state == "abandoned":
+                abandoned += 1
+            if previous:
+                out.append(previous)
+            continue
         if budget is not None and not budget.take():
             if previous:
                 out.append(previous)
             continue
         try:
-            out.append({"id": pid,
-                        "claim_fa": _translate_text(claim, glossary, run),
-                        "src_hash": digest})
-            translated += 1
+            claim_fa = _translate_text(claim, glossary, run)
         except modelrun.QuotaExhausted:
             raise   # see translate_stance's comment on the same exception
-        except (modelrun.ModelError, translatetext.ParseError):
+        except (modelrun.ModelError, translatetext.ParseError) as exc:
+            if ledger:
+                ledger.record_failure(source, digest, str(exc), pid)
             if previous:
                 out.append(previous)
             failed += 1
+        else:
+            if ledger:
+                ledger.clear(source, pid)
+            out.append({"id": pid, "claim_fa": claim_fa,
+                        "src_hash": digest})
+            translated += 1
 
     text = "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in out)
     if not sidecar.exists() or sidecar.read_text(encoding="utf-8") != text:
         translatetext.write_atomic(sidecar, text)
-    return {"translated": translated, "failed": failed}
+    return _doc_counts(translated, failed, abandoned)
 
 
 def new_reports(reports_dir: Path, since_iso: str) -> list[Path]:
@@ -860,15 +1131,33 @@ def new_reports(reports_dir: Path, since_iso: str) -> list[Path]:
 def translate_docs(
     root: Path, cfg: dict, glossary: dict, run,
     now: str | None = None, force: bool = False,
+    conn: sqlite3.Connection | None = None,
 ) -> dict:
     """Every document sidecar, in one pass. Returns summed counts.
 
     `root` rather than hard-coded paths so a test can build a whole state tree
     in tmp_path — and so a second checkout is never at risk of writing into the
     live one.
+
+    `conn` is only for the attempt ledger — every write this pass makes is to
+    a file. Passing `None` leaves the pass as it was before docs/todo/019 was
+    fixed, with no per-document cap at all; it is what a test about something
+    else passes, never production. `run_translate` always hands over the live
+    connection, and `test_run_translate_wires_the_document_ledger` is what
+    keeps that true.
     """
     state, reports = root / "state", root / "reports"
-    totals = {"translated": 0, "failed": 0}
+    totals = {"translated": 0, "failed": 0, "abandoned": 0}
+    ledger = DocLedger(conn, root, now) if conn is not None else None
+    if ledger is not None and force:
+        # --force's document half, mirroring `rearm` for rows: the spec's
+        # escape hatch is "an operator clearing a known-bad state does not
+        # have to edit the database", and an abandoned document is exactly
+        # such a state.
+        ledger.clear_all()
+    # Chunking threshold, named and configurable rather than a magic number.
+    # Absent means the measured default — NOT "never chunk", which is the bug.
+    chunk_bytes = cfg.get("doc_chunk_bytes", DEFAULT_CHUNK_BYTES)
     # One budget across every document type: the ceiling that matters is the
     # tick's total, not any single file's. See DocBudget.
     #
@@ -891,6 +1180,7 @@ def translate_docs(
     def merge(result):
         totals["translated"] += result["translated"]
         totals["failed"] += result["failed"]
+        totals["abandoned"] += result["abandoned"]
 
     # Each of the four calls below (and each report in the loop) can raise
     # modelrun.QuotaExhausted from inside its own per-item loop — see the
@@ -901,19 +1191,24 @@ def translate_docs(
     # watchlist, predictions and every pending report in turn.
     try:
         merge(translate_stance(state / "stance.md", state / "stance.fa.md",
-                               glossary, run, now, force=force, budget=budget))
+                               glossary, run, now, force=force, budget=budget,
+                               ledger=ledger))
         merge(translate_document(state / "playbook.md", state / "playbook.fa.md",
-                                 glossary, run, now, force=force, budget=budget))
+                                 glossary, run, now, force=force, budget=budget,
+                                 chunk_bytes=chunk_bytes, ledger=ledger))
         merge(translate_watchlist(state / "watchlist.yaml",
                                   state / "watchlist.fa.yaml",
-                                  glossary, run, now, force=force, budget=budget))
+                                  glossary, run, now, force=force, budget=budget,
+                                  ledger=ledger))
         merge(translate_predictions(state / "predictions.jsonl",
                                     state / "predictions.fa.jsonl",
-                                    glossary, run, now, force=force, budget=budget))
+                                    glossary, run, now, force=force, budget=budget,
+                                    ledger=ledger))
         for report in new_reports(reports, cfg["reports_since"]):
             merge(translate_document(
                 report, report.with_name(report.name[:-3] + ".fa.md"),
-                glossary, run, now, force=force, budget=budget))
+                glossary, run, now, force=force, budget=budget,
+                chunk_bytes=chunk_bytes, ledger=ledger))
     except modelrun.QuotaExhausted as exc:
         totals["quota_exhausted"] = True
         totals["quota_message"] = str(exc)
@@ -999,7 +1294,8 @@ def run_translate(
         stats["events"] = translate_events(conn, cfg, glossary, run, now, force)
         quota_hit = bool(stats["events"].get("quota_exhausted"))
     if want_docs and not quota_hit:
-        stats["docs"] = translate_docs(root, cfg, glossary, run, now, force)
+        stats["docs"] = translate_docs(root, cfg, glossary, run, now, force,
+                                       conn=conn)
         quota_hit = quota_hit or bool(stats["docs"].get("quota_exhausted"))
     if quota_hit:
         stats["quota_exhausted"] = True

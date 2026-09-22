@@ -223,14 +223,24 @@ def _translate_line(stats: dict) -> str:
                 f" {stats['pending_events']} events,"
                 f" {stats['pending_reports']} reports pending")
     rows, events, docs = stats["rows"], stats["events"], stats["docs"]
+    # "3 documents failed this run" and "3 documents are being skipped
+    # because they keep failing" are different operator situations: the first
+    # may fix itself on the next tick, the second never will without --force.
+    # Reporting one number for both is what let docs/todo/019 stay invisible.
+    notes = []
+    if docs.get("skipped"):
+        notes.append(f"{docs['skipped']} deferred to the next tick")
+    if docs.get("abandoned"):
+        notes.append(
+            f"{docs['abandoned']} abandoned after"
+            f" {translate_mod.MAX_DOC_ATTEMPTS} failed attempts — --force retries")
     line = (
         f"reused {stats['reused']}; "
         f"rows {rows.get('translated', 0)}/{rows.get('failed', 0)} in"
         f" {rows.get('batches', 0)} batches; "
         f"events {events.get('translated', 0)}/{events.get('failed', 0)}; "
         f"docs {docs.get('translated', 0)}/{docs.get('failed', 0)}"
-        + (f" ({docs['skipped']} deferred to the next tick)"
-           if docs.get("skipped") else "")
+        + (f" ({'; '.join(notes)})" if notes else "")
     )
     if stats.get("quota_exhausted"):
         # Without this, a quota stop reads exactly like a quiet tick — "rows
@@ -247,10 +257,10 @@ def _translate_line(stats: dict) -> str:
 @click.option("--dry-run", is_flag=True, help="report what would be translated")
 @click.option("--force", is_flag=True,
               help="re-translate in-window rows, events and documents even"
-                   " when unchanged, and re-arm rows the attempt cap"
-                   " abandoned (Persian copied from a flash is left alone;"
-                   " the per-run document ceiling does not apply, so this"
-                   " does the whole tree in one run and can be slow)")
+                   " when unchanged, and re-arm rows AND documents the"
+                   " attempt cap abandoned (Persian copied from a flash is"
+                   " left alone; the per-run document ceiling does not apply,"
+                   " so this does the whole tree in one run and can be slow)")
 @click.option("--only", type=click.Choice(["rows", "events", "docs"]),
               help="run one track (rows always includes the flash reuse pass)")
 @click.option("--check", "check_only", is_flag=True,

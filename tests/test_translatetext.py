@@ -249,3 +249,72 @@ def test_stance_sidecar_front_matter_carries_the_whole_source_hash():
     meta, _ = tt.parse_front_matter(text)
     assert meta["src_hash"] == "wholefilehash"
     assert "<!-- src_hash: aaa -->" in text
+
+
+BRIEF = """# Jamasp Brief — 2026-09-16
+
+Gold at 3,681.
+
+## Market snapshot
+
+GC=F 3,681.40, DXY 97.2.
+
+Real yields 1.81%.
+
+## What happened
+
+The Fed cut 25bp.
+
+## Outlook
+
+Constructive.
+"""
+
+
+def test_doc_segments_reassemble_to_the_source_byte_for_byte():
+    """The invariant the whole chunked path rests on: a reassembled document
+    differs from its source only in the prose, never in its structure."""
+    segments = tt.doc_segments(BRIEF, 10_000)
+    assert "".join(b + p + a for b, p, a in segments) == BRIEF
+
+
+def test_doc_segments_keeps_every_heading_out_of_the_translated_prose():
+    """Headings are structure, and DOC_RULES already tells the model not to
+    translate them. Splitting a document is how they stop being sent at all."""
+    segments = tt.doc_segments(BRIEF, 40)
+    for _, prose, _ in segments:
+        assert "## " not in prose
+
+
+def test_doc_segments_keeps_the_preamble_before_the_first_heading():
+    segments = tt.doc_segments(BRIEF, 10_000)
+    assert "Gold at 3,681." in segments[0][1]
+    assert "Market snapshot" not in segments[0][1]
+
+
+def test_doc_segments_splits_a_section_that_is_itself_too_large():
+    """A single `## ` section over the threshold is the case heading-splitting
+    alone cannot serve; it is packed into paragraph-sized chunks instead."""
+    body = "\n\n".join(f"Paragraph {i} about gold." for i in range(40))
+    text = f"## Deep dive\n\n{body}\n"
+    segments = tt.doc_segments(text, 200)
+    assert len([p for _, p, _ in segments if p]) > 1
+    assert "".join(b + p + a for b, p, a in segments) == text
+    for _, prose, _ in segments:
+        assert len(prose.encode("utf-8")) <= 200
+
+
+def test_doc_segments_emits_an_unsplittable_paragraph_whole():
+    """A single paragraph larger than the threshold has no safe split point —
+    prose is not chunkable below a paragraph without mangling it. It goes as
+    one oversized chunk rather than being cut mid-sentence."""
+    text = "x" * 500 + "\n"
+    segments = tt.doc_segments(text, 100)
+    assert len([p for _, p, _ in segments if p]) == 1
+    assert "".join(b + p + a for b, p, a in segments) == text
+
+
+def test_doc_segments_never_sends_whitespace_only_prose():
+    text = "## Empty\n\n## Also empty\n\n"
+    assert [p for _, p, _ in tt.doc_segments(text, 10)] == ["", ""]
+    assert "".join(b + p + a for b, p, a in tt.doc_segments(text, 10)) == text

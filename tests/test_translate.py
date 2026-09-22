@@ -1,4 +1,5 @@
 import sqlite3
+import sys
 from datetime import datetime, timedelta, timezone
 
 from jamasp import db, translate
@@ -716,7 +717,7 @@ def test_translate_stance_partial_failure_preserves_only_the_failed_hash(tmp_pat
 def test_translate_stance_with_no_source_is_a_noop(tmp_path):
     stats = translate.translate_stance(
         tmp_path / "absent.md", tmp_path / "absent.fa.md", GLOSSARY, doc_run())
-    assert stats == {"translated": 0, "failed": 0}
+    assert stats == {"translated": 0, "failed": 0, "abandoned": 0}
 
 
 import json
@@ -1397,7 +1398,7 @@ def test_an_emptied_stance_section_still_rewrites_the_sidecar(tmp_path):
     src.write_text(emptied, encoding="utf-8")
     stats = translate.translate_stance(src, side, GLOSSARY, doc_run())
 
-    assert stats == {"translated": 0, "failed": 0}
+    assert stats == {"translated": 0, "failed": 0, "abandoned": 0}
     after = side.read_text(encoding="utf-8")
     assert after != before
     sections = tt.parse_stance_sidecar(after)
@@ -1605,7 +1606,7 @@ def test_a_stance_sidecar_holding_english_does_not_match_the_source(tmp_path):
         return {"text": "FA:" + prompt.split("---\n", 1)[1]}
 
     stats = translate.translate_stance(src, side, GLOSSARY, one_section_fails)
-    assert stats == {"translated": 2, "failed": 1}
+    assert stats == {"translated": 2, "failed": 1, "abandoned": 0}
 
     text = side.read_text(encoding="utf-8")
     assert "- A hot CPI print." in text          # the English body really is there
@@ -1615,7 +1616,7 @@ def test_a_stance_sidecar_holding_english_does_not_match_the_source(tmp_path):
     # And the healthy case still stamps the real hash, so the Persian stance
     # renders at all — the whole point of writing it in the first place.
     stats = translate.translate_stance(src, side, GLOSSARY, doc_run())
-    assert stats == {"translated": 1, "failed": 0}
+    assert stats == {"translated": 1, "failed": 0, "abandoned": 0}
     meta, _ = tt.parse_front_matter(side.read_text(encoding="utf-8"))
     assert meta["src_hash"] == tt.src_hash(STANCE_MD)
 
@@ -1629,7 +1630,7 @@ def test_a_budget_deferred_stance_section_does_not_match_the_source(tmp_path):
 
     stats = translate.translate_stance(src, side, GLOSSARY, doc_run(),
                                        budget=translate.DocBudget(1))
-    assert stats == {"translated": 1, "failed": 0}
+    assert stats == {"translated": 1, "failed": 0, "abandoned": 0}
     meta, _ = tt.parse_front_matter(side.read_text(encoding="utf-8"))
     assert meta["src_hash"] != tt.src_hash(STANCE_MD)
 
@@ -1662,7 +1663,7 @@ def test_a_stance_sidecar_of_stale_persian_still_matches_the_source(tmp_path):
         return {"text": "NEW:" + prompt.split("---\n", 1)[1]}
 
     assert translate.translate_stance(
-        src, side, GLOSSARY, flips_fails) == {"translated": 1, "failed": 1}
+        src, side, GLOSSARY, flips_fails) == {"translated": 1, "failed": 1, "abandoned": 0}
     text = side.read_text(encoding="utf-8")
     assert "OLD:" in text                       # stale Persian, not English
     meta, _ = tt.parse_front_matter(text)
@@ -1726,3 +1727,308 @@ def test_floor_for_tolerates_an_unquoted_yaml_date():
     assert translate.floor_for(
         {**CFG, "translate_from": _dt.date(2026, 9, 20)}, 7,
         "2026-09-21T12:00:00Z") == "2026-09-20T00:00:00Z"
+
+
+# ---------------------------------------------------------------- large docs
+
+def big_brief(sections=6, paras=6):
+    """A brief shaped like the real ones, comfortably over the threshold.
+
+    The live 2026-09-16 brief was 21,728 bytes across six `## ` sections, the
+    largest 8,434; this is the same shape at a size no threshold accident can
+    make small.
+    """
+    out = ["# Jamasp Brief — 2026-09-16\n\nGold at 3,681.40.\n\n"]
+    for s in range(sections):
+        out.append(f"## Section {s}\n\n")
+        for p in range(paras):
+            out.append(f"Paragraph {p} of section {s}. " * 12 + "\n\n")
+    return "".join(out)
+
+
+def test_a_large_document_is_translated_in_pieces(tmp_path):
+    """21,728 bytes in one call timed out after 180s on the live host; 11,362
+    and 11,455 succeeded. Nothing above ~12KB could ever finish."""
+    src = tmp_path / "brief.md"
+    src.write_text(big_brief(), encoding="utf-8")
+    calls = []
+    result = translate.translate_document(
+        src, tmp_path / "brief.fa.md", GLOSSARY, counting_doc_run(calls),
+        chunk_bytes=8000)
+    assert result["translated"] == 1
+    assert len(calls) > 1
+    for prompt in calls:
+        payload = prompt.split("---\n", 1)[1]
+        assert len(payload.encode("utf-8")) <= 8000
+
+
+def test_a_chunked_document_keeps_its_structure_exactly(tmp_path):
+    """Only the prose may differ. Heading text, heading order and the
+    preamble before the first heading come back byte-identical."""
+    src = tmp_path / "brief.md"
+    source = big_brief()
+    src.write_text(source, encoding="utf-8")
+    sidecar = tmp_path / "brief.fa.md"
+    translate.translate_document(src, sidecar, GLOSSARY, doc_run(),
+                                 chunk_bytes=8000)
+    _, body = tt.parse_front_matter(sidecar.read_text(encoding="utf-8"))
+    assert ([h for h, _ in tt.split_sections(body)]
+            == [h for h, _ in tt.split_sections(source)])
+    assert "# Jamasp Brief" in body
+    assert body.count("FA:") > 1          # really was assembled from pieces
+
+
+def test_a_small_document_still_takes_a_single_call(tmp_path):
+    """Chunking a 2KB playbook into one chunk is pointless overhead and more
+    failure surface, so the threshold gates it."""
+    src = tmp_path / "playbook.md"
+    src.write_text("## A\n\nShort.\n\n## B\n\nAlso short.\n", encoding="utf-8")
+    calls = []
+    translate.translate_document(src, tmp_path / "playbook.fa.md", GLOSSARY,
+                                 counting_doc_run(calls), chunk_bytes=8000)
+    assert len(calls) == 1
+    assert "## A" in calls[0]             # the whole document, headings and all
+
+
+def test_the_chunk_threshold_comes_from_config(tmp_path):
+    """Not a magic number: the key moves the boundary in both directions."""
+    src = tmp_path / "brief.md"
+    src.write_text(big_brief(sections=2), encoding="utf-8")
+
+    def calls_at(limit):
+        calls = []
+        sidecar = tmp_path / f"brief.{limit}.fa.md"
+        translate.translate_docs(
+            tmp_path, {**DOC_CFG, "doc_chunk_bytes": limit}, GLOSSARY,
+            counting_doc_run(calls))
+        sidecar.unlink(missing_ok=True)
+        return calls
+
+    (tmp_path / "state").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "state" / "playbook.md").write_text(
+        big_brief(sections=2), encoding="utf-8")
+    assert len(calls_at(100_000)) == 1
+    (tmp_path / "state" / "playbook.fa.md").unlink()
+    assert len(calls_at(1_000)) > 1
+
+
+# ------------------------------------------------------- per-document give-up
+
+def failing_doc_run(calls):
+    def run(prompt, schema):
+        calls.append(prompt)
+        raise modelrun.ModelError("codex refused this document")
+    return run
+
+
+def one_doc(root, text="Playbook.\n"):
+    """A tree whose only translatable unit is the playbook."""
+    (root / "state").mkdir(parents=True, exist_ok=True)
+    (root / "state" / "playbook.md").write_text(text, encoding="utf-8")
+
+
+def test_a_document_that_keeps_failing_stops_being_attempted(tmp_path):
+    """docs/todo/019: with no per-document cap a refused document cost a call
+    every tick, ~144 a day, forever."""
+    conn = db.connect(tmp_path / "t.db")
+    one_doc(tmp_path)
+    calls = []
+    for minutes in (0, 20, 90, 200, 400):
+        translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY,
+                                 failing_doc_run(calls), now=clock(minutes),
+                                 conn=conn)
+    assert len(calls) == translate.MAX_DOC_ATTEMPTS
+
+
+def test_a_failed_document_waits_out_its_backoff_before_retrying(tmp_path):
+    """Same reason rows got one: three 10-minute ticks would otherwise walk a
+    document to the cap 20 minutes into a transient outage."""
+    conn = db.connect(tmp_path / "t.db")
+    one_doc(tmp_path)
+    calls = []
+    translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY,
+                             failing_doc_run(calls), now=clock(0), conn=conn)
+    assert len(calls) == 1
+    translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY,
+                             failing_doc_run(calls), now=clock(10), conn=conn)
+    assert len(calls) == 1                # still inside the 15-minute backoff
+    translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY,
+                             failing_doc_run(calls), now=clock(20), conn=conn)
+    assert len(calls) == 2
+
+
+def test_an_abandoned_document_is_counted_apart_from_a_failure(tmp_path):
+    """"3 documents were skipped because they keep failing" must be legible
+    as something other than "3 documents failed this run"."""
+    conn = db.connect(tmp_path / "t.db")
+    one_doc(tmp_path)
+    for minutes in (0, 20, 90):
+        stats = translate.translate_docs(
+            tmp_path, DOC_CFG, GLOSSARY, always_fails, now=clock(minutes),
+            conn=conn)
+        assert stats == {"translated": 0, "failed": 1, "abandoned": 0,
+                         "skipped": 0}
+    stats = translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY, always_fails,
+                                     now=clock(200), conn=conn)
+    assert stats["failed"] == 0
+    assert stats["abandoned"] == 1
+
+
+def test_force_re_arms_an_abandoned_document(tmp_path):
+    """The same escape hatch --force gives an abandoned row."""
+    conn = db.connect(tmp_path / "t.db")
+    one_doc(tmp_path)
+    for minutes in (0, 20, 90):
+        translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY, always_fails,
+                                 now=clock(minutes), conn=conn)
+    calls = []
+    translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY,
+                             counting_doc_run(calls), now=clock(200),
+                             force=True, conn=conn)
+    assert len(calls) == 1
+    assert (tmp_path / "state" / "playbook.fa.md").exists()
+    assert conn.execute(
+        "SELECT COUNT(*) FROM doc_translations").fetchone()[0] == 0
+
+
+def test_rewriting_an_abandoned_document_re_arms_it(tmp_path):
+    """stance.md is rewritten at the end of every run. Abandoning a unit for
+    good would outlive the English that earned the abandonment."""
+    conn = db.connect(tmp_path / "t.db")
+    one_doc(tmp_path)
+    for minutes in (0, 20, 90):
+        translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY, always_fails,
+                                 now=clock(minutes), conn=conn)
+    (tmp_path / "state" / "playbook.md").write_text("Rewritten.\n",
+                                                    encoding="utf-8")
+    calls = []
+    translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY,
+                             counting_doc_run(calls), now=clock(200),
+                             conn=conn)
+    assert len(calls) == 1
+
+
+def test_a_document_that_succeeds_leaves_no_give_up_state(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    one_doc(tmp_path)
+    translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY, always_fails,
+                             now=clock(0), conn=conn)
+    assert conn.execute(
+        "SELECT COUNT(*) FROM doc_translations").fetchone()[0] == 1
+    translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY, doc_run(),
+                             now=clock(20), conn=conn)
+    assert conn.execute(
+        "SELECT COUNT(*) FROM doc_translations").fetchone()[0] == 0
+
+
+def test_a_quota_error_never_counts_a_document_attempt(tmp_path):
+    """A quota outage is not "this document is bad". It must abort the run
+    without spending the document's attempts (docs/todo/025)."""
+    conn = db.connect(tmp_path / "t.db")
+    one_doc(tmp_path)
+
+    def out_of_quota(prompt, schema):
+        raise modelrun.QuotaExhausted("usage limit")
+
+    for minutes in (0, 20, 90, 200):
+        stats = translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY,
+                                         out_of_quota, now=clock(minutes),
+                                         conn=conn)
+        assert stats["quota_exhausted"] is True
+    assert conn.execute(
+        "SELECT COUNT(*) FROM doc_translations").fetchone()[0] == 0
+
+
+def test_run_translate_wires_the_document_ledger(tmp_path):
+    """The production path, not just translate_docs directly: without the
+    connection reaching the docs pass there is no cap at all."""
+    conn = db.connect(tmp_path / "t.db")
+    one_doc(tmp_path)
+    calls = []
+    for minutes in (0, 20, 90, 200, 400):
+        translate.run_translate(
+            conn, {"translate": {**DOC_CFG, "scored_only": False}},
+            root=tmp_path, glossary=GLOSSARY, run=failing_doc_run(calls),
+            now=clock(minutes), only="docs")
+    assert len(calls) == translate.MAX_DOC_ATTEMPTS
+
+
+def test_every_document_kind_is_bounded_by_the_cap(tmp_path):
+    """Stance sections, watchlist entries and prediction lines fail the same
+    way a report does, and each is a unit of its own."""
+    conn = db.connect(tmp_path / "t.db")
+    build_state(tmp_path)
+    for minutes in (0, 20, 90):
+        translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY, always_fails,
+                                 now=clock(minutes), conn=conn)
+    units = {r[0] for r in conn.execute("SELECT unit FROM doc_translations")}
+    assert "state/playbook.md" in units
+    assert "reports/2026/09/2026-09-12-brief.md" in units
+    assert any(u.startswith("state/stance.md#") for u in units)
+    assert "state/watchlist.yaml#t" in units
+    assert "state/predictions.jsonl#p1" in units
+
+    calls = []
+    stats = translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY,
+                                     failing_doc_run(calls), now=clock(200),
+                                     conn=conn)
+    assert calls == []
+    assert stats["abandoned"] == len(units)
+
+
+# ----------------------------------------------- end to end, real subprocess
+
+def oversize_settings(tmp_path, **overrides):
+    return {"translate": {
+        "cmd": [sys.executable, "tests/fake_codex.py"],
+        "protocol": "codex", "timeout_seconds": 60,
+        "window_days": 7, "batch_size": 20, "max_batches_per_run": 6,
+        "reports_since": "2026-09-01", "scored_only": False,
+        **overrides}}
+
+
+def test_a_report_the_translator_refuses_whole_succeeds_in_pieces(
+    tmp_path, monkeypatch
+):
+    """The production failure, end to end through the real codex protocol
+    against a translator that refuses exactly what the real one refused:
+    2026-09-16-brief.md, 21,728 bytes, timed out after 180s while 11,362 and
+    11,455-byte briefs went through."""
+    monkeypatch.setenv("FAKE_CODEX_MODE", "oversize")
+    conn = db.connect(tmp_path / "t.db")
+    reports = tmp_path / "reports" / "2026" / "09"
+    reports.mkdir(parents=True)
+    source = big_brief(sections=7, paras=10)
+    assert len(source.encode("utf-8")) > 20_000
+    (reports / "2026-09-16-brief.md").write_text(source, encoding="utf-8")
+
+    stats = translate.run_translate(
+        conn, oversize_settings(tmp_path), root=tmp_path, glossary=GLOSSARY,
+        only="docs")
+    assert stats["docs"] == {"translated": 1, "failed": 0, "abandoned": 0,
+                             "skipped": 0}
+
+    sidecar = reports / "2026-09-16-brief.fa.md"
+    meta, body = tt.parse_front_matter(sidecar.read_text(encoding="utf-8"))
+    assert meta["src_hash"] == tt.src_hash(source)
+    assert ([h for h, _ in tt.split_sections(body)]
+            == [h for h, _ in tt.split_sections(source)])
+
+
+def test_the_same_report_still_fails_when_chunking_is_switched_off(
+    tmp_path, monkeypatch
+):
+    """Pins the fake's teeth. Without this, the test above would pass even if
+    `doc_chunk_bytes` did nothing at all."""
+    monkeypatch.setenv("FAKE_CODEX_MODE", "oversize")
+    conn = db.connect(tmp_path / "t.db")
+    reports = tmp_path / "reports" / "2026" / "09"
+    reports.mkdir(parents=True)
+    (reports / "2026-09-16-brief.md").write_text(
+        big_brief(sections=7, paras=10), encoding="utf-8")
+
+    stats = translate.run_translate(
+        conn, oversize_settings(tmp_path, doc_chunk_bytes=10_000_000),
+        root=tmp_path, glossary=GLOSSARY, only="docs")
+    assert stats["docs"]["failed"] == 1
+    assert not (reports / "2026-09-16-brief.fa.md").exists()

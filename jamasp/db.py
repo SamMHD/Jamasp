@@ -195,6 +195,37 @@ CREATE TABLE IF NOT EXISTS weight_fits (
     n          INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_weight_fits_key ON weight_fits(fit, key, fitted_at);
+-- Attempt state for the translate job's DOCUMENT pass, one row per unit that
+-- is CURRENTLY failing. Rows and events carry fa_attempts on their own row;
+-- documents are files on disk with no row anywhere, so a document the
+-- translator refuses was retried every tick forever (docs/todo/019).
+--
+-- A table rather than one `meta` key per document, which was the cheaper
+-- candidate: `meta` holds a handful of singleton facts about the whole
+-- deployment (last_ingest_at, last_translate_at) and is small enough to read
+-- whole when something is wrong. Reports arrive daily and never change, so
+-- keys there would accumulate one per broken report forever and make that
+-- read useless — and there would be nowhere to put the hash, the error and
+-- the failure time without encoding a record into a string value.
+--
+-- `unit` is the path relative to the repo root, plus `#<sub-unit>` where a
+-- file translates in parts: "reports/2026/09/2026-09-16-brief.md",
+-- "state/stance.md### Outlook", "state/predictions.jsonl#p1".
+--
+-- `src_hash` is the English the attempts were made against. When it changes
+-- the unit is new work, whatever the old one did — stance.md is rewritten at
+-- the end of every agent run, and an abandonment must not outlive the text
+-- that earned it.
+--
+-- Only failures live here. A unit that translates has its row DELETED, so
+-- `SELECT * FROM doc_translations` is exactly "what is broken right now".
+CREATE TABLE IF NOT EXISTS doc_translations (
+    unit       TEXT PRIMARY KEY,
+    src_hash   TEXT NOT NULL,
+    attempts   INTEGER NOT NULL,
+    last_error TEXT,
+    failed_at  TEXT NOT NULL
+);
 """
 
 # Columns added to tables that already exist in deployed databases. The schema
