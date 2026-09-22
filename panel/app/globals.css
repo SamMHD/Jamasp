@@ -292,15 +292,62 @@
   :where([dir="rtl"], [lang="fa"]) {
     font-family: var(--font-fa);
   }
+  /* The rule above sits on <html> (the only element app/layout.tsx ever
+     puts dir="rtl"/lang="fa" on) and relies on font-family INHERITING down
+     to everything else. It never reaches anything, because <body> carries
+     Tailwind's `font-sans` utility class, which sets font-family DIRECTLY
+     on <body> itself. An element's own declaration always beats a value it
+     would otherwise inherit, so body's Inter wins over html's Vazirmatn for
+     every single thing rendered on the panel — regardless of the rule
+     above's specificity, since specificity only ever settles a contest
+     between rules that target the SAME element, and nothing above targets
+     <body>.
+     Raising that rule's specificity to also target <body> would not be
+     enough on its own, either: `.font-sans` lives in Tailwind's `utilities`
+     @layer, and this stylesheet's own `@layer base` (theme < base <
+     components < utilities is Tailwind's fixed order) loses to it on LAYER
+     alone — a `base`-layer rule cannot outrank a `utilities`-layer one no
+     matter how specific its selector is, confirmed by hand against this
+     exact stylesheet (see test/source-lang.test.tsx).
+     Three things cross that boundary, not one. Moving this same selector
+     into `@layer utilities` would also win, on ordinary specificity, since
+     `html[dir="rtl"] body` outranks a bare `.font-sans` class — rejected
+     because every other hand-authored rule in this file (this one's
+     neighbours included) lives in `@layer base`; splitting one font rule
+     into `@layer utilities` to win a layer fight nothing else in the file
+     needs to fight would read as arbitrary to the next person here unless
+     they already know this history. Leaving the rule fully unlayered would
+     also win, since unlayered styles outrank every named layer regardless
+     of specificity — rejected because that victory wouldn't be scoped to
+     this property or this bug: an unlayered rule sits permanently above
+     *every* future utility touching <body>'s font-family, app-wide, for as
+     long as this file exists, which is a subtler foot-gun than a commented
+     `!important` sitting right next to the rule it overrides.
+     `!important` inside `@layer base` wins the same tie without either
+     cost: it stays with its sibling rules, and its effect is legible
+     exactly where it's written rather than depending on which `@layer`
+     the rule happens to sit in.
+     Keyed off <html>'s attributes rather than <body>'s class list, so this
+     keeps working if someone later edits which classes app/layout.tsx puts
+     on <body> — the exact fragility that caused this bug. */
+  html[dir="rtl"] body, html[lang="fa"] body {
+    font-family: var(--font-fa) !important;
+  }
   /* The Latin face back for English islands inside a Persian page.
-     The rule above sits on <html> and font-family INHERITS, so without
-     this every untranslated headline, lede, stance body and brief —
-     everything components/source-lang.tsx wraps in lang="en" — rendered
-     in Vazirmatn. Vazirmatn carries Latin glyphs, so nothing looked
-     broken; the fallback text just quietly wore the wrong face, which is
-     the opposite of what the EN marker is there to communicate. Not in
-     :where(), so it outranks the zero-specificity rule above whichever
-     order they end up in. */
+     The :where([dir="rtl"], [lang="fa"]) rule two blocks up sits on <html>
+     and font-family INHERITS, so without this every untranslated headline,
+     lede, stance body and brief — everything components/source-lang.tsx
+     wraps in lang="en" — renders in Vazirmatn once that rule actually
+     reaches <body> (see the html[dir="rtl"] body / html[lang="fa"] body
+     rule just above, which is what makes it reach). Vazirmatn carries
+     Latin glyphs, so nothing looks broken; the fallback text just quietly
+     wears the wrong face, which is the opposite of what the EN marker is
+     there to communicate. This selector never matches <body> itself (its
+     subject is the lang="en" element, not body), so it never has to fight
+     the !important rule just above for that element — it only has to beat
+     the html-level :where() rule's inherited value, and not being in
+     :where() itself is enough for that: it outranks the zero-specificity
+     rule whichever order they end up in. */
   [lang="en"] {
     font-family: var(--font-sans);
   }
