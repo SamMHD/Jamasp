@@ -9,6 +9,7 @@ import contextlib
 import hashlib
 import json
 import os
+import re
 import tempfile
 from pathlib import Path
 from typing import Mapping, Sequence
@@ -313,6 +314,47 @@ def parse_doc_response(payload: object) -> str:
     return payload["text"]
 
 
+# An opening or closing code fence: up to three spaces of indent, then three
+# or more backticks or tildes. CommonMark's rule, and the only part of it that
+# matters here — a closer must use the same character and be at least as long
+# as its opener, and must carry no info string.
+_FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})(.*)$")
+
+
+def _inside_fence(lines: Sequence[str]) -> list[bool]:
+    """Per line, whether it belongs to a fenced code block.
+
+    The delimiter lines themselves count as inside, so a fence is never cut
+    from its own opener or closer.
+
+    Without this, a report that quotes markdown — every deep dive that shows
+    what a heading looks like — has its `## ` example lines read as document
+    headings. The fence then opens in one model call and closes in the next:
+    one chunk arrives unterminated, the other carries a stray closer, and both
+    come back mangled. A blank line inside a fence is content for the same
+    reason, so the paragraph packer must not cut there either.
+
+    An unterminated fence runs to the end of the text, which is what
+    CommonMark does with one too.
+    """
+    inside: list[bool] = []
+    marker = ""
+    for line in lines:
+        match = _FENCE.match(line)
+        if marker:
+            inside.append(True)
+            if (match and match.group(1)[0] == marker[0]
+                    and len(match.group(1)) >= len(marker)
+                    and not match.group(2).strip()):
+                marker = ""
+        elif match:
+            marker = match.group(1)
+            inside.append(True)
+        else:
+            inside.append(False)
+    return inside
+
+
 def _paragraph_blocks(body: str) -> list[str]:
     """`body` cut at blank lines into blocks that concatenate back to it.
 
@@ -328,8 +370,11 @@ def _paragraph_blocks(body: str) -> list[str]:
     blocks: list[str] = []
     cur: list[str] = []
     has_text = pending_blank = False
-    for line in body.splitlines(keepends=True):
-        blank = not line.strip()
+    lines = body.splitlines(keepends=True)
+    for line, fenced in zip(lines, _inside_fence(lines)):
+        # A blank line inside a fence is code, not a paragraph break. Treating
+        # it as one splits the fence in half; see `_inside_fence`.
+        blank = not line.strip() and not fenced
         if not blank and pending_blank and has_text:
             blocks.append("".join(cur))
             cur, has_text = [], False
@@ -370,20 +415,33 @@ def doc_segments(markdown: str, limit: int) -> list[tuple[str, str, str]]:
     byte for byte. `before` and `after` are structure that must survive
     untranslated — the `## ` heading line and the blank lines around a
     paragraph — and `prose` is the only part a model ever sees. Reassembly is
-    therefore `"".join(before + translate(prose) + after)`, and a document
-    that comes back differs from its source in the prose and in nothing else:
-    same headings, same order, same preamble, same blank lines.
+    therefore `"".join(before + translate(prose) + after)`.
+
+    What that guarantees is narrower than it looks, so state it exactly: the
+    `## ` heading lines, the preamble boundary and the blank lines BETWEEN
+    chunks come back byte-identical and in their original order, because this
+    function never hands them to anybody. Everything inside a `prose` span is
+    whatever the model returned for it — lists, emphasis, fences and the
+    blank lines within a chunk are asked for verbatim by `DOC_RULES` and are
+    not enforced by anything here. "Same structure" is a promise about the
+    seams, not about the contents.
 
     Two levels of splitting, in this order:
 
-    1. At `## ` headings, exactly as `split_sections` does — same rule, so the
-       panel's TypeScript twin of that function still agrees with this file
-       about where a document's sections are. Headings do not go to the model
-       at all, which is what `DOC_RULES` already asks for.
+    1. At `## ` headings — `split_sections`'s rule, plus one correction it
+       does not make: a `## ` line inside a ``` or ~~~ fence is an example of
+       a heading, not a heading (`_inside_fence`). The panel's TypeScript twin
+       of `split_sections` therefore agrees with this function about every
+       document that does not quote markdown, and only stance.md is matched
+       section-by-section across the two. Headings never reach the model on
+       this path — which is the strongest form of the rule `DOC_RULES` states
+       for the single-call path, where they do.
     2. Inside a section that is STILL over `limit`, at blank lines, packed
-       greedily into paragraph-sized chunks.
+       greedily into paragraph-sized chunks — never at a blank line inside a
+       fence, for the reason in `_inside_fence`.
 
-    A single paragraph longer than `limit` is the one case neither level can
+    A single paragraph longer than `limit` — or a single FENCE longer than
+    it, kept whole for the same reason — is the one case neither level can
     serve. It is emitted whole and oversized, on purpose: prose has no safe
     split point below a paragraph, and half a sentence would come back as half
     a translation. Such a chunk may well fail the way the whole document used
@@ -395,8 +453,11 @@ def doc_segments(markdown: str, limit: int) -> list[tuple[str, str, str]]:
     """
     pieces: list[tuple[str, str]] = []
     heading, body = "", []
-    for line in markdown.splitlines(keepends=True):
-        if line.startswith("## "):
+    lines = markdown.splitlines(keepends=True)
+    for line, fenced in zip(lines, _inside_fence(lines)):
+        # `## ` inside a fence is an EXAMPLE of a heading, not one. See
+        # `_inside_fence`.
+        if line.startswith("## ") and not fenced:
             pieces.append((heading, "".join(body)))
             heading, body = line, []
         else:

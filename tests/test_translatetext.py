@@ -318,3 +318,53 @@ def test_doc_segments_never_sends_whitespace_only_prose():
     text = "## Empty\n\n## Also empty\n\n"
     assert [p for _, p, _ in tt.doc_segments(text, 10)] == ["", ""]
     assert "".join(b + p + a for b, p, a in tt.doc_segments(text, 10)) == text
+
+
+FENCED = """# Jamasp Brief — 2026-09-16
+
+Gold at 3,681.
+
+## Example
+
+Reports quote markdown at the desk:
+
+```markdown
+## Not a heading
+
+The body of the quoted example.
+```
+
+Back to prose.
+
+## After
+
+Done.
+"""
+
+
+def test_doc_segments_does_not_treat_a_heading_inside_a_fence_as_one():
+    """A report quoting markdown carries `## ` lines that are CONTENT. Split
+    on one and the fence opener goes to one model call and its closer to the
+    next, which is how a code block comes back with an unterminated fence."""
+    segments = tt.doc_segments(FENCED, 10_000)
+    assert "".join(b + p + a for b, p, a in segments) == FENCED
+    whole = [b + p + a for b, p, a in segments]
+    holding = [s for s in whole if "```markdown" in s]
+    assert len(holding) == 1
+    assert holding[0].count("```") == 2          # opener AND closer together
+    assert "## Not a heading" in holding[0]
+
+
+def test_doc_segments_never_splits_a_fence_at_an_interior_blank_line():
+    """The second shape of the same bug: an over-limit section is packed at
+    blank lines, and a fence containing one is cut in half — the closing
+    fence arrives in the NEXT model call with nothing it closes."""
+    first, second = "FIRST" + "x" * 150, "SECOND" + "x" * 150
+    text = ("## Deep dive\n\nIntro.\n\n"
+            f"```\n{first}\n\n{second}\n```\n\nOutro.\n")
+    segments = tt.doc_segments(text, 200)
+    assert "".join(b + p + a for b, p, a in segments) == text
+    whole = [b + p + a for b, p, a in segments]
+    holding = [s for s in whole if "FIRST" in s]
+    assert len(holding) == 1
+    assert "SECOND" in holding[0] and holding[0].count("```") == 2
