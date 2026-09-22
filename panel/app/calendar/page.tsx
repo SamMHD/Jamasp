@@ -44,11 +44,22 @@ export default async function CalendarPage() {
   return (
     <div>
       <AutoRefresh />
-      <PageHeader title="Calendar" subtitle={`${events.length} events in the next 30 days`} />
-      {events.length === 0 && <p className="text-sm text-muted-foreground">nothing upcoming</p>}
+      <PageHeader title={t(messages, "nav.calendar")}
+        subtitle={t(messages, "calendar.eventsInNext30Days")
+          .replace("{n}", String(events.length))} />
+      {events.length === 0 && (
+        <p className="text-sm text-muted-foreground">{t(messages, "calendar.nothingUpcoming")}</p>
+      )}
       {[...byDay.entries()].map(([day, evs]) => (
         <section key={day} className="mb-6">
-          <h2 className="mb-2 font-medium">{day} <span className="text-xs text-muted-foreground">(Dubai)</span></h2>
+          {/* The day itself stays a Latin ISO date in both locales (spec
+              decision 9); only the "(Dubai)" qualifier is chrome. */}
+          <h2 className="mb-2 font-medium">
+            {day}{" "}
+            <span className="text-xs text-muted-foreground">
+              {t(messages, "calendar.dubaiSuffix")}
+            </span>
+          </h2>
           <ul className="space-y-1 text-sm">
             {evs.map(e => {
               // Times, the Dubai column and the country code are Latin/Gregorian

@@ -171,3 +171,40 @@ describe("TechnicalMap — Persian chrome", () => {
     expect(noFit).toContain(fa["tech.noFitYet"]);
   });
 });
+
+/**
+ * The two aria-labels that were English in both locales, citing a report
+ * that was never written. They are the region's only name — see
+ * test/market-map.test.tsx's matching block for the full reasoning.
+ */
+describe("TechnicalMap region labels", () => {
+  const faMessages = getMessages("fa");
+  const renderFa = (tiles: SignalTile[]) => renderToStaticMarkup(
+    <TechnicalMap tiles={tiles} width={1200} height={600}
+      fittedAt="2026-08-20T04:17:00Z" messages={faMessages} />);
+
+  it("names the populated region through the dictionary", () => {
+    const html = renderFa([tile({})]);
+    expect(html).toContain(`aria-label="${fa["tech.regionLabel"]}"`);
+    expect(html).not.toContain('aria-label="Technical signal treemap"');
+  });
+
+  it("names the EMPTY region through the same key", () => {
+    const html = renderFa([]);
+    expect(html).toContain(`aria-label="${fa["tech.regionLabel"]}"`);
+    expect(html).not.toContain("Technical signal treemap");
+  });
+
+  it("composes the svg's counted sentence in Persian with Latin digits", () => {
+    const html = renderFa([tile({ key: "a" }), tile({ key: "b" })]);
+    expect(html).toContain(fa["tech.svgAriaTemplate"].replace("{n}", "2"));
+    expect(html).not.toContain("technical signal treemap,");
+  });
+
+  it("keeps the English label in the English locale", () => {
+    const html = renderToStaticMarkup(
+      <TechnicalMap tiles={[tile({})]} width={1200} height={600}
+        fittedAt={null} messages={getMessages("en")} />);
+    expect(html).toContain(`aria-label="${messages["tech.regionLabel"]}"`);
+  });
+});

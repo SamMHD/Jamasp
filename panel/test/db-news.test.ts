@@ -15,9 +15,11 @@ import Database from "better-sqlite3";
 let db: typeof import("../lib/db");
 
 const item = (id: string, source: string, publishedAt: string, topic: string,
-  clusterId: string | null, headline = `headline ${id}`) =>
+  clusterId: string | null, headline = `headline ${id}`,
+  fa: { headlineFa: string; ledeFa: string } | null = null) =>
   `('${id}','${source}','${publishedAt}','${headline}',NULL,'https://x.test/${id}','${topic}',` +
-  (clusterId === null ? "NULL" : `'${clusterId}'`) + `,'${publishedAt}',NULL,NULL,NULL,NULL)`;
+  (clusterId === null ? "NULL" : `'${clusterId}'`) + `,'${publishedAt}',NULL,` +
+  (fa === null ? "NULL,NULL,NULL" : `'${fa.headlineFa}','${fa.ledeFa}','model'`) + `)`;
 
 beforeAll(async () => {
   const root = mkdtempSync(path.join(tmpdir(), "jamasp-db-news-"));
@@ -34,7 +36,8 @@ beforeAll(async () => {
       ${item("a2", "cnbc_finance", "2026-08-10T08:30:00Z", "regional", "a1")},
       ${item("a3", "ft_markets", "2026-08-10T09:00:00Z", "regional", "a1")},
       ${item("b1", "reuters", "2026-08-10T10:00:00Z", "gold", "b1", "Gold holds 4380")},
-      ${item("b2", "reuters", "2026-08-10T11:00:00Z", "gold", "b1")},
+      ${item("b2", "reuters", "2026-08-10T11:00:00Z", "gold", "b1", "headline b2",
+        { headlineFa: "طلا ۴۳۸۰ را حفظ کرد", ledeFa: "شمش آرام گرفت" })},
       ${item("c1", "cnbc_finance", "2026-08-09T12:00:00Z", "fed", null, "Fed speaker")},
       ${item("d1", "ft_markets", "2026-08-01T12:00:00Z", "gold", "d1", "Old story")};
   `);
@@ -99,10 +102,22 @@ describe("topStory", () => {
 
 describe("getItems", () => {
   it("carries the Persian columns through getItems", () => {
-    // getItems is SELECT *, so this is really asserting the TYPE admits them
-    // and that no projection drops them on the way out.
-    const rows = db.getItems({ limit: 1 });
-    expect(rows[0]).toHaveProperty("headline_fa");
-    expect(rows[0]).toHaveProperty("lede_fa");
+    // getItems is SELECT *, so this is really asserting that no projection
+    // drops the columns on the way out.
+    //
+    // Asserted by VALUE against a row that actually has Persian: the old
+    // toHaveProperty ran against a fixture where headline_fa was NULL
+    // everywhere, which proved the type admits the field and nothing more.
+    const rows = db.getItems({ limit: 200 });
+    const b2 = rows.find(r => r.id === "b2");
+    expect(b2?.headline_fa).toBe("طلا ۴۳۸۰ را حفظ کرد");
+    expect(b2?.lede_fa).toBe("شمش آرام گرفت");
+    expect(b2?.fa_source).toBe("model");
+    // Distinct columns, not aliases of the English ones.
+    expect(b2?.headline).toBe("headline b2");
+    // An untranslated row still comes back, with the fields null.
+    const b1 = rows.find(r => r.id === "b1");
+    expect(b1?.headline_fa).toBeNull();
+    expect(b1?.lede_fa).toBeNull();
   });
 });

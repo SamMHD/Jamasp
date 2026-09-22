@@ -19,6 +19,19 @@ EnvironmentFile=-%h/.config/jamasp/env
 # Deterministic pipeline stage, not an agent run: no `jamasp run` wrapper, so
 # it consumes none of the daily agent-run cap — same as flash and rollup.
 #
-# A run whose every batch fails still exits zero, so this unit's OnFailure
-# alert is not the whole story: `jamasp watchdog` carries the backlog probe.
+# An ORDINARY translation failure (a batch codex refuses, a malformed
+# response) still exits zero on purpose: a handful of bad headlines is not
+# worth paging the desk over, and `jamasp watchdog` carries the backlog and
+# abandoned-row probes for that case instead — the backlog probe is
+# explicitly scored_only-aware (see jamasp/watchdog.py); the abandoned-row
+# probe needs no such awareness, since scored_only means an unscored row's
+# fa_attempts never leaves 0 in the first place.
+#
+# A codex QUOTA outage (docs/todo/025) is different and exits NON-ZERO: it
+# is a billing state worth surfacing, and the run already stopped itself
+# cleanly rather than fanning out. OnFailure's per-unit suppression
+# (jamasp/alert.py, ALERT_WINDOW_MINUTES=60) still re-arms every hour an
+# outage continues, so this does not collapse a whole outage into one page —
+# but it does cut a 10-minute-tick outage to ~9 alerts/day instead of
+# ~144/day.
 ExecStart=%h/.local/bin/uv run jamasp translate

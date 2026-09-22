@@ -56,8 +56,8 @@ export default async function CrawlPage() {
               <TableCell className="font-medium">{h.name}</TableCell>
               <TableCell><Badge variant={BADGE[h.state]}>{sourceStateLabel(h.state, messages)}</Badge></TableCell>
               <TableCell>{h.intervalMinutes}m</TableCell>
-              <TableCell>{h.lastFetch ? fmtAge(h.lastFetch, now) : t(messages, "common.never")}</TableCell>
-              <TableCell>{h.lastItem ? fmtAge(h.lastItem, now) : "—"}</TableCell>
+              <TableCell>{h.lastFetch ? fmtAge(h.lastFetch, messages, now) : t(messages, "common.never")}</TableCell>
+              <TableCell>{h.lastItem ? fmtAge(h.lastItem, messages, now) : "—"}</TableCell>
               <TableCell>{h.errors24h || ""}</TableCell>
             </TableRow>
           ))}

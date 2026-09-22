@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { SourceLang } from "@/components/source-lang";
@@ -26,8 +28,17 @@ describe("SourceLang", () => {
   });
 
   it("marks the fallback text as English for screen readers and typography", () => {
-    // Without lang="en" the Persian font applies to Latin text and a screen
-    // reader announces English words with a Persian voice.
+    // Two effects, and only one of them used to be real.
+    //
+    // The screen-reader half always worked: lang="en" is what stops English
+    // words being announced with a Persian voice.
+    //
+    // The typography half did NOT, and this comment used to claim it did.
+    // app/globals.css set font-family: var(--font-fa) on
+    // :where([dir="rtl"], [lang="fa"]) — which lands on <html> — and
+    // font-family inherits, so the fallback text rendered in Vazirmatn like
+    // everything else. It took an explicit [lang="en"] rule in globals.css
+    // to restore the Latin face; the attribute alone does nothing.
     const html = renderToStaticMarkup(
       <SourceLang fallback messages={messages}>Gold climbs</SourceLang>);
     expect(html).toContain('lang="en"');
@@ -60,5 +71,32 @@ describe("SourceLang", () => {
         <div className="prose">Gold climbs</div>
       </SourceLang>);
     expect(html).toContain(`>${messages["content.sourceEnglish"]}</span>`);
+  });
+});
+
+/**
+ * The typography half of SourceLang's contract lives in CSS, not in the
+ * component, so it is asserted against the stylesheet — the same shape
+ * test/type-scale.test.ts uses for its own token checks.
+ */
+describe("SourceLang typography (app/globals.css)", () => {
+  const css = readFileSync(
+    path.join(import.meta.dirname, "..", "app/globals.css"), "utf8");
+
+  it("restores the Latin face for lang=\"en\" islands", () => {
+    // Without this rule the Persian font-family set on <html> inherits
+    // straight through the lang="en" wrapper, and English fallback text
+    // renders in Vazirmatn — which is exactly what the EN marker exists to
+    // say is NOT happening.
+    expect(css).toMatch(/\[lang="en"\]\s*\{[^}]*font-family:\s*var\(--font-sans\)/);
+  });
+
+  it("keeps that rule out of :where(), so it can win", () => {
+    // :where() zeroes specificity. The Persian rule above it is
+    // :where([dir="rtl"], [lang="fa"]), also zero — a zero-specificity
+    // English rule would then be decided by source order alone.
+    const line = css.split("\n").find(l => l.includes('[lang="en"]'));
+    expect(line).toBeDefined();
+    expect(line).not.toContain(":where(");
   });
 });

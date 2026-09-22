@@ -118,6 +118,241 @@ describe("state page (stance/playbook Persian sidecars)", () => {
     expect(html).toContain(fa["content.sourceEnglishTitle" as keyof typeof fa]);
   });
 
+  /**
+   * The per-section twin of readWholeDocumentFa's blank-body hazard: every
+   * section can carry a real hash and still have an empty body, and joining
+   * them produced "" — which LocalizedDocument's `=== null` gate read as
+   * "translation present" and rendered as a blank stance with no EN marker.
+   * A blank stance on a trading desk is the worst failure this feature has,
+   * and nothing on screen says anything is wrong.
+   */
+  it("falls back to the marked English stance when every section body is blank", async () => {
+    mockFiles.stance = englishStance;
+    mockFiles.stanceFa = { sections: [{ heading: "", hash: "h0", body: "" }] };
+    mockFiles.playbook = null;
+    mockFiles.playbookFa = null;
+
+    const html = await renderPage("fa");
+    expect(html).toContain("Gold constructive on soft CPI");
+    expect((html.match(/lang="en"/g) ?? []).length).toBe(1);
+    expect(html).toContain(fa["content.sourceEnglishTitle" as keyof typeof fa]);
+  });
+
+  it("falls back to the marked English stance when the joined sections are only whitespace", async () => {
+    mockFiles.stance = englishStance;
+    mockFiles.stanceFa = { sections: [
+      { heading: "", hash: "h0", body: "\n" }, { heading: "", hash: "h1", body: "  \n" },
+    ] };
+    mockFiles.playbook = null;
+    mockFiles.playbookFa = null;
+
+    const html = await renderPage("fa");
+    expect(html).toContain("Gold constructive on soft CPI");
+    expect((html.match(/lang="en"/g) ?? []).length).toBe(1);
+  });
+
+  /**
+   * A blank PLAYBOOK sidecar reaches the page as null already, because
+   * readPlaybookFa now collapses blank to absent (see lib/files.ts). This
+   * asserts the page's own behaviour given that null, so the two halves of
+   * the blank-body fix are both pinned.
+   */
+  it("falls back to the marked English playbook when its sidecar body is blank", async () => {
+    mockFiles.stance = null;
+    mockFiles.stanceFa = null;
+    mockFiles.playbook = englishPlaybook;
+    mockFiles.playbookFa = "   \n";
+
+    const html = await renderPage("fa");
+    expect(html).toContain("Hold the line on real yields");
+    expect((html.match(/lang="en"/g) ?? []).length).toBe(1);
+  });
+
+  /**
+   * PRODUCTION HEADING SHAPE. lib/files.ts#splitMarkdownSections keeps the
+   * whole heading LINE, so readStanceFa yields `heading: "## View"` — pinned
+   * by test/files-fa.test.ts's own "returns sections in source order"
+   * assertion. lib/stance.ts#parseStance strips the marker and yields
+   * "View". Every fixture below uses the sidecar's shape, not the parser's:
+   * an earlier version of these tests used "View" and passed while the page
+   * was in fact rendering a literal "## View" heading, because
+   * classifyHeading("## View") matches no canonical prefix and fell through
+   * to the raw anchor.
+   */
+  const faSection = (heading: string, hash: string, body: string) =>
+    ({ heading, hash, body });
+
+  const STANCE_WITH_SECTIONS = [
+    "# Stance — 2026-08-01", "", "Preamble line.", "",
+    "## View", "", "Gold constructive.", "",
+    "## What flips me", "", "A hot CPI print.", "",
+  ].join("\n");
+
+  /**
+   * The page concatenated section BODIES and dropped every heading anchor,
+   * so Persian was one flat blob where English has "## View" and
+   * "## What flips me". The old code comment said the page "has no
+   * dictionary to render a canonical heading through" — but
+   * STANCE_HEADING_KEYS in fundamental-panel.tsx is exactly that dictionary.
+   */
+  it("renders canonical Persian headings for the stance's sections", async () => {
+    mockFiles.stance = STANCE_WITH_SECTIONS;
+    mockFiles.stanceFa = { sections: [
+      faSection("", "h0", "خط آغازین.\n"),
+      faSection("## View", "h1", "طلا رو به رشد.\n"),
+      faSection("## What flips me", "h2", "یک شاخص قیمت داغ.\n"),
+    ] };
+    mockFiles.playbook = null;
+    mockFiles.playbookFa = null;
+
+    const html = await renderPage("fa");
+    expect(html).toContain("خط آغازین.");
+    expect(html).toContain("طلا رو به رشد.");
+    expect(html).toContain("یک شاخص قیمت داغ.");
+    expect(html).toContain(`>${fa["stance.view"]}<`);
+    expect(html).toContain(`>${fa["stance.whatFlipsMe"]}<`);
+    // The English anchor never reaches the screen — neither bare nor, as it
+    // did before the "## " marker was stripped, with its marker attached.
+    expect(html).not.toContain(">View<");
+    expect(html).not.toContain(">What flips me<");
+    expect(html).not.toContain("## View");
+    expect(html).not.toContain("## What flips me");
+    expect(html).not.toContain('lang="en"');
+  });
+
+  it("keeps an ad-hoc section's own heading, which has no canonical key", async () => {
+    mockFiles.stance = [
+      "# Stance — 2026-08-01", "", "Preamble.", "",
+      "## View", "", "Gold constructive.", "",
+      "## Watching the Strait", "", "Tanker traffic thinning.", "",
+    ].join("\n");
+    mockFiles.stanceFa = { sections: [
+      faSection("", "h0", "پیش‌درآمد.\n"),
+      faSection("## View", "h1", "طلا رو به رشد.\n"),
+      faSection("## Watching the Strait", "h2", "ترافیک نفتکش‌ها کم شده.\n"),
+    ] };
+    mockFiles.playbook = null;
+    mockFiles.playbookFa = null;
+
+    const html = await renderPage("fa");
+    expect(html).toContain(fa["stance.view"]);
+    // Free-form agent prose, not a closed enum — there is no dictionary key
+    // for it, so the anchor the job wrote is the only heading available. Its
+    // "## " marker is stripped, or it would render as literal text.
+    expect(html).toContain(">Watching the Strait<");
+    expect(html).toContain("ترافیک نفتکش‌ها کم شده.");
+  });
+
+  it("leaves the English stance's own headings alone in the English locale", async () => {
+    mockFiles.stance = [
+      "# Stance — 2026-08-01", "", "Preamble.", "", "## View", "", "Gold constructive.", "",
+    ].join("\n");
+    mockFiles.stanceFa = { sections: [
+      faSection("", "h0", "پیش‌درآمد.\n"),
+      faSection("## View", "h1", "طلا رو به رشد.\n"),
+    ] };
+    mockFiles.playbook = null;
+    mockFiles.playbookFa = null;
+
+    const html = await renderPage("en");
+    expect(html).toContain("View");
+    expect(html).toContain("Gold constructive.");
+    expect(html).not.toContain("طلا رو به رشد.");
+  });
+
+  /**
+   * THE REGRESSION THE HEADING WORK INTRODUCED.
+   *
+   * Prepending "## <heading>" to every non-preamble section made an
+   * all-blank sidecar join to a non-blank string ("## دیدگاه\n\n## ...\n"),
+   * so LocalizedDocument's `!sidecarBody?.trim()` guard — added precisely to
+   * catch this — passed, and /state rendered Persian headings over nothing,
+   * with no EN marker and the English stance gone entirely.
+   *
+   * The blankness test therefore has to run on the section BODIES, before
+   * any heading is assembled.
+   */
+  it("falls back to the marked English stance when every section body is blank", async () => {
+    mockFiles.stance = STANCE_WITH_SECTIONS;
+    mockFiles.stanceFa = { sections: [
+      faSection("", "h0", ""),
+      faSection("## View", "h1", ""),
+      faSection("## What flips me", "h2", "\n  \n"),
+    ] };
+    mockFiles.playbook = null;
+    mockFiles.playbookFa = null;
+
+    const html = await renderPage("fa");
+    expect(html).toContain("Gold constructive.");
+    expect(html).toContain("A hot CPI print.");
+    expect((html.match(/lang="en"/g) ?? []).length).toBe(1);
+    expect(html).toContain(fa["content.sourceEnglishTitle" as keyof typeof fa]);
+    // No orphan Persian section heading standing over nothing.
+    //
+    // Asserted on whatFlipsMe, not view: fa.json renders stance.view,
+    // state.stanceHeading and fundamental.stancePrefix all as "دیدگاه", and
+    // state.stanceHeading is this page's own always-present section title —
+    // so a "view" assertion here can never hold and would be testing the
+    // dictionary's collisions rather than the page. whatFlipsMe's Persian
+    // value is unique across the whole dictionary.
+    expect(html).not.toContain(`>${fa["stance.whatFlipsMe"]}<`);
+  });
+
+  /**
+   * The MIXED case: some sections translated, one blank behind a real hash.
+   *
+   * Discarded wholesale, like every other per-section hazard on this page —
+   * see the guard's own comment. A blank body under a REAL hash means the
+   * job returned nothing for a section that has English content, and
+   * rendering "## چه چیزی نظرم را برمی‌گرداند" with nothing beneath it does
+   * not merely look unfinished: it silently deletes the analyst's
+   * falsifiers and reads as "there are none", which is a substantive false
+   * claim on a trading desk.
+   *
+   * Measured before choosing this: across all 121 stance.md versions in this
+   * repo's history, 712 "## " sections, ZERO had an empty body. A
+   * heading-bearing section with no content does not occur, so the strict
+   * rule has no realistic false positive.
+   */
+  it("falls back to the marked English stance when only SOME bodies are blank", async () => {
+    mockFiles.stance = STANCE_WITH_SECTIONS;
+    mockFiles.stanceFa = { sections: [
+      faSection("", "h0", "خط آغازین.\n"),
+      faSection("## View", "h1", "طلا رو به رشد.\n"),
+      faSection("## What flips me", "h2", "   \n"),
+    ] };
+    mockFiles.playbook = null;
+    mockFiles.playbookFa = null;
+
+    const html = await renderPage("fa");
+    expect(html).toContain("Gold constructive.");
+    expect(html).toContain("A hot CPI print.");
+    expect((html.match(/lang="en"/g) ?? []).length).toBe(1);
+    // The partial Persian is discarded rather than spliced in unmarked.
+    expect(html).not.toContain("طلا رو به رشد.");
+  });
+
+  /**
+   * The one blank body that is legitimate: position 0 is whatever precedes
+   * the first "## " line, and a stance that opens straight into a section
+   * has none. It carries no heading, so it is exempt from the rule above —
+   * the sidecar is still usable.
+   */
+  it("still uses a sidecar whose PREAMBLE alone is empty", async () => {
+    mockFiles.stance = ["## View", "", "Gold constructive.", ""].join("\n");
+    mockFiles.stanceFa = { sections: [
+      faSection("", "h0", ""),
+      faSection("## View", "h1", "طلا رو به رشد.\n"),
+    ] };
+    mockFiles.playbook = null;
+    mockFiles.playbookFa = null;
+
+    const html = await renderPage("fa");
+    expect(html).toContain("طلا رو به رشد.");
+    expect(html).toContain(`>${fa["stance.view"]}<`);
+    expect(html).not.toContain('lang="en"');
+  });
+
   it("renders the playbook sidecar independently of the stance sidecar", async () => {
     mockFiles.stance = null;
     mockFiles.stanceFa = null;

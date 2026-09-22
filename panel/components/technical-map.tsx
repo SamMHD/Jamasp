@@ -55,7 +55,7 @@ function familyLabel(family: string, messages: Messages): string {
     : family.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 }
 
-function tileTitle(t: SignalTile, now: Date): string {
+function tileTitle(t: SignalTile, now: Date, messages: Messages): string {
   const read = t.state > 0.15 ? "bullish" : t.state < -0.15 ? "bearish" : "neutral";
   // A pin overrides the fitted value outright (jamasp/fit.py's run_fit
   // applies it regardless of `fitted`), so it takes priority here too.
@@ -69,7 +69,7 @@ function tileTitle(t: SignalTile, now: Date): string {
   // the tile rather than having to know which host has bars.
   const via = t.source === "tradingview" ? ", via TradingView" : "";
   return `${t.signal} ${t.timeframe} — ${read} ${t.state.toFixed(2)}, `
-    + `${weight}${via}, ${fmtAge(t.ts, now)}`;
+    + `${weight}${via}, ${fmtAge(t.ts, messages, now)}`;
 }
 
 export function TechnicalMap({ tiles, width, height, fittedAt, messages }: {
@@ -82,10 +82,12 @@ export function TechnicalMap({ tiles, width, height, fittedAt, messages }: {
   const now = new Date();
 
   if (tiles.length === 0) {
-    // aria-label deliberately English-only in both locales: see
-    // components/market-map.tsx's identical section for the reasoning.
+    // Localized, for the reason spelled out in components/market-map.tsx's
+    // identical section: the aria-label is this region's only name, so
+    // English here leaves the Persian screen-reader user the one reader
+    // served no Persian.
     return (
-      <section aria-label="Technical signal treemap"
+      <section aria-label={t(messages, "tech.regionLabel")}
         className="rounded border border-border p-4">
         <p className="text-sm text-muted-foreground">
           {t(messages, "tech.noSignalsPrefix")} <code>jamasp bars backfill</code>{" "}
@@ -104,13 +106,15 @@ export function TechnicalMap({ tiles, width, height, fittedAt, messages }: {
   const unfitted = tiles.filter(t => !t.fitted && !t.pinned).length;
 
   return (
-    <section id={TECHNICAL_MAP_ELEMENT_ID} aria-label="Technical signal treemap" dir="ltr"
+    <section id={TECHNICAL_MAP_ELEMENT_ID} aria-label={t(messages, "tech.regionLabel")}
+      dir="ltr"
       className="rounded border border-border p-4 bg-background">
       <div className="mb-2 flex items-center justify-end">
-        <FullscreenButton targetId={TECHNICAL_MAP_ELEMENT_ID} />
+        <FullscreenButton targetId={TECHNICAL_MAP_ELEMENT_ID} messages={messages} />
       </div>
       <svg viewBox={`0 0 ${width} ${height}`} className="w-full" role="img"
-        aria-label={`technical signal treemap, ${tiles.length} signals`}>
+        aria-label={t(messages, "tech.svgAriaTemplate")
+          .replace("{n}", String(tiles.length))}>
         <MapHatchDefs />
         {boxes.map(box => (
           <g key={box.group}>
@@ -125,9 +129,10 @@ export function TechnicalMap({ tiles, width, height, fittedAt, messages }: {
                 <MapTile key={cell.node.key}
                   x={cell.x} y={cell.y} w={cell.w} h={cell.h}
                   tone={toneFromIntensity(cell.node.state)}
-                  title={tileTitle(cell.node, now)}
+                  title={tileTitle(cell.node, now, messages)}
                   dashed={!cell.node.fitted && !cell.node.pinned}
-                  lines={label.lines} fontSize={label.fontSize} />
+                  lines={label.lines} fontSize={label.fontSize}
+                  messages={messages} />
               );
             })}
           </g>
@@ -138,7 +143,7 @@ export function TechnicalMap({ tiles, width, height, fittedAt, messages }: {
         {tiles.length} {t(messages, "tech.signalsWord")}
         {unfitted > 0 ? <> · {unfitted} {t(messages, "tech.notYetFitted")}</> : ""}
         {fittedAt
-          ? <> · {t(messages, "tech.weightsFitted")} {fmtAge(fittedAt, now)}</>
+          ? <> · {t(messages, "tech.weightsFitted")} {fmtAge(fittedAt, messages, now)}</>
           : <> · {t(messages, "tech.noFitYet")}</>}
       </p>
     </section>

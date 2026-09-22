@@ -37,6 +37,25 @@ export function ItemHeadline({ item, locale, messages }: {
   return <SourceLang fallback={fallback} messages={messages}>{text}</SourceLang>;
 }
 
+/**
+ * The lede, shared by the list row and the detail dialog's description for
+ * exactly the reason `ItemHeadline` is shared: one `localized(..., "lede")`
+ * call site rather than two that must remember to agree.
+ *
+ * Returns null when neither language has a lede, so a caller can render it
+ * unconditionally — the `{rep.lede && ...}` guard that used to sit at each
+ * call site tested the *English* field, which would have hidden a row that
+ * has only `lede_fa` once the reuse pass starts filling one in without the
+ * other.
+ */
+export function ItemLede({ item, locale, messages }: {
+  item: ItemRow; locale: Locale; messages: Messages;
+}) {
+  const { text, fallback } = localized(item, "lede", locale);
+  if (!text.trim()) return null;
+  return <SourceLang fallback={fallback} messages={messages}>{text}</SourceLang>;
+}
+
 const fetcher = async (url: string) => {
   const r = await fetch(url);
   if (!r.ok) {
@@ -160,9 +179,13 @@ export function InboxTable({ sources, topics, locale, messages }: {
                 </button>
                 {!rep.read_at && <Badge>{t(messages, "inboxTable.unreadBadge")}</Badge>}
               </div>
-              {rep.lede && <p className="mt-1 text-sm text-muted-foreground">{rep.lede}</p>}
+              {(rep.lede || rep.lede_fa) && (
+                <p className="mt-1 text-sm text-muted-foreground">
+                  <ItemLede item={rep} locale={locale} messages={messages} />
+                </p>
+              )}
               <div className="mt-1 text-xs text-muted-foreground">
-                {rep.source} · {rep.topic} · {fmtAge(rep.published_at)}
+                {rep.source} · {rep.topic} · {fmtAge(rep.published_at, messages)}
                 {others.length > 0 && (
                   <> · {t(messages, "inboxTable.alsoWord")}: {others.map(o => o.source).join(", ")}</>
                 )}
@@ -199,7 +222,11 @@ export function InboxTable({ sources, topics, locale, messages }: {
                 <DialogTitle className="leading-snug">
                   <ItemHeadline item={selectedRep} locale={locale} messages={messages} />
                 </DialogTitle>
-                {selectedRep.lede && <DialogDescription>{selectedRep.lede}</DialogDescription>}
+                {(selectedRep.lede || selectedRep.lede_fa) && (
+                  <DialogDescription>
+                    <ItemLede item={selectedRep} locale={locale} messages={messages} />
+                  </DialogDescription>
+                )}
               </DialogHeader>
               <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1.5 text-sm">
                 <dt className="text-muted-foreground">{t(messages, "inboxTable.dtSource")}</dt>
@@ -207,13 +234,13 @@ export function InboxTable({ sources, topics, locale, messages }: {
                 <dt className="text-muted-foreground">{t(messages, "inboxTable.dtTopic")}</dt>
                 <dd>{selectedRep.topic}</dd>
                 <dt className="text-muted-foreground">{t(messages, "inboxTable.dtPublished")}</dt>
-                <dd>{fmtUtc(selectedRep.published_at)} · {fmtAge(selectedRep.published_at)}</dd>
+                <dd>{fmtUtc(selectedRep.published_at)} · {fmtAge(selectedRep.published_at, messages)}</dd>
                 <dt className="text-muted-foreground">{t(messages, "inboxTable.dtIngested")}</dt>
-                <dd>{fmtUtc(selectedRep.fetched_at)} · {fmtAge(selectedRep.fetched_at)}</dd>
+                <dd>{fmtUtc(selectedRep.fetched_at)} · {fmtAge(selectedRep.fetched_at, messages)}</dd>
                 <dt className="text-muted-foreground">{t(messages, "inboxTable.dtStatus")}</dt>
                 <dd>
                   {selectedRep.read_at
-                    ? `${t(messages, "inboxTable.readPrefix")} ${fmtAge(selectedRep.read_at)}`
+                    ? `${t(messages, "inboxTable.readPrefix")} ${fmtAge(selectedRep.read_at, messages)}`
                     : t(messages, "inboxTable.unreadWord")}
                 </dd>
                 <dt className="text-muted-foreground">{t(messages, "inboxTable.dtItemId")}</dt>
@@ -236,7 +263,7 @@ export function InboxTable({ sources, topics, locale, messages }: {
                           <a href={o.url} target="_blank" rel="noreferrer" className="hover:text-primary underline underline-offset-2">
                             {o.source}
                           </a>{" "}
-                          <span className="text-muted-foreground">· {fmtAge(o.published_at)}</span>
+                          <span className="text-muted-foreground">· {fmtAge(o.published_at, messages)}</span>
                         </div>
                       ))}
                     </dd>

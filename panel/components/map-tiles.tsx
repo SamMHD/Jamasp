@@ -369,7 +369,26 @@ export function importanceInsets(
  * most-scanned, least-hovered surface, and a stalled translate job should
  * not look identical to a healthy one to someone who never hovers.
  */
-export const FALLBACK_MARKER_TEXT = "EN";
+/**
+ * The marker's TEXT comes from the dictionary, never a literal here.
+ *
+ * It used to be `const FALLBACK_MARKER_TEXT = "EN"`, which duplicated the
+ * value of `content.sourceEnglish` — the string components/source-lang.tsx's
+ * chip renders — and gave the marker a second place to drift from. The two
+ * say the same thing about the same condition and must not be able to
+ * disagree.
+ *
+ * Read through `t()` against the caller's own dictionary, exactly as
+ * SourceLang reads it, rather than pinned to English: the badge is chrome,
+ * and a locale that spells the source-language marker differently should
+ * spell it the same way on the map as everywhere else.
+ *
+ * The FONT and BAND stay numeric constants — they are layout, reserved out
+ * of the label box before fitLabel runs (see below), and must not vary with
+ * the dictionary or the zero-overflow guarantee would depend on string
+ * length.
+ */
+export const FALLBACK_MARKER_KEY = "content.sourceEnglish";
 export const FALLBACK_MARKER_FONT = 9;
 export const FALLBACK_MARKER_BAND = 14;
 
@@ -766,11 +785,11 @@ export function MapGroupHeader({ x, y, w, label }: {
  * `lines`/`fontSize` against `h - fallbackMarkerBand(...)` on top of
  * whatever `importanceInsets` already took, for the same reason.
  */
-export function MapTile({ x, y, w, h, tone, title, lines,
+export function MapTile({ x, y, w, h, tone, title, lines, messages,
   fontSize = LABEL_FONT, dashed = false,
   importance = "none", tier, gates = DEFAULT_TIER_GATES, fallback = false }: {
   x: number; y: number; w: number; h: number;
-  tone: Tone; title: string; lines: string[];
+  tone: Tone; title: string; lines: string[]; messages: Messages;
   fontSize?: number; dashed?: boolean;
   importance?: ImportanceTreatment; tier?: number; gates?: TierGates;
   fallback?: boolean;
@@ -892,7 +911,7 @@ export function MapTile({ x, y, w, h, tone, title, lines,
           textAnchor="end" fontSize={FALLBACK_MARKER_FONT} fill={TONE_INK[tone]}
           fillOpacity={0.6} pointerEvents="none"
           style={{ fontWeight: 600, letterSpacing: "0.02em" }}>
-          {FALLBACK_MARKER_TEXT}
+          {t(messages, FALLBACK_MARKER_KEY)}
         </text>
       )}
       {metaFits && (

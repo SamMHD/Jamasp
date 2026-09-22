@@ -79,6 +79,31 @@ describe("readPlaybookFa", () => {
     });
   });
 
+  /**
+   * A sidecar that is valid front matter and NOTHING else parses cleanly and
+   * hashes correctly — it is simply empty. Returning "" for it made the
+   * caller's `!== null` / `=== null` gate say "translation present", and the
+   * page rendered a blank document with no EN marker: the worst failure this
+   * feature has, and invisible. Absent and blank must be the same answer.
+   */
+  it("returns null for a sidecar whose body is empty", async () => {
+    await withRoot({
+      "state/playbook.md": english,
+      "state/playbook.fa.md": frontMatter(hash(english)),
+    }, m => {
+      expect(m.readPlaybookFa()).toBeNull();
+    });
+  });
+
+  it("returns null for a sidecar whose body is only whitespace", async () => {
+    await withRoot({
+      "state/playbook.md": english,
+      "state/playbook.fa.md": `${frontMatter(hash(english))}\n   \n\t\n`,
+    }, m => {
+      expect(m.readPlaybookFa()).toBeNull();
+    });
+  });
+
   it("returns null when the English source itself is missing", async () => {
     await withRoot({
       "state/playbook.fa.md": frontMatter(hash(english)) + persian,
@@ -287,6 +312,15 @@ describe("readReportFa", () => {
       "reports/2026/08/2026-08-01-brief.md": english,
       "reports/2026/08/2026-08-01-brief.fa.md":
         frontMatter(hash("an older report body")) + persian,
+    }, m => {
+      expect(m.readReportFa(["2026", "08", "2026-08-01-brief"])).toBeNull();
+    });
+  });
+
+  it("returns null for a report sidecar whose body is blank", async () => {
+    await withRoot({
+      "reports/2026/08/2026-08-01-brief.md": english,
+      "reports/2026/08/2026-08-01-brief.fa.md": `${frontMatter(hash(english))}\n  \n`,
     }, m => {
       expect(m.readReportFa(["2026", "08", "2026-08-01-brief"])).toBeNull();
     });

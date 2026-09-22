@@ -47,6 +47,53 @@ describe("unscoredCountSince against a database with no item_scores table", () =
   });
 });
 
+describe("getScoredItems against a pre-migration items table", () => {
+  it("returns English headlines rather than throwing when headline_fa is missing", async () => {
+    // The deployed host has an `items` table from before the Persian columns
+    // existed. They arrive via jamasp/db.py's ADDED_COLUMNS, which only runs
+    // when a `jamasp` CLI command opens the database — and the panel is
+    // read-only and may well render first. getScoredItems names its columns
+    // explicitly, so `i.headline_fa` throws at PREPARE time, and q() rethrows
+    // everything but SQLITE_BUSY: the whole overview route 500s, not just the
+    // map. Exactly the hazard hasColumn's own doc comment describes.
+    const root = mkdtempSync(path.join(tmpdir(), "jamasp-items-nofa-"));
+    mkdirSync(path.join(root, "state"), { recursive: true });
+    const d = new Database(path.join(root, "state", "jamasp.db"));
+    d.exec(`
+      CREATE TABLE items (id TEXT PRIMARY KEY, source TEXT NOT NULL,
+        published_at TEXT NOT NULL, headline TEXT NOT NULL, lede TEXT,
+        url TEXT NOT NULL, topic TEXT NOT NULL, cluster_id TEXT,
+        fetched_at TEXT NOT NULL, read_at TEXT);
+      CREATE TABLE item_scores (item_id TEXT PRIMARY KEY, tier INTEGER NOT NULL,
+        direction INTEGER NOT NULL, conviction REAL NOT NULL, theme TEXT NOT NULL,
+        scored_at TEXT NOT NULL);
+      INSERT INTO items VALUES
+        ('w1','reuters','2026-08-19T20:00:00Z','Late story',NULL,
+         'https://x.test/w1','gold',NULL,'2026-08-19T20:00:00Z',NULL);
+      INSERT INTO item_scores VALUES
+        ('w1',4,2,0.8,'rates_dollar','2026-08-19T22:00:00Z');
+    `);
+    d.close();
+
+    const prev = process.env.JAMASP_ROOT;
+    process.env.JAMASP_ROOT = root;
+    vi.resetModules();
+    try {
+      const m = await import("../lib/db");
+      expect(() => m.getScoredItems(SINCE)).not.toThrow();
+      const rows = m.getScoredItems(SINCE);
+      // Degrades to English headlines — the map still renders, marked.
+      expect(rows).toHaveLength(1);
+      expect(rows[0].headline).toBe("Late story");
+      expect(rows[0].headline_fa).toBeNull();
+    } finally {
+      process.env.JAMASP_ROOT = prev;
+      vi.resetModules();
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
+
 describe("latestSignalStates against a database with no signal_states table", () => {
   it("returns an empty array rather than throwing", () => {
     // A host that has not run `jamasp signals refresh` yet must still serve

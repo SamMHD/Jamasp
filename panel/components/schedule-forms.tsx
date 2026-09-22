@@ -49,6 +49,31 @@ export function RunNowButtons({ capped, messages }: { capped: boolean; messages:
   );
 }
 
+/**
+ * The run-type `<option>` list, exported so it can be rendered on its own.
+ *
+ * Radix mounts DialogContent's portal only once `open` is true, and
+ * AddWakeupDialog holds `open` in internal state with no prop to force it,
+ * so a static render of the dialog sees the trigger button and nothing
+ * else. Lifting the options out is the same escape hatch
+ * components/inbox-table.tsx's ItemHeadline uses: one exported call site,
+ * rendered by the dialog and asserted directly by the test.
+ *
+ * `value={rt}` is the load-bearing part. A `<select>` with no explicit
+ * `value` submits its option's TEXT CONTENT — and that text is now a
+ * translated label, so without this the wakeup would be scheduled with a
+ * Persian string where addWakeup expects the Latin run_type slug.
+ */
+export function RunTypeOptions({ messages }: { messages: Messages }) {
+  return (
+    <>
+      {RUN_TYPES.map(rt => (
+        <option key={rt} value={rt}>{runTypeLabel(rt, messages)}</option>
+      ))}
+    </>
+  );
+}
+
 export function AddWakeupDialog({ messages }: { messages: Messages }) {
   const { pending, act } = useAct();
   const [open, setOpen] = useState(false);
@@ -70,14 +95,7 @@ export function AddWakeupDialog({ messages }: { messages: Messages }) {
             <Label htmlFor="type">{t(messages, "schedule.runTypeFieldLabel")}</Label>
             <select id="type" value={type} onChange={e => setType(e.target.value)}
               className="w-full rounded border border-border bg-background px-2 py-1.5 text-sm">
-              {/* `value={rt}` explicit: the option's text now carries the
-                  translated label, and a <select> with no `value` submits
-                  its TEXT CONTENT — without this the wakeup would be
-                  scheduled with a Persian string instead of the run_type
-                  slug addWakeup expects. */}
-              {RUN_TYPES.map(rt => (
-                <option key={rt} value={rt}>{runTypeLabel(rt, messages)}</option>
-              ))}
+              <RunTypeOptions messages={messages} />
             </select>
           </div>
           <div>

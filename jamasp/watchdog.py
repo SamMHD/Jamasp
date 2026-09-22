@@ -141,6 +141,7 @@ def check(
     now: str | None = None,
     credentials_path: Path | None = None,
     translate_window_days: int | None = None,
+    translate_scored_only: bool = False,
 ) -> list[str]:
     now_dt = _parse(now or utcnow())
     violations: list[str] = []
@@ -211,17 +212,36 @@ def check(
     translate_has_run = get_meta(conn, "last_translate_at") is not None
 
     # A translate run whose every batch fails still exits zero, so the unit's
-    # OnFailure alert cannot see it. Backlog is the signal that can. Only check
+    # OnFailure alert cannot see that case. Backlog is the signal that can —
+    # but a quota stop (docs/todo/025) now exits non-zero and does reach
+    # OnFailure, so this probe's job is the OTHER silent failure: a translator
+    # that runs, exits zero, and simply never gets to a row (auth broken,
+    # protocol mismatch, or the codex binary itself gone quiet). Only check
     # rows inside the translate window; rows older than window_days are never
     # revisited by design and do not trigger this probe.
+    #
+    # `translate_scored_only` mirrors `translate.pending_rows`'s own filter of
+    # the same name — required, not optional, once `scored_only` is on.
+    # Without it this probe counts every unscored row in the window as
+    # backlog forever: `scored_only` means those rows are NEVER selected for
+    # translation by design, so they sit at `headline_fa IS NULL,
+    # fa_attempts = 0` permanently and satisfy this query even after a fully
+    # successful run. On the live host that is ~1,157 items reported as a
+    # stuck backlog every single day — a probe that never clears is
+    # indistinguishable from a probe that caught nothing, which is worse than
+    # no probe at all.
     if translate_has_run and translate_window_days is not None:
         threshold = (now_dt - timedelta(minutes=TRANSLATE_BACKLOG_MINUTES)).strftime(
             "%Y-%m-%dT%H:%M:%SZ")
         window_bound = _since(translate_window_days, now)
+        scored_clause = (
+            " AND EXISTS (SELECT 1 FROM item_scores s WHERE s.item_id = items.id)"
+            if translate_scored_only else ""
+        )
         backlog = conn.execute(
             "SELECT COUNT(*) FROM items"
             " WHERE headline_fa IS NULL AND fa_attempts < ? AND published_at < ?"
-            " AND published_at >= ?",
+            f" AND published_at >= ?{scored_clause}",
             (translate_mod.MAX_ATTEMPTS, threshold, window_bound),
         ).fetchone()[0]
         if backlog:
@@ -255,10 +275,11 @@ def run(
     now: str | None = None,
     credentials_path: Path | None = None,
 ) -> list[str]:
-    translate_window = settings.get("translate", {}).get("window_days")
+    translate_cfg = settings.get("translate", {})
     violations = check(
         conn, reports_dir, now=now, credentials_path=credentials_path,
-        translate_window_days=translate_window
+        translate_window_days=translate_cfg.get("window_days"),
+        translate_scored_only=bool(translate_cfg.get("scored_only")),
     )
     if violations:
         runner._notify_safe(

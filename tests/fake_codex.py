@@ -21,6 +21,7 @@ Mode comes from FAKE_CODEX_MODE:
   garbage  write prose to the output file
   empty    write nothing to the output file
   fail     exit non-zero
+  quota    exit non-zero with the real usage-limit message (QuotaExhausted)
   hang     sleep past any sane timeout
   stdout   print the JSON to stdout instead (the `stdout` protocol)
   lax      skip strict-schema validation (for tests about other failures)
@@ -86,6 +87,19 @@ if schema_path and mode != "lax":
 
 if mode == "fail":
     print("codex: boom", file=sys.stderr)
+    sys.exit(1)
+if mode == "quota":
+    # The real message that fanned a quota outage into 22x the calls it
+    # should have cost (docs/todo/025) — verbatim modulo the reset time, so
+    # modelrun's signature match is exercised against actual production text
+    # rather than a paraphrase that would pass even if the match were wrong.
+    print(
+        "ERROR: You've hit your usage limit. Upgrade to Pro"
+        " (https://chatgpt.com/explore/pro), visit"
+        " https://chatgpt.com/codex/settings/usage to purchase more credits"
+        " or try again at 10:00 PM.",
+        file=sys.stderr,
+    )
     sys.exit(1)
 if mode == "hang":
     time.sleep(30)

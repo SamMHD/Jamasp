@@ -67,6 +67,35 @@ def test_non_zero_exit_raises_model_error(monkeypatch):
         run()
 
 
+def test_a_quota_message_raises_quota_exhausted_not_plain_model_error(monkeypatch):
+    """The regression guard for docs/todo/025: a quota outage must be
+    distinguishable from an ordinary translator failure so translate.py can
+    abort instead of fanning out into 22x the calls."""
+    monkeypatch.setenv("FAKE_CODEX_MODE", "quota")
+    with pytest.raises(modelrun.QuotaExhausted, match="usage limit"):
+        run()
+
+
+def test_quota_exhausted_is_still_a_model_error(monkeypatch):
+    """Existing `except ModelError` sites must keep catching it."""
+    monkeypatch.setenv("FAKE_CODEX_MODE", "quota")
+    with pytest.raises(modelrun.ModelError):
+        run()
+
+
+def test_an_ordinary_failure_does_not_trip_the_quota_signature(monkeypatch):
+    """A false positive here would stop a healthy run over a plain refusal —
+    the match must require the billing-specific phrasing, not just any
+    failure."""
+    monkeypatch.setenv("FAKE_CODEX_MODE", "fail")
+    try:
+        run()
+    except modelrun.QuotaExhausted:
+        pytest.fail("an ordinary failure must not raise QuotaExhausted")
+    except modelrun.ModelError:
+        pass
+
+
 def test_garbage_output_raises_model_error(monkeypatch):
     monkeypatch.setenv("FAKE_CODEX_MODE", "garbage")
     with pytest.raises(modelrun.ModelError):
@@ -88,6 +117,25 @@ def test_timeout_raises_model_error(monkeypatch):
 def test_missing_binary_raises_model_error():
     with pytest.raises(modelrun.ModelError):
         run(cmd=["definitely-not-a-real-binary-9f2a"])
+
+
+@pytest.mark.parametrize("text", [
+    "ERROR: You've hit your usage limit. Upgrade to Pro.",
+    "usage limit reached; purchase more credits to continue",
+    "USAGE LIMIT — please upgrade your plan",
+])
+def test_is_quota_exhausted_matches_the_billing_signature(text):
+    assert modelrun._is_quota_exhausted(text)
+
+
+@pytest.mark.parametrize("text", [
+    "I can't help with that request.",
+    "connection reset by peer",
+    "usage limit",                       # no credit/upgrade phrasing
+    "please upgrade your client to the latest version",  # upgrade, no quota
+])
+def test_is_quota_exhausted_ignores_unrelated_failures(text):
+    assert not modelrun._is_quota_exhausted(text)
 
 
 def test_unknown_protocol_raises():

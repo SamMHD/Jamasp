@@ -292,6 +292,18 @@
   :where([dir="rtl"], [lang="fa"]) {
     font-family: var(--font-fa);
   }
+  /* The Latin face back for English islands inside a Persian page.
+     The rule above sits on <html> and font-family INHERITS, so without
+     this every untranslated headline, lede, stance body and brief —
+     everything components/source-lang.tsx wraps in lang="en" — rendered
+     in Vazirmatn. Vazirmatn carries Latin glyphs, so nothing looked
+     broken; the fallback text just quietly wore the wrong face, which is
+     the opposite of what the EN marker is there to communicate. Not in
+     :where(), so it outranks the zero-specificity rule above whichever
+     order they end up in. */
+  [lang="en"] {
+    font-family: var(--font-sans);
+  }
   /* Mobile step-up for the type scale above. Relies on the desktop values
      being declared in a plain (non-inline) @theme block — see the comment
      there — so this override, in the base layer, actually wins over the

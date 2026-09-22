@@ -2,6 +2,12 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { SeriesTable } from "../components/series-table";
 import type { PricePoint } from "../lib/db";
+import { getMessages } from "../lib/i18n";
+
+// `messages` is a REQUIRED prop: the component used to default it to
+// getMessages("en"), which let a caller silently drop it — see
+// components/driver-panel.tsx, which did exactly that in production.
+const messages = getMessages("en");
 
 const pt = (ts: string, value: number): PricePoint => ({ ts, value });
 
@@ -13,7 +19,7 @@ const SERIES = [
 
 describe("SeriesTable", () => {
   it("keeps every stored value reachable without hover", () => {
-    const html = renderToStaticMarkup(<SeriesTable points={SERIES} />);
+    const html = renderToStaticMarkup(<SeriesTable points={SERIES} messages={messages} />);
     expect(html).toContain("view as table");
     expect(html).toContain("4,383.7");
     expect(html).toContain("Aug 10 00:00Z");
@@ -23,12 +29,12 @@ describe("SeriesTable", () => {
     // An empty disclosure inviting a click onto an empty table is worse than
     // silence — and the technical panel hands it an empty series whenever
     // the GC feed has no rows.
-    expect(renderToStaticMarkup(<SeriesTable points={[]} />)).toBe("");
+    expect(renderToStaticMarkup(<SeriesTable points={[]} messages={messages} />)).toBe("");
   });
 
   it("takes a caller-supplied summary label", () => {
     const html = renderToStaticMarkup(
-      <SeriesTable points={SERIES} label="view Jamasp’s stored readings as table" />);
+      <SeriesTable points={SERIES} label="view Jamasp’s stored readings as table" messages={messages} />);
     expect(html).toContain("view Jamasp");
     expect(html).toContain("stored readings as table");
   });

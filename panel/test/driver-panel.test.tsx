@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { DriverPanel } from "../components/driver-panel";
 import { deriveDriver, DRIVER_SPECS } from "../lib/drivers";
 import { getMessages } from "../lib/i18n";
+import fa from "../messages/fa.json";
 
 const NOW = new Date("2026-08-11T12:00:00Z");
 const messages = getMessages("en");
@@ -71,5 +72,28 @@ describe("DriverPanel", () => {
         drivers={DRIVER_SPECS.filter(s => s.symbol !== "DFII10")
           .map(s => deriveDriver(s, null, null, []))} />);
     expect(allLive).not.toContain("Real yield is Jamasp");
+  });
+
+  /**
+   * The bug an optional `messages` prop with an English default hid: this
+   * panel holds a dictionary and simply did not pass it to QuoteTile, so
+   * the tile fell back to getMessages("en") and the overview's driver tiles
+   * printed English in Persian mode — with nothing failing, because the
+   * default made the call site type-check.
+   */
+  it("threads its dictionary into the driver tiles", () => {
+    const drivers = DRIVER_SPECS.map(spec => deriveDriver(spec, null, null, []));
+    const html = renderToStaticMarkup(
+      <DriverPanel drivers={drivers} now={NOW} messages={getMessages("fa")} />);
+    expect(html).toContain(fa["common.noData"]);
+    expect(html).not.toContain("no data");
+  });
+
+  it("threads it into the timestamp line too", () => {
+    const drivers = [deriveDriver(DRIVER_SPECS[0], { ts: null as unknown as string, value: 99.71 }, null, [])];
+    const html = renderToStaticMarkup(
+      <DriverPanel drivers={drivers} now={NOW} messages={getMessages("fa")} />);
+    expect(html).toContain(fa["common.noTimestamp"]);
+    expect(html).not.toContain("no timestamp");
   });
 });

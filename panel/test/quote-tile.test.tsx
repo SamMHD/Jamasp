@@ -2,6 +2,12 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { Delta, QuoteTile } from "../components/quote-tile";
 import type { PricePoint } from "../lib/db";
+import { getMessages } from "../lib/i18n";
+
+// `messages` is a REQUIRED prop: the component used to default it to
+// getMessages("en"), which let a caller silently drop it — see
+// components/driver-panel.tsx, which did exactly that in production.
+const messages = getMessages("en");
 
 const NOW = new Date("2026-08-11T12:00:00Z");
 const pt = (ts: string, value: number): PricePoint => ({ ts, value });
@@ -40,7 +46,7 @@ describe("QuoteTile", () => {
   it("renders value, delta, sparkline and age", () => {
     const html = renderToStaticMarkup(
       <QuoteTile label="DXY" value={99.71} ts="2026-08-10T03:06:09Z"
-        delta={-0.5} series={series} now={NOW} />);
+        delta={-0.5} series={series} now={NOW} messages={messages} />);
     expect(html).toContain("DXY");
     expect(html).toContain("99.71");
     expect(html).toContain("▼ 0.5");
@@ -50,7 +56,7 @@ describe("QuoteTile", () => {
 
   it("states 'no data' for a symbol with no rows — no figure, no sparkline", () => {
     const html = renderToStaticMarkup(
-      <QuoteTile label="US 10y real" value={null} ts={null} delta={null} now={NOW} />);
+      <QuoteTile label="US 10y real" value={null} ts={null} delta={null} now={NOW} messages={messages} />);
     expect(html).toContain("US 10y real");
     expect(html).toContain("no data");
     expect(html).not.toContain("<svg");
@@ -60,7 +66,7 @@ describe("QuoteTile", () => {
   it("draws no trend line from a single print", () => {
     const html = renderToStaticMarkup(
       <QuoteTile label="US 10y" value={4.66} ts="2026-08-07T18:20:00Z"
-        delta={null} series={[pt("2026-08-07T18:20:00Z", 4.66)]} now={NOW} />);
+        delta={null} series={[pt("2026-08-07T18:20:00Z", 4.66)]} now={NOW} messages={messages} />);
     expect(html).toContain("4.66");
     expect(html).toContain("24h —");
     expect(html).not.toContain("<svg");
@@ -71,7 +77,7 @@ describe("QuoteTile", () => {
     // missing"), which must still render "24h —".
     const html = renderToStaticMarkup(
       <QuoteTile label="ATR14" value={105.1} digits={1} ts="2026-08-09T21:32:04Z"
-        note="1.4% of spot" now={NOW} />);
+        note="1.4% of spot" now={NOW} messages={messages} />);
     expect(html).toContain("105.1");
     expect(html).not.toContain("24h");
     expect(html).not.toContain("—");
@@ -80,7 +86,7 @@ describe("QuoteTile", () => {
   it("carries a cadence note when given one", () => {
     const html = renderToStaticMarkup(
       <QuoteTile label="Net spec" value={190648} digits={0} ts="2026-08-04T00:00:00Z"
-        delta={16348} deltaLabel="w/w" deltaTone="neutral" note="CFTC weekly" now={NOW} />);
+        delta={16348} deltaLabel="w/w" deltaTone="neutral" note="CFTC weekly" now={NOW} messages={messages} />);
     expect(html).toContain("190,648");
     expect(html).toContain("CFTC weekly");
     expect(html).toContain("w/w");

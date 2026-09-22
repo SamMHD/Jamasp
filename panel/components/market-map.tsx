@@ -77,15 +77,6 @@ function windowLabel(range: MapRange, messages: Messages): string {
   return t(messages, WINDOW_LABEL_KEY[range]);
 }
 
-/**
- * English-only, deliberately, in both locales: the svg's own aria-label
- * below is a dynamically composed accessibility sentence (item counts
- * folded in), not visible chrome with a Persian rendering to match against
- * — see this task's report for the full reasoning next to the section
- * aria-label just above it, which gets the identical treatment.
- */
-const WINDOW_LABEL_EN: Record<MapRange, string> = { "24h": "in the last 24h", week: "this week" };
-
 
 const FATE_WORD = {
   posted: "posted to the channel",
@@ -123,7 +114,7 @@ function tileTitle(
   const sign = item.direction > 0 ? "+" : "";
   const base = `${headline} — tier ${item.tier} (${FATE_WORD[tierFate(item.tier, gates)]}), `
     + `${dirWord} ${sign}${item.direction} `
-    + `(conviction ${item.conviction.toFixed(2)}), ${item.source}, ${fmtAge(item.publishedAt, now)}`;
+    + `(conviction ${item.conviction.toFixed(2)}), ${item.source}, ${fmtAge(item.publishedAt, messages, now)}`;
   return fallback ? `${base} — ${t(messages, "content.sourceEnglishTitle")}` : base;
 }
 
@@ -151,12 +142,17 @@ export function MarketMap({ items, width, height, range, coverage,
   const now = new Date();
 
   if (items.length === 0) {
-    // aria-label deliberately English-only in both locales: it names an
-    // SVG-accessibility surface, not visible chrome, and has no visible
-    // counterpart elsewhere on the page for a Persian rendering to match
-    // against — see this task's report for the full reasoning.
+    // Localized like everything else. The previous note here called the
+    // aria-label "not visible chrome, with no visible counterpart to match
+    // against" and deferred to a report that was never written — but having
+    // no visible counterpart is an argument FOR translating it, not against:
+    // this label is the ONLY name the region has, so leaving it English
+    // means a Persian screen-reader user is the one reader who gets no
+    // Persian at all. It is a closed string, hand-translated, so it carries
+    // no EN marker: chrome, not content.
     return (
-      <section aria-label="Scored news treemap" className="rounded border border-border p-4">
+      <section aria-label={t(messages, "map.regionLabel")}
+        className="rounded border border-border p-4">
         <p className="text-sm text-muted-foreground">
           {t(messages, "map.noScoredStoriesTemplate").replace("{window}", windowLabel(range, messages))}
           {coverage.unscored > 0
@@ -191,13 +187,15 @@ export function MarketMap({ items, width, height, range, coverage,
     // Pinned LTR: the panel flips to dir="rtl" in Persian, and every
     // instrument here is positioned along a left-to-right time axis.
     // Mirroring them would reverse the axis for no reader's benefit.
-    <section id={MAP_ELEMENT_ID} aria-label="Scored news treemap" dir="ltr"
+    <section id={MAP_ELEMENT_ID} aria-label={t(messages, "map.regionLabel")} dir="ltr"
       className="rounded border border-border p-4 bg-background">
       <div className="mb-2 flex items-center justify-end">
-        <FullscreenButton targetId={MAP_ELEMENT_ID} />
+        <FullscreenButton targetId={MAP_ELEMENT_ID} messages={messages} />
       </div>
       <svg viewBox={`0 0 ${width} ${height}`} className="w-full" role="img"
-        aria-label={`scored news treemap, ${items.length} scored stories ${WINDOW_LABEL_EN[range]}`}>
+        aria-label={t(messages, "map.svgAriaTemplate")
+          .replace("{n}", String(items.length))
+          .replace("{window}", windowLabel(range, messages))}>
         <MapHatchDefs />
         {boxes.map(box => (
           <g key={box.theme}>
@@ -236,7 +234,7 @@ export function MarketMap({ items, width, height, range, coverage,
                   title={tileTitle(cell.node, headline, fallback, now, messages, tierGates)}
                   lines={label.lines} fontSize={label.fontSize}
                   importance={importance} tier={cell.node.tier} gates={tierGates}
-                  fallback={fallback} />
+                  fallback={fallback} messages={messages} />
               );
             })}
           </g>
@@ -262,7 +260,7 @@ export function MarketMap({ items, width, height, range, coverage,
             be read as the rescale claim it replaced. */}
         {fittedAt && hasMultipliers
           ? <> · {t(messages, "map.areaIsTier")} · {t(messages, "map.themeFit")}{" "}
-              {fmtAge(fittedAt, now)}, {t(messages, "map.notAppliedToArea")}</>
+              {fmtAge(fittedAt, messages, now)}, {t(messages, "map.notAppliedToArea")}</>
           : <> · {t(messages, "map.areaIsTier")} · {t(messages, "map.themeFitNotRun")}</>}
       </p>
     </section>

@@ -112,10 +112,15 @@ export default async function Overview({
   // no-ops on it in English locale.
   const stanceFa = files.readStanceFa();
   const watchlist = files.readWatchlist();
+  // Keyed by theme; an absent or stale entry simply is not there, and
+  // FundamentalPanel's chips fall back to the English `why` WITH the marker
+  // — the same treatment app/state/page.tsx gives the same field.
+  const watchlistFa = files.readWatchlistFa();
   const preds = files.readPredictions();
   const pendingWakeups = db.getWakeups("pending");
   const horizon = deriveHorizon(
-    { events: db.getEvents(7, now), predictions: preds, wakeups: pendingWakeups }, now);
+    { events: db.getEvents(7, now), predictions: preds, wakeups: pendingWakeups, locale },
+    now);
   // News-volume window anchored to the newest item (see lib/newsflow.ts);
   // the SQL cutoff is a day wider than the 14-day day-window so its first
   // day is never a partial count.
@@ -297,7 +302,8 @@ export default async function Overview({
           measure. */}
       <div className="mt-4">
         <FundamentalPanel stance={stance} watchlist={watchlist} now={now}
-          locale={locale} messages={messages} stanceFa={stanceFa} />
+          locale={locale} messages={messages} stanceFa={stanceFa}
+          watchlistFa={watchlistFa} />
       </div>
 
       <FooterStrip wakeup={pendingWakeups[0]}
