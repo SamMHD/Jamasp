@@ -771,17 +771,22 @@ class DocLedger:
         self.conn.commit()
 
 
-def _doc_counts(translated: int = 0, failed: int = 0,
-                abandoned: int = 0) -> dict:
+def _doc_counts(translated: int = 0, failed: int = 0, abandoned: int = 0,
+                backoff: int = 0) -> dict:
     """The shape every document pass returns, so `translate_docs` can sum it.
 
-    `failed` and `abandoned` are deliberately separate numbers: "3 documents
-    failed this run" and "3 documents are being skipped because they keep
-    failing" are different operator situations, and the first one is the one
-    that might fix itself.
+    `failed`, `abandoned` and `backoff` are deliberately separate numbers.
+    "3 documents failed this run", "3 documents are being skipped because
+    they keep failing" and "3 documents are waiting out a backoff before
+    their next attempt" are three different operator situations, and only the
+    first two involve anything going wrong in THIS tick.
+
+    `backoff` is here because it was in none of them at first: a backed-off
+    unit was counted in nothing, so a tick where every document was waiting
+    printed `docs 0/0` — byte-identical to a tick with nothing to do.
     """
     return {"translated": translated, "failed": failed,
-            "abandoned": abandoned}
+            "abandoned": abandoned, "backoff": backoff}
 
 
 def _translate_text(text: str, glossary: dict, run) -> str:
@@ -828,7 +833,7 @@ def translate_stance(
         prior = translatetext.parse_stance_sidecar(raw)
     existing = {heading: (h, body) for heading, h, body in prior}
 
-    translated = failed = abandoned = 0
+    translated = failed = abandoned = backoff = 0
     out: list[tuple[str, str, str]] = []
     for heading, body in translatetext.split_sections(text):
         digest = translatetext.src_hash(body)
@@ -848,10 +853,12 @@ def translate_stance(
         if state != "ready":
             # Identical bookkeeping to the budget path below — keep whatever
             # Persian this section had and its OLD hash, so nothing claims it
-            # is current. `abandoned` is the only difference, and only so the
+            # is current. The count is the only difference, and only so the
             # summary can say which of the two happened.
             if state == "abandoned":
                 abandoned += 1
+            else:
+                backoff += 1
             out.append((heading,
                         previous[0] if previous else "",
                         previous[1] if previous else body))
@@ -934,7 +941,7 @@ def translate_stance(
             translatetext.render_stance_sidecar(
                 out, now or utcnow(), translator, stamp),
         )
-    return _doc_counts(translated, failed, abandoned)
+    return _doc_counts(translated, failed, abandoned, backoff)
 
 
 def translate_document(
@@ -976,7 +983,8 @@ def translate_document(
     # a call slot that another document could have used.
     state = ledger.state(source, digest) if ledger else "ready"
     if state != "ready":
-        return _doc_counts(abandoned=1 if state == "abandoned" else 0)
+        return _doc_counts(abandoned=int(state == "abandoned"),
+                           backoff=int(state == "backoff"))
 
     # Only documents over the threshold are cut up. Chunking a 2KB playbook
     # into a single chunk buys nothing and adds a reassembly step that can be
@@ -1043,7 +1051,7 @@ def translate_watchlist(
             "watchlist") or []
         existing = {e.get("theme"): e for e in prior}
 
-    translated = failed = abandoned = 0
+    translated = failed = abandoned = backoff = 0
     out = []
     for entry in entries:
         theme, why = entry.get("theme", ""), entry.get("why", "")
@@ -1058,6 +1066,8 @@ def translate_watchlist(
         if state != "ready":
             if state == "abandoned":
                 abandoned += 1
+            else:
+                backoff += 1
             if previous:
                 out.append(previous)
             continue
@@ -1090,7 +1100,7 @@ def translate_watchlist(
                           sort_keys=False)
     if not sidecar.exists() or sidecar.read_text(encoding="utf-8") != text:
         translatetext.write_atomic(sidecar, text)
-    return _doc_counts(translated, failed, abandoned)
+    return _doc_counts(translated, failed, abandoned, backoff)
 
 
 def translate_predictions(
@@ -1117,7 +1127,7 @@ def translate_predictions(
                     continue
                 existing[row.get("id")] = row
 
-    translated = failed = abandoned = 0
+    translated = failed = abandoned = backoff = 0
     out = []
     for line in source.read_text(encoding="utf-8").splitlines():
         if not line.strip():
@@ -1138,6 +1148,8 @@ def translate_predictions(
         if state != "ready":
             if state == "abandoned":
                 abandoned += 1
+            else:
+                backoff += 1
             if previous:
                 out.append(previous)
             continue
@@ -1165,7 +1177,7 @@ def translate_predictions(
     text = "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in out)
     if not sidecar.exists() or sidecar.read_text(encoding="utf-8") != text:
         translatetext.write_atomic(sidecar, text)
-    return _doc_counts(translated, failed, abandoned)
+    return _doc_counts(translated, failed, abandoned, backoff)
 
 
 def new_reports(reports_dir: Path, since_iso: str) -> list[Path]:
@@ -1206,7 +1218,7 @@ def translate_docs(
     keeps that true.
     """
     state, reports = root / "state", root / "reports"
-    totals = {"translated": 0, "failed": 0, "abandoned": 0}
+    totals = {"translated": 0, "failed": 0, "abandoned": 0, "backoff": 0}
     ledger = DocLedger(conn, root, now) if conn is not None else None
     if ledger is not None and force:
         # --force's document half, mirroring `rearm` for rows: the spec's
@@ -1242,6 +1254,7 @@ def translate_docs(
         totals["translated"] += result["translated"]
         totals["failed"] += result["failed"]
         totals["abandoned"] += result["abandoned"]
+        totals["backoff"] += result["backoff"]
 
     # Each of the four calls below (and each report in the loop) can raise
     # modelrun.QuotaExhausted from inside its own per-item loop — see the

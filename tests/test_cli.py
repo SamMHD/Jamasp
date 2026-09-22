@@ -895,3 +895,14 @@ def test_the_translate_line_separates_abandoned_documents_from_failures():
         {**base, "docs": {"translated": 0, "failed": 1, "abandoned": 2,
                           "skipped": 4}})
     assert "docs 0/1" in both and "4 deferred" in both and "2 abandoned" in both
+
+
+def test_the_translate_line_names_a_document_waiting_out_a_backoff():
+    """A tick where every document is backed off printed `docs 0/0` and
+    nothing else — identical to a tick with nothing to do."""
+    base = {"reused": 0, "rows": {}, "events": {}}
+    line = cli._translate_line(
+        {**base, "docs": {"translated": 0, "failed": 0, "abandoned": 0,
+                          "backoff": 2}})
+    assert "docs 0/0" in line
+    assert "2 backing off" in line

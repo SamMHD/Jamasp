@@ -717,7 +717,8 @@ def test_translate_stance_partial_failure_preserves_only_the_failed_hash(tmp_pat
 def test_translate_stance_with_no_source_is_a_noop(tmp_path):
     stats = translate.translate_stance(
         tmp_path / "absent.md", tmp_path / "absent.fa.md", GLOSSARY, doc_run())
-    assert stats == {"translated": 0, "failed": 0, "abandoned": 0}
+    assert stats == {"translated": 0, "failed": 0, "abandoned": 0,
+                     "backoff": 0}
 
 
 import json
@@ -1398,7 +1399,8 @@ def test_an_emptied_stance_section_still_rewrites_the_sidecar(tmp_path):
     src.write_text(emptied, encoding="utf-8")
     stats = translate.translate_stance(src, side, GLOSSARY, doc_run())
 
-    assert stats == {"translated": 0, "failed": 0, "abandoned": 0}
+    assert stats == {"translated": 0, "failed": 0, "abandoned": 0,
+                     "backoff": 0}
     after = side.read_text(encoding="utf-8")
     assert after != before
     sections = tt.parse_stance_sidecar(after)
@@ -1606,7 +1608,8 @@ def test_a_stance_sidecar_holding_english_does_not_match_the_source(tmp_path):
         return {"text": "FA:" + prompt.split("---\n", 1)[1]}
 
     stats = translate.translate_stance(src, side, GLOSSARY, one_section_fails)
-    assert stats == {"translated": 2, "failed": 1, "abandoned": 0}
+    assert stats == {"translated": 2, "failed": 1, "abandoned": 0,
+                     "backoff": 0}
 
     text = side.read_text(encoding="utf-8")
     assert "- A hot CPI print." in text          # the English body really is there
@@ -1616,7 +1619,8 @@ def test_a_stance_sidecar_holding_english_does_not_match_the_source(tmp_path):
     # And the healthy case still stamps the real hash, so the Persian stance
     # renders at all — the whole point of writing it in the first place.
     stats = translate.translate_stance(src, side, GLOSSARY, doc_run())
-    assert stats == {"translated": 1, "failed": 0, "abandoned": 0}
+    assert stats == {"translated": 1, "failed": 0, "abandoned": 0,
+                     "backoff": 0}
     meta, _ = tt.parse_front_matter(side.read_text(encoding="utf-8"))
     assert meta["src_hash"] == tt.src_hash(STANCE_MD)
 
@@ -1630,7 +1634,8 @@ def test_a_budget_deferred_stance_section_does_not_match_the_source(tmp_path):
 
     stats = translate.translate_stance(src, side, GLOSSARY, doc_run(),
                                        budget=translate.DocBudget(1))
-    assert stats == {"translated": 1, "failed": 0, "abandoned": 0}
+    assert stats == {"translated": 1, "failed": 0, "abandoned": 0,
+                     "backoff": 0}
     meta, _ = tt.parse_front_matter(side.read_text(encoding="utf-8"))
     assert meta["src_hash"] != tt.src_hash(STANCE_MD)
 
@@ -1663,7 +1668,8 @@ def test_a_stance_sidecar_of_stale_persian_still_matches_the_source(tmp_path):
         return {"text": "NEW:" + prompt.split("---\n", 1)[1]}
 
     assert translate.translate_stance(
-        src, side, GLOSSARY, flips_fails) == {"translated": 1, "failed": 1, "abandoned": 0}
+        src, side, GLOSSARY, flips_fails) == {
+            "translated": 1, "failed": 1, "abandoned": 0, "backoff": 0}
     text = side.read_text(encoding="utf-8")
     assert "OLD:" in text                       # stale Persian, not English
     meta, _ = tt.parse_front_matter(text)
@@ -1867,7 +1873,7 @@ def test_an_abandoned_document_is_counted_apart_from_a_failure(tmp_path):
             tmp_path, DOC_CFG, GLOSSARY, always_fails, now=clock(minutes),
             conn=conn)
         assert stats == {"translated": 0, "failed": 1, "abandoned": 0,
-                         "skipped": 0}
+                         "backoff": 0, "skipped": 0}
     stats = translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY, always_fails,
                                      now=clock(200), conn=conn)
     assert stats["failed"] == 0
@@ -2006,7 +2012,7 @@ def test_a_report_the_translator_refuses_whole_succeeds_in_pieces(
         conn, oversize_settings(tmp_path), root=tmp_path, glossary=GLOSSARY,
         only="docs")
     assert stats["docs"] == {"translated": 1, "failed": 0, "abandoned": 0,
-                             "skipped": 0}
+                             "backoff": 0, "skipped": 0}
 
     sidecar = reports / "2026-09-16-brief.fa.md"
     meta, body = tt.parse_front_matter(sidecar.read_text(encoding="utf-8"))
@@ -2112,3 +2118,21 @@ def test_an_unreadable_document_ceiling_does_not_take_the_pass_down(tmp_path):
     build_state(tmp_path)
     stats = translate.translate_docs(tmp_path, cfg, GLOSSARY, doc_run())
     assert stats["translated"] >= 6
+
+
+def test_a_backed_off_document_is_counted_in_the_summary(tmp_path):
+    """A backed-off unit was counted in nothing — not `failed`, not
+    `abandoned`, not `skipped` — so a tick where every document is waiting
+    out a backoff printed `docs 0/0`, indistinguishable from a genuinely
+    quiet tick. Same legibility failure `abandoned` was split out to fix."""
+    conn = db.connect(tmp_path / "t.db")
+    one_doc(tmp_path)
+    translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY, always_fails,
+                             now=clock(0), conn=conn)
+    calls = []
+    stats = translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY,
+                                     failing_doc_run(calls), now=clock(10),
+                                     conn=conn)
+    assert calls == []                      # inside the 15-minute backoff
+    assert stats["backoff"] == 1
+    assert stats["failed"] == 0 and stats["abandoned"] == 0

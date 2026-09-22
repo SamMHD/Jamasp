@@ -223,13 +223,19 @@ def _translate_line(stats: dict) -> str:
                 f" {stats['pending_events']} events,"
                 f" {stats['pending_reports']} reports pending")
     rows, events, docs = stats["rows"], stats["events"], stats["docs"]
-    # "3 documents failed this run" and "3 documents are being skipped
-    # because they keep failing" are different operator situations: the first
-    # may fix itself on the next tick, the second never will without --force.
-    # Reporting one number for both is what let docs/todo/019 stay invisible.
+    # "3 documents failed this run", "3 documents are being skipped because
+    # they keep failing" and "3 documents are waiting before their next
+    # attempt" are three different operator situations: the first may fix
+    # itself on the next tick, the second never will without --force, and the
+    # third is the job working as designed. Reporting one number for them is
+    # what let docs/todo/019 stay invisible — and `backoff` was in no number
+    # at all, so a tick where every document was waiting printed `docs 0/0`,
+    # byte-identical to a tick with nothing to do.
     notes = []
     if docs.get("skipped"):
         notes.append(f"{docs['skipped']} deferred to the next tick")
+    if docs.get("backoff"):
+        notes.append(f"{docs['backoff']} backing off after a failed attempt")
     if docs.get("abandoned"):
         notes.append(
             f"{docs['abandoned']} abandoned after"
