@@ -23,6 +23,7 @@
 
 import type { EventRow, WakeupRow } from "./db";
 import type { Prediction } from "./files";
+import { localized, type Locale } from "./i18n";
 
 export type HorizonLane = "event" | "prediction" | "wakeup";
 
@@ -37,6 +38,17 @@ export type HorizonEntry = {
   /** Stated confidence for prediction maturities; null when malformed. */
   confidence?: number | null;
   overdue?: boolean;
+  /**
+   * The event title shown is the English source because no `title_fa`
+   * exists yet — the caller renders the EN marker off this. Always false
+   * for the prediction and wakeup lanes, whose text has its own sidecars
+   * and is not this function's business.
+   *
+   * A GROUP is flagged when any one of its titles fell back: simultaneous
+   * rows collapse into one mark, and a mark whose text is partly English
+   * must say so.
+   */
+  fallback: boolean;
   href: string;
 };
 
@@ -63,8 +75,17 @@ function groupLabel(titles: string[]): string {
   return titles.length > 1 ? `${rep} +${titles.length - 1}` : rep;
 }
 
+/**
+ * `locale` rides in the input object rather than as a fourth positional
+ * parameter with a default: a default here would be a second place the
+ * panel decides what language it is in, and lib/i18n.ts#DEFAULT_LOCALE is
+ * meant to be the only one.
+ */
 export function deriveHorizon(
-  input: { events: EventRow[]; predictions: Prediction[]; wakeups: WakeupRow[] },
+  input: {
+    events: EventRow[]; predictions: Prediction[]; wakeups: WakeupRow[];
+    locale: Locale;
+  },
   now: Date = new Date(),
   days = 7,
 ): Horizon {
@@ -73,19 +94,26 @@ export function deriveHorizon(
   const inWindow = (ms: number) => Number.isFinite(ms) && ms >= startMs && ms < endMs;
 
   const groups = new Map<string, { ts: string; impact: "high" | "medium";
-    country: string | null; titles: string[] }>();
+    country: string | null; titles: string[]; fallback: boolean }>();
   for (const e of input.events) {
     const impact = normImpact(e.impact);
     if (!impact || !inWindow(new Date(e.starts_at).getTime())) continue;
+    // Persian when the translate pass has filled title_fa, English
+    // otherwise — the same `localized` call /calendar and FooterStrip make
+    // on this very field. Resolved HERE, once, so the mark, its hover title
+    // and the list row cannot disagree about which language is on screen.
+    const { text, fallback } = localized(e, "title", input.locale);
     const key = `${e.starts_at}|${e.country ?? ""}|${impact}`;
     const g = groups.get(key);
-    if (g) g.titles.push(e.title);
-    else groups.set(key, { ts: e.starts_at, impact, country: e.country, titles: [e.title] });
+    if (g) { g.titles.push(text); g.fallback ||= fallback; }
+    else groups.set(key, {
+      ts: e.starts_at, impact, country: e.country, titles: [text], fallback,
+    });
   }
   const events: HorizonEntry[] = [...groups.values()].map(g => ({
     ts: g.ts, lane: "event", label: groupLabel(g.titles),
     detail: g.titles.join(" · ") + (g.country ? ` — ${g.country}` : ""),
-    impact: g.impact, href: "/calendar",
+    impact: g.impact, fallback: g.fallback, href: "/calendar",
   }));
 
   const predictions: HorizonEntry[] = [];
@@ -97,6 +125,7 @@ export function deriveHorizon(
     if (!inWindow(matures)) continue;
     predictions.push({
       ts: iso(matures), lane: "prediction", label: p.id, detail: p.claim,
+      fallback: false,
       confidence: typeof p.confidence === "number" && Number.isFinite(p.confidence)
         ? p.confidence : null,
       // The ledger page, not /state: this mark IS a prediction maturity, and
@@ -112,7 +141,7 @@ export function deriveHorizon(
     if (!Number.isFinite(due) || due >= endMs) continue;
     wakeups.push({
       ts: w.due_at, lane: "wakeup", label: `#${w.id} ${w.run_type}`, detail: w.task,
-      overdue: due < startMs, href: "/schedule",
+      fallback: false, overdue: due < startMs, href: "/schedule",
     });
   }
 

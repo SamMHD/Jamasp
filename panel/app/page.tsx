@@ -119,7 +119,8 @@ export default async function Overview({
   const preds = files.readPredictions();
   const pendingWakeups = db.getWakeups("pending");
   const horizon = deriveHorizon(
-    { events: db.getEvents(7, now), predictions: preds, wakeups: pendingWakeups }, now);
+    { events: db.getEvents(7, now), predictions: preds, wakeups: pendingWakeups, locale },
+    now);
   // News-volume window anchored to the newest item (see lib/newsflow.ts);
   // the SQL cutoff is a day wider than the 14-day day-window so its first
   // day is never a partial count.

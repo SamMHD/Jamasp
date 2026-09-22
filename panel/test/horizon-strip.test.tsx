@@ -32,7 +32,7 @@ const render = (
   renderToStaticMarkup(
     <HorizonStrip horizon={deriveHorizon(
       { events: input.events ?? [], predictions: input.predictions ?? [],
-        wakeups: input.wakeups ?? [] }, NOW)} now={NOW} messages={messages[locale]} />);
+        wakeups: input.wakeups ?? [], locale: "en" }, NOW)} now={NOW} messages={messages[locale]} />);
 
 describe("HorizonStrip", () => {
   it("renders all three lanes with marks, labels, and the list twin", () => {
@@ -87,7 +87,7 @@ describe("HorizonStrip", () => {
     const lateNow = new Date("2026-08-11T23:30:00Z"); // first midnight 30min out
     const html = renderToStaticMarkup(
       <HorizonStrip horizon={deriveHorizon(
-        { events: [ev({ starts_at: "2026-08-12T12:30:00Z" })], predictions: [], wakeups: [] },
+        { events: [ev({ starts_at: "2026-08-12T12:30:00Z" })], predictions: [], wakeups: [], locale: "en" },
         lateNow)} now={lateNow} messages={messages.en} />);
     const dayLabels = html.match(/>(Sun|Mon|Tue|Wed|Thu|Fri|Sat) \d+</g) ?? [];
     expect(dayLabels).toHaveLength(6);
@@ -144,5 +144,48 @@ describe("HorizonStrip — Persian", () => {
     const capped = render({ events }, "fa");
     expect(capped).toContain(fa["horizon.moreWithin"].replace("{n}", "7"));
     expect(capped).not.toMatch(/[۰-۹]/); // the count and day number stay Latin
+  });
+});
+
+/**
+ * The rendering half of the same gap: once deriveHorizon carries a Persian
+ * title and a fallback flag, the strip has to actually show them — and mark
+ * the English it still shows, like every other content surface here.
+ */
+describe("HorizonStrip — event titles by locale", () => {
+  const translated = ev({ title: "US CPI (MoM)", title_fa: "شاخص قیمت مصرف‌کننده" });
+
+  const renderFa = (events: EventRow[]) => renderToStaticMarkup(
+    <HorizonStrip now={NOW} messages={messages.fa}
+      horizon={deriveHorizon(
+        { events, predictions: [], wakeups: [], locale: "fa" }, NOW)} />);
+
+  it("renders the Persian event title with no marker", () => {
+    const html = renderFa([translated]);
+    expect(html).toContain("شاخص قیمت مصرف‌کننده");
+    expect(html).not.toContain("US CPI (MoM)");
+    expect(html).not.toContain(fa["content.sourceEnglish"]);
+  });
+
+  it("marks an untranslated event title in the list row", () => {
+    const html = renderFa([ev({ title: "FOMC Statement", title_fa: null })]);
+    expect(html).toContain("FOMC Statement");
+    expect(html).toContain(fa["content.sourceEnglish"]);
+    expect(html).toContain('lang="en"');
+  });
+
+  it("marks the hover titles too, which cannot hold an element", () => {
+    const html = renderFa([ev({ title: "FOMC Statement", title_fa: null })]);
+    expect(html).toContain(fa["content.sourceEnglishTitle"]);
+  });
+
+  it("leaves the English locale unmarked", () => {
+    const html = renderToStaticMarkup(
+      <HorizonStrip now={NOW} messages={messages.en}
+        horizon={deriveHorizon(
+          { events: [translated], predictions: [], wakeups: [], locale: "en" }, NOW)} />);
+    expect(html).toContain("US CPI (MoM)");
+    expect(html).not.toContain("شاخص قیمت مصرف‌کننده");
+    expect(html).not.toContain('lang="en"');
   });
 });

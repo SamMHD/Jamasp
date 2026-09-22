@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Horizon, HorizonEntry, HorizonLane } from "@/lib/horizon";
 import { cls, fmtAge, fmtUtc } from "@/lib/format";
+import { SourceLang } from "@/components/source-lang";
 import { t, type Messages } from "@/lib/i18n";
 
 /**
@@ -44,7 +45,15 @@ const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const AXIS_Y = 82;
 const MAX_ROWS = 6;
 
-function Mark({ entry, x }: { entry: HorizonEntry; x: number }) {
+/**
+ * `messages` is here only for the fallback marker: an SVG <title> is a text
+ * node, not a place a <SourceLang> element can go, so an untranslated event
+ * title appends content.sourceEnglishTitle the way
+ * components/market-map.tsx#tileTitle does.
+ */
+function Mark({ entry, x, messages }: {
+  entry: HorizonEntry; x: number; messages: Messages;
+}) {
   const cy = LANE_Y[entry.lane];
   const open = entry.lane === "event" && entry.impact === "medium";
   return (
@@ -53,7 +62,8 @@ function Mark({ entry, x }: { entry: HorizonEntry; x: number }) {
       fill={open ? "var(--background)" : LANE_VAR[entry.lane]}
       stroke={open ? LANE_VAR[entry.lane] : "var(--background)"}
       strokeWidth={open ? 1.5 : 2}>
-      <title>{`${fmtUtc(entry.ts)} — ${entry.detail}`}</title>
+      <title>{`${fmtUtc(entry.ts)} — ${entry.detail}`
+        + (entry.fallback ? ` — ${t(messages, "content.sourceEnglishTitle")}` : "")}</title>
     </circle>
   );
 }
@@ -144,11 +154,18 @@ export function HorizonStrip({ horizon, now, messages }: {
             {labelled && (
               <text x={Math.min(Math.max(x(labelled.ts), GUTTER + 24), W - 40).toFixed(1)}
                 y={LANE_Y.event - 9} fontSize="10" textAnchor="middle"
-                fill="var(--muted-foreground)">{labelled.label}</text>
+                fill="var(--muted-foreground)">
+                {labelled.label}
+                {/* SVG <text> cannot hold the SourceLang chip (it is a <span>),
+                    so the marker rides inline. Same fact, same word, one
+                    dictionary key. */}
+                {labelled.fallback ? ` (${t(messages, "content.sourceEnglish")})` : ""}
+              </text>
             )}
 
             {entries.map(e => (
-              <Mark key={`${e.lane}-${e.ts}-${e.label}`} entry={e} x={x(e.ts)} />
+              <Mark key={`${e.lane}-${e.ts}-${e.label}`} entry={e} x={x(e.ts)}
+                messages={messages} />
             ))}
           </svg>
 
@@ -167,7 +184,9 @@ export function HorizonStrip({ horizon, now, messages }: {
             {entries.slice(0, MAX_ROWS).map(e => (
               <li key={`${e.lane}-${e.ts}-${e.label}`}>
                 <Link href={e.href} className="flex items-baseline gap-2 hover:underline"
-                  title={e.detail}>
+                  title={e.fallback
+                    ? `${e.detail} — ${t(messages, "content.sourceEnglishTitle")}`
+                    : e.detail}>
                   <span aria-hidden className="h-2 w-2 shrink-0 self-center rounded-full"
                     style={{ background: LANE_VAR[e.lane] }} />
                   <span className="w-24 shrink-0 text-xs text-muted-foreground tabular-nums">
@@ -179,16 +198,21 @@ export function HorizonStrip({ horizon, now, messages }: {
                   </span>
                   <span className="min-w-0 flex-1 truncate">
                     {/* e.label is a wakeup's "#{id} {run_type}" (built in
-                        lib/horizon.ts), an event's headline, or a
-                        prediction's id — none of these is chrome, so none
-                        goes through the dictionary here. The run_type slug
-                        specifically stays Latin: splitting it out of this
-                        precomposed string to translate just that word would
-                        mean restructuring HorizonEntry's shape, which
-                        test/horizon.test.ts pins independently of this
-                        component. */}
-                    <span className="font-medium">{e.label}</span>
-                    <span className="text-muted-foreground"> — {e.detail}</span>
+                        lib/horizon.ts), an event's title, or a prediction's
+                        id — none of these is chrome, so none goes through
+                        the dictionary here. The EVENT title is already
+                        localized upstream, by deriveHorizon's own
+                        localized() call, and arrives with `fallback` set;
+                        that is what the SourceLang wrapper below is marking.
+                        The run_type slug specifically stays Latin: splitting
+                        it out of this precomposed string to translate just
+                        that word would mean restructuring HorizonEntry's
+                        shape, which test/horizon.test.ts pins independently
+                        of this component. */}
+                    <SourceLang fallback={e.fallback} messages={messages}>
+                      <span className="font-medium">{e.label}</span>
+                      <span className="text-muted-foreground"> — {e.detail}</span>
+                    </SourceLang>
                   </span>
                   {e.lane === "prediction" && e.confidence !== null && (
                     <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
