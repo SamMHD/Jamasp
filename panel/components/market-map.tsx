@@ -194,7 +194,7 @@ export function MarketMap({ items, width, height, range, coverage,
     <section id={MAP_ELEMENT_ID} aria-label="Scored news treemap" dir="ltr"
       className="rounded border border-border p-4 bg-background">
       <div className="mb-2 flex items-center justify-end">
-        <FullscreenButton targetId={MAP_ELEMENT_ID} />
+        <FullscreenButton targetId={MAP_ELEMENT_ID} messages={messages} />
       </div>
       <svg viewBox={`0 0 ${width} ${height}`} className="w-full" role="img"
         aria-label={`scored news treemap, ${items.length} scored stories ${WINDOW_LABEL_EN[range]}`}>

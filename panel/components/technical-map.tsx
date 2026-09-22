@@ -107,7 +107,7 @@ export function TechnicalMap({ tiles, width, height, fittedAt, messages }: {
     <section id={TECHNICAL_MAP_ELEMENT_ID} aria-label="Technical signal treemap" dir="ltr"
       className="rounded border border-border p-4 bg-background">
       <div className="mb-2 flex items-center justify-end">
-        <FullscreenButton targetId={TECHNICAL_MAP_ELEMENT_ID} />
+        <FullscreenButton targetId={TECHNICAL_MAP_ELEMENT_ID} messages={messages} />
       </div>
       <svg viewBox={`0 0 ${width} ${height}`} className="w-full" role="img"
         aria-label={`technical signal treemap, ${tiles.length} signals`}>
