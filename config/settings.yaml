@@ -64,17 +64,33 @@ translate:
         "--ignore-user-config", "-s", "read-only"]
   protocol: codex
   timeout_seconds: 180
-  # Cost knobs. window_days matches the map's widest window; everything older
-  # renders English-with-marker in the panel. max_batches_per_run bounds one
-  # tick — a larger backlog drains over subsequent ticks, newest first.
-  # Hard floor under the rolling window: nothing published before this date is
-  # ever translated. Set to the day the desk turned the timer on, because the
-  # rolling window is also a BACKFILL instruction -- pointed at months of
-  # history it works through every item in the last window_days, which on this
-  # host was ~2,800 rows and exhausted the codex quota on the first day. Clear
-  # this key to restore the plain rolling window for a deliberate, supervised
-  # backfill.
-  translate_from: "2026-09-21"
+  # Cost knobs. scored_only (below) is the actual backlog bound now;
+  # window_days is kept equal to the map's own widest range (MapRange: 24h or
+  # week) so the two agree by construction rather than by coincidence, not
+  # because window_days does the bounding itself — everything outside it
+  # still renders English-with-marker in the panel. max_batches_per_run
+  # bounds one tick — a larger backlog drains over subsequent ticks, newest
+  # first.
+  #
+  # Only items the map actually renders are worth paying to translate: the
+  # map joins item_scores onto items (getScoredItems, panel/lib/db.ts), so an
+  # item with no item_scores row never reaches that surface however recent it
+  # is. Ties spend to VISIBILITY rather than recency — measured on the live
+  # host, the 7-day pending backlog was 1,971 items under the plain rolling
+  # window; only 814 of the window's 1,332 scored items were untranslated, a
+  # 59% cut. Leaves the events pass untouched: calendar events are not map
+  # news, and there are only ~194 of them. Absent means the old "everything
+  # in the window" behaviour.
+  scored_only: true
+  # Hard floor under the rolling window, SUPERSEDED by scored_only above and
+  # deliberately left empty. This bounded the backlog by RECENCY — added to
+  # stop a runaway ~2,800-item backfill exhausting the codex quota on the
+  # first day — but scored_only bounds it by VISIBILITY instead, which is the
+  # rule the desk actually wants: the map's full history is meant to
+  # backfill, not stay walled off behind a date. floor_for() stays wired and
+  # tested; it is still the right tool if a date bound is ever wanted again —
+  # set a value here (or restore one) to use it.
+  translate_from:
   window_days: 7
   batch_size: 20
   max_batches_per_run: 6

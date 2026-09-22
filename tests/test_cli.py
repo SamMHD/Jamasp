@@ -696,6 +696,14 @@ def test_translate_dry_run_reports_pending_and_writes_nothing(tmp_path, monkeypa
         " fetched_at) VALUES ('i1','a',?,'Gold climbs','https://e/1','gold',?)",
         (utcnow(), utcnow()),
     )
+    # The shipped config now sets translate.scored_only: true — only items
+    # the map actually renders (an item_scores row) count as pending, so this
+    # fixture needs one to still exercise "one row pending" rather than zero.
+    conn.execute(
+        "INSERT INTO item_scores (item_id, tier, direction, conviction,"
+        " theme, scored_at) VALUES ('i1', 2, 1, 0.5, 'gold', ?)",
+        (utcnow(),),
+    )
     conn.commit()
     conn.close()
 
@@ -755,6 +763,14 @@ def test_translate_dry_run_survives_a_broken_translator(tmp_path):
         "INSERT INTO items (id, source, published_at, headline, url, topic,"
         " fetched_at) VALUES ('i1','a',?,'Gold climbs','https://e/1','gold',?)",
         (utcnow(), utcnow()),
+    )
+    # This config is a copy of the real settings.yaml (only `cmd` swapped),
+    # which sets translate.scored_only: true — an item_scores row is what
+    # makes this fixture count as pending under that default.
+    conn.execute(
+        "INSERT INTO item_scores (item_id, tier, direction, conviction,"
+        " theme, scored_at) VALUES ('i1', 2, 1, 0.5, 'gold', ?)",
+        (utcnow(),),
     )
     conn.commit()
     conn.close()
@@ -831,6 +847,15 @@ def test_translate_exits_non_zero_and_leaves_the_row_untouched_on_quota(
         "INSERT INTO items (id, source, published_at, headline, url, topic,"
         " fetched_at) VALUES ('i1','a',?,'Gold climbs','https://e/1','gold',?)",
         (utcnow(), utcnow()),
+    )
+    # The real settings.yaml (copied above, only `cmd` swapped) sets
+    # translate.scored_only: true — without an item_scores row this item
+    # would never reach the rows pass at all, and the test would end up
+    # exercising the docs pass against this checkout's own state/ instead.
+    conn.execute(
+        "INSERT INTO item_scores (item_id, tier, direction, conviction,"
+        " theme, scored_at) VALUES ('i1', 2, 1, 0.5, 'gold', ?)",
+        (utcnow(),),
     )
     conn.commit()
     conn.close()

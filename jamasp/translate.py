@@ -160,6 +160,7 @@ def _backoff(now: str) -> tuple[str, list[str]]:
 def pending_rows(
     conn: sqlite3.Connection, window_days: int, limit: int,
     now: str | None = None, force: bool = False, since: str | None = None,
+    scored_only: bool = False,
 ) -> list[sqlite3.Row]:
     """Untranslated items inside the window, newest first.
 
@@ -177,31 +178,65 @@ def pending_rows(
     from the reuse pass, and re-translating it would both spend a call and give
     the same story two different Persian headlines. The reuse pass owns those
     rows.
+
+    `scored_only` (config key `translate.scored_only`) narrows the candidate
+    set to items carrying an `item_scores` row — the same join
+    `getScoredItems` (panel/lib/db.ts) makes onto the technical map. The map
+    is the only surface that reads `headline_fa`/`lede_fa` on `items`, so this
+    ties translation spend to what is actually ON SCREEN rather than merely
+    recent: measured on the live host, the 7-day window's pending backlog was
+    1,971 items under the plain rolling window; of the 1,332 items in that
+    window that are actually scored, only 814 were untranslated — a 59% cut
+    to the backlog, to roughly 41 batches for the whole thing. `item_scores.
+    item_id` is that table's primary key, so the EXISTS check costs an index
+    lookup, not a scan. Defaults to off so an unconfigured deployment keeps
+    the old "everything in the window" behaviour.
     """
     stamp = now or utcnow()
     clause, thresholds = _backoff(stamp)
     selector = ("(fa_source IS NULL OR fa_source = 'model')" if force
                 else "headline_fa IS NULL")
+    scored_clause = (
+        " AND EXISTS (SELECT 1 FROM item_scores s WHERE s.item_id = items.id)"
+        if scored_only else ""
+    )
     return conn.execute(
         f"SELECT id, headline, lede FROM items"
-        f" WHERE {selector} AND published_at >= ? AND fa_attempts < ?{clause}"
+        f" WHERE {selector} AND published_at >= ? AND fa_attempts < ?"
+        f"{clause}{scored_clause}"
         " ORDER BY published_at DESC LIMIT ?",
         (since or _since(window_days, stamp), MAX_ATTEMPTS, *thresholds, limit),
     ).fetchall()
 
 
 def rearm(conn: sqlite3.Connection, table: str, column: str,
-          window_days: int, now: str | None = None) -> int:
+          window_days: int, now: str | None = None,
+          scored_only: bool = False) -> int:
     """`--force`'s first half: clear the abandonment state inside the window.
 
     The spec is explicit that --force does not merely ignore the cap, it
     resets it — "an operator clearing a known-bad state does not have to edit
     the database". Scoped to the window because rows outside it are never
     translated anyway.
+
+    `scored_only` mirrors `pending_rows`'s own filter of the same name, and
+    for the same reason: without it, `--force` run against a `scored_only`
+    config would re-arm every abandoned row in the window but then actually
+    retranslate only the scored ones, leaving the rest sitting at
+    `fa_attempts = 0` with nothing to pick them up until `scored_only` is
+    turned off — a state that quietly outlives the run that created it and
+    contradicts "re-arms exactly the map set and nothing wider". Meaningful
+    only for `table == "items"`, since `item_scores` keys off `items.id`; the
+    events pass never sets it.
     """
+    scored_clause = (
+        f" AND EXISTS (SELECT 1 FROM item_scores s WHERE s.item_id = {table}.id)"
+        if scored_only else ""
+    )
     cur = conn.execute(
         f"UPDATE {table} SET fa_attempts = 0, fa_error = NULL"
-        f" WHERE {column} >= ? AND (fa_attempts > 0 OR fa_error IS NOT NULL)",
+        f" WHERE {column} >= ? AND (fa_attempts > 0 OR fa_error IS NOT NULL)"
+        f"{scored_clause}",
         (_since(window_days, now),),
     )
     conn.commit()
@@ -398,11 +433,16 @@ def translate_rows(
     stamp = now or utcnow()
     batch_size = cfg["batch_size"]
     ceiling = cfg["max_batches_per_run"]
+    # Absent means the old "everything in the window" behaviour — opt-in at
+    # the config layer, see pending_rows's docstring.
+    scored_only = cfg.get("scored_only", False)
     if force:
-        rearm(conn, "items", "published_at", cfg["window_days"], stamp)
+        rearm(conn, "items", "published_at", cfg["window_days"], stamp,
+              scored_only=scored_only)
     rows = pending_rows(
         conn, cfg["window_days"], batch_size * ceiling, stamp, force,
-        since=floor_for(cfg, cfg["window_days"], stamp))
+        since=floor_for(cfg, cfg["window_days"], stamp),
+        scored_only=scored_only)
 
     return _run_batches(conn, rows, batch_size, ROW_FIELDS, glossary, run,
                         stamp, _write_row, _record_failure)
@@ -925,7 +965,8 @@ def run_translate(
             "pending_rows": len(pending_rows(
                 conn, cfg["window_days"],
                 cfg["batch_size"] * cfg["max_batches_per_run"], now, force,
-                since=floor_for(cfg, cfg["window_days"], now))),
+                since=floor_for(cfg, cfg["window_days"], now),
+                scored_only=cfg.get("scored_only", False))),
             "pending_events": len(pending_events(
                 conn, cfg["window_days"],
                 cfg["batch_size"] * cfg["max_batches_per_run"], now, force,

@@ -2,6 +2,7 @@ import sqlite3
 from datetime import datetime, timedelta, timezone
 
 from jamasp import db, translate
+from jamasp.db import utcnow
 from jamasp.ingest import rss
 from jamasp.models import Item
 
@@ -150,6 +151,105 @@ def test_pending_excludes_rows_at_the_attempt_cap(tmp_path):
                  (translate.MAX_ATTEMPTS, one))
     conn.commit()
     assert translate.pending_rows(conn, 7, 10) == []
+
+
+def add_score(conn, item_id, tier=2):
+    """A minimal item_scores row — enough for the EXISTS join scored_only
+    relies on. Values beyond item_id/tier are irrelevant to that filter."""
+    conn.execute(
+        "INSERT INTO item_scores (item_id, tier, direction, conviction,"
+        " theme, scored_at) VALUES (?, ?, 1, 0.5, 'gold', ?)",
+        (item_id, tier, utcnow()),
+    )
+    conn.commit()
+
+
+def test_scored_only_excludes_an_unscored_item_inside_the_window(tmp_path):
+    conn = db.connect(tmp_path / "t.db")
+    (scored, unscored) = seed(conn, [("Scored", 1), ("Unscored", 1)])
+    add_score(conn, scored)
+    ids = [r["id"] for r in
+           translate.pending_rows(conn, 7, 10, scored_only=True)]
+    assert ids == [scored]
+    assert unscored not in ids
+
+
+def test_scored_only_off_selects_both(tmp_path):
+    """The absent/False case: identical to the behaviour before this key
+    existed — nothing conditioned on item_scores at all."""
+    conn = db.connect(tmp_path / "t.db")
+    (scored, unscored) = seed(conn, [("Scored", 1), ("Unscored", 2)])
+    add_score(conn, scored)
+    ids = {r["id"] for r in
+           translate.pending_rows(conn, 7, 10, scored_only=False)}
+    assert ids == {scored, unscored}
+
+
+def test_translate_rows_reads_scored_only_from_config(tmp_path):
+    """The config key, not just the pending_rows parameter, must reach the
+    rows pass — this is what a bare `scored_only: true` in settings.yaml
+    actually wires up."""
+    conn = db.connect(tmp_path / "t.db")
+    (scored, unscored) = seed(conn, [("Scored", 1), ("Unscored", 1)])
+    add_score(conn, scored)
+    cfg = {**CFG, "scored_only": True}
+    stats = translate.translate_rows(conn, cfg, GLOSSARY, fake_run())
+    assert stats["translated"] == 1
+    row = conn.execute(
+        "SELECT headline_fa FROM items WHERE id = ?", (unscored,)
+    ).fetchone()
+    assert row["headline_fa"] is None
+
+
+def test_scored_only_never_reaches_the_events_pass(tmp_path):
+    """Calendar events have no item_scores row at all (item_scores keys off
+    items.id) and the desk explicitly asked to leave events alone — this
+    guards against scored_only being wired into pending_events by mistake,
+    which would silently stop every event from translating."""
+    conn = db.connect(tmp_path / "t.db")
+    add_event(conn, "e1", "US CPI (MoM)", 24)
+    cfg = {**CFG, "scored_only": True}
+
+    def run(prompt, schema):
+        return {"items": [{"n": 1, "title": "NEW"}]}
+
+    stats = translate.translate_events(conn, cfg, GLOSSARY, run)
+    assert stats["translated"] == 1
+
+
+def test_force_re_arms_only_the_scored_set_when_scored_only_is_on(tmp_path):
+    """--force run with scored_only must re-arm (and then retranslate)
+    exactly the map set — an abandoned unscored row inside the window must
+    come out of this run untouched, not merely un-retranslated."""
+    conn = db.connect(tmp_path / "t.db")
+    (scored, unscored) = seed(conn, [("Scored", 1), ("Unscored", 1)])
+    add_score(conn, scored)
+    conn.execute(
+        "UPDATE items SET fa_attempts = ?, fa_error = 'old'",
+        (translate.MAX_ATTEMPTS,),
+    )
+    conn.commit()
+
+    cfg = {**CFG, "scored_only": True}
+    stats = translate.translate_rows(conn, cfg, GLOSSARY, fake_run(),
+                                     force=True)
+    assert stats["translated"] == 1
+
+    scored_row = conn.execute(
+        "SELECT headline_fa, fa_attempts FROM items WHERE id = ?", (scored,)
+    ).fetchone()
+    assert scored_row["headline_fa"] is not None
+    assert scored_row["fa_attempts"] == 0
+
+    unscored_row = conn.execute(
+        "SELECT headline_fa, fa_attempts, fa_error FROM items WHERE id = ?",
+        (unscored,),
+    ).fetchone()
+    assert unscored_row["headline_fa"] is None
+    # Left exactly as --force found it: still abandoned, not quietly re-armed
+    # and then stranded — see rearm()'s docstring on why this matters.
+    assert unscored_row["fa_attempts"] == translate.MAX_ATTEMPTS
+    assert unscored_row["fa_error"] == "old"
 
 
 def test_translate_rows_writes_persian_and_marks_source_model(tmp_path):
