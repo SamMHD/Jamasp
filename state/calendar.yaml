@@ -1243,3 +1243,19 @@ events:
       investinglive post first (odds sentence), then actionforex, then the
       CNBC quotes for the 2y/30y; tape clause read from the speech's start
       time to the Globex close (rule 23). Scans carry any earlier headline.
+    update_2026_09_22_deepdive: >
+      Wakeup #57 fired 15:05Z. Jefferson's 14:20Z slot was 20 minutes of
+      remarks at the NY Fed's 12th U.S. Treasury Market Conference titled
+      "Discount Window Modernization and Treasury Market Functioning"
+      (federalreserve.gov text extracted in full) - DWD portal, FHLB
+      interoperability, Treasury collateral, standing repo; no rate-path,
+      inflation or October content, no Q&A. Williams' 14:05Z slot (same
+      conference) was reserves-implementation only ("doesn't comment on
+      monetary policy", investinglive). Flip test did not run; weights
+      20/50/30 held; odds sentence recorded: "October 28 is priced at just
+      over 50%" (investinglive, 13:38Z, in the Collins post). Barr's Wed
+      14:05Z slot is now wakeup #59 (replaces #58) with a venue check first:
+      extract barr20260923a.htm before any relay; Barr's two most recent
+      Board speeches were second-chance lending and AI/inequality, so a
+      no-policy outcome is the base case. The host/Board page is the
+      anchor for any future Fed-speaker wakeup (lessons-inbox 22 Sep).
