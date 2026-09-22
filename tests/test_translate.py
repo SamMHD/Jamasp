@@ -2280,3 +2280,30 @@ def test_a_pass_that_stopped_on_quota_prunes_nothing(tmp_path):
                                      now=clock(200), conn=conn)
     assert stats["quota_exhausted"] is True
     assert ledger_units(conn) == before
+
+
+def test_force_clears_the_document_ledger_even_when_rows_stop_on_quota(tmp_path):
+    """`run_translate` guards the docs pass with `if want_docs and not
+    quota_hit`, so --force's clear_all never ran when the rows pass stopped
+    on quota. The operator's only documented recovery from mass abandonment
+    then did nothing at all — and that recovery is what the attempt cap
+    leans on."""
+    conn = db.connect(tmp_path / "t.db")
+    one_doc(tmp_path)
+    for minutes in (0, 20, 90):
+        translate.translate_docs(tmp_path, DOC_CFG, GLOSSARY, always_fails,
+                                 now=clock(minutes), conn=conn)
+    assert ledger_units(conn)
+
+    seed(conn, [("One", 1)])         # something for the rows pass to choke on
+
+    def out_of_quota(prompt, schema):
+        raise modelrun.QuotaExhausted("usage limit")
+
+    stats = translate.run_translate(
+        conn, {"translate": {**DOC_CFG, "scored_only": False}},
+        root=tmp_path, glossary=GLOSSARY, run=out_of_quota, now=clock(200),
+        force=True)
+    assert stats["quota_exhausted"] is True
+    assert stats["docs"] == {}               # the docs pass never ran
+    assert ledger_units(conn) == set()

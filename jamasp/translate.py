@@ -1523,6 +1523,15 @@ def run_translate(
     # of this run the moment any pass reports it, rather than paying to
     # rediscover the outage in events and again in docs (docs/todo/025).
     quota_hit = False
+    if want_docs and force:
+        # --force's document half, BEFORE the rows pass rather than inside
+        # translate_docs, because the docs pass is guarded by `not quota_hit`
+        # below: a rows pass that stopped on quota would swallow it, and
+        # clearing an abandoned document is the operator's only documented
+        # recovery from mass abandonment. It has to survive the outage that
+        # caused the abandonment. translate_docs clears again on its own for
+        # a direct caller; the second DELETE finds nothing.
+        DocLedger(conn, root, now).clear_all()
     if want_rows:
         # Always before the model pass, and not separately selectable: a rows
         # pass that ran first would pay to translate what flash already wrote.
