@@ -3,34 +3,37 @@ watchlist:
     why: >
       Real yields are gold's dominant driver, and this Fed just HIKED: 16
       Sep +25bp to 3.75-4.00%, 12-0, no guidance sentence; dots one more in
-      2026 (median 4.1; 16 of 18 see >=1 more), 2027 4.1, LR 3.2. Warsh:
-      'not restrictive', 'inflation is too high', August PCE estimate ~3.6%
-      (official print later this month). 21 SEP - THREE REGIONAL PRESIDENTS
-      ASK FOR MORE: Musalem (policy 'accommodative', rates 'likely need to
-      rise further', earlier-smaller over later-larger); Collins (one more
-      hike in 2026, hold in 2027); Goolsbee (persistent supply shocks and
-      AI-capex demand may require higher rates 'even if the slowdown hurts
-      employment'). The 2y closed +0.75bp at 4.7505 while the 10y fell 4.5
-      and the 30y 4.7 - the front end is PINNED, not moving, and on an oil
-      -3.7% session it did not fall either. PRICING: Oct ~55% (investinglive
-      wrap 21 Sep); futures two-in-three for 4.00-4.25% at end-2026; BofA
-      keeps Oct + Dec; Deutsche Bank (21 Sep): markets underprice the global
-      hiking cycle. Checkpoints: 2y 4.791-4.800 (break = 5.055 projection;
-      rejection then <4.600 = reversal); DXY 100.02 / 100.58 / 101.80. THE
-      LOOK-THROUGH IS CLOSED ON THE RECORD (Schmid 18 Sep, Kashkari 20 Sep,
-      the trio 21 Sep) - oil DOWN no longer pulls the 2y down. None of the
-      five speakers so far is a governor; the flip line (governor endorses
-      Oct -> bearish-rates 60; pause call -> base 30) is untriggered.
-      SPEAKERS VERIFIED from the ff_calendar feed (Low impact, hidden by
-      `jamasp calendar`, todo-188): Williams 14:05Z, JEFFERSON (Vice Chair)
-      14:20Z, Barkin 17:00Z Tue 22; BARR Wed 23 14:05Z; Williams 08:10Z,
-      Hammack 12:50Z, Paulson 14:10Z Thu 24; Williams 09:15Z, Hammack
-      18:00Z Fri 25. Wakeups #57 (Jefferson) and #58 (Barr + US flash PMI).
-      Claims: 1889819a (0.7, closes Tue 23:59Z, HIT trajectory - no both-up
-      pair); fc5c5a29 (no 2y close <4.60 through 25 Sep, 0.55); NEW 22 Sep:
-      Oct-hike odds relay stays >=45% through Fri (0.55) and the 1889819a
-      successor (no consecutive both-up pair through Mon 28 Sep, 0.7). Next
-      gates: Jefferson Tue; Barr Wed; Sept CPI mid-Oct; 28 Oct FOMC.
+      2026 (median 4.1; 16 of 18 see >=1 more). Warsh: 'not restrictive',
+      August PCE estimate ~3.6%. THE REGIONAL CAMP KEEPS ASKING FOR MORE:
+      Musalem, Collins, Goolsbee (21 Sep); Collins again 22 Sep ('can focus
+      on price stability'); BARKIN 22 Sep 17:00Z (CFA Baltimore): 'the
+      risks to inflation outweigh the risks to maximum employment', >60% of
+      PCE categories >3%, firms passing costs through, one 'talking-to'
+      might not be enough - BUT the cycle 'could be like the Greenspan
+      mid-cycle adjustment' (the ~75bp of the mid-1990s): hawkish with a
+      ceiling, and homebuilders rallied on it. The two governor/NY slots
+      (Jefferson, Williams 22 Sep) were plumbing - no guidance. TAPE: the
+      2y auction ($69bn, 22 Sep) cleared at 4.787, 0.2bp tail, grade C -
+      the highest 2y since 2024 absorbed supply without stress; the curve
+      closed UP 1.5-2.3bp (CNBC: 5y 4.842, 10y 4.967, 30y 5.303) on a
+      session with Brent -1.1% and a co-confirmed US-Iran round - THE FRONT
+      END DOES NOT FOLLOW OIL DOWN (look-through closed on the record:
+      Schmid, Kashkari, the trio, Barkin). 2y close 22 Sep not retrievable
+      (CNBC US2Y blank). PRICING: Oct 'just over 50%' (investinglive
+      13:38Z 22 Sep, no later relay); BofA keeps Oct + Dec; Deutsche Bank:
+      markets underprice the global hiking cycle. Checkpoints: 2y
+      4.791-4.800 (break = 5.055 projection; rejection then <4.600 =
+      reversal); DXY 100.02 / 100.58 / 101.80. Flip line (governor endorses
+      Oct -> bearish-rates 60; pause call -> base 30) untriggered. SPEAKERS
+      (ff_calendar, Low, todo-188): BARR Wed 23 14:05Z (wakeup #59, venue
+      check first - Board index shows only second-chance lending and AI);
+      Williams 08:10Z, Barkin 12:30Z, Hammack 12:50Z, Paulson 14:10Z Thu;
+      Williams 09:15Z, Hammack 18:00Z Fri. Claims: fc5c5a29 (no 2y close
+      <4.60 through 25 Sep, 0.55); 4872cd75 (Oct odds relay >=45% through
+      Fri, 0.55); 1a513d72 (no relay >=60% through Wed 23:59Z, 0.55 - the
+      Barr risk); d8e247ef (no consecutive both-up pair through Mon 28,
+      0.7 - Tue was row-flat, not both-up). Next gates: Barr Wed; US flash
+      PMI prices-paid Wed 13:45Z; Sept CPI mid-Oct; 28 Oct FOMC.
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -38,114 +41,114 @@ watchlist:
       Structural demand floor: ~289t of official demand this cycle with ETF
       inflows resuming beside it, and reserve diversification out of
       Treasuries as the flow-side twin (China's UST holdings lowest since
-      2008; China's reserves rose again in August; UBS 9 Sep keeps its
-      long-game call; Goldman 18 Sep keeps $5,400 through the hike; the
-      'HALO'/'scarcity trade' pieces 21 Sep are narrative, not flow).
-      Custody reflex spreading (DNB 86t to London, France earlier; 18 Sep
-      Venezuela weighing $4bn London -> US - custody, not demand). 21 Sep:
-      PBOC fixed the yuan at its strongest since Feb 2023 - a cheaper CNY
-      gold price at the margin (SGE 938.59/g, 17 Sep). Counter: Russia a
-      steady seller. The floor: 4300 GC (~4255 spot) - tests 14 Sep 4305.9,
-      15 Sep 4304.0, 16 Sep 22:19Z tick 4296.7, then the retrace to 4424.9
-      Fri 18 Sep. Floors 8/8 this regime, but every bounce tracked oil off
-      its highs or a yields-down session; not yet a bought dip AT the line
-      on an oil-UP day. 21 Sep: Monday low 4361.3 (14:05Z), Globex close
-      ~4381, PM fix 4324.25 (-0.55%) - no test of the line; the 50DMA is
-      4339.8, 42 pts below spot. Ninth test live: d571e0f0 (no GC_CLOSE
-      <=4326.5 Mon/Tue, 0.55) - Monday row 4401.3, Tuesday remaining.
-      Confirms: WGC monthlies net buying through the drawdown (wgc feed
-      still 503); a bought dip at 4300-4340 on an oil-UP day. Kills: two
-      consecutive months of net official selling.
+      2008; UBS 9 Sep keeps its long-game call; Goldman 18 Sep keeps $5,400
+      through the hike). Custody reflex spreading (DNB 86t to London,
+      France; Venezuela weighing $4bn London -> US). SGE 942/g (20 Sep).
+      Counter: Russia a steady seller; a research house (investinglive 23
+      Sep) expects further Q4 declines on dollar + hawkish Fed but a 'firm
+      floor around $3,800' from geopolitics and official buying. The floor
+      in practice: 4300 GC (~4265 spot) - tests 14 Sep 4305.9, 15 Sep
+      4304.0, 16 Sep 22:19Z tick 4296.7, then the retrace to 4424.9 Fri 18
+      Sep; 22 Sep low 4335.0 held on Trump's 'annihilate or deal' + Brent
+      back to 100, then row 4402.2. d571e0f0 HIT 23 Sep - FLOORS 9/9 this
+      regime, all written 0.55 (calibration gap, rule 20 distance logic),
+      and EVERY bounce tracked oil off its highs or a yields-down session;
+      still no bought dip AT the line on an oil-UP day. Tenth test live:
+      717f560c (no GC_CLOSE row <=4300.0 Wed 23 - Fri 25 Sep, 0.55; 73 pts
+      under spot, 0.43x the three-session range). Confirms: WGC monthlies
+      net buying through the drawdown (wgc feed still 503); a bought dip
+      at 4300-4340 on an oil-UP day. Kills: two consecutive months of net
+      official selling.
     since: 2026-07-31
 
   - theme: warsh-credibility
     why: >
       The debasement channel - the best explanation for gold above $4,000
-      against a positive real yield (DFII10 2.68). 16 Sep: the hike was
-      delivered THROUGH the political pressure, 12-0 - credibility-positive;
-      the theme's own kill line printed (30y -1.3bp with the 2y +12bp, gold
-      -1.9%, dollar through 100). 18 Sep: the tell printed ONCE - gold
-      +0.96% with the 2y +6.6bp, 10y 5.00, 30y +3bp, DXY flat, BTC +6%. 19
-      Sep corrective: at the WEEK level the curve does not carry the
-      signature (actionforex: 2y +12.6, 10y +3.1, 30y -2.9). 21 SEP - THE
-      ANTI-TELL: gold -0.8% (spot) / -1.0% (Globex close) with the 2y
-      +0.75bp, the 10y -4.5bp, the 30y -4.7bp, DXY +0.1 and BTC +7.1% to an
-      eight-month high beside a Nasdaq record (Meta +12%, AMD $1tn) - the
-      debasement/scarcity flow went to BTC and AI equities, NOT gold, on a
-      session with two tankers hit in Hormuz and oil -3.7%. The Monday gate
-      FAILED (gold DOWN, 2y up): the theme's named kill lines have printed
-      and 1889819a closes Tue on a hit trajectory. Tell 2 for / 14 against.
-      Base stays 20 as the residual weight; it goes to 15 if the 1889819a
-      successor (recorded 22 Sep, through Mon 28 Sep) also runs clean.
-      Confirms (base 30): two consecutive both-up sessions WITH the 30y up;
-      a 30y close >=5.40 with gold UP (aec5cc8b MISS); gold +1% on an
-      oil-DOWN session with the 2y flat (the chain broken from the gold
-      end). A Trump move ON Warsh priced gold-up/2y-up is the other confirm
+      against a positive real yield (DFII10 2.62, 21 Sep). 16 Sep: the
+      hike was delivered THROUGH the political pressure, 12-0 - the
+      theme's own kill line printed (30y -1.3bp with the 2y +12bp, gold
+      -1.9%, dollar through 100). 18 Sep: the tell printed ONCE (gold
+      +0.96% with the 2y +6.6bp, 10y 5.00, BTC +6%). 21 SEP - THE ANTI-
+      TELL: gold -1.0% (Globex) with the 2y +0.75bp, 10y -4.5bp, 30y
+      -4.7bp, DXY +0.1, BTC +7.1% and a Nasdaq record - the flow went to
+      BTC and AI equities, NOT gold. 22 SEP: the SHAPE of the tell on spot
+      (+22 to 4364 with the curve +1.5-2.3bp, 30y 5.303) but a FLAT row
+      (4402.2 vs 4401.3), the dollar softening late and BTC 86.5K (+14%
+      on the week) beside a Nasdaq record; overnight gold gave the $22
+      back tick for tick with DXY 100.54 -> 100.69. Read: a dollar move,
+      not a debasement bid. Tell 2 for / 15 against. 1889819a HIT
+      (successor d8e247ef, 0.7, through Mon 28 - Tue not both-up on the
+      row basis). Base stays 20 as the residual weight; 15 if d8e247ef
+      also runs clean. Confirms (base 30): two consecutive both-up rows
+      WITH the 30y up; a 30y close >=5.40 with gold UP (aec5cc8b HIT - it
+      did not print); gold +1% on an oil-DOWN session with the 2y flat.
+      A Trump move ON Warsh priced gold-up/2y-up is the other confirm
       (rule 7 caps timing).
     since: 2026-07-31
 
   - theme: middle-east-risk-premium
     why: >
-      Two regimes: IRGC control of Hormuz transit against a US blockade with
-      open kinetic exchange since 30-31 Aug, and a Red Sea second front that
-      reached RIYADH 19 Sep (one Houthi ballistic missile at the capital,
-      INTERCEPTED; attribution HOUTHI, not Iran). HORMUZ 21 SEP (UKMTO via
-      gcaptain/Maritime Executive): two more tankers hit - inbound crude
-      tanker LR Stephanie (72,825 dwt, Isle of Man), two minor injuries,
-      proceeding under own power; an outbound LPG tanker hit by debris, crew
-      safe; UKMTO attributes neither ('unknown projectiles'); at least five
-      tanker incidents since 16 Sep; JMIC threat SEVERE, 116 incidents since
-      1 Mar; Kpler: 17 transits over the weekend vs 37 the prior week and
-      ~125/day pre-war (AIS-dark transits uncounted); CENTCOM: 1bn bbl
-      escorted, 2,000+ ships assisted, 110 vessels redirected. Iran claims
-      another MQ-1 downed (Mehr, unverified, rule 12); Sayyari: 'Hormuz is
-      definitely in Iran's hands'. WASHINGTON 21 Sep: Trump 'could meet'
-      Pezeshkian at UNGA (one-sided; Pezeshkian departs Tue per Mehr); the
-      Yemen president got no pledge of US military support; WSJ: a USD 5bn
-      fund to rebuild Gulf energy infrastructure and reduce Hormuz reliance,
-      under discussion with Saudi/UAE (the Trump-GCC centrepiece); Bessent:
-      all Iranian airlines grounded worldwide from 23 Sep via secondary
-      sanctions, Turkey complying, China 'very engaged' on compliance before
-      Thursday's Xi summit, 'cannot predict' when the war ends - pressure and
-      talk tracks escalating together. Allies: Macron offers to help secure
-      Saudi energy sites; UK offers aerial refuelling vs the Houthis; EU
-      seeks Red Sea assets (Kallas). Iran's seven conditions via Qatar
-      (Rezaei 19 Sep) unanswered on record. Ladder: Kharg/Larak infra
+      Two regimes: IRGC control of Hormuz transit against a US blockade
+      with open kinetic exchange since 30-31 Aug, and a Red Sea second
+      front that reached RIYADH 19 Sep (Houthi missile, intercepted). 22
+      SEP - THE TALKS TRACK OPENED: Araghchi's delegation and Witkoff/
+      Kushner completed a mediated round at the UN (Qatar, Pakistan
+      shuttling); Trump: ~3 hours, 'productive', another 'soon', but a
+      deal 'right after the election' and 'annihilate' as the alternative;
+      Witkoff (X): indirect, a round completed, mediation continues; Iran
+      state TV: Tehran accepted Witkoff's request, 'strict conditions'
+      conveyed; NYT (2 Iranian officials): Araghchi met Witkoff+Kushner;
+      Israel Ch.12: no agreement on most disputes; Al Arabiya source:
+      'deadlock broken'. Iran's conditions (Tasnim): end of the war on all
+      fronts, a south-Lebanon withdrawal timeline, frozen funds, blockade
+      and new sanctions lifted, an oil waiver - the old MOU. Fars: the US
+      'has not left a red line', ready for all scenarios. Earlier Tue the
+      Kyodo 'reopen Hormuz in 7 days' report was denied by Fars. 645cc78a
+      MISS (first loss for the family; lesson filed on the format
+      qualifier). HORMUZ: last hits Mon 21 Sep (LR Stephanie, Isle of
+      Man; an LPG carrier) - neither Saudi-linked; no new hull 22-23 Sep
+      (queried); Hormuz AIS transit count 'two' (Investing.com 22 Sep) vs
+      Saudi loading ~12m bbl in a day and East-West restarted (partial) -
+      the flows moved off-AIS and around the strait. Saudi king at UNGA
+      condemned Houthi 'targeting of Mecca' (the earlier drone, no new
+      event); France mulls a UNSC Hormuz resolution; EU seeks Red Sea
+      assets; UK offers Saudi refuelling. No Trump-GCC readout in the DB
+      by 23 Sep 03:30Z (queried, missing). Ladder: Kharg/Larak infra
       d96debd5 (to 26 Sep); Gulf-side regime 2df323fa (to 26 Sep); Saudi
-      restraint 33defb45 (to 27 Sep); escorts d4f5ffd6 (to 27 Sep; CENTCOM
-      expanding); Saudi hull 9e629d6e (23 Sep; Monday's hits are Hormuz,
-      not Red Sea, not Saudi-linked); 645cc78a (no co-confirmed talks,
-      closes Tue 23:59Z, HIT trajectory) -> successor recorded 22 Sep
-      (Wed-Sun, 0.65). Markers: Trump-GCC readout Tue; a Pezeshkian meeting
-      co-confirmed; any US strike order; SPA damage lines; Saudi attribution
-      beyond the Houthis; UKMTO names; an escorted hull stopped with
-      casualties (the ladder's next rung).
+      restraint 33defb45 (to 27 Sep); escorts d4f5ffd6 (to 27 Sep); Saudi
+      hull 9e629d6e (closes Wed 23:59Z, HIT trajectory); 0d52e7da (no
+      co-confirmed Trump-Pezeshkian meeting or second direct round Wed-
+      Sun, 0.65) - MISS trajectory the moment a second round is
+      acknowledged by both sides. Markers: a Qatari/Pakistani host line
+      with venue+date (-> deepdive wakeup); a Trump-Pezeshkian meeting
+      co-confirmed; any US strike order; SPA damage lines; an escorted
+      hull stopped with casualties (the ladder's next rung).
     since: 2026-07-31
 
   - theme: kinetic-transmission-inverted
     why: >
       The war reaches gold as a Fed hike and a margin call, not as a haven
-      bid. FOURTEEN sessions of evidence: 2, 6, 7, 8, 10, 11 Sep, the 11 Sep
-      NY close, the 14 Sep reopen, 14, 15, 16 Sep, 17-18 Sep overnight, the
-      20 Sep reopen (Riyadh: oil +0.8%, gold flat), and 21 SEP - THE
-      SHARPEST YET: two tankers hit in Hormuz, oil -3.7% (Brent settle
-      100.34, briefly under 100; WTI -4.9%), the 10y -4.5bp and 30y -4.7bp,
-      and gold FELL -0.8% (spot) / -1.0% (Globex close) while BTC rose 7.1%
-      and the Nasdaq closed at a record. Against: one (9 Sep). THE VALVE IS
-      WORSE THAN ONE-WAY: oil UP sells gold (via the 2y); oil DOWN on
-      diplomacy ALSO sells gold (its own war premium drains and the risk
-      bid rotates to BTC/AI) because the 2y does not follow oil down (the
-      Fed closed the look-through). Gold's only up-route is the 2y DOWN -
-      which needs a governor, not a headline. Claims: 64c7ba41 (0.5) - runs
-      on the first oil-UP Brent settle Mon/Tue: Monday settled DOWN (100.34
-      vs 103.87), so it runs on Tuesday only if Brent settles above 100.34
-      (101.35 at 03:30Z); no GC_CLOSE >= +1% (>=4445.3 on the 4401.3 row
-      basis) = HIT; neither session oil-UP = UNCLEAR. Confirms: an oil-UP
+      bid. FOURTEEN sessions of evidence 2-21 Sep, sharpest 21 Sep (two
+      tankers hit, oil -3.7%, gold -1.0%, BTC +7.1%). Against: one (9
+      Sep). 22 SEP - THE DE-ESCALATION LEG: a co-confirmed US-Iran round,
+      Brent settled 99.25 (-1.1%, five down sessions), gold spot +0.5% /
+      row FLAT, curve UP 1.5-2.3bp, dollar softened late then firmed
+      overnight and gold gave it back. Tape clause on the trigger (rule
+      23): printed ~18:30Z, GC 4390 -> 4396 at the Globex close - target
+      failed both ways, weights held. THE VALVE: oil UP sells gold (via
+      the 2y); oil DOWN on diplomacy leaves gold flat-to-down (its own
+      premium drains, the 2y does not follow) - gold's only up-route is
+      the 2y DOWN, which needs a governor or a US data break, not a
+      headline. Claims: 64c7ba41 UNCLEAR 23 Sep (no oil-UP settle Mon/
+      Tue); successor 8e425cab (0.5) runs on the first oil-UP Brent settle
+      Wed-Fri (row <+1% = HIT; none = UNCLEAR); f7a0c23d (0.55): no Brent
+      settle >=103 Wed-Fri - the premium-drain claim. Confirms: an oil-UP
       settle with gold flat/DOWN; a US strike on Iran priced gold DOWN; a
-      co-confirmed deal priced oil -5% with gold DOWN. Kills: 64c7ba41 MISS
-      -> kinetic 35; two consecutive gold-up / 2y-up closes; gold +1% on an
-      oil-DOWN session with the 2y flat; a supply event traded as
-      stagflation (long end up, dollar DOWN, gold up).
+      co-confirmed text priced oil -5% with gold DOWN. Kills: 8e425cab
+      MISS -> kinetic 35; two consecutive gold-up / 2y-up rows; gold +1%
+      on an oil-DOWN session with the 2y flat; a supply event traded as
+      stagflation (long end up, dollar DOWN, gold up); a text priced
+      Brent -5% with gold UP and the 2y flat -> kinetic 25.
     since: 2026-09-09
 
   - theme: boj-yen-pillar
@@ -153,68 +156,71 @@ watchlist:
       The yen was a pillar of the debasement bid: USDJPY pinned at 159-160
       after August's failed intervention; that broke 3-8 Sep (160.4 ->
       153.3). 18 Sep: BoJ HIKED to 1.25% (highest since 1995), 7-2, no
-      timing; Ueda: 'policy phase has changed', will keep raising; street:
-      one hike per quarter, next Dec/turn-of-year, terminal 1.75-2%. Tape:
-      BoJ RATE CHECK at 158.05 - the defended line is 158, not 160. 22 Sep:
-      USDJPY 157.50 (+0.45%, third up day, testing the 61.8% retracement
-      per investinglive) with Tokyo shut Tue and Wed (holiday-week thin
-      tape; CFTC hedge funds net LONG yen for the first time since July
-      2025). Gold took nothing from the yen either way (deepdive #56: the
-      yen reaches gold only through DXY, and DXY is +0.11). Read with the
-      FOMC: one widening differential, both legs dollar-favourable -
-      relative-rate trade, not debasement. Open: be4d6b22 (USDJPY no print
-      >=160 through 24 Sep, 0.55; 1.6% of room). Next BoJ 30 Oct, two days
-      after the 28 Oct FOMC - second convergence window. Flip: >=160 through
-      the MoF = pillar back, base 30; <152 with Nikkei+BTC down = liquidity
-      regime.
+      timing; Ueda: 'policy phase has changed'; street: one hike per
+      quarter, terminal 1.75-2%. Tape: BoJ RATE CHECK at 158.05 - the
+      defended line is 158, not 160. 23 Sep: USDJPY 157.62 (window high
+      157.94), Tokyo shut Tue/Wed (holiday-week thin tape; CFTC hedge
+      funds net LONG yen for the first time since July 2025). Gold takes
+      nothing from the yen directly (deepdive #56: the yen reaches gold
+      only through DXY; DXY 100.65, +0.26% on 22-23 Sep, was the whole
+      overnight gold move). Read with the FOMC: one widening differential,
+      both legs dollar-favourable - relative-rate trade, not debasement;
+      no other central bank is easing into this (ECB Nagel/Lane 22 Sep,
+      SNB Thu cons hold). Open: be4d6b22 (USDJPY no print >=160 through
+      Thu 24 Sep 23:59Z, 0.55; 1.5% of room). Next BoJ 30 Oct, two days
+      after the 28 Oct FOMC. Flip: >=160 through the MoF = pillar back,
+      base 30; <152 with Nikkei+BTC down = liquidity regime.
     since: 2026-09-03
 
   - theme: energy-pce-passthrough
     why: >
-      The bridge from the war to the Fed: oil into CPI is the live hike-odds
-      channel, and oil is gold's price-setter on non-Fed days - in BOTH
-      directions now. 15 Sep settles WTI 105.83 / Brent 108.75 (109.97
-      high); five down sessions since: 21 Sep Brent Nov settled 100.34
-      (-3.4%; traded both sides of 100, wrap snapshot 100.05), WTI Oct 95.78
-      (-4.9%; EXPIRES Tue 22 Sep - Nov becomes front), on Trump's 'could
-      meet Pezeshkian', the Houthi stand-down, Saudi exports >4 mb/d,
-      escorted/AIS-dark flows and Kpler's tanker count - THROUGH two tanker
-      hits in Hormuz the same day; 22 Sep 03:30Z Brent 101.35 (+1.0%), WTI
-      96.65. fxempire levels: Brent support 97-97.5 then the 50MA 92.44,
-      resistance 102/105; WTI support 92.5-93, needs >98 to turn. The
-      stance's test - Brent settle <100 with the 2y >=4.70 = asymmetry
-      confirmed, weight holds 50 - printed a hair above 100 (100.34) with
-      the 2y 4.7505: confirmed in substance (oil -3.7% -> 2y +0.75bp);
-      Brent <100 AND 2y <4.70 = input lost (bearish-rates 45) has not
-      printed. Passthrough one-way on the record (Schmid, Kashkari, Musalem
-      'broadens beyond oil', Warsh PCE ~3.6); abroad the line is
-      conditional - Macklem 'oil can be looked through until inflation
-      spreads', RBA Hunter and RBNZ Breman leaning to hikes, ECB Lane
-      tying growth to containing the energy shock. Supply chain: East-West
-      shut 5-6 weeks, Yanbu loadings paused, Iran zero (CENTCOM); Russia
-      extending its diesel export ban; US diesel export-ban calls growing
-      (Maritime Executive); Bessent's airline sanctions have no supply
-      effect. Claims: 4dfbd1d8 (Sept headline >=0.4, 0.65); 62c34dbd (core
-      <=0.3, 0.7); rule-11 midpoint check 30 Sep; 64c7ba41 runs on Tuesday
-      only if Brent settles above 100.34. No cap written.
+      The bridge from the war to the Fed: oil into CPI is the live hike-
+      odds channel, and oil is gold's price-setter on non-Fed days - in
+      BOTH directions. 15 Sep settles WTI 105.83 / Brent 108.75 (109.97
+      high); FIVE lower settles since: 21 Sep Brent 100.34, 22 SEP BRENT
+      99.25 (first sub-100 settle in two weeks; 98.78 at 03:30Z Wed), WTI
+      Nov ~89-90.5 (Oct expired 22 Sep) - on Saudi East-West restarted
+      (partial, up to 4 mb/d rerouted), Yanbu exports resuming, ~12m bbl
+      loaded in one day (Gulf News), Hormuz shuttles/AIS-dark flows, the
+      co-confirmed US-Iran round, and an API headline build vs a draw
+      expected. PRODUCTS ARE THE TIGHT PART: diesel at records, jet fuel
+      following (MarketWatch), Trump endorses a diesel export ban with a
+      decision 'fast' (analysts: would hurt, not help). fxempire levels:
+      Brent support 97-97.5 then the 50MA 92.44, resistance 102/105; WTI
+      support 90.47 then 87.7. THE STANCE'S TEST: Brent <100 with the 2y
+      >=4.70 = asymmetry confirmed, bearish-rates holds 50 - PRINTED 22
+      Sep (Brent 99.25, 2y auction 4.787, curve UP); Brent <100 AND 2y
+      <4.70 = input lost (bearish-rates 45) has not printed. Passthrough
+      one-way on the record (Schmid, Kashkari, Musalem, Barkin 'persistent
+      shocks embedded in pricing', Warsh PCE ~3.6); abroad the same: ECB
+      Nagel 'oil now a key inflation gauge, mildly restrictive not ruled
+      out', Lane 'energy shock lasts longer, inflation elevated to mid-
+      2027'; Australia flash PMI 50.8 with input costs at a 3-month high.
+      Supply chain: East-West partial, Yanbu resuming, Iran zero (CENTCOM);
+      Russia diesel export ban extended; BofA raised its H2 Brent forecast
+      (Investing.com, unread). Claims: 4dfbd1d8 (Sept headline >=0.4,
+      0.65); 62c34dbd (core <=0.3, 0.7); rule-11 midpoint check 30 Sep;
+      f7a0c23d (no Brent settle >=103 Wed-Fri, 0.55); 8e425cab runs on
+      the first oil-UP settle.
     since: 2026-07-31
 
   - theme: us-fiscal-dominance
     why: >
       Treasury's expanded long-dated buybacks (19 Aug) are de facto
       yield-curve control and the market read them as debasement - gold's
-      trend regime began as US debt passed $40tn. The tool FAILED IN PUBLIC
-      9-10 Sep (30y auction 'poor' at 5.308). FOMC week: curve flatter,
-      dollar UP - not the signature. 18 Sep: 'bonds slump again' - 10y
-      5.00, 30y 5.328 - and gold ROSE with the dollar flat: one session.
-      21 SEP: the long end RALLIED (10y -4.5bp to 4.951, 30y -4.7bp to
-      5.280; 5y -2.5) on oil -3.7% while the 2y rose 0.75bp - a bull
-      flattening from the long end - and gold FELL: the long end is not
-      leading gold in either direction; the WSJ USD 5bn Gulf rebuilding
-      fund is fiscally trivial. 52db03df HIT (no upsizing through 18 Sep).
-      Open: aec5cc8b (no 30y close >=5.40 Fri-Tue, 0.55) - 12bp of room
-      with one session left, HIT trajectory. Watch: 2y/5y/7y auctions this
-      week (UNVERIFIED, todo-185 - no relay in the DB as of 22 Sep), any
-      Bessent line on issuance (his 21 Sep CNBC hit was Iran/China only),
-      whether the 30y moves WITH gold on any session.
+      trend regime began as US debt passed $40tn. The tool FAILED IN
+      PUBLIC 9-10 Sep (30y auction 'poor' at 5.308). 18 Sep: 'bonds slump
+      again' - 10y 5.00, 30y 5.328 - and gold ROSE with the dollar flat:
+      one session. 21 Sep: the long end RALLIED (30y 5.280) on oil -3.7%
+      and gold FELL. 22 SEP: the 2y auction ($69bn) cleared at 4.787 with
+      a 0.2bp tail, grade C - no stress at the front; the curve closed UP
+      1.5-2.3bp (5y 4.842, 10y 4.967, 30y 5.303; investinglive wrap had
+      the 10y -6bp - basis disagreement, CNBC close is the basis) while
+      gold spot rose $22 and the row was flat - the long end is not
+      leading gold in either direction. aec5cc8b HIT 23 Sep (no 30y close
+      >=5.40 Fri-Tue; high 5.311). Perli (NY Fed): bill buying 'paused,
+      not finished'. Watch: 5y/7y auctions Wed/Thu (UNVERIFIED, todo-185
+      - no relay in the DB), any Bessent line on issuance (his 21-22 Sep
+      appearances were Iran/China/diesel only), whether the 30y moves
+      WITH gold on any session.
     since: 2026-08-20
