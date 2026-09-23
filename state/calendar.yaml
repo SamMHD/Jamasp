@@ -1270,6 +1270,24 @@ events:
       high without stress. Barr Wed 14:05Z remains wakeup #59 with the
       venue check first (Board index shows only his second-chance-lending
       and AI speeches so far); 1a513d72 (no >=60% relay) closes Wed 23:59Z.
+    update_2026_09_23_deepdive: >
+      Wakeup #59 fired 14:50Z. Barr's 14:05Z slot was "A Long-Term View on
+      the Costs of Shelter" at the Chicago Fed housing-affordability summit
+      (Board text extracted in full) - a POLICY speech: supported the hike,
+      "out of position", inflation risks up / labor risks receded, "in my
+      base case, further policy adjustments are likely to be needed"; no
+      meeting named. The >=60% relay came from the flash PMI 14 min earlier
+      (investinglive 13:51Z: October 64%, composite 58.4, services 58.7,
+      input costs highest since Oct 2022) - 1a513d72 scored MISS. GC 4323.8
+      at the speech row, 4326.4 at 14:36Z (flat since the speech, -20 on
+      the PMI); 2y 4.872 (+9.5bp), Brent 101.66 on a UKMTO Hormuz
+      cargo-vessel strike with two casualties. Rule 23: the flip is written
+      at the wrap odds + Globex close, so weights 20/50/30 held and wakeup
+      #60 (21:30Z) closes the tape clause (GC <4323.8 + wrap >=60% ->
+      bearish-rates 60; else "trigger printed, target failed", <=+5).
+      New claim 6e168240 (2y >=4.80 closes Wed+Thu, 0.55). Xi-Trump: Trump
+      hosts Xi in Washington Thu 24 Sep per actionforex (analyst copy, no
+      host time) - scan marker, no wakeup (rule 16).
 
   - date: 2026-09-23
     time_dubai: "Track opened Tue 22 Sep ~18:30Z (22:30 Dubai); next round 'soon' per Trump, no host-published slot (rule 16)"
