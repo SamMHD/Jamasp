@@ -1319,6 +1319,22 @@ events:
       through the chain: Brent -5% with the 2y <4.70 = the gold-up print;
       Brent -5% with the 2y flat = gold flat-to-down (21 Sep pattern).
 
+    update_2026_09_24_brief: >
+      Wed 23 Sep: no second round. Oil recap (investinglive): Tehran still
+      reviewing the US response, 'many differences'; a senior official said
+      Hormuz could reopen within a week if the US eases pressure and lifts
+      the port blockade; Rezaei: shut until Iran's conditions are met -
+      Brent settled 103.08 (+3.9%). Overnight: Gulf News (regional sources,
+      unconfirmed by either government) - Iran's 'roadmap' offers a
+      region-wide ceasefire of up to 60 days, a PHASED Hormuz reopening, a
+      halt to attacks on Arab neighbours and a timetable for broader talks;
+      Rubio 'open', military options retained. Tasnim (IRGC-linked): the
+      Araghchi-Witkoff contact was 'not authorised' by policymaking bodies;
+      the MFA defends it as Qatari-mediated condition-conveying - the
+      mandate question is now the gate. Brent 102.10 at 03:30Z, gold flat
+      (premium drain, no bid). New claim ed8c08b5 (no on-record US
+      ceasefire announcement Thu-Sun, 0.7). Still no host slot, no wakeup;
+      scans add an on-record US response to the roadmap as marker (5).
   - date: 2026-09-24
     time_dubai: "no host-published time (Xi due in Washington Wed; talks 'scheduled for Thursday' per investinglive 23 Sep; actionforex 22 Sep 'Trump hosts Xi 24 Sep')"
     title: Xi-Trump Washington meeting - scan marker only (rule 16)
@@ -1335,3 +1351,13 @@ events:
       Scan marker: a host-published time -> deepdive wakeup at +60 after
       the readout; otherwise read the readout in the Fri brief. No wakeup
       booked.
+    update_2026_09_24_brief: >
+      Busan truce extended to 10 Jan (Bessent on Fox after He Lifeng, Wed);
+      Xi arrived, airport welcome, summit Thu; a 'bigger deal' explored
+      (floated by Beijing Sunday), rare-earth compliance the friction, up
+      to four leader meetings this year. Dollar read: none - DXY closed
+      +0.5 on yields and is flat overnight at 101.08; the f5fd7c62 breaker
+      did not fire. Claim d24c9300 (rollover, not a deal, by Fri 23:59Z,
+      0.6). Still no host time; the 21:00Z/23:00Z scans read the readout
+      for (a) tariff/export-control terms (dollar-DOWN), (b) a Taiwan or
+      trade breakdown (dollar-UP), (c) any Iran line. Fri brief scores.
