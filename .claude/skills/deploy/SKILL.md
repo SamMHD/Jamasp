@@ -754,31 +754,54 @@ ssh jamasp 'systemd-run --wait --pipe --collect \
     -m saman@mahdanian.xyz --deploy-hook "systemctl reload nginx"'
 ```
 
-This was already documented as "a workaround, not a fix," and the intended
-real fix — adding the host's IPv6 address to the token's Client IP Address
-Filtering allowlist — never happened. Instead the host's egress fully moved
-to IPv6 (`2a01:4f8:1c1a:dacf::1`) before that could be done: every Cloudflare
-API call from certbot started failing with the same 9109 error regardless of
-the drop-in, `certbot renew --dry-run` failed outright, and the certificate
-would have expired 2026-11-06 with no warning. The token was also scoped to
-`mahdanian.xyz` alone, so it could never have served the new `mkagent.co`
-zone either way. That combination of failures — not a preference for Origin
-CA on its own merits — is why the migration happened.
+This was documented as "a workaround, not a fix," and the intended real fix —
+adding the host's IPv6 address to the token's Client IP Address Filtering
+allowlist — never happened. **The workaround nevertheless still works.**
 
-**Verification trap (historical, kept for context):** a bare `certbot renew
---dry-run` run in an interactive shell was not reliable proof it would renew
-unattended — the shell is unsandboxed, so it could reach the Cloudflare API
-over a different network path than `certbot.timer` → `certbot.service` (with
-the drop-in above) actually used, and could report success even when the
-real timer-driven renewal would fail. The only trustworthy check was running
-the dry run inside the identical sandbox:
+Be careful here, because this is where the 2026-09-25 migration got its
+reasoning wrong at first. A bare `certbot renew --dry-run` in a root shell
+fails with 9109, and that was briefly read as "renewal is broken, the
+certificate expires 2026-11-06". It was the test that was broken: a shell does
+not get the `certbot.service` drop-in, so it egresses over IPv6 and is
+rejected, while `certbot.timer` → `certbot.service` runs inside
+`RestrictAddressFamilies=AF_INET` and is not. Re-running the dry run inside
+the same sandbox reported "all simulated renewals succeeded".
+
+The real reason for the migration is narrower: the token is scoped to the
+`mahdanian.xyz` zone alone and cannot write DNS in `mkagent.co` (verified — it
+returns `Authentication error` for that zone even over IPv4), so it could not
+issue for `jamasp.mkagent.co` at all. Let's Encrypt for the new hostname
+needed a new token minted by hand in the dashboard. Origin CA needed no token,
+covers both hostnames in one certificate, and never renews.
+
+**Verification trap — and it runs the opposite way to the obvious guess.** A
+bare `certbot renew --dry-run` in an interactive shell is not proof of
+anything, because the shell is *less* restricted than the timer: it egresses
+over IPv6 and **fails** with 9109, while the timer, pinned to AF_INET by the
+drop-in above, **succeeds**. The shell test is a false alarm, not a false
+reassurance. Reading it the wrong way round is what produced a wrong "the
+certificate is about to expire" conclusion on 2026-09-25. The only trustworthy
+check is the dry run inside the identical sandbox:
 
 ```bash
 ssh jamasp 'systemd-run --wait --pipe --collect -p RestrictAddressFamilies="AF_INET AF_UNIX AF_NETLINK" certbot renew --dry-run'
 ```
 
-None of this needs to be run again for this vhost — there is nothing left to
-renew.
+This still works and `certbot.timer` is still enabled, so the Let's Encrypt
+certificate for `jamasp.mahdanian.xyz` keeps renewing — deliberately, even
+though nginx now serves the Origin CA certificate for both hostnames. It costs
+nothing, it keeps `OnFailure=` alerting meaningful rather than firing on a
+renewal nobody wants, and it is a one-line fallback: point `ssl_certificate`
+back at `/etc/letsencrypt/live/jamasp.mahdanian.xyz/` if Origin CA ever has to
+be backed out.
+
+Two consequences worth holding onto. The certificate certbot renews is **not**
+the certificate nginx serves, so it is the wrong thing to inspect when
+debugging a TLS problem on either hostname — check
+`/etc/ssl/certs/jamasp-origin.pem`. And if you ever do retire this, disable
+`certbot.timer` rather than only deleting the renewal config, or the timer
+fires, finds nothing to do, and the `OnFailure=` drop-in gets a chance to page
+the desk about it.
 
 ### Trap: configure Access before creating the DNS record
 
