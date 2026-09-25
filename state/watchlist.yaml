@@ -48,6 +48,21 @@ watchlist:
       13:20Z, Hammack 18:00Z - all regional presidents, no governor, scan
       markers only. Flip-back: a relay <55% or claims >230K with a Williams
       pause call -> bearish-rates 50.
+      25 SEP BRIEF: WEIGHTS HELD 15/60/25. Thursday broadened the chorus and
+      the market ran ahead of it: OCTOBER 77.5% (actionforex relay of fed funds
+      futures 09:16Z; the Americas wrap carried NO odds sentence). Williams
+      (London Macro Policy Forum): another 2026 hike 'reasonable', would not
+      commit to October, forward guidance 'over', economy 'resilient to the
+      rise in energy prices'; Hammack: risks 'tilted to the upside', an
+      'inflationary mindset' risk from repeated shocks; Paulson (voter):
+      'some modest further tightening may be warranted'. Claims 197K, new-home
+      sales 684K. 2y closed 4.895 (CNBC) / 4.916 (wrap), 10y 5.163 (2007 high),
+      30y 5.460 (2004 high). 6e168240 HIT (both legs). Live: 1e91793f (>=55%)
+      and 4872cd75 (>=45%) close Fri on HIT trajectories; fc5c5a29 closes Fri;
+      new 86f87a36 (no 2y close <4.80 Fri-Tue, 0.55). Fri speakers: Williams
+      09:15Z (again), Schmid 13:20Z, Hammack 18:00Z - no governor; the 28-29
+      Sep Fed schedule is not yet in the feed. Flip-back unchanged: a relay
+      <55% or a governor pause call -> bearish-rates 50. NFP 2 Oct: wakeup #61.
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -80,6 +95,14 @@ watchlist:
       with the 2y flat - no bought dip visible, the bounce to 4324 came with
       Brent -1% on the roadmap report. SGE 936.61 (21 Sep); China shut Fri +
       Golden Week next week, so the physical read goes dark.
+      25 SEP: floor test ten - Thu row 4309.5 (survived), but the TICK low
+      was 4282.9 at 15:35Z on an oil-UP session with the 2y flat (below 4300 on
+      the tick, not the row basis; noted as such). The bounce off the low came
+      on the 16:18Z phased-deal report (Brent -3) and overnight on Brent -1% -
+      oil-DOWN bids, still no bought dip AT the line on an oil-UP day. XAU PM
+      fix 4266.4, AM 4255.55. 717f560c's last session is Fri. China shut Fri
+      (Mid-Autumn) and 1-8 Oct (Golden Week): SGE dark, physical read gone for a
+      week - a thin bid under any test of 4300.
     since: 2026-07-31
 
   - theme: warsh-credibility
@@ -110,6 +133,13 @@ watchlist:
       break the theme needed, traded as Fed not debasement; the flow went to
       the dollar. Tell 2 for / 16 against. Base 15. d8e247ef live (Wed row-
       DOWN, no pair before Thu-Fri).
+      25 SEP - ANTI-TELL 17 AGAINST / 2 FOR: the 30y CLOSED 5.460 (2004 high),
+      the 10y 5.163 (2007 high), after Treasury's SECOND buyback in two weeks
+      and a 7y tail - and gold fell 0.3% with DXY +0.2 and BTC flat. The
+      long-end break is global (Bund 17-year high, JGB 10y highest since 1996)
+      and priced in the dollar's favour. CNBC: 'surging yields pose a brand
+      new problem for Warsh'. Base 15. d8e247ef live (Thu row-DOWN; a pair
+      needs Fri+Mon). Confirm unchanged: 30y >=5.50 with gold UP and DXY DOWN.
     since: 2026-07-31
 
   - theme: middle-east-risk-premium
@@ -166,6 +196,32 @@ watchlist:
       on-record US ceasefire announcement Thu-Sun, 0.7). Blockade: 115 Iran-
       linked ships redirected (Gulf News). Senior IRGC commander killed in
       southeast Iran clashes (internal, not US).
+      25 SEP: THE CLOCK. Rezaei (SNSC secretary, via Guardian/Press TV,
+      Gulf News 00:36Z): Washington has 'four or five days' to implement
+      Iran's conditions 'completely and all at once' - no Hormuz reopening, no
+      negotiations until the US acts; 'Talk is enough. Now we must act';
+      'next step' decided after the deadline (lands ~Mon 28-Tue 29).
+      Parliament REGISTERED AN IMPEACHMENT MOTION against Araghchi (Khezrian,
+      Sabeti) over the New York contacts - hardliners say the mandate was
+      conditions-through-mediators, not direct talks; a senior official had
+      told Reuters the delegation had 'full authority'. Reuters (sources,
+      16:18Z Thu): negotiators exploring a PHASED deal (Hormuz reopens,
+      blockade lifts, frozen assets); an Iranian official: odds 'extremely
+      low'; a European official: Iran's list 'very long'. Pezeshkian (NBC):
+      wants the June MOU revived BEFORE the midterms, open to nuclear
+      inspections, denies plotting against Trump. Rubio: not a major
+      breakthrough. Trump: Iran stalls till the midterms. HOUTHI FRONT: six
+      ballistic missiles at Taif and YANBU intercepted (coalition/al-Maliki);
+      Houthis claim Aramco-Yanbu and Riyadh hits - no SPA damage line
+      (adversary-only, rule 12); Macron sends troops, radars, air defence to
+      Yanbu; UK confronts Iran; 150+ killed in Yemen fighting over Bab
+      al-Mandab heights; Safavi: a Red Sea/Bab al-Mandab front could open.
+      Bahrain leads a call for full Hormuz reopening without tolls (2df323fa
+      the other way). Hormuz transits 10 Wed (10-day avg ~17, AIS-dark
+      excluded). Cape Dao still unattributed (dd31b40f closes Fri). Ladder
+      unchanged; new 9083e952 (no co-confirmed arrangement Fri-Tue, 0.7).
+      Markers: an on-record US response to the deadline; an SNSC 'next
+      step'; an SPA damage line at Yanbu; a host line with venue+date.
     since: 2026-07-31
 
   - theme: kinetic-transmission-inverted
@@ -201,6 +257,15 @@ watchlist:
       flat - diplomacy is not a bid. Kinetic 25. Kills unchanged: a
       stagflation print (30y >=5.45, DXY DOWN, gold UP); two both-up rows;
       gold +1% on oil-DOWN with the 2y flat.
+      25 SEP: FIFTEENTH oil-UP session closing gold flat/down (Brent +3.4%
+      to 106.60 on missiles at Yanbu; row -0.37%). THE CRACK: 16:18Z the
+      phased-deal report took Brent -3 and GC +20 (4292.7 -> 4312.1) with the
+      2y flat - the first oil-DOWN bid of the regime - faded by 18:00Z; then
+      overnight Brent -1% bid gold +24 to 4328.5. Small, but the chain now
+      shows both directions intraday. New a270f3f1 (0.55): the first Brent
+      -3% settle Fri-Tue does not print a +1% GC row; a MISS with the 2y flat
+      -> kinetic 20, base 25 (the drain leg bids gold = the regime is
+      loosening). Kills otherwise unchanged.
     since: 2026-09-09
 
   - theme: boj-yen-pillar
@@ -228,6 +293,13 @@ watchlist:
       while the weak yen keeps inflation elevated. be4d6b22 closes Thu
       23:59Z with ~2 yen of room. DXY 101.08 - the yen is not moving the
       dollar; the pillar stays down.
+      25 SEP: be4d6b22 HIT - window max 158.949 (Thu 15:16Z), no 160 print.
+      Katayama: Trump raised weak-yen concerns with Takaichi, USD/JPY eased
+      below 158.50 (158.43 at 03:16Z). Goldman cuts its USD/JPY path to 150
+      in a year on BoJ tightening; Daiwa: next BoJ hike December; JGB 10y at
+      a 1996 high. The pillar stays down: the dollar is a US-yields trade and
+      the yen leg reaches gold only through DXY (101.26). No successor claim
+      - the 158/160 test has no gold information while DXY rises on yields.
     since: 2026-09-03
 
   - theme: energy-pce-passthrough
@@ -273,6 +345,17 @@ watchlist:
       imports still 13% below pre-war (Gulf News). The asymmetry test still
       stands: Brent <100 with the 2y >=4.70 confirmed 22 Sep; the 2y did not
       follow oil UP either - it led (PMI).
+      25 SEP: Brent SETTLED 106.60 (+3.4%, highest close since 15 Sep; +5%
+      at the highs), WTI 94.61 (six-session slide snapped) on Houthi missiles
+      at Yanbu/Taif; then -1% overnight on the phased-deal report (105.55 at
+      03:31Z). Yanbu is the East-West workaround: investinglive says tanker
+      loadings there 'have yet to resume' vs Gulf News 24 Sep '12m bbl in a
+      day' - CONFLICT, resolve via gcaptain Sat. Products: Wright sounding
+      out refiners on VOLUNTARY diesel export limits (disputes the 90-day-ban
+      report); EU warns a ban hurts both sides. Aramco studying a 4th and 5th
+      export route. Midpoint check 30 Sep (4dfbd1d8 / 62c34dbd). Aug PCE date
+      not in the feed through 26 Sep (Warsh's estimate ~3.6% y/y) - verify
+      Sat.
     since: 2026-07-31
 
   - theme: us-fiscal-dominance
@@ -301,6 +384,16 @@ watchlist:
       already HIT on Tue's close). 5y/7y auctions still UNVERIFIED (no relay
       in the DB, todo-185). Watch: a 30y close >=5.45 with DXY DOWN and gold
       UP is the only print that moves base.
+      25 SEP: THE TOOL FAILED AGAIN - Treasury ran its second buyback in two
+      weeks and the 7y ($44bn) tailed 0.7bp at 5.085%; the 30y CLOSED 5.460
+      (+5.9bp, highest in 22 years; wrap snapshot 5.478), the 10y 5.163 (July
+      2007 high), mortgages 7%. Reuters via investinglive: 'buybacks and yen
+      intervention have failed to cap yields'; strategists put most of the
+      rise since March on Fed-hike expectations, the rest on growth and oil;
+      '6% on the 10y is emerging as the next pain threshold'. Global: Germany
+      ~EUR525bn record borrowing, Bund 17-year high, JGB 10y 1996 high. Gold
+      DOWN with DXY UP - not read as debasement. Only mover for base: 30y
+      >=5.50 with DXY DOWN and gold UP.
     since: 2026-08-20
 
   - theme: liquidity-crack-channel
@@ -321,4 +414,13 @@ watchlist:
       out): two weeks of equity records with the 2y >=4.85 and gold flat;
       or the crack prints and gold FALLS with everything (margin-call
       regime - kinetic-transmission-inverted's read wins).
+      25 SEP: first datapoint on the line - investinglive/Reuters: the 10y
+      at 5.2 is 'testing how much the equity market can take', pressing AI
+      valuations with the Nasdaq near records. Thu: S&P -0.02% with Meta
+      +4.5% 'masking the losers' (Arm -7.9%), Dow -0.31%, Russell -0.11%,
+      Europe down 0.2-0.9%; Nikkei +1.2% Fri on chips; BTC flat at 84.3K (did
+      not follow the late equity rebound). Oxford Economics recession signal
+      flashing while spending holds. Trigger set NOT printed (needs equities
+      -2% with Nikkei and BTC down, 2y -15bp, USDJPY <156). Quarter-end Wed
+      30 Sep is the calendar's own stress point.
     since: 2026-09-24

@@ -1335,6 +1335,22 @@ events:
       (premium drain, no bid). New claim ed8c08b5 (no on-record US
       ceasefire announcement Thu-Sun, 0.7). Still no host slot, no wakeup;
       scans add an on-record US response to the roadmap as marker (5).
+
+    update_2026_09_25_brief: >
+      Thu 24 Sep: two tracks in one afternoon. Reuters (sources, 16:18Z):
+      negotiators exploring a PHASED deal - Iran reopens Hormuz, the US
+      lifts the blockade, possibly frozen-asset access; an Iranian official
+      put the odds 'extremely low', a European official called Iran's list
+      'very long'; Brent -3 in an hour, GC +20 with the 2y flat (faded).
+      Then Rezaei (SNSC): 'four or five days' for the US to implement
+      Iran's conditions 'completely and all at once' before any reopening
+      or negotiation - the clock lands ~Mon 28-Tue 29 Sep (see the entry
+      below). Parliament registered an impeachment motion against Araghchi
+      over the New York contacts (mandate contested). Pezeshkian (NBC):
+      wants the June MOU back before the midterms, open to nuclear
+      inspections. Rubio: not a major breakthrough. New claim 9083e952 (no
+      co-confirmed arrangement Fri 25 - Tue 29, 0.7). Still no host slot,
+      no wakeup.
   - date: 2026-09-24
     time_dubai: "no host-published time (Xi due in Washington Wed; talks 'scheduled for Thursday' per investinglive 23 Sep; actionforex 22 Sep 'Trump hosts Xi 24 Sep')"
     title: Xi-Trump Washington meeting - scan marker only (rule 16)
@@ -1361,3 +1377,80 @@ events:
       0.6). Still no host time; the 21:00Z/23:00Z scans read the readout
       for (a) tariff/export-control terms (dollar-DOWN), (b) a Taiwan or
       trade breakdown (dollar-UP), (c) any Iran line. Fri brief scores.
+
+    update_2026_09_25_brief: >
+      OUTCOME: rollover, as claimed. Busan truce extended to 10 Jan ('two
+      more months'), tariffs and rare earths 'in limbo' (investinglive), Xi
+      set red lines and urged AI cooperation (CNBC), Saxo: 'stability, not
+      a breakthrough'. No fact sheet with terms, no tariff change. Dollar
+      read: DXY +0.2 on yields, not the summit; the f5fd7c62 dollar-DOWN
+      breaker did not fire. d24c9300 closes Fri 25 Sep 23:59Z on a HIT
+      trajectory. Entry closed.
+
+  - date: 2026-09-28
+    time_dubai: "Mon 28 - Tue 29 Sep (participant deadline, no clock time: Rezaei 'four or five days' from Thu 24 Sep)"
+    title: Rezaei's four-to-five-day Hormuz ultimatum lands - scan marker only (rule 7/16)
+    why: >
+      Rezaei (SNSC secretary, Thu 24 Sep, via Guardian/Press TV/Gulf News):
+      Washington has 'four or five days' to implement Iran's conditions
+      'completely and all at once'; no Hormuz reopening and no negotiations
+      until the US acts first; Tehran decides its 'next step' after the
+      deadline. Sits beside a Reuters-sourced phased-deal track (odds
+      'extremely low' per an Iranian official) and an impeachment motion
+      against Araghchi - the mandate is contested, so the deadline may be
+      the hardliners' line rather than the state's. For gold (rule 22): a
+      breakdown line (SNSC 'next step', a strike order, a hull with
+      casualties, an SPA damage line at Yanbu) = Brent >=110 = gold DOWN
+      via the 2y unless stagflation (30y up, DXY DOWN, gold UP -> base
+      25); a co-confirmed arrangement (both governments on record, any
+      format) = 9083e952 MISS, Brent -5 to -8%, gold flat-to-DOWN unless
+      the 2y follows under 4.75 (then gold UP through the front end).
+    action: >
+      No wakeup (participant deadline, rule 16). Scan markers Mon-Tue: an
+      on-record US response; an SNSC 'next step'; a co-confirmed
+      arrangement (9083e952 MISS); a strike order; a Yanbu damage line.
+      A host-published venue+date for a further round -> deepdive at +60.
+
+  - date: 2026-09-29
+    time_dubai: "Tue 29 Sep ~08:30 (04:30Z; RBA decision slot per convention - verify against the feed Mon)"
+    title: RBA decision - hike expected to the highest cash rate since 2011 (dollar-only marker)
+    why: >
+      investinglive 24 Sep: sticky core inflation pushes the RBA toward its
+      highest cash rate since 2011; the 30y piece cites 'the RBA's expected
+      hike on Tuesday'. Part of the global hiking cycle into the oil shock
+      (Fed, BoJ, ECB lean, RBA) - no cross carries gold up through DXY
+      while every central bank tightens. Gold channel is AUD/DXY only.
+    action: >
+      Scan marker; not a breaker for 86f87a36 / a270f3f1. No wakeup.
+
+  - date: 2026-10-02
+    time_dubai: "Fri 2 Oct 16:30 (12:30Z; date hand-built from the BLS first-Friday convention on 25 Sep - RE-VERIFY against the events feed at the Mon 28 Sep brief)"
+    title: September 2026 US payrolls - deepdive wakeup #61 at print+45
+    why: >
+      The next tier-1 print for the October decision (77.5% priced on 24
+      Sep). A hot print (payrolls above consensus with AHE >=0.3) locks
+      October and tests 4300 GC via the 2y; a soft print with AHE cooling
+      is the front-end-DOWN route that this regime reads as gold UP. Rule
+      14: read the investinglive print post first, name the largest
+      component and the ex-that number, run the rule-23 tape clause from
+      the print.
+    action: >
+      wakeup #61 booked 2026-10-02T13:15:00Z (deepdive). Monday's brief
+      confirms the date against the feed and cancels if it disagrees; the
+      Thursday 1 Oct brief records NO fresh directional predictions (final
+      hours before an NFP-class print).
+
+  - date: 2026-09-30
+    time_dubai: "Wed 30 Sep (quarter-end) - and Aug PCE date UNVERIFIED (not in the feed through 26 Sep; 30 Sep or 1 Oct)"
+    title: Quarter-end, rule-11 midpoint check, Aug PCE date to verify, Golden Week from 1 Oct
+    why: >
+      Wed 30 Sep is quarter-end (a stress point for the liquidity-crack
+      channel with the 10y at 5.2) and the rule-11 midpoint check for
+      4dfbd1d8 / 62c34dbd (September WTI/Brent average vs August's). Aug
+      PCE (Warsh's estimate ~3.6% y/y) is not in the feed through 26 Sep -
+      the Saturday brief verifies the date via an actionforex week-ahead
+      summary. China shuts 1-8 Oct (Golden Week): the SGE read goes dark,
+      a thin physical bid under any test of 4300.
+    action: >
+      Sat 26 brief: verify PCE and ISM dates; Wed 30 brief: midpoint
+      check; if PCE lands inside the week, book a deepdive at print+45.
