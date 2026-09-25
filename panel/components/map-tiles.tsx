@@ -131,11 +131,38 @@ export const AVG_CHAR_W = 0.66;
  * A budget that ignored it would hand the fit a size whose painted text is
  * wider than the tile — precisely the failure the budget exists to prevent.
  */
-export function trackingFor(fontSize: number): number {
+export function trackingFor(fontSize: number, text?: string): number {
+  // WebKit — so every Safari, desktop and iOS — falls off its complex-text
+  // shaping path when letter-spacing is set on Arabic script. Letters come
+  // out unjoined AND in reversed visual order: "نرخ بهره و دلار" paints as
+  // "رلد و هرهب خرن". Not a kerning artifact; unreadable text.
+  //
+  // It is the letter-spacing alone — the reversal survives `direction: rtl`
+  // just as readily as `ltr` — so the only fix is not to set it. Tracking is
+  // a Latin refinement worth a fraction of an em; it is not worth a
+  // character of correctness. Chromium renders every one of these cases
+  // correctly, which is why this survived the whole i18n project.
+  if (text !== undefined && hasRTL(text)) return 0;
   if (fontSize >= 28) return -0.022;
   if (fontSize >= 20) return -0.015;
   if (fontSize >= 14) return -0.005;
   return 0.005;
+}
+
+/**
+ * Arabic, Hebrew, Syriac, Thaana, N'Ko and the Arabic presentation forms —
+ * enough to answer "would letter-spacing wreck this string?".
+ *
+ * Content test, not a locale test, and deliberately so: in Persian a tile
+ * whose headline has no translation yet renders its English source through
+ * `SourceLang`, and a Persian headline can carry a Latin ticker. The
+ * question is what is in *this* string, which is also why the Persian digits
+ * at U+06F0–U+06F9 fall inside the range.
+ */
+const RTL_RE = /[֐-ࣿיִ-﷿ﹰ-ﻼ]/;
+
+export function hasRTL(text: string): boolean {
+  return RTL_RE.test(text);
 }
 
 /**
@@ -151,8 +178,8 @@ export function weightFor(fontSize: number): number {
 }
 
 /** Per-character advance in em: the glyph estimate plus this size's tracking. */
-export function charAdvance(fontSize: number): number {
-  return AVG_CHAR_W + trackingFor(fontSize);
+export function charAdvance(fontSize: number, text?: string): number {
+  return AVG_CHAR_W + trackingFor(fontSize, text);
 }
 
 /**
@@ -429,7 +456,7 @@ export function truncateForWidth(
   text: string, w: number, fontSize: number, charW?: number,
 ): string {
   const maxChars = Math.floor(
-    (w - LABEL_PAD * 2) / (fontSize * (charW ?? charAdvance(fontSize))));
+    (w - LABEL_PAD * 2) / (fontSize * (charW ?? charAdvance(fontSize, text))));
   if (maxChars <= 0) return "";
   if (text.length <= maxChars) return text;
   return `${text.slice(0, Math.max(1, maxChars - 1))}…`;
@@ -486,7 +513,7 @@ export const MIN_LINE_CHARS = 12;
 export function wrapForTile(
   text: string, w: number, h: number, fontSize: number = LABEL_FONT,
 ): string[] {
-  const budget = budgets(w, h, fontSize);
+  const budget = budgets(w, h, fontSize, false, text);
   const { lines, complete } = wrapWithin(text, budget);
   if (complete || !lines.length) return lines;
 
@@ -518,11 +545,17 @@ export function wrapForTile(
  *     the padding has to give, so charging only `fontSize` would hand the
  *     search a size whose descenders fall through the bottom edge.
  */
-function budgets(w: number, h: number, fontSize: number, painted = false):
-  { maxChars: number; maxLines: number } {
+function budgets(w: number, h: number, fontSize: number, painted = false,
+  text?: string): { maxChars: number; maxLines: number } {
   const firstLine = painted ? fontSize * (ASCENT + DESCENT) : fontSize;
   return {
-    maxChars: Math.floor((w - LABEL_PAD * 2) / (fontSize * charAdvance(fontSize))),
+    // `text` reaches charAdvance so the budget charges the same tracking the
+    // paint will actually apply. RTL text is painted without letter-spacing
+    // (see trackingFor), and tracking is NEGATIVE at every size above 14 —
+    // so a budget that kept charging it would measure the string narrower
+    // than it paints and hand back a size that overflows the tile the fit
+    // just proved it into.
+    maxChars: Math.floor((w - LABEL_PAD * 2) / (fontSize * charAdvance(fontSize, text))),
     maxLines: 1 + Math.floor(
       (h - LABEL_PAD * 2 - firstLine) / (fontSize * LINE_RATIO)),
   };
@@ -717,7 +750,7 @@ export function fitLabel(text: string, w: number, h: number):
   let relaxed: { fontSize: number; lines: string[] } | null = null;
 
   for (let f = start; f > LABEL_FONT; f -= 1) {
-    const budget = budgets(w, h, f, true);
+    const budget = budgets(w, h, f, true, text);
     const { lines, complete } = wrapWithin(text, budget, false);
     if (!complete || !lines.length) continue;
     if (relaxed === null) relaxed = { fontSize: f, lines };
@@ -757,7 +790,16 @@ export function MapGroupHeader({ x, y, w, label }: {
     <text x={x + LABEL_PAD}
       y={y + (GROUP_HEADER_H - fontSize * (ASCENT + DESCENT)) / 2 + fontSize * ASCENT}
       fontSize={fontSize} fill="var(--muted-foreground)"
-      style={{ textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600 }}>
+      style={{
+        textTransform: "uppercase",
+        // Suppressed for Arabic script — see trackingFor. The group headers
+        // were the most visibly broken part of the Persian map: short, set
+        // large, and every one of them reversed. `uppercase` is a no-op on
+        // Persian, so it can stay unconditional.
+        letterSpacing: hasRTL(label) ? undefined : "0.08em",
+        fontWeight: 600,
+        unicodeBidi: "plaintext",
+      }}>
       {truncateForWidth(label, w, fontSize, HEADER_CHAR_W)}
     </text>
   );
@@ -928,7 +970,7 @@ export function MapTile({ x, y, w, h, tone, title, lines, messages,
           fontSize={fontSize} fill={TONE_INK[tone]}
           style={{
             fontWeight: weightFor(fontSize),
-            letterSpacing: `${trackingFor(fontSize)}em`,
+            letterSpacing: `${trackingFor(fontSize, lines.join(" "))}em`,
           }}>
           {lines.map((line, i) => (
             // Each tspan repeats x so the line returns to the tile's centre
@@ -936,7 +978,21 @@ export function MapTile({ x, y, w, h, tone, title, lines, messages,
             // which is what makes a wrapped block read as a centred block
             // rather than as a centred first line with a ragged tail. dy
             // advances all but the first.
-            <tspan key={i} x={cx} dy={i === 0 ? 0 : lineH}>{line}</tspan>
+            //
+            // unicode-bidi: plaintext is load-bearing and has to be HERE, on
+            // each tspan, not on the parent <text>. A tspan carrying its own
+            // `x` starts a new text chunk, and WebKit reorders bidi runs
+            // across those chunk boundaries: without this, line 1 of a
+            // Persian label paints a fragment of line 2. Setting
+            // `direction: rtl` or this property on the <text> instead was
+            // tried against real WebKit and does not fix it.
+            //
+            // `plaintext` rather than `direction: rtl` so each line takes its
+            // base direction from its own content. That is what lets one tile
+            // hold a Latin ticker on one line and Persian on the next and get
+            // both right, with no locale plumbing reaching this component.
+            <tspan key={i} x={cx} dy={i === 0 ? 0 : lineH}
+              style={{ unicodeBidi: "plaintext" }}>{line}</tspan>
           ))}
         </text>
       )}

@@ -1,3 +1,4 @@
+import { hasRTL } from "@/components/map-tiles";
 import { cls } from "@/lib/format";
 import { t, type Messages } from "@/lib/i18n";
 
@@ -101,11 +102,27 @@ export function ArcGauge({ label, value, min, max, digits = 1, ticks = [], class
       )}
       <text x={CX} y={50} textAnchor="middle" fontSize="17" fontWeight="600"
         fill="var(--foreground)">{display}</text>
-      <text x={CX} y={64} textAnchor="middle" fontSize="7"
-        style={{ textTransform: "uppercase", letterSpacing: "0.08em" }}
-        fill="var(--muted-foreground)">
-        {value === null ? `${label} · ${t(messages, "common.noData")}` : label}
-      </text>
+      {(() => {
+        const caption = value === null
+          ? `${label} · ${t(messages, "common.noData")}` : label;
+        return (
+          // letter-spacing is suppressed for Arabic script here for the same
+          // reason as the market map's labels (see map-tiles' trackingFor):
+          // WebKit paints letter-spaced Arabic unjoined and in reversed
+          // order. Both strings that reach this line are translated — the
+          // signal name and common.noData — so in Persian this caption was
+          // rendering as reversed nonsense in every Safari.
+          <text x={CX} y={64} textAnchor="middle" fontSize="7"
+            style={{
+              textTransform: "uppercase",
+              letterSpacing: hasRTL(caption) ? undefined : "0.08em",
+              unicodeBidi: "plaintext",
+            }}
+            fill="var(--muted-foreground)">
+            {caption}
+          </text>
+        );
+      })()}
     </svg>
   );
 }
