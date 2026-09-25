@@ -320,7 +320,14 @@ oneshot timer units).
    for user units, or (drop `--user` for system units)
    `systemctl restart jamasp-panel` for the system variant.
 
-## Public access (jamasp.mahdanian.xyz)
+## Public access (jamasp.mkagent.co)
+
+The panel's public hostname is `jamasp.mkagent.co`. `jamasp.mahdanian.xyz`
+was the original hostname; it still exists, but now only as a 301 to the
+one above, so old bookmarks and links already published in reports keep
+working — its DNS record, nginx vhost and Access application are all
+deliberately kept, not torn down. See "TLS: Cloudflare Origin CA
+certificate" and "Reference values" below for both hostnames' ids.
 
 The panel is also reachable publicly, behind three independent layers, none
 of which restructure `panel/` — it's still the same `next start` on
@@ -334,7 +341,10 @@ of which restructure `panel/` — it's still the same `next start` on
    Cloudflare's IP ranges are shared by every Cloudflare customer, so a
    request can still arrive at the origin from an allow-listed Cloudflare IP
    via *another* tenant's zone, with an Origin Rule overriding Host/SNI to
-   `jamasp.mahdanian.xyz` (a documented technique — Certitude, Nov 2023).
+   `jamasp.mkagent.co` (a documented technique — Certitude, Nov 2023) — that's
+   the hostname to use for this attack now, since it's the vhost that
+   actually serves the panel; overriding to `jamasp.mahdanian.xyz` only gets
+   an attacker the bare redirect, nothing more.
    That request passes the firewall and matches our vhost without ever
    touching our zone's Access configuration. Basic auth (item 2 below) is
    what actually stops that path — see
@@ -343,13 +353,15 @@ of which restructure `panel/` — it's still the same `next start` on
    `docs/superpowers/specs/2026-08-08-panel-public-access-design.md`'s
    Architecture section for the full breakdown of what each layer does and
    doesn't guarantee.
-2. **nginx** — terminates TLS (Let's Encrypt, DNS-01) and admits a request
-   under `satisfy any` if **either** the Cloudflare Access JWT validates
-   (via the `jamasp-authd` sidecar, below) **or** HTTP basic auth succeeds,
-   before reverse-proxying to `127.0.0.1:3300`. In normal browser use the
-   JWT satisfies this and no password is ever requested.
+2. **nginx** — terminates TLS (a Cloudflare Origin CA certificate — see "TLS:
+   Cloudflare Origin CA certificate" below, not Let's Encrypt any more) and
+   admits a request under `satisfy any` if **either** the Cloudflare Access
+   JWT validates (via the `jamasp-authd` sidecar, below) **or** HTTP basic
+   auth succeeds, before reverse-proxying to `127.0.0.1:3300`. In normal
+   browser use the JWT satisfies this and no password is ever requested.
 3. **Cloudflare Access** — a one-time-PIN gate on the hostname at the edge,
-   in front of both of the above.
+   in front of both of the above. **Two Access applications exist now, one
+   per hostname** — see "Reference values" below for both.
 
 ### File inventory
 
@@ -362,7 +374,8 @@ of which restructure `panel/` — it's still the same `next start` on
 | `ops/systemd-root/nginx.service.d/requires-jamasp-edge.conf` | `/etc/systemd/system/nginx.service.d/` | `Requires=`/`After=jamasp-edge.service` — without it, nginx starts (fail-open) even when the lockdown failed to load, since `Before=` alone is ordering, not a dependency |
 | `ops/nginx/jamasp-panel.conf` | `/etc/nginx/sites-available/`, symlinked into `sites-enabled/` | public vhost + catch-all `444` default servers; `satisfy any` over `auth_request` + `auth_basic` |
 | `ops/systemd/jamasp-authd.service` | `/etc/systemd/system/` **via the ordinary step-5 loop** (it must run as `jamasp`, so it belongs in `ops/systemd/`, not `-root/`) | the Access JWT sidecar on `127.0.0.1:3301` |
-| `panel/next.config.ts` | built into the panel | `experimental.serverActions.allowedOrigins: ["jamasp.mahdanian.xyz"]` — without this, pages render fine but every Server Action POST silently fails Origin checking |
+| `panel/next.config.ts` | built into the panel | `experimental.serverActions.allowedOrigins: ["jamasp.mkagent.co", "jamasp.mahdanian.xyz"]` — without the current hostname, pages render fine but every Server Action POST silently fails Origin checking; the legacy hostname stays listed only for the transition (a tab already open on it still POSTs from that Origin, and browsers don't reliably follow a 301 for a POST) |
+| *(not in repo — issued via the Cloudflare API)* | `/etc/ssl/certs/jamasp-origin.pem` (0644, root) + `/etc/ssl/private/jamasp-origin.key` (0600, root) | Origin CA cert/key that `ops/nginx/jamasp-panel.conf`'s `ssl_certificate`/`ssl_certificate_key` point at — see "TLS: Cloudflare Origin CA certificate" below |
 
 ### The Access JWT sidecar (`jamasp-authd`)
 
@@ -391,11 +404,20 @@ JAMASP_ACCESS_AUD=<the Access application's AUD tag>
 JAMASP_ACCESS_TEAM_DOMAIN=mahdanian-saman-81.cloudflareaccess.com
 ```
 
+**Two Access applications exist now** — current panel (`jamasp.mkagent.co`)
+and legacy redirect (`jamasp.mahdanian.xyz`); see "Reference values" below
+for both ids and AUDs. `JAMASP_ACCESS_AUD` must be the **current panel**
+one, not the legacy one — the sidecar only ever validates the hostname that
+actually serves the panel through `auth_request`. The legacy vhost is a
+bare 301 with no `auth_request` at all, so its AUD is never checked against
+anything here; pointing this at the legacy AUD would make every real
+request fail the check the daemon exists to perform.
+
 Refusing to start is deliberate. An empty AUD would skip the check that pins
 a token to *this* application, and the daemon would accept a validly-signed
 Access token from *any* Cloudflare team. Loud failure beats silent
 acceptance. (Handy cross-check: the AUD appears as `kid=` in the 302 redirect
-from `curl -sSI https://jamasp.mahdanian.xyz/`.)
+from `curl -sSI https://jamasp.mkagent.co/`.)
 
 The JWKS is cached in memory for an hour and mirrored to
 `~/.local/state/jamasp/access-jwks.json`. That file is a last-known-good
@@ -419,7 +441,7 @@ the lockdown, and hitting the origin directly takes Cloudflare out of the
 path so the origin's own decision is what you observe):
 
 ```bash
-R="--resolve jamasp.mahdanian.xyz:443:127.0.0.1 https://jamasp.mahdanian.xyz/"
+R="--resolve jamasp.mkagent.co:443:127.0.0.1 -k https://jamasp.mkagent.co/"
 ssh jamasp "curl -sS -o /dev/null -w 'no-creds:%{http_code}\n' $R"   # expect 401
 # Restart in the SAME invocation so a dropped connection can't leave it stopped:
 ssh jamasp "systemctl stop jamasp-authd
@@ -428,7 +450,20 @@ ssh jamasp "systemctl stop jamasp-authd
   systemctl start jamasp-authd"
 ```
 
-Measured on 2026-08-09: stopped → 401; SIGSTOP-hung → 401 in 2.04s.
+`-k` is required now and wasn't before this migration: `--resolve` sends this
+straight to the origin, bypassing Cloudflare's edge entirely, so curl itself
+validates the certificate — and the public trust store curl uses doesn't
+include Cloudflare's Origin CA root. Without `-k` every one of these checks
+fails on the TLS handshake before nginx's auth logic ever runs, which looks
+identical to "the sidecar is broken" but means something else entirely.
+Ordinary requests through Cloudflare's edge never need this: the edge
+presents its own publicly-trusted certificate to the browser regardless of
+what the origin holds.
+
+Measured on 2026-08-09 (pre-migration, against the Let's Encrypt cert then in
+place): stopped → 401; SIGSTOP-hung → 401 in 2.04s. The sidecar's behavior is
+unaffected by the TLS change — only the flag needed to observe it from the
+host changed.
 
 | Symptom | Likely cause | Check |
 |---|---|---|
@@ -459,6 +494,14 @@ ssh jamasp 'cp /home/jamasp/Jamasp/ops/systemd-root/certbot.service.d/onfailure.
   /etc/systemd/system/certbot.service.d/onfailure.conf'
 ssh jamasp 'systemctl daemon-reload'
 ```
+
+**Superseded by the TLS migration:** this drop-in only does anything if
+`certbot.service` still runs on the host. TLS for the panel moved to a
+Cloudflare Origin CA certificate (see "TLS: Cloudflare Origin CA
+certificate" below), so nothing renews via certbot for this vhost any more
+— on a fresh install there's no `certbot.service` for the drop-in to attach
+to, and installing it is optional. On a host that predates the migration,
+leaving it in place is harmless.
 
 Verify by injecting a real failure, never by reading the config:
 
@@ -540,24 +583,71 @@ done
 ssh jamasp 'systemctl daemon-reload && systemctl enable --now jamasp-edge.service jamasp-cf-ranges.timer'
 ```
 
-### Prerequisite: Cloudflare API token
+### TLS: Cloudflare Origin CA certificate
 
-DNS-01 issuance needs a token scoped **Zone:DNS:Edit + Zone:Zone:Read** on
-`mahdanian.xyz` (Cloudflare cannot mint tokens via the API/MCP — create it
-by hand in the dashboard). Install it on the host, never in the repo:
+TLS for this vhost is a Cloudflare **Origin CA** certificate, not Let's
+Encrypt/certbot — see "Historical: certbot's IPv4-only workaround (superseded
+by Origin CA)" further down for why that changed, and the header comment in
+`ops/nginx/jamasp-panel.conf` for the reasoning the vhost itself carries.
+There is no API token to install on the host at all for this: nftables
+already restricts 80/443 to Cloudflare's ranges, so the edge proxy is the
+only client that ever completes a handshake here, and Cloudflare trusts its
+own Origin CA — no renewal, no timer, no token to go stale.
+
+One certificate covers both hostnames' SAN (`jamasp.mkagent.co` and
+`jamasp.mahdanian.xyz`), expires 2041-09-21, id
+`188133292607190827397673185325461104624708937497` (see "Reference values").
+Issue or reissue it with the Cloudflare API MCP tool (`ToolSearch` for
+`select:mcp__plugin_cloudflare_cloudflare-api__execute`) — generate a CSR and
+private key first (e.g. `openssl req -new -newkey rsa:2048 -nodes -keyout
+jamasp-origin.key -out jamasp-origin.csr -subj "/CN=jamasp.mkagent.co"`),
+then:
+
+```js
+async () => cloudflare.request({
+  method: "POST",
+  path: "/certificates",
+  body: {
+    hostnames: ["jamasp.mkagent.co", "jamasp.mahdanian.xyz"],
+    request_type: "origin-rsa",
+    requested_validity: 5475,
+    csr: "<contents of jamasp-origin.csr>",
+  },
+})
+```
+
+`GET /certificates?zone_id=<a zone id containing one of the hostnames>` lists
+existing ones — this endpoint is account-scoped, not per-zone, so any zone id
+that touches the cert works for the lookup. Install the returned certificate
+and the key you generated, never in the repo:
 
 ```bash
-ssh jamasp 'install -D -m 0600 -o root -g root /dev/null /etc/letsencrypt/cloudflare.ini && cat > /etc/letsencrypt/cloudflare.ini' <<'EOF'
-dns_cloudflare_api_token = PASTE_TOKEN_HERE
-EOF
+ssh jamasp 'install -D -m 0644 -o root -g root /dev/null /etc/ssl/certs/jamasp-origin.pem && cat > /etc/ssl/certs/jamasp-origin.pem' <<< "$CERT_PEM"
+ssh jamasp 'install -D -m 0600 -o root -g root /dev/null /etc/ssl/private/jamasp-origin.key && cat > /etc/ssl/private/jamasp-origin.key' <<< "$KEY_PEM"
 ```
-(`-D` creates `/etc/letsencrypt/` if it doesn't exist yet — on a rebuilt
-host it won't, since certbot isn't installed until step 2 of the reinstall
-sequence below, and plain `install` without `-D` does not create parent
-directories.)
+(`-D` creates the parent directory if it doesn't exist yet — on a rebuilt
+host `/etc/ssl/certs/` and `/etc/ssl/private/` normally already exist as
+part of the base OS, but nginx still needs both files present before it
+will start; it fails closed on a missing cert rather than falling back.)
 
-Same rule for the basic-auth file generated below — `/etc/nginx/jamasp.htpasswd`
-and `/etc/letsencrypt/cloudflare.ini` never enter this repo.
+Same rule as ever for the basic-auth file generated below —
+`/etc/nginx/jamasp.htpasswd` never enters this repo, and neither does the
+Origin CA private key.
+
+**A hazard specific to `mkagent.co`, not `mahdanian.xyz`:** the `mkagent.co`
+zone also hosts a separate, unrelated live website (`A mkagent.co →
+149.56.225.6`, plus MX/SPF for that site's email). Its zone-wide SSL/TLS mode
+is `full` and has never been touched — which is exactly what Origin CA
+needs, so it was left alone rather than "improved." Zone-wide settings are
+not per-hostname: changing SSL/TLS mode, Always Use HTTPS, or any other
+zone-level Cloudflare setting "for the panel's benefit" changes it for that
+other site too. Origin CA works under `full` or `full (strict)`; it would
+break under `flexible`, because this vhost's plaintext-80 handler redirects
+straight to HTTPS, so a `flexible`-mode edge fetching the origin over plain
+HTTP would loop against that redirect forever. If stricter per-hostname
+validation is ever wanted for the panel specifically, follow the pattern in
+"Resolved: per-hostname strict TLS (I5)" below — a Configuration Rule scoped
+by `http.host`, not a zone-wide change.
 
 ### Reinstall on a rebuilt host, in order
 
@@ -569,33 +659,22 @@ and `/etc/letsencrypt/cloudflare.ini` never enter this repo.
    `ssh jamasp 'nft list set inet jamasp_edge cf_v4 | grep -c /'` — a count
    of 0 means the lockdown would drop Cloudflare itself; stop and fix the
    fetch before continuing.
-2. **nginx + certbot**:
+2. **nginx + TLS**:
    ```bash
-   ssh jamasp 'apt-get update -qq && apt-get install -y nginx certbot python3-certbot-dns-cloudflare apache2-utils'
+   ssh jamasp 'apt-get update -qq && apt-get install -y nginx apache2-utils'
    ```
-   Install the certbot IPv4-only drop-in now, as **commands**, not just as
-   illustrative content in the trap below — without the `daemon-reload` the
-   drop-in is inert and the first unattended renewal fails with Cloudflare
-   error 9109 (see the certbot trap below for why it's needed):
-   ```bash
-   ssh jamasp 'mkdir -p /etc/systemd/system/certbot.service.d'
-   ssh jamasp 'cat > /etc/systemd/system/certbot.service.d/ipv4-only.conf' <<'EOF'
-   [Service]
-   RestrictAddressFamilies=AF_INET AF_UNIX AF_NETLINK
-   EOF
-   ssh jamasp 'systemctl daemon-reload'
-   ```
-   Issue the certificate **inside the IPv4-only sandbox** (see the certbot
-   trap below — do not run this bare):
-   ```bash
-   ssh jamasp 'systemd-run --wait --pipe --collect \
-     -p RestrictAddressFamilies="AF_INET AF_UNIX AF_NETLINK" \
-     certbot certonly --dns-cloudflare \
-       --dns-cloudflare-credentials /etc/letsencrypt/cloudflare.ini \
-       --dns-cloudflare-propagation-seconds 20 \
-       -d jamasp.mahdanian.xyz --non-interactive --agree-tos \
-       -m saman@mahdanian.xyz --deploy-hook "systemctl reload nginx"'
-   ```
+   TLS is a Cloudflare Origin CA certificate now, not certbot/Let's Encrypt
+   — certbot is not part of a fresh install at all any more. Issue and
+   install the certificate and key as in "TLS: Cloudflare Origin CA
+   certificate" above **before** starting nginx: it fails closed on a
+   missing cert rather than starting without TLS.
+
+   If you land on a host that still has certbot, `/etc/letsencrypt/`, or the
+   `certbot.service.d` drop-ins installed from before this migration, none
+   of it governs this vhost's certificate any more — see "Historical:
+   certbot's IPv4-only workaround (superseded by Origin CA)" below. Leave it
+   in place or purge it; either is safe.
+
    Then install `ops/nginx/jamasp-panel.conf` to
    `/etc/nginx/sites-available/`, symlink into `sites-enabled/`, remove the
    distro `default`. Generate basic-auth credentials — **capture the
@@ -631,16 +710,29 @@ and `/etc/letsencrypt/cloudflare.ini` never enter this repo.
    `serverActions.allowedOrigins`; build and enable it as in the Panel
    section above.
 4. **Cloudflare Access before DNS** (ordering trap below) — create the
-   self-hosted app + allow policy on `jamasp.mahdanian.xyz`.
-5. **DNS last** — proxied A record `jamasp` → `167.235.150.246`.
+   self-hosted app + allow policy for `jamasp.mkagent.co` (the current
+   panel hostname). If you're also rebuilding the legacy redirect from
+   scratch, do the same for `jamasp.mahdanian.xyz` — see "Reference values"
+   for both applications' ids and AUDs.
+5. **DNS last** — proxied `A jamasp.mkagent.co → 167.235.150.246` in the
+   `mkagent.co` zone. The legacy `jamasp.mahdanian.xyz` record already
+   exists in the `mahdanian.xyz` zone and isn't part of a fresh rebuild
+   unless you're recreating that hostname too.
 
-### Trap: certbot's IPv4-only workaround
+### Historical: certbot's IPv4-only workaround (superseded by Origin CA)
 
-The Cloudflare API token is IP-allowlisted to the host's IPv4 address only;
-the host is dual-stack and certbot's HTTP client defaults to IPv6, so the
-Cloudflare zone lookup fails with error 9109 ("Cannot use the access token
-from location: ..."). Fix: a systemd drop-in scoped to `certbot.service`
-only — deliberately not a host-wide `/etc/gai.conf` change — at
+**None of this governs anything any more.** TLS for this vhost moved to a
+Cloudflare Origin CA certificate — see "TLS: Cloudflare Origin CA
+certificate" above. This section is kept, not deleted, so that anyone who
+finds `/etc/letsencrypt/` or the `certbot.service.d` drop-ins still on the
+host understands what they were for and why they stopped mattering.
+
+The Cloudflare API token used for DNS-01 issuance was IP-allowlisted to the
+host's IPv4 address only; the host is dual-stack and certbot's HTTP client
+defaults to IPv6, so the Cloudflare zone lookup failed with error 9109
+("Cannot use the access token from location: ..."). The workaround at the
+time was a systemd drop-in scoped to `certbot.service` only — deliberately
+not a host-wide `/etc/gai.conf` change — at
 `/etc/systemd/system/certbot.service.d/ipv4-only.conf`:
 
 ```ini
@@ -648,34 +740,59 @@ only — deliberately not a host-wide `/etc/gai.conf` change — at
 RestrictAddressFamilies=AF_INET AF_UNIX AF_NETLINK
 ```
 
-This is a **workaround, not a fix** — remove the drop-in once the host's
-IPv6 address is added to the token's Client IP Address Filtering allowlist
-on Cloudflare's side.
+This is what used to run (inside that sandbox) to issue the certificate,
+for reference if an old `/etc/letsencrypt/renewal/*.conf` on the host needs
+explaining:
 
-**Verification trap**: a bare `certbot renew --dry-run` run in an
-interactive shell is not reliable proof it will renew unattended — the
-shell is unsandboxed, so it can reach the Cloudflare API over a different
-network path than `certbot.timer` → `certbot.service` (with the drop-in
-above) actually uses, and can report success even when the real
-timer-driven renewal would fail. Verify inside the identical sandbox
-instead:
+```bash
+ssh jamasp 'systemd-run --wait --pipe --collect \
+  -p RestrictAddressFamilies="AF_INET AF_UNIX AF_NETLINK" \
+  certbot certonly --dns-cloudflare \
+    --dns-cloudflare-credentials /etc/letsencrypt/cloudflare.ini \
+    --dns-cloudflare-propagation-seconds 20 \
+    -d jamasp.mahdanian.xyz --non-interactive --agree-tos \
+    -m saman@mahdanian.xyz --deploy-hook "systemctl reload nginx"'
+```
+
+This was already documented as "a workaround, not a fix," and the intended
+real fix — adding the host's IPv6 address to the token's Client IP Address
+Filtering allowlist — never happened. Instead the host's egress fully moved
+to IPv6 (`2a01:4f8:1c1a:dacf::1`) before that could be done: every Cloudflare
+API call from certbot started failing with the same 9109 error regardless of
+the drop-in, `certbot renew --dry-run` failed outright, and the certificate
+would have expired 2026-11-06 with no warning. The token was also scoped to
+`mahdanian.xyz` alone, so it could never have served the new `mkagent.co`
+zone either way. That combination of failures — not a preference for Origin
+CA on its own merits — is why the migration happened.
+
+**Verification trap (historical, kept for context):** a bare `certbot renew
+--dry-run` run in an interactive shell was not reliable proof it would renew
+unattended — the shell is unsandboxed, so it could reach the Cloudflare API
+over a different network path than `certbot.timer` → `certbot.service` (with
+the drop-in above) actually used, and could report success even when the
+real timer-driven renewal would fail. The only trustworthy check was running
+the dry run inside the identical sandbox:
 
 ```bash
 ssh jamasp 'systemd-run --wait --pipe --collect -p RestrictAddressFamilies="AF_INET AF_UNIX AF_NETLINK" certbot renew --dry-run'
 ```
 
-Only a dry run executed this way is evidence the automated path works.
+None of this needs to be run again for this vhost — there is nothing left to
+renew.
 
 ### Trap: configure Access before creating the DNS record
 
-Create the DNS record **last**, after nginx, certbot, and Access are all
-already live. Creating DNS first — with only basic auth in front — would
-leave the hostname publicly reachable through basic auth alone until Access
-is added, a real exposure window during a rebuild. Access applications are
-matched by hostname and don't require the DNS record to exist, so ordering
-Access before DNS closes that window entirely (verified: creating the
-Access app for `jamasp.mahdanian.xyz` succeeded with no DNS record present
-and no warning).
+Create the DNS record **last**, after nginx, TLS, and Access are all already
+live. Creating DNS first — with only basic auth in front — would leave the
+hostname publicly reachable through basic auth alone until Access is added,
+a real exposure window during a rebuild. Access applications are matched by
+hostname and don't require the DNS record to exist, so ordering Access
+before DNS closes that window entirely (verified: creating the Access app
+for `jamasp.mahdanian.xyz` succeeded with no DNS record present and no
+warning — this was verified against the original hostname before the
+`mkagent.co` migration, but the mechanism it relies on, hostname matching
+with no DNS dependency, is unrelated to which hostname or zone is involved,
+so the same ordering applies to `jamasp.mkagent.co` on a rebuild).
 
 ### Debugging: nftables drop counters
 
@@ -748,13 +865,23 @@ hostname only) makes Cloudflare actually check the origin cert against
 `jamasp.mahdanian.xyz`, so a cert problem surfaces as a Cloudflare-side
 error instead of silently degrading to unauthenticated TLS.
 
+This rule lives in the `mahdanian.xyz` zone and only ever covered
+`jamasp.mahdanian.xyz`; the `mkagent.co` migration didn't touch it and
+doesn't need to — nothing here is stale. `jamasp.mkagent.co` is a different
+hostname in a different zone (`mkagent.co`) and has no equivalent rule today;
+that zone's own hazard and what Origin CA needs from it are covered in "TLS:
+Cloudflare Origin CA certificate" above.
+
 ### Known gap: no failure alerting (I5)
 
 Neither the range-refresh units (`jamasp-cf-ranges.service`/`.timer`) nor
 the packaged `certbot.service` have an `OnFailure=` unit configured. A
 failure in either (with no cache to fall back to for the former, or a
-renewal miss for the latter) is currently only visible by *going looking*
-— `systemctl status`, `journalctl`, or noticing the panel is down. Jamasp
+renewal miss for the latter — though since the move to a Cloudflare Origin
+CA certificate, certbot no longer renews anything for this vhost, so that
+half of the gap no longer applies to the panel's certificate specifically)
+is currently only visible by *going looking* — `systemctl status`,
+`journalctl`, or noticing the panel is down. Jamasp
 already has a working Telegram notifier (`uv run jamasp notify`); that's
 the natural hook for an `OnFailure=` unit that posts a one-line alert. This
 is a **documented follow-up, not built as part of this change** — scope
@@ -783,12 +910,33 @@ As of this writing, two on-host checkouts are not simply "at main":
 
 ### Reference values
 
-- Hostname `jamasp.mahdanian.xyz`, origin `167.235.150.246`, zone
-  `mahdanian.xyz` (zone id `4f4fa848a174bf69d638b66d4e6fa29b`, account id
-  `85799051dc45ac9a2add4892d13f4e58`).
-- Access app `d9e0dc1d-797c-4f73-8915-caa3214a6d3a`, auth domain
-  `mahdanian-saman-81.cloudflareaccess.com`, one-time-PIN, allow policy for
-  `saman@mahdanian.xyz` and `mahdanian.saman@gmail.com`.
+- **Current panel hostname** `jamasp.mkagent.co`, origin `167.235.150.246`,
+  zone `mkagent.co` (zone id `28374bd7669d760f298f8800735ff956`, account id
+  `85799051dc45ac9a2add4892d13f4e58`). DNS: proxied `A jamasp.mkagent.co →
+  167.235.150.246`.
+- **Legacy redirect hostname** `jamasp.mahdanian.xyz` — 301s to the above,
+  same origin, zone `mahdanian.xyz` (zone id
+  `4f4fa848a174bf69d638b66d4e6fa29b`, same account id). Its DNS record,
+  nginx vhost and Access application are all deliberately still live; see
+  "Public access" above for why.
+- **Two Access applications**, same auth domain
+  `mahdanian-saman-81.cloudflareaccess.com`, one-time-PIN:
+
+  | | application id | AUD | hostname |
+  |---|---|---|---|
+  | current panel | `c0dea932-2301-4102-8ebd-5949ccfa3b88` | `99a2db1163d4c718c98962a5e74c6e7c9dbf9dbb597a357c9ec9df926cb4348f` | `jamasp.mkagent.co` |
+  | legacy redirect | `d9e0dc1d-797c-4f73-8915-caa3214a6d3a` | `b54e2de7426792dfaa6f9134c8c5d01b36491a72e4ed0e3c7f5ac7f812d27264` | `jamasp.mahdanian.xyz` |
+
+  `JAMASP_ACCESS_AUD` must be the **current panel** row's AUD (see "The
+  Access JWT sidecar" above for why). Each application carries one "Desk
+  operators" allow policy with the same six emails — see the
+  `access-whitelist` skill for the current list and how to edit it, rather
+  than duplicating a list here that would drift.
+- **TLS**: one Cloudflare Origin CA certificate, id
+  `188133292607190827397673185325461104624708937497`, both hostnames above
+  in its SAN, expires 2041-09-21. Installed at
+  `/etc/ssl/certs/jamasp-origin.pem` (0644, root) and
+  `/etc/ssl/private/jamasp-origin.key` (0600, root).
 - Basic auth user `desk` — the password lives in the operator's password
   manager and `/etc/nginx/jamasp.htpasswd` (bcrypt) only, never in this
   repo.

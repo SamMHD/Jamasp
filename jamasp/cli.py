@@ -223,14 +223,30 @@ def _translate_line(stats: dict) -> str:
                 f" {stats['pending_events']} events,"
                 f" {stats['pending_reports']} reports pending")
     rows, events, docs = stats["rows"], stats["events"], stats["docs"]
+    # "3 documents failed this run", "3 documents are being skipped because
+    # they keep failing" and "3 documents are waiting before their next
+    # attempt" are three different operator situations: the first may fix
+    # itself on the next tick, the second never will without --force, and the
+    # third is the job working as designed. Reporting one number for them is
+    # what let docs/todo/019 stay invisible — and `backoff` was in no number
+    # at all, so a tick where every document was waiting printed `docs 0/0`,
+    # byte-identical to a tick with nothing to do.
+    notes = []
+    if docs.get("skipped"):
+        notes.append(f"{docs['skipped']} deferred to the next tick")
+    if docs.get("backoff"):
+        notes.append(f"{docs['backoff']} backing off after a failed attempt")
+    if docs.get("abandoned"):
+        notes.append(
+            f"{docs['abandoned']} abandoned after"
+            f" {translate_mod.MAX_DOC_ATTEMPTS} failed attempts — --force retries")
     line = (
         f"reused {stats['reused']}; "
         f"rows {rows.get('translated', 0)}/{rows.get('failed', 0)} in"
         f" {rows.get('batches', 0)} batches; "
         f"events {events.get('translated', 0)}/{events.get('failed', 0)}; "
         f"docs {docs.get('translated', 0)}/{docs.get('failed', 0)}"
-        + (f" ({docs['skipped']} deferred to the next tick)"
-           if docs.get("skipped") else "")
+        + (f" ({'; '.join(notes)})" if notes else "")
     )
     if stats.get("quota_exhausted"):
         # Without this, a quota stop reads exactly like a quiet tick — "rows
@@ -247,14 +263,15 @@ def _translate_line(stats: dict) -> str:
 @click.option("--dry-run", is_flag=True, help="report what would be translated")
 @click.option("--force", is_flag=True,
               help="re-translate in-window rows, events and documents even"
-                   " when unchanged, and re-arm rows the attempt cap"
-                   " abandoned (Persian copied from a flash is left alone;"
-                   " the per-run document ceiling does not apply, so this"
-                   " does the whole tree in one run and can be slow)")
+                   " when unchanged, and re-arm rows AND documents the"
+                   " attempt cap abandoned (Persian copied from a flash is"
+                   " left alone; the per-run document ceiling does not apply,"
+                   " so this does the whole tree in one run and can be slow)")
 @click.option("--only", type=click.Choice(["rows", "events", "docs"]),
               help="run one track (rows always includes the flash reuse pass)")
 @click.option("--check", "check_only", is_flag=True,
-              help="verify the translator is installed and configured")
+              help="verify the translator is installed, configured, and"
+                   " answers a one-line round trip (costs one model call)")
 @db_opt
 @cfg_opt
 def translate(dry_run, force, only, check_only, db_path, config_dir):
@@ -262,9 +279,14 @@ def translate(dry_run, force, only, check_only, db_path, config_dir):
     conn, _, settings = _common(db_path, config_dir)
     problem = translate_mod.check(settings["translate"])
     if check_only:
+        # Two questions, in order: is it wired up, and does it ANSWER. Only
+        # the second one catches the failure that matters — an
+        # unauthenticated codex is still a codex on PATH, refuses every call
+        # and leaves the unit exiting zero. See translate.probe.
+        problem = problem or translate_mod.probe(settings["translate"])
         if problem:
             raise click.ClickException(problem)
-        click.echo("translate: ok")
+        click.echo("translate: ok — the translator answered")
         return
     if problem and not dry_run:
         raise click.ClickException(problem)

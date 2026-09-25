@@ -874,3 +874,67 @@ def test_translate_exits_non_zero_and_leaves_the_row_untouched_on_quota(
     assert row["fa_attempts"] == 0
     assert row["fa_failed_at"] is None
     assert row["headline_fa"] is None
+
+
+def test_the_translate_line_separates_abandoned_documents_from_failures():
+    """docs/todo/019: an operator must be able to tell "3 documents failed
+    this run" from "3 documents are being skipped because they keep failing"
+    — the second never fixes itself."""
+    base = {"reused": 0, "rows": {}, "events": {}}
+    quiet = cli._translate_line(
+        {**base, "docs": {"translated": 1, "failed": 2, "abandoned": 0}})
+    assert "abandoned" not in quiet
+
+    loud = cli._translate_line(
+        {**base, "docs": {"translated": 0, "failed": 0, "abandoned": 3}})
+    assert "docs 0/0" in loud
+    assert "3 abandoned" in loud
+    assert "--force" in loud
+
+    both = cli._translate_line(
+        {**base, "docs": {"translated": 0, "failed": 1, "abandoned": 2,
+                          "skipped": 4}})
+    assert "docs 0/1" in both and "4 deferred" in both and "2 abandoned" in both
+
+
+def test_the_translate_line_names_a_document_waiting_out_a_backoff():
+    """A tick where every document is backed off printed `docs 0/0` and
+    nothing else — identical to a tick with nothing to do."""
+    base = {"reused": 0, "rows": {}, "events": {}}
+    line = cli._translate_line(
+        {**base, "docs": {"translated": 0, "failed": 0, "abandoned": 0,
+                          "backoff": 2}})
+    assert "docs 0/0" in line
+    assert "2 backing off" in line
+
+
+def test_translate_check_fails_when_the_translator_will_not_answer(tmp_path,
+                                                                   monkeypatch):
+    """The binary resolves, the config is complete, and every call still
+    fails — an unauthenticated codex. --check used to call that ok."""
+    monkeypatch.setenv("FAKE_CODEX_MODE", "fail")
+    cfgdir = tmp_path / "config"
+    cfgdir.mkdir()
+    (cfgdir / "sources.yaml").write_text(
+        Path("config/sources.yaml").read_text(encoding="utf-8"), encoding="utf-8")
+    (cfgdir / "glossary.fa.yaml").write_text("Fed: فدرال رزرو\n", encoding="utf-8")
+    settings = yaml.safe_load(Path("config/settings.yaml").read_text(encoding="utf-8"))
+    settings["translate"]["cmd"] = [sys.executable, "tests/fake_codex.py"]
+    (cfgdir / "settings.yaml").write_text(
+        yaml.safe_dump(settings, allow_unicode=True), encoding="utf-8")
+
+    result = CliRunner().invoke(
+        cli.main,
+        ["translate", "--check", "--db", str(tmp_path / "t.db"),
+         "--config-dir", str(cfgdir)],
+    )
+    assert result.exit_code != 0, result.output
+    assert "answer" in result.output.lower()
+
+    monkeypatch.setenv("FAKE_CODEX_MODE", "ok")
+    ok = CliRunner().invoke(
+        cli.main,
+        ["translate", "--check", "--db", str(tmp_path / "t.db"),
+         "--config-dir", str(cfgdir)],
+    )
+    assert ok.exit_code == 0, ok.output
