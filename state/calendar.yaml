@@ -1424,7 +1424,7 @@ events:
       Scan marker; not a breaker for 86f87a36 / a270f3f1. No wakeup.
 
   - date: 2026-10-02
-    time_dubai: "Fri 2 Oct 16:30 (12:30Z; date hand-built from the BLS first-Friday convention on 25 Sep - RE-VERIFY against the events feed at the Mon 28 Sep brief)"
+    time_dubai: "Fri 2 Oct 16:30 (12:30Z; date VERIFIED 26 Sep against the actionforex calendar summary and the Wells Fargo week-ahead - BLS 403; Monday's brief re-checks the events feed once it rolls)"
     title: September 2026 US payrolls - deepdive wakeup #61 at print+45
     why: >
       The next tier-1 print for the October decision (77.5% priced on 24
@@ -1441,16 +1441,42 @@ events:
       hours before an NFP-class print).
 
   - date: 2026-09-30
-    time_dubai: "Wed 30 Sep (quarter-end) - and Aug PCE date UNVERIFIED (not in the feed through 26 Sep; 30 Sep or 1 Oct)"
-    title: Quarter-end, rule-11 midpoint check, Aug PCE date to verify, Golden Week from 1 Oct
+    time_dubai: "Wed 30 Sep 16:30 (12:30Z) - August PCE + Q2 GDP third estimate + BEA annual revisions; ADP 12:15Z, Chicago PMI 13:45Z, China PMIs 01:30Z; quarter-end (date VERIFIED 26 Sep via the actionforex calendar summary + Wells Fargo week-ahead; BEA page 403)"
+    title: August PCE, GDP revisions and quarter-end - deepdive wakeup #62 at print+45
     why: >
-      Wed 30 Sep is quarter-end (a stress point for the liquidity-crack
-      channel with the 10y at 5.2) and the rule-11 midpoint check for
-      4dfbd1d8 / 62c34dbd (September WTI/Brent average vs August's). Aug
-      PCE (Warsh's estimate ~3.6% y/y) is not in the feed through 26 Sep -
-      the Saturday brief verifies the date via an actionforex week-ahead
-      summary. China shuts 1-8 Oct (Golden Week): the SGE read goes dark,
-      a thin physical bid under any test of 4300.
+      The flip's first test after a week of the whole curve at 2004-2007
+      highs: consensus headline PCE 0.4 m/m / 3.7% y/y, core 0.3 / 3.4%
+      (Warsh's own estimate on 16 Sep was ~3.6% y/y); the BEA annual
+      revisions land in the same release ('softer near-term trend, hotter
+      August print' - Wells Fargo), so the relay may move on the revised
+      trend rather than the August number - name the component and the
+      ex-that number (rule 14). Quarter-end is the liquidity-crack
+      channel's calendar slot with the 30y at 5.49-5.53. The rule-11
+      midpoint check for 4dfbd1d8 / 62c34dbd (September Brent/WTI average
+      vs August's ~90 Brent) is due the same day. China shuts 1-8 Oct from
+      Thursday: the SGE read goes dark and the physical bid under 4300 is
+      thin.
     action: >
-      Sat 26 brief: verify PCE and ISM dates; Wed 30 brief: midpoint
-      check; if PCE lands inside the week, book a deepdive at print+45.
+      wakeup #62 booked 2026-09-30T13:15:00Z (deepdive): investinglive
+      print post first, then actionforex /live-comments/, then CNBC;
+      October odds before (77.5% Thu 24 Sep) and after; score b934960e
+      (no relay <55%) on the relay; rule-23 tape clause from the 12:30Z
+      print; a relay <55% -> bearish-rates 50, >=80% with a 2y close
+      >=4.95 -> 65; if a flip fires, book a close-out wakeup at Globex
+      close +30. The Wed brief runs the midpoint check if the deepdive
+      cannot.
+
+  - date: 2026-10-01
+    time_dubai: "Thu 1 Oct 18:00 (14:00Z) - ISM manufacturing PMI (cons 55.0) and prices paid (cons 72, prev 71.1); claims 12:30Z; China Golden Week begins (SGE shut to 8 Oct)"
+    title: ISM manufacturing prices paid - scan marker; the NFP-eve brief writes no directional claims
+    why: >
+      Prices paid at 72 would be the highest since 2022 and the second
+      passthrough print in a week after PCE; the 23 Sep flash PMI (input
+      costs highest since Oct 2022) moved October odds 27 pts in a day, so
+      the final ISM is a live odds mover even without a Fed speaker. The
+      Thursday brief sits in the final hours before an NFP-class print:
+      no fresh directional predictions (skill rule).
+    action: >
+      Scan marker for the 15:00Z scan (odds sentence in the investinglive
+      ISM post; a relay <55% is the bearish-rates-50 line). No wakeup: the
+      NFP deepdive #61 follows 22 hours later.
