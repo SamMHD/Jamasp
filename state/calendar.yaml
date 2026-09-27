@@ -1411,6 +1411,21 @@ events:
       arrangement (9083e952 MISS); a strike order; a Yanbu damage line.
       A host-published venue+date for a further round -> deepdive at +60.
 
+      27 SEP UPDATE: the on-record US response printed Saturday, after
+      Friday's settle - Trump: 'I reject their proposal' (CNN) / 'they
+      made a proposal but I rejected it' (Bloomberg); WSJ: he expects to
+      resume bombing after the midterms. Araghchi awaits a FORMAL
+      response via mediators and decides after it. The deal branch is
+      priced out before the clock opens; the breakdown branch ('next
+      step' inside the current classes -> Brent >=110 -> gold DOWN via
+      the 2y; a new-class act -> a0c82077 MISS -> kinetic 30) is the
+      live one. Claims on the clock: 9083e952 (no co-confirmed
+      arrangement, to Tue), 9e1829f8 (first Brent +2% settle prints a GC
+      row >=0.1% down, 0.6), efd9700b (no relay <55%, 0.55), 95c71900
+      (no row >=4402.2), 86f87a36 (no 2y close <4.80), a270f3f1 (UNCLEAR
+      trajectory). No run exists 19:00Z-03:30Z (scans are 05-19Z):
+      Monday's 03:30Z brief is the first read of the Sunday 22:00Z open;
+      markers only, still no wakeup (rule 16).
   - date: 2026-09-29
     time_dubai: "Tue 29 Sep ~08:30 (04:30Z; RBA decision slot per convention - verify against the feed Mon)"
     title: RBA decision - hike expected to the highest cash rate since 2011 (dollar-only marker)
@@ -1424,7 +1439,7 @@ events:
       Scan marker; not a breaker for 86f87a36 / a270f3f1. No wakeup.
 
   - date: 2026-10-02
-    time_dubai: "Fri 2 Oct 16:30 (12:30Z; date VERIFIED 26 Sep against the actionforex calendar summary and the Wells Fargo week-ahead - BLS 403; Monday's brief re-checks the events feed once it rolls)"
+    time_dubai: "Fri 2 Oct 16:30 (12:30Z; date VERIFIED 26 Sep by the actionforex calendar summary, the Wells Fargo week-ahead and the actionforex weekly report ('October 2 at 8:30am ET') - BLS 403; Monday's brief re-checks the events feed once it rolls)"
     title: September 2026 US payrolls - deepdive wakeup #61 at print+45
     why: >
       The next tier-1 print for the October decision (77.5% priced on 24

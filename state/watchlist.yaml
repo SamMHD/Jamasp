@@ -85,6 +85,24 @@ watchlist:
       governor pause call -> bearish-rates 50; PCE relay >=80% with a 2y close
       >=4.95 -> 65; a co-confirmed arrangement with the 2y <4.75 -> 50 (gold UP
       through the front end).
+      27 SEP BRIEF: WEIGHTS HELD 15/60/25 (fourth day). CORRECTION: a
+      Friday relay EXISTED - CNBC's Saturday explainer (13:30Z): CME
+      FedWatch 64% for October, from 77.5% Thu - 13.5 pts off on
+      Araghchi's plan and Brent -2.1%, no data, no speaker. UMich
+      September year-ahead inflation expectations 4.6% (from 4.0%,
+      highest since June). actionforex weekly: 'Fed pricing backed away
+      from its midweek extreme into Friday'; the 2y is stretched (daily
+      RSI >72; 4.912 high, 5.055 projection) and the 10y (5.23 ceiling,
+      5.413 projection) now decides the dollar; DXY resistance
+      101.80-102.86, pullback zone 99.7-99.9 if the 10y stalls. Trump's
+      on-record rejection of the seven-day plan (Sat, after Friday's
+      settle) points the oil -> 2y chain back UP into Rezaei's clock.
+      New efd9700b (no relay <55% Mon 28 - Tue 29, 0.55; rule-19 cap
+      because the speaker schedule is dark) succeeds 1e91793f; b934960e
+      takes PCE day. Fed speakers Mon-Fri: still none visible (Board
+      calendar page extracts only its header). Flip lines unchanged:
+      relay <55% or a governor pause call -> bearish-rates 50; PCE relay
+      >=80% with a 2y close >=4.95 -> 65.
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -290,6 +308,41 @@ watchlist:
       non-US hulls, PGSA fines, US seizures do NOT score). Markers: an on-record
       US response; an SNSC 'next step'; a host line with venue+date (-> deepdive
       +60); an SPA damage line at Yanbu.
+      27 SEP: ON THE RECORD. Trump (Sat, departing the White House; CNN
+      / Bloomberg via gcaptain): 'I reject their proposal' / 'they made
+      a proposal but I rejected it - they want to make a deal where they
+      open the strait immediately because they're losing so badly ... I
+      like making a deal too', in no rush; Bloomberg's source: the
+      explored pact was June-MOU-shaped (reopen Hormuz <-> lift the
+      blockade). WSJ: Trump expects to resume the bombing campaign after
+      the midterms (he declined to confirm). Araghchi (Gulf News
+      liveblog): Tehran 'noted' the rejection, awaits a FORMAL response
+      through mediators and decides after it - the only sliver left for
+      the deal branch. IRGC Navy deputy Mohammadi (Fars): US warships
+      'including in the Indian Ocean' are targets in a new war - a
+      statement, not an act (a0c82077 does not score). Flight tracking
+      (unofficial): 5 KC-135, 2 KC-46, 1 MQ-4C over the approaches. UNGA
+      Sat: Saudi FM Faisal bin Farhan - the world is 'failing to protect
+      Gulf shipping'; Oman FM Albusaidi - self-restraint, Muscat ready
+      to mediate on navigation. Houthis Sat: two drones at Riyadh + a
+      ballistic missile at Khamis Mushait intercepted, alerts in
+      Abha/Jazan (proxy class). Bessent 'Operation Economic Outcast' (X,
+      Sat): the UAE grounded ALL Iranian airlines, the UAE central bank
+      blocked Bank Melli branch transactions (Wed), major UAE and
+      Turkish banks cut Iran, Turkey/Oman stopped Mahan Air, 50+
+      countries engaged ('economic D-Day', WSJ). Scored: d96debd5 HIT
+      (no Kharg/Larak infrastructure strike 20-26 Sep; the US stayed on
+      the hull class), 2df323fa HIT (no Gulf signature on Iran's regime;
+      Bahrain and Riyadh went the other way) - structural negatives
+      23/23. Sunday closers 33defb45 / d4f5ffd6 / 0d52e7da / ed8c08b5
+      all on HIT trajectories (Monday scores and writes successors).
+      9083e952 (no co-confirmed arrangement, to Tue) is the comfortable
+      side; a0c82077 (no new-class act, to Wed) is the live risk - the
+      SNSC 'next step' is the hardliners' to define. Markers Mon-Tue: a
+      formal US response via Qatar; an SNSC 'next step'; a strike order;
+      an SPA damage line at Yanbu; a host line with venue+date (->
+      deepdive +60). No run exists 19:00Z-03:30Z: Monday's brief is the
+      first read of the Sunday open.
     since: 2026-07-31
 
   - theme: kinetic-transmission-inverted
@@ -348,6 +401,22 @@ watchlist:
       scaled, -3% ~ +0.4%). New 95c71900 (no row >=4402.2 Mon-Tue, 0.5) is the
       cap on either branch. Kinetic 25. Kills unchanged: a270f3f1 MISS with the
       2y flat -> 20 / base 25; two both-up rows; a stagflation print.
+      27 SEP: THE REJECTION LANDED AFTER THE SETTLE. Friday's drain leg
+      (Brent -2.1%, 2y -3.5bp, DXY -0.22%, GC row +0.27%) traded a plan
+      Trump rejected on the record Saturday (~18:00Z); the Sunday 22:00Z
+      open re-prices the input - expected Brent 106-108, the 2y back
+      toward 4.90, gold giving Friday's $12 back through the front end
+      (NOT a haven bid). New 9e1829f8 (0.6): the FIRST Brent settle
+      >=+2% Mon-Tue prints a GC row >=0.1% BELOW the prior row (UNCLEAR
+      if none prints) - the reverse-sign test of the 15/16 oil-UP
+      record; a MISS with the 30y >=5.50 and DXY DOWN is the stagflation
+      read (base 25), a MISS with the 2y UP and gold UP is a both-up row
+      (base). a270f3f1 (0.55) drifts to an UNCLEAR trajectory (a -3%
+      settle by Tue needs a formal US counter). Kinetic 25: the deal
+      branch is off the table on the record, the breakdown branch (Brent
+      >=110 -> gold DOWN via the 2y) is the live one. Kills unchanged:
+      a270f3f1 MISS with the 2y flat -> 20 / base 25; two both-up rows;
+      a stagflation print.
     since: 2026-09-09
 
   - theme: boj-yen-pillar
@@ -390,6 +459,12 @@ watchlist:
       mapping); not a regime change. Every other central bank tightens into
       the dollar (RBA Tue to 4.60 - Wells calls it terminal; ECB with Eurozone
       CPI 3.7% Fri; BoJ minutes Mon 23:50Z). Pillar stays down. No claim.
+      27 SEP: USDJPY 157.19 into the Sunday 22:00Z open - the MoF 'round
+      at the open' risk is unchanged after Friday's verbal intervention;
+      a real round = DXY -0.3-0.5, gold +$15-25 (deepdive #56 mapping),
+      not a regime change. BoJ minutes Mon 23:50Z. actionforex: DXY
+      faces resistance at 101.80-102.86 and the yen leg reaches gold
+      only through DXY. Pillar stays down. No claim.
     since: 2026-09-03
 
   - theme: energy-pce-passthrough
@@ -460,6 +535,21 @@ watchlist:
       dated after Aug 3; Gulf News 24 Sep 'seven-fold surge, AIS-dark' stands as
       the only dated line). Kpler: Hormuz crude flows 33.7m bbl this week vs
       49.2m last week - the physical leg tightened while the premium drained.
+      27 SEP: Brent Nov 104.32 (Fri settle; the Nov contract EXPIRES Wed
+      30 Sep - CNBC @LCO.1 rolls to Dec that day, so any Brent-settle
+      claim spanning Wednesday names the contract, rule 17; a270f3f1 and
+      9e1829f8 close Tue, unaffected), WTI Nov 92.44 (-8% w/w from
+      ~100.30; actionforex: 55-day EMA 89.14 and the 86.90 50%
+      retracement are the levels whose break would say the war rise is
+      over - not reached). Trump's on-record rejection (Sat) removes the
+      plan that drained the premium; expected re-pricing UP at the
+      Sunday open. Physical leg tightened while the premium fell (Kpler
+      33.7m vs 49.2m bbl). Yanbu loading conflict still unresolved.
+      UMich year-ahead inflation 4.6%. PCE Wed 12:30Z (cons 0.4/3.7,
+      core 0.3/3.4): deepdive #62 runs the rule-11 midpoint check for
+      4dfbd1d8 / 62c34dbd (September Brent average ~103-105 vs August
+      ~90: the headline >=0.4 claim is on track; core <=0.3 rides on
+      shelter/travel). ISM prices paid Thu (cons 72).
     since: 2026-07-31
 
   - theme: us-fiscal-dominance
@@ -506,6 +596,20 @@ watchlist:
       is still not reading it as debasement even with the dollar out of the
       way. 5y/7y auction detail still UNVERIFIED (todo-185). Quarter-end Wed.
       Only mover for base: a 30y close >=5.50 with DXY DOWN and gold UP.
+      27 SEP: CNBC's explainer (Macquarie's Thierry Wizman): the 10y at
+      5.23 'has more to do with the bond issuance than the inflation
+      story' - deficit financing plus AI capex debt (Vanguard: $132bn
+      issued by Alphabet/Amazon/Meta/Microsoft/Oracle through July vs
+      ~$35bn a year in 2020-24; $300-570bn of AI-related issuance this
+      year), 'we don't have a Fed that's tightening aggressively',
+      'these yields could go higher'. The long end is a duration-supply
+      story the market prices in the dollar's favour - gold's anti-tell
+      (17 against / 2 for) stands. actionforex: the 10y (channel ceiling
+      5.23, projection 5.413) is now the dollar's key; a stall sends DXY
+      back to 99.7-99.9. Friday: 30y 5.49 with DXY DOWN and gold UP 0.3%
+      - one bp and one size short of the base-25 trigger. 5y/7y detail
+      still UNVERIFIED (todo-185). Quarter-end Wed. Only mover for base:
+      a 30y close >=5.50 with DXY DOWN and gold UP.
     since: 2026-08-20
 
   - theme: liquidity-crack-channel
