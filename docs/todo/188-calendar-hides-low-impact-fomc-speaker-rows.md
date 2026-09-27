@@ -88,3 +88,27 @@ the list comes from.
 - `state/playbook.md` rule 19 (6 Sep, revised 20 Sep 2026).
 - `docs/todo/001` — calendar horizon; same source, different gap.
 - `reports/2026/09/2026-09-20-retro.md` — Verified-this-run.
+
+## Update 2026-09-27 — the venue source exists and extracts
+
+The 22 Sep deepdive (#57) booked "FOMC Member Jefferson Speaks" as the
+stance's first-governor flip test on the ff row's name alone; the slot was
+20 minutes on discount-window modernization at the NY Fed Treasury Market
+Conference, with no rate-path content and no relay post afterwards.
+Playbook rule 24 (27 Sep) now requires venue and title before a speaker
+wakeup is booked. The sources that satisfy it, verified:
+
+- `https://www.federalreserve.gov/newsevents/speech/2026-speeches.htm`
+  extracts and lists **title + venue** for every 2026 Board speech.
+- `https://www.federalreserve.gov/newsevents/speech/<lastname><yyyymmdd>a.htm`
+  extracts the full text at speaking time.
+- `newyorkfed.org` event pages carry the conference agenda.
+
+Whichever fix option lands (promote at ingest, or `--include-low`), the
+row alone is still the name only. A cheap addition: have the brief's
+speaker line (or a `jamasp speakers` subcommand) join the ff rows for the
+week with the Board index's title/venue, so rule 24 is one extract rather
+than a hand lookup per speaker. This week's `jamasp calendar` (27 Sep
+16:00Z) does show "FOMC Member Waller Speaks" Thu 1 Oct 14:00Z tagged
+**Medium** — so the Low tag is not universal; the ingest override in Fix
+option 1 should key on the title pattern, not on the impact field.

@@ -167,3 +167,13 @@ Monday.
 
 Retro rows to date: 2, 9, 16, 23 Aug ok; **30 Aug failed**; 6 Sep ok;
 **13 Sep failed**; 20 Sep ok. Two of the last four Sundays lost.
+
+## Update 2026-09-27
+
+`jamasp-retro.service` ran at its 16:00Z slot on 27 Sep and completed
+(this note is written by that run). Retro rows: 2, 9, 16, 23 Aug ok;
+30 Aug failed; 6 Sep ok; 13 Sep failed; 20, 27 Sep ok — 3 of the last 5
+Sundays. Nothing in Fix §1 or §2 has landed; the run succeeded because
+the day's session budget happened to hold, not because anything changed.
+The timer-slot move (17:00Z+) in the 20 Sep update is still the cheapest
+prevention.

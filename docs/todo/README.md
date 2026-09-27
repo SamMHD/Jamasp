@@ -41,7 +41,7 @@ NNN-kebab-case-slug.md
 `NNN` is a zero-padded, sequential three-digit id. Find the next one with:
 
 ```sh
-ls docs/todo/[0-9]*.md | grep -oE '[0-9]{3}' | sort -n | tail -1
+ls docs/todo/ | grep -oE '^[0-9]{3}' | sort -n | tail -1
 ```
 
 IDs are never reused, even if an item is abandoned.

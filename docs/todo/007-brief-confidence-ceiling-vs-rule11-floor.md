@@ -78,3 +78,14 @@ calibration artefact the 23 Aug, 6 Sep and 20 Sep retros all reported.
 Skill line unchanged (`.claude/skills/brief/SKILL.md` "Cap `--confidence`
 at 0.7"). Playbook rule 10 still carries the workaround ("name the
 compliant floor in the claim text").
+
+## Update 2026-09-27
+
+Week 21–27 Sep: the 0.70 bucket went 5/6; the structural-negative family
+is 57/58 lifetime (the one miss, `645cc78a`, fell across a scheduled gate
+and the playbook now caps that shape at 0.7 anyway — rule 10, 27 Sep).
+Every brief-written structural negative this week (`a0429ae4` `e0e5cd9c`
+`d96debd5` `2df323fa` `33defb45` `d4f5ffd6` `ed8c08b5` `9083e952`) still
+carries the "rule-10 floor blocked by the ceiling" boilerplate. Stated
+average this week 0.595 vs observed 0.864; roughly a third of that gap is
+this ceiling. The decision in Fix (A or B) is still Saman's.
