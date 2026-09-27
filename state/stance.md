@@ -54,8 +54,13 @@ Brent 102–110, DXY 100.7–101.8, USDJPY 155.5–158.5.
 - **Liquidity event:** equities −2% with Nikkei and BTC down together, 2y −15bp, USDJPY <156 → bearish-rates
   50, base 20. Quarter-end Wed is its slot.
 - **Yen:** a real MoF round at the open = DXY −0.3–0.5, gold +$15–25; not a regime change.
-- **Fed:** no speaker visible Mon–Fri (todo-001/188; the Board calendar page extracts header only). Any
-  governor slot is a breaker for `95c71900`, `efd9700b`, `9e1829f8`; a pause call → bearish-rates 50.
+- **Fed (corrected, 17:00Z scan — the events feed rolled at 05:15Z after the brief; `jamasp calendar` still hides
+  Low-tagged speakers, query `events`; fxempire week-ahead lists the same 22):** governors **Bowman Mon 12:15Z**
+  (first US-hours voice after the open) and Tue 15:00Z, **Cook Mon 17:25Z**, **Barr Tue 16:40Z**, **Williams Tue
+  18:00Z**, **Waller Tue 19:00Z**; Barkin Mon/Wed/Thu, Goolsbee + Musalem Tue, Kashkari Wed 22:00Z, Waller again
+  Thu 14:00Z, Jefferson Thu 17:30Z, Logan Thu/Fri. Any governor slot is a breaker for `95c71900`, `efd9700b`,
+  `9e1829f8`; a pause call → bearish-rates 50. Feed also confirms JOLTS Tue 14:00Z, ADP Wed 12:15Z, ISM Thu
+  14:00Z, **NFP Fri 2 Oct 12:30Z (#61 date holds)**.
 
 ## Open predictions (15) — by window close
 
@@ -74,7 +79,7 @@ feed if it rolls). Scan markers Mon–Tue: a formal US response via Qatar, an SN
 arrangement (`9083e952`), a new-class act (`a0c82077`), an SPA damage line at Yanbu, a Brent ±3% settle
 (`a270f3f1`/`9e1829f8`), a 30y close ≥5.50 with DXY down, any odds relay (`efd9700b`), RBA Tue 04:30Z, any Fed
 speaker the feed does not show. **Monday brief:** read the Sunday open first (first eyes), score the four
-Sunday closers and write successors, re-check the events feed (NFP date, Fed speakers), read Greer's China
+Sunday closers and write successors, events feed re-checked 17:00Z scan (NFP 2 Oct, 22 Fed slots — see Fed bullet), read Greer's China
 details, confirm the OAuth re-auth happened (token expires Mon 18:47Z — every run after it fails otherwise).
 
 ## Desk-local
@@ -93,5 +98,5 @@ check.
 CNBC `--fresh` 03:31Z all yields + both oil quotes served; Gulf News liveblog, gcaptain/Bloomberg, CNBC
 explainer, actionforex weekly, Mehr ×1 each. Fed Board calendar page: header only (unusable). Investing.com
 403. Saturday's 8 scans (25–75s each) stayed silent through the 18:09Z on-record rejection — carried here.
-`gold_spot` = todo-003; events feed ends 26 Sep (todo-001); Fed speakers hidden (todo-188); GC row at
+`gold_spot` = todo-003; events feed rolled 05:15Z, runs to 3 Oct (todo-001 not biting this week); Fed speakers hidden (todo-188); GC row at
 23:16Z (todo-187); no run 19:00Z–03:30Z (todo filed today).
