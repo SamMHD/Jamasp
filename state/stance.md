@@ -1,4 +1,4 @@
-# Stance — 2026-09-27 03:45Z (brief) — WEIGHTS 15/60/25 (base/bearish-rates/kinetic) HOLD, FOURTH DAY; TRUMP REJECTED THE SEVEN-DAY PLAN ON THE RECORD AFTER FRIDAY'S SETTLE, SO THE SUNDAY OPEN RE-PRICES A PREMIUM FRIDAY DRAINED (GOLD DOWN VIA THE 2Y); OCTOBER ODDS 64% WITH THE FLIP-BACK 9 PTS AWAY; REZAEI'S CLOCK MON–TUE INTO PCE WED — conviction 0.6
+# Stance — 2026-09-27 03:45Z (brief) — WEIGHTS 15/60/25 (base/bearish-rates/kinetic) HOLD, FOURTH DAY; TRUMP REJECTED THE SEVEN-DAY PLAN ON THE RECORD AFTER FRIDAY'S SETTLE, SO THE SUNDAY OPEN RE-PRICES A PREMIUM FRIDAY DRAINED (GOLD DOWN VIA THE 2Y); OCTOBER ODDS 64% WITH THE FLIP-BACK 9 PTS AWAY; REZAEI'S CLOCK MON–TUE INTO PCE WED; 19:00Z SCAN: TRUMP TO AXIOS — REJECTION STANDS, QATAR TALKS 'AS EARLY AS MON', CLAIMED RECORD 20MB WEEKEND TRANSIT → OPEN TWO-WAY, WEIGHTS HELD — conviction 0.6
 
 **Tape (Fri close, re-read Sun 03:31Z; markets shut):** GC row **4321.2** (+0.27%; last 4320.5; Thu tick low
 4282.9 = week low); spot ~4286 (basis ~35), XAU PM 4261.05. 2y **4.86** (−3.5bp; low 4.845), 10y **5.165**
@@ -9,7 +9,11 @@ yesterday's "no Friday relay" was wrong). ATR 98; 50DMA 4355.8; 200DMA 4557; RSI
 **Facts (extracted):** Trump Sat, departing the WH: "I reject their proposal" (CNN); "they made a proposal but I
 rejected it … they open the strait immediately because they're losing so badly … I like making a deal too", in
 no rush (Bloomberg). WSJ: he expects to resume bombing after the midterms (unconfirmed by him). Araghchi:
-awaits a FORMAL response via mediators, decides after it. IRGC Navy (Fars): US warships incl. Indian Ocean are
+awaits a FORMAL response via mediators, decides after it. **Sun (Axios via Gulf News 17:47Z; 19:00Z scan, alerted):**
+"not the deal I want … they overplayed their hand"; indirect talks via Qatar "as early as Monday" (Witkoff/Kushner–
+Araghchi channel); claims a record >20mb transited Hormuz over the weekend; on strikes, "always thinking about it".
+Araghchi (NBC Sun): the rejection is still NOT formally communicated via mediators; ready to reopen the strait for
+frozen assets + oil sales ("not new", Islamabad MoU); "prepared for the war to be resumed". IRGC Navy (Fars): US warships incl. Indian Ocean are
 targets in a new war (statement, not act). Flight tracking: 5 KC-135, 2 KC-46, MQ-4C over the approaches. UNGA
 Sat: Saudi FM — world "failing to protect Gulf shipping"; Oman FM — self-restraint, ready to mediate. Houthis
 Sat: 2 drones Riyadh + missile Khamis Mushait intercepted (proxy class). Bessent "Economic Outcast": UAE
@@ -62,10 +66,11 @@ Brent 102–110, DXY 100.7–101.8, USDJPY 155.5–158.5.
   `9e1829f8`; a pause call → bearish-rates 50. Feed also confirms JOLTS Tue 14:00Z, ADP Wed 12:15Z, ISM Thu
   14:00Z, **NFP Fri 2 Oct 12:30Z (#61 date holds)**.
 
-## Open predictions (15) — by window close
+## Open predictions (16) — by window close
 
 **Sun 27:** `33defb45` `d4f5ffd6` `0d52e7da` `ed8c08b5` (HIT trajectories; Monday scores, successors then).
-**Mon 28:** `d8e247ef` (HIT locked; Tuesday scores). **Tue 29:** `9083e952` (0.7), `86f87a36` (0.55; Fri
+**Mon 28:** `d8e247ef` (HIT locked; Tuesday scores), **new `42512099`** (0.7, reopen band 4278–4364, Monday brief
+scores off the GC row). **Tue 29:** `9083e952` (0.7), `86f87a36` (0.55; Fri
 4.86), `a270f3f1` (0.55; UNCLEAR trajectory), `95c71900` (0.5), **new `9e1829f8`** (0.6, chain-down on the
 first Brent +2% settle), **new `efd9700b`** (0.55, no relay <55%). **Wed 30:** `a0c82077` (0.65), `b934960e`
 (0.55). **Mid-Oct:** `4dfbd1d8` `62c34dbd` (midpoint Wed). Scored today: `d96debd5` HIT, `2df323fa` HIT
@@ -78,14 +83,17 @@ check). **#61** deepdive 2 Oct 13:15Z — payrolls (date now verified by two 26 
 feed if it rolls). Scan markers Mon–Tue: a formal US response via Qatar, an SNSC "next step", a co-confirmed
 arrangement (`9083e952`), a new-class act (`a0c82077`), an SPA damage line at Yanbu, a Brent ±3% settle
 (`a270f3f1`/`9e1829f8`), a 30y close ≥5.50 with DXY down, any odds relay (`efd9700b`), RBA Tue 04:30Z, any Fed
-speaker the feed does not show. **Monday brief:** read the Sunday open first (first eyes), score the four
+speaker the feed does not show. **Monday brief:** read the Sunday open first (first eyes — against the Axios line, not only the rejection; score
+`42512099` reopen band 4278–4364 off the GC row), score the four
 Sunday closers and write successors, events feed re-checked 17:00Z scan (NFP 2 Oct, 22 Fed slots — see Fed bullet), read Greer's China
 details, confirm the OAuth re-auth happened (token expires Mon 18:47Z — every run after it fails otherwise).
 
 ## Desk-local
 
-Spot ~4286 (basis ~35). Friday's +$8 bought a plan that is now rejected on the record; the premium re-prices
-up at the open and the rates desk sells gold through the 2y — 4300 (~4265 spot) first, 4283/4277 second, the
+Spot ~4286 (basis ~35). Friday's +$8 bought a plan that is now rejected on the record; the open is now TWO-WAY
+(19:00Z scan: the Axios talks-Monday line and the claimed record transit offset the rejection) — if Brent opens
+down the 2y softens and 4347/4356 cap; if the rejection dominates, the rates desk sells gold through the 2y —
+4300 (~4265 spot) first, 4283/4277 second, the
 China bid dark from Thursday and thin before it. A bounce needs the 2y DOWN, which needs a formal US counter
 or a governor, not a headline; 4347/4356 cap the rest. Short-dated protection against 4300 into Wednesday is
 still the cheaper side; the regime changes only when gold rises +1% on a day the 2y does not fall. **Local:**
@@ -97,6 +105,7 @@ check.
 
 CNBC `--fresh` 03:31Z all yields + both oil quotes served; Gulf News liveblog, gcaptain/Bloomberg, CNBC
 explainer, actionforex weekly, Mehr ×1 each. Fed Board calendar page: header only (unusable). Investing.com
-403. Saturday's 8 scans (25–75s each) stayed silent through the 18:09Z on-record rejection — carried here.
+403. Saturday's 8 scans (25–75s each) stayed silent through the 18:09Z on-record rejection — carried here; Sunday's 19:00Z scan alerted on the Axios
+line (rule 16 blind-window slot).
 `gold_spot` = todo-003; events feed rolled 05:15Z, runs to 3 Oct (todo-001 not biting this week); Fed speakers hidden (todo-188); GC row at
 23:16Z (todo-187); no run 19:00Z–03:30Z (todo filed today).
