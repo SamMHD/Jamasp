@@ -1,10 +1,10 @@
 ---
 id: 021
 title: jamasp-cf-ranges runs on the host but exists nowhere in ops/systemd
-status: open
+status: withdrawn
 opened: 2026-09-13
 owner: unassigned
-closed:
+closed: 2026-09-20
 ---
 
 ## Problem
@@ -50,3 +50,23 @@ count in CLAUDE.md's Deployment section to match reality.
 
 If the unit turns out to be obsolete, delete it from the host instead and say
 so here — either outcome closes this, but leaving it undocumented does not.
+
+## Withdrawn — the premise was wrong
+
+`jamasp-cf-ranges.service` and `.timer` **are** in version control, at
+`ops/systemd-root/`. They live there rather than in `ops/systemd/` because the
+two directories mean different things: `ops/systemd/` holds units that run as
+the `jamasp` service user, `ops/systemd-root/` holds units that run as root.
+`cf-ranges` rewrites nftables sets and an nginx snippet, so it is a root unit.
+The `deploy` skill's own file inventory lists both of them.
+
+This item was filed after checking `ops/systemd/` alone and concluding from its
+absence there that the unit was unversioned. That was a search of one directory
+presented as a search of the repository.
+
+The one real observation underneath it survives and is worth keeping: a reader
+reconciling CLAUDE.md's timer count against `systemctl list-timers` will still
+come up one short, because CLAUDE.md's Deployment section counts only the
+service-user timers and never mentions the root ones. That is a documentation
+clarity question, not a missing-unit question, and it does not need its own
+todo — a sentence in CLAUDE.md naming the two directories would close it.

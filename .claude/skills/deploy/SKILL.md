@@ -116,6 +116,22 @@ done
 systemctl daemon-reload
 ```
 
+> **Adding one unit to a host that is already running.** Use the same loop,
+> narrowed to the new unit — never a plain `cp`. The files in `ops/systemd/`
+> are templates: they carry `%h` and no `User=`, because the transform above
+> is what turns them into system units. Copied verbatim into
+> `/etc/systemd/system/`, a unit with no `User=` runs as **root**, `%h`
+> resolves to `/root`, and the run fails somewhere confusing — against root's
+> own stale install rather than the service user's. That is how
+> `jamasp-translate` first failed on this host, with
+> `Error: No such command 'translate'`.
+>
+> Verify through systemd, not through a shell: `su - jamasp -c '… uv run
+> jamasp <cmd>'` passes even when the unit is broken, because it happens to
+> supply the right user and home. Only `systemctl start <unit>` followed by
+> `systemctl show <unit> -p Result --value` exercises what the timer will
+> actually do.
+
 **User units** (unprivileged account — keep `%h` as-is):
 ```bash
 mkdir -p ~/.config/systemd/user
