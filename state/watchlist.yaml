@@ -113,6 +113,20 @@ watchlist:
       Bessent Sun: Fed should keep 'an open mind' (AI productivity) -
       the coerced-pause breaker for 288a87ac (no consecutive both-up
       pair Tue 29 Sep - Mon 5 Oct, 0.65). d8e247ef HIT (3/3 family).
+      29 SEP BRIEF: relay ~70% for October and ~60% for Oct+Dec (investinglive
+      Mon 22:59Z); Cook (Oakland, Mon) hawkish at the margin - AI + oil keep
+      pushing inflation up 'in the coming months', further hikes data-dependent,
+      the labor market 'well positioned to handle' higher rates; Bowman said
+      nothing on policy. 2y close 4.924 (+6.4bp), 10y 5.242, 30y 5.562: the
+      long end took the wheel on supply/real yields (weakest 7y auction in a
+      year), so a 10y close >5.25 with the 2y flat is the new long-end-only
+      tell. Tue: six speakers - Bowman 15:00Z (Mansion House supervision titles),
+      Barr 16:40Z, Goolsbee 17:00Z, Musalem 17:30Z, Williams 18:00Z, Waller
+      19:00Z (Board index: 'Economic Outlook and... My Policy Communication',
+      undated - conditional deepdive #63 19:45Z). Live claims: efd9700b (no
+      relay <55% through Tue), 86f87a36 (no 2y close <4.80 through Tue),
+      b934960e (PCE session), 288a87ac (no both-up pair through 5 Oct). Next
+      gates: PCE Wed 12:30Z (#62), ISM+Waller Thu 14:00Z, NFP Fri 12:30Z (#61).
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -683,4 +697,17 @@ watchlist:
       12:30Z is the slot; the 30y at 5.49-5.53 is the pressure. Kill clock:
       two weeks of equity records with the 2y >=4.85 and gold flat = theme out
       (week one of two done, but the 2y just closed 4.86).
+      29 SEP: the closest print yet to the trigger set, and still not it - Mon
+      28 Sep the 10y closed 5.242 (June-2007 high, 5.27 intraday) and the 30y
+      5.562 (2004 high) on the weakest 7y bid-to-cover in a year with real
+      yields, not breakevens, doing the work (Aberdeen); GVZ +10.7% to 24.8,
+      silver broke its bear flag to 61.4, gold -3.3% on the row to 4156 (-$164
+      spot), S&P -0.8%, Nikkei down Tue on oil and yields - but BTC only -0.75%,
+      the 2y UP 6.4bp (4.924) and USDJPY 157.3: the bond-rout half without the
+      equity/BTC/front-end half. Read: the long end is now the price-setter for
+      gold (supply + real yields), the 2y a passenger. Kill clock RESET: the
+      theme stays live through quarter-end Wed (PCE + revisions 12:30Z, Brent
+      Nov expiry, China dark from Thu). Trigger set unchanged: equities -2% with
+      Nikkei and BTC down together, 2y -15bp, USDJPY <156 -> bearish-rates 50,
+      base 20.
     since: 2026-09-24

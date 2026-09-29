@@ -1516,3 +1516,26 @@ events:
       Scan marker for the 15:00Z scan (odds sentence in the investinglive
       ISM post; a relay <55% is the bearish-rates-50 line). No wakeup: the
       NFP deepdive #61 follows 22 hours later.
+
+  - date: 2026-09-29
+    time_dubai: "Tue 29 Sep 23:00 (19:00Z; events-feed slot, Low, todo-188) - Waller (governor); Board 2026 index lists 'The Economic Outlook and Some Comments on My Policy Communication' (Reuters NEXT Newsmaker Interview, Washington) WITHOUT a date, calendar.htm did not extract - venue unverified (rule 24)"
+    title: Waller 19:00Z - conditional deepdive wakeup #63 inside the blind window
+    why: >
+      efd9700b (no October-hike relay <55%, closes Tue 23:59Z) and 86f87a36
+      (no 2y close <4.80, closes Tue) both name a governor pause call as
+      their breaker, today's shelf claim a1961168 (Tue row <4253, 0.5)
+      lists a governor pause or a relay <60% first, and no scan runs after
+      19:00Z (todo-189) - a policy speech at 19:00Z would otherwise be
+      unread until the Wed 03:30Z brief, hours before PCE. Rule 16: the
+      brief books a one-off wakeup for an event the desk needs inside the
+      blind window; rule 24: booked conditional because the venue could
+      not be verified.
+    action: >
+      wakeup #63 booked 2026-09-29T19:45:00Z (deepdive): extract
+      /speech/waller20260929a.htm --fresh first; 404 or non-policy -> read
+      the wrap for the closes and any odds sentence, one paragraph, exit
+      ok; policy speech -> three-way test, post-speech odds sentence, 2y
+      close vs 4.80/4.95, Tue row vs 4253 and 4156, rule-23 tape clause; a
+      pause call read by the market (relay <55%) -> bearish-rates 50 and
+      score efd9700b/86f87a36; else hold 15/60/25 and leave the Tuesday
+      closers to the Wed brief.
