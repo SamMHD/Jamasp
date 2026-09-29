@@ -127,6 +127,18 @@ watchlist:
       relay <55% through Tue), 86f87a36 (no 2y close <4.80 through Tue),
       b934960e (PCE session), 288a87ac (no both-up pair through 5 Oct). Next
       gates: PCE Wed 12:30Z (#62), ISM+Waller Thu 14:00Z, NFP Fri 12:30Z (#61).
+      29 SEP #64 (19:45Z): Williams (permanent voter) 18:00Z - 'no need for
+      urgency' after September, 'one further hike likely this year' if the
+      economy meets expectations, inflation 3.5% this year / 2% in 2028; the
+      investinglive relay: October 54% from 64%, 2y -2.5bp to 4.90. efd9700b
+      MISS on that relay; the 19:00Z scan moved 15/60/25 -> 25/50/25 (tape
+      clause passing, +25 pts at 19:35Z; #65 23:30Z closes it on the row).
+      Waller 19:00Z: Board text 404 fresh, no relay by 19:50Z - non-policy
+      slot (rule 24); the Reuters NEXT outlook interview is read as Thu
+      14:00Z (Medium tag) - #66 14:45Z beside ISM (ISM owns the odds
+      trigger). 15:45 EDT: 2y 4.891, 10y 5.255, 30y 5.591 - the front end
+      capped by a voter, the long end at the highs. Flip lines: a second
+      voter reading pause + relay <50% -> 40; hawkish + relay >=60% -> 60.
     since: 2026-07-31
 
   - theme: central-bank-gold-buying

@@ -1539,3 +1539,50 @@ events:
       pause call read by the market (relay <55%) -> bearish-rates 50 and
       score efd9700b/86f87a36; else hold 15/60/25 and leave the Tuesday
       closers to the Wed brief.
+
+  - date: 2026-09-29
+    time_dubai: "Wed 30 Sep 03:30 (Tue 23:30Z) - close-out of the Williams flip inside the blind window"
+    title: Americas wrap + Tue 23:16Z row - deepdive wakeup #65 (close-out, rule 14)
+    why: >
+      #64 (19:45Z) ran before the wrap posts (~21:00Z) and before the
+      23:16Z GC_CLOSE row; Waller's 19:00Z slot produced no Board text
+      (404 fresh) and no relay by 19:50Z (rule 24 non-policy read), and
+      the 19:00Z scan's re-weight 15/60/25 -> 25/50/25 on the Williams
+      54% relay carries a rule-23 tape clause that only the Tue row can
+      close (+25 pts from the 17:51Z pre-print 4178.4 at 19:35Z). No scan
+      runs after 19:00Z (todo-189).
+    action: >
+      wakeup #65 booked 2026-09-29T23:30:00Z (deepdive): read the
+      investinglive Americas wrap (2y/10y/30y close, latest October odds
+      sentence), any 'Fed's Waller' relay after 19:00Z (policy line ->
+      three-way test; governor pause + relay <50% -> bearish-rates 40;
+      hawkish + relay >=60% -> restore 15/60/25), the 23:16Z row vs 4178.4
+      (tape clause: >=5 pts UP keeps the 10-pt move; inside the margin or
+      DOWN -> 20/55/25 'trigger printed, target failed'); score a1961168
+      (Tue row <4253) on the row - rule 18; leave 9083e952, 86f87a36,
+      a270f3f1, 9e1829f8, 95c71900 to the Wed brief; no new directional
+      claims (PCE 12:30Z); Telegram only if weights move.
+
+  - date: 2026-10-01
+    time_dubai: "Thu 1 Oct 18:00 (14:00Z) - Waller, Reuters NEXT Newsmaker Interview, Washington: 'The Economic Outlook and Some Comments on My Policy Communication' (Board index, venue + title verified 29 Sep; DATE inferred from the events feed's Medium-tagged Thu 14:00Z slot after the Tue 19:00Z Low slot produced nothing - the run verifies the date first); ISM manufacturing + prices paid 14:00Z in the same minute"
+    title: Waller outlook interview + ISM prices paid - deepdive wakeup #66 at print+45
+    why: >
+      A governor on the economic outlook and his own policy communication,
+      between PCE (Wed) and payrolls (Fri), with the front end already
+      capped by Williams (October 54%) and the long end at 2004-2007
+      highs. Rule 14: ISM prices paid (cons 72, highest since 2022 if
+      printed) owns the odds trigger; Waller owns the governor-pause
+      breaker that efd9700b/a1961168 named and Tuesday did not deliver.
+      Rule 24: booked on venue and title; an interview posts no Board
+      text, so the relay order is investinglive post, actionforex
+      /live-comments/, the wrap as tiebreaker.
+    action: >
+      wakeup #66 booked 2026-10-01T14:45:00Z (deepdive): verify the date
+      (Board index / any 'Fed's Waller' item after 14:00Z; if the
+      interview is not Thursday, read ISM alone and exit ok); ISM: largest
+      component and the ex-that number before the odds sentence; Waller:
+      three-way test (further hikes / pause / no content); post-event
+      odds sentence; the 2y vs 4.80 and 4.95; rule-23 tape clause from
+      the 14:00Z print to the 23:16Z row; NFP-eve - no new directional
+      claims beyond what the flip requires; book the close-out only if a
+      flip fires.
