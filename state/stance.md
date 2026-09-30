@@ -1,4 +1,4 @@
-# Stance — 2026-09-30 13:35Z (deepdive #62, PCE) — WEIGHTS 25/50/25 (base/bearish-rates/kinetic) HELD UNDER RULE 23 WITH THE SOFT-PCE FLIP **ARMED → 35/40/25** (CLOSE-OUT #68 AT 23:35Z ON THE FIRST GC_CLOSE ROW ≥23:00Z; PRINT BASIS 4216.0, PASS ≥4221); LATEST RELAY OCTOBER **34%** (INVESTINGLIVE PRINT POST 12:30Z, FROM 50/50 AT THE TUE WRAP / 64% MON); 2Y 4.833 (−5.6bp) / 10Y 5.232 / 30Y 5.591 (FLAT); BRENT NOV 102.99 (EXPIRES TODAY — DEC IS THE FRONT); QATARI CHANNEL STALLED, NO ACT — conviction 0.55 (capped: Cook tonight, Waller/ISM Thu, NFP Fri)
+# Stance — 2026-09-30 21:25Z (deepdive #67, Cook/Barkin — CONFIRMS #62 13:35Z) — WEIGHTS 25/50/25 (base/bearish-rates/kinetic) HELD UNDER RULE 23 WITH THE SOFT-PCE FLIP **ARMED → 35/40/25** BUT ON **BREACH TRAJECTORY** (GC 4189 AT 21:00Z VS PRINT BASIS 4216.0, PASS ≥4221; CLOSE-OUT #68 AT 23:35Z ON THE FIRST GC_CLOSE ROW ≥23:00Z — A ROW <4211 → 30/45/25 "TRIGGER PRINTED, TARGET FAILED", SELLER = LONG END + DXY, NOT THE SPEAKERS); COOK = NON-POLICY VENUE, ONE LINE RESTATING HER SEPTEMBER VOTE, NO RELAY; LATEST RELAY OCTOBER **40%** (INVESTINGLIVE GOLDMAN NOTE 17:04Z, FROM 34% AT THE PRINT POST; THE WRAP CARRIES NO ODDS SENTENCE; GOLDMAN'S CALL MOVED TO DECEMBER); CLOSE 2Y 4.893 (+0.4bp — THE PRINT GIVEN BACK) / 10Y 5.289 (+3.4) / 30Y 5.631 (+3.7); DXY 101.45; WTI 90.30; QATARI CHANNEL STALLED, NO ACT — conviction 0.55 (capped: the row tonight, Waller/ISM Thu, NFP Fri)
 
 **Tape (13:16Z, CNBC fresh):** GC 4241 (print basis 4216.0 at 12:21Z; first post-print snapshot 4245.4; row 4218 at 11:46Z; Tue row 4214.7). 2y 4.833 (Tue close
 4.889; low 4.827), 10y 5.232 (close 5.255; low 5.201), 30y 5.591 (close 5.594; high 5.599). Brent Nov 102.99 (+0.4%; settle 102.59), WTI Nov 90.25. DXY 101.07
@@ -34,10 +34,11 @@ GC 4205–4270, 2y 4.79–4.87, 10y 5.18–5.27, 30y 5.54–5.62, Brent Dec 100�
 
 ## What flips me
 
-- **Row tonight (#68 23:35Z):** ≥4221 → 35/40/25 applied; 4211–4221 → 30/45/25 (inside the noise); <4211 → 30/45/25 "trigger printed, target failed" and the
-  seller named (2y vs 4.889, 10y vs 5.255, the Cook/Barkin lines from #67).
-- **Cook 19:25Z (#67 21:20Z, conditional; venue unverified):** a governor pause read by the market (relay <25%) → bearish-rates −10 from wherever the row
-  leaves it; "further hikes" with the relay ≥50% → the flip's 10 pts come back. Barkin 17:30Z, Goolsbee 21:10Z, Kashkari 22:00Z: relay lines only.
+- **Row tonight (#68 23:35Z):** ≥4221 → 35/40/25 applied; 4211–4221 → 30/45/25 (inside the noise); <4211 → 30/45/25 "trigger printed, target failed" — #67's
+  read: GC 4189 at 21:00Z, the seller is the long end (10y 5.289 / 30y 5.631, +3.4/+3.7) and DXY (+0.4% from 13:16Z) with the 2y flat at 4.893 — the base-25
+  "real yields, not premium" shape; a row <4178 writes it. Not the speakers (no relay all evening).
+- **Cook 19:25Z — READ (#67):** Richmond Fed rural conference (Barkin introducing); one line — voted for the September hike, "committed to returning inflation to
+  our objective while preserving the strength in the labor market" — no pause, no "further hikes" → no move; no relay post for Cook or Barkin. Goolsbee/Kashkari: relay lines only.
 - **Waller Thu 14:00Z + ISM prices paid (#66 14:45Z; verify the date):** prices paid ≥75 with a 2y close ≥4.889 → `862c95f7` MISS, bearish-rates +10; ≤68
   with Waller no-content → hold.
 - **Qatar / Hormuz:** a US official acknowledging the text on record → Brent −5–8% → 2y −8–13bp → gold +0.5–1%, capped by the 10y. Co-confirmed AGREEMENT =
@@ -46,14 +47,15 @@ GC 4205–4270, 2y 4.79–4.87, 10y 5.18–5.27, 30y 5.54–5.62, Brent Dec 100�
 
 ## Open predictions (9) — by window close
 
-**Wed 30:** `a0c82077` (0.65, on track — Thu brief scores). **Thu 1 Oct close (read Fri 03:30Z):** `862c95f7` (new, 0.55). **Sun 4 Oct:** `483bea33`,
+**Wed 30:** `a0c82077` (0.65, on track — Thu brief scores). **Thu 1 Oct close (read Fri 03:30Z):** `862c95f7` (0.55; Wed leg FAILING by 0.4bp on both readings
+— 4.893 CNBC / 4.8953 wrap — scored on Thursday's Prev Close field; inside the measurement error, rule 9). **Sun 4 Oct:** `483bea33`,
 `d9142975`, `603c3c19` (0.7 each). **Mon 5 Oct:** `288a87ac` (0.65; Wed is gold-UP/2y-DOWN — not both-up). **Wed 7 Oct:** `440d34a8` (0.7). **Mid-Oct:**
 `4dfbd1d8` (midpoint run: Sept Brent front avg ~102.5 vs Aug ~90; WTI ~95 pre-roll / 89–94 post-roll — mechanism live, hold 0.65), `62c34dbd` (midpoint run:
 core PCE 0.1/0.2 sequence, Q2 core revised down, no telecom repricing relayed — hold 0.7). **Scored this run:** `b934960e` MISS.
 
 ## Wakeups
 
-**#67** deepdive Wed 21:20Z (Cook/Barkin conditional — keeps to the speeches; #68 owns the row). **#68** deepdive Wed 23:35Z (tape-clause close-out — NEW).
+**#67** DONE 21:25Z (Cook non-policy; verdict above — #68 takes it, no re-extract). **#68** deepdive Wed 23:35Z (tape-clause close-out).
 **#66** deepdive Thu 14:45Z (Waller + ISM; date check first). **#61** deepdive Fri 13:15Z (payrolls). Scan markers Wed: Chicago PMI 13:45Z; EIA 14:30Z; any
 relay ≥50% or <25%; the US reply via Qatar on record; USDJPY vs 156 with equities; Brent Dec vs 100/106; a UKMTO/operator line on any new claim.
 
@@ -71,4 +73,5 @@ and the long end is selling.
 investinglive PCE post at print+0 with the odds sentence (headline mislabeled "July"); GDP and ADP posts; actionforex live-comments PCE at print+16 (tables,
 real PCE, saving rate; no split); MarketWatch paywalled to two paragraphs; CNBC PCE article on the index at 13:18Z, slug unreachable (six 404s); BEA 403
 (todo-193). CNBC quotes ×5 `--fresh` 13:16Z; `gold_spot` errored (todo-003); Fed speakers hidden by `calendar` (todo-188); row basis = first GC_CLOSE row
-≥23:00Z (todo-187); blind window tonight covered by #67 and #68.
+≥23:00Z (todo-187); blind window tonight covered by #67 (done: Board text + index fresh at 21:20Z; CNBC US2Y/US10Y/US30Y/@GC.1/.DXY fresh 21:21Z; wrap + Goldman note; Trump/Powell
+post and flydubai FZ1073 read, neither stance-changing) and #68.
