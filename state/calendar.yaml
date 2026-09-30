@@ -1520,6 +1520,19 @@ events:
       gasoline +3.9% CPI month), ex-that = core 0.2. Rule-11 midpoint:
       4dfbd1d8 (Sept Brent front avg ~102.5 vs Aug ~90) and 62c34dbd (core
       PCE 0.1/0.2 sequence, no telecom repricing relayed) both hold.
+      CLOSE-OUT 23:50Z (#68): first GC_CLOSE row >=23:00Z printed 4184.1
+      at 23:46:21Z - -31.9 / -0.76% vs the 4216.0 print basis, 27 pts under
+      the 4211-4221 noise band -> 'trigger printed, target failed', the
+      rule-23 5-pt move: weights 30/45/25 (base/bearish-rates/kinetic),
+      the armed 35/40/25 not applied. Seller: the long end and the dollar
+      (2y 4.887 flat on the CNBC prev-close field, 10y 5.293 +3.8bp, 30y
+      5.631 +3.7, DXY 101.45 +0.08%), not the speakers (Cook no-content per
+      #67; Kashkari 22:13Z 'one more hike this year' after the Globex
+      close, no odds sentence). Latest dated relay 40% (Goldman 17:04Z);
+      the Americas wrap carried no odds figure. Attempt 1 of #68 (23:35Z)
+      exited empty 8 min before the row - the technicals slot drifts with
+      its 360-min interval (todo-194). 862c95f7 Wed leg: 4.887 CNBC vs
+      4.8953 wrap, readings disagree - rides on the Thu close.
 
   - date: 2026-10-01
     time_dubai: "Thu 1 Oct 18:00 (14:00Z) - ISM manufacturing PMI (cons 55.0) and prices paid (cons 72, prev 71.1); claims 12:30Z; China Golden Week begins (SGE shut to 8 Oct)"
