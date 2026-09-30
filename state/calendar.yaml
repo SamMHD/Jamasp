@@ -1586,3 +1586,63 @@ events:
       the 14:00Z print to the 23:16Z row; NFP-eve - no new directional
       claims beyond what the flip requires; book the close-out only if a
       flip fires.
+
+  - date: 2026-09-30
+    time_dubai: "Wed 30 Sep 23:25 (19:25Z; events-feed slot, Low, todo-188) - Cook (governor), after Barkin 17:30Z; Goolsbee 21:10Z and Kashkari 22:00Z follow. NO title or venue on the Board 2026 speeches index at 03:33Z (rule 24: conditional, not a firm slot)"
+    title: Cook 19:25Z on PCE day inside the blind window - conditional deepdive wakeup #67 at 21:20Z
+    why: >
+      A governor slot 25 minutes after the last scan of the day, on the
+      session that prints PCE, with October odds at a coin flip (50/50 at
+      the Tue wrap) and the stance's own flip line naming a governor pause
+      (relay <50% -> bearish-rates 40) or a hawkish governor with the relay
+      back >=60% (-> 60). Cook's Monday lean was hawkish (AI + oil 'keep
+      pushing inflation higher'), so the pause branch is the surprise and
+      the one the desk would otherwise read at 03:30Z Thursday (todo-189).
+      Rule 16: the brief books a one-off wakeup for an event the desk
+      needs inside the blind window; rule 24: conditional because no venue
+      or title could be verified - an early exit if she says nothing on
+      policy.
+    action: >
+      wakeup #67 booked 2026-09-30T21:20:00Z (deepdive): if #62 fired a
+      flip and booked its own 23:30Z close-out, keep to the Cook/Barkin
+      read; query items for Cook/Barkin since 17:00Z, extract the Board
+      text --fresh; 404 + no relay -> read the wrap (closes, the session's
+      latest odds sentence dated to its own clause), one paragraph, exit
+      ok; a policy line -> three-way test, odds sentence, weights per the
+      flip lines, tape clause marked 'breach trajectory' for the Thu brief
+      to close on the first GC_CLOSE row >=23:00Z. No new directional
+      claims (NFP Fri).
+
+  - date: 2026-10-01
+    time_dubai: "Thu 1 Oct 21:30 / 23:00 / 23:30 / Fri 02:45 (17:30Z Jefferson, 19:00Z Bowman, 19:30Z Cook, 22:45Z Logan - events feed, Low, todo-188); venues NOT on the Board index at 03:33Z Wed"
+    title: Thursday-evening Fed governors inside the blind window, NFP-eve - Thursday brief verifies venues and books a read only on a policy title
+    why: >
+      Three governors and a president speak after the 19:00Z scan on the
+      night before payrolls, with Waller's outlook interview (#66, 14:00Z)
+      having set the day's governor line. Rule 24: booked on venue and
+      title, never on the calendar name - a supervision / community venue
+      is a scan marker only; rule 16: an event inside 19:00Z-03:30Z has no
+      reader until the brief unless the brief books one.
+    action: >
+      Thu 03:30Z brief: extract the Board 2026 speeches index --fresh and
+      the host pages if named; a policy title for Bowman/Cook/Jefferson ->
+      one conditional deepdive at 20:15Z or 21:20Z (whichever covers the
+      policy slot) with the same flip lines as #67; otherwise scan markers
+      and the Friday brief reads the wrap. NFP-eve: no new directional
+      claims in any case.
+
+  - date: 2026-10-04
+    time_dubai: "Sun 4 Oct (OPEC+ ministerial/JMMC slot; delegates via investinglive Tue: November quotas held steady)"
+    title: OPEC+ November quotas - Sunday-open Brent input, scan marker only
+    why: >
+      Delegates expect no change; a surprise (a cut into a $100+ market
+      with Gulf exports back at the 2025 average, or an increase to press
+      the diesel complex) is a Brent Dec input for the Sunday 22:00Z open,
+      read through the chain (oil -> 2y -> DXY -> gold) at the Monday
+      brief. No agent run sits between the meeting and the Monday 03:30Z
+      brief (todo-189); rule 7 - a participant-scheduled event, no
+      wakeup.
+    action: >
+      Monday 5 Oct brief: read the OPEC+ outcome first (investinglive
+      /Reuters relay), name the Brent Dec move at the open, then the Sunday
+      closers 483bea33 / d9142975 / 603c3c19 and 288a87ac (Mon).

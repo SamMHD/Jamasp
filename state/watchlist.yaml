@@ -139,6 +139,23 @@ watchlist:
       trigger). 15:45 EDT: 2y 4.891, 10y 5.255, 30y 5.591 - the front end
       capped by a voter, the long end at the highs. Flip lines: a second
       voter reading pause + relay <50% -> 40; hawkish + relay >=60% -> 60.
+      30 SEP BRIEF: the wrap's odds sentence 50/50 (from 64%) is the latest
+      relay; Barr 'further adjustments likely', Williams 'one more, no rush',
+      Goolsbee 'playing with fire', Musalem framework - no voter read pause;
+      #65 tape clause PASSED (row 4214.7, +36 from the 17:51Z snapshot) so
+      25/50/25 stands. Tue closes 2y 4.889, 10y 5.255, 30y 5.594 (highest
+      since 2002); Asia 4.887 / 5.234 / 5.565. 86f87a36 HIT (2y floor 10/10
+      this regime). b934960e enters its window OFFSIDE (last relay 50% < 55%)
+      - needs the print to lift odds. JOLTS 7.079M, confidence 81.9 (lowest
+      since 2014) pushed back on the 'accelerating economy' theme;
+      MarketWatch: back-to-back-hike traders 'ahead of themselves'; CNBC:
+      prediction markets see September jobs above consensus. Wed: ADP 12:15Z,
+      PCE 12:30Z (#62), Barkin 17:30Z, Cook 19:25Z (#67 conditional 21:20Z -
+      no Board title), Goolsbee 21:10Z, Kashkari 22:00Z. Thu: Waller 14:00Z +
+      ISM (#66); Jefferson 17:30Z, Bowman 19:00Z, Cook 19:30Z, Logan 22:45Z in
+      the blind window - Thu brief verifies venues. Flip lines: governor pause
+      + relay <50% -> 40; hawkish + relay >=60% -> 60; PCE core >=0.4 -> relay
+      >=80% / 2y >=4.95 -> 65.
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -394,6 +411,21 @@ watchlist:
       Saudi September shipments up. 42512099 (reopen band) MISS - the
       family's first, on the first weekend whose kinetic input landed
       inside the blind window.
+      30 SEP BRIEF: 9083e952 HIT - Rezaei's clock lapsed with no act and no
+      text. Axios via investinglive (Tue 22:40Z): Qatari mediation 'little
+      progress', two-page compromise (blockade lift vs nuclear), al-Thawadi
+      met Araghchi (NY) then Kushner/Vance (DC), Trump 'offered nothing',
+      Iran: concessions only after a US return to the June MOU, US officials:
+      major combat could resume AFTER the midterms (3 Nov), Qatar frustrated,
+      no new round. Brent settled 102.59 (-2.55%) on SUPPLY - SPR offer up to
+      40M bbl (June's drew ~500K), Yanbu loadings resumed, Kpler ~16 mb/d
+      Mideast exports (war high), Goldman: Gulf exports at the 2025 average,
+      Saudi above, Iran zero seaborne; Brent still +10% m/m; OPEC+ holds
+      Sunday; Nov expiry Wed (Dec is the front). The physical recovery weakens
+      Tehran's hand and the deal branch with it. Live: 603c3c19 (to Sun),
+      483bea33, d9142975; a0c82077 closes Wed 23:59Z on track (Al Funtas =
+      hull class); successor 440d34a8 (no new-class act Thu 1 - Wed 7 Oct,
+      0.7).
     since: 2026-07-31
 
   - theme: kinetic-transmission-inverted
@@ -478,6 +510,16 @@ watchlist:
       row already 70 pts under Sunday's 4299.7). Deal-branch sign
       unchanged: a Qatari text acknowledged = drain = 4253/4300, a
       failed breakdown, not a rally.
+      30 SEP BRIEF: Tuesday was the DRAIN leg with the 2y barely moving
+      (-3.3bp) and gold +1.41% on the row - the second full drain-leg bid (25
+      Sep faded, 29 Sep held), against DXY +0.19% and the 10y/30y UP. a270f3f1
+      UNCLEAR by the letter (settle -2.55%, line -3%), SUBSTANCE AGAINST;
+      9e1829f8 UNCLEAR (no +2% settle). The inversion still holds on the
+      oil-UP leg (Mon +0.9%, gold -3.3%, the long-end/liquidation leg); the
+      oil-DOWN leg now bids gold. Working read: asymmetric, not inverted - oil
+      up = gold down via the 2y, oil down = gold up via positioning. Two
+      sessions; a hypothesis with a named test (the next Brent Dec settle down
+      >=2%: does the row rise >=0.5% with the 2y down <5bp?), not a rule.
     since: 2026-09-09
 
   - theme: boj-yen-pillar
@@ -611,6 +653,16 @@ watchlist:
       4dfbd1d8 / 62c34dbd (September Brent average ~103-105 vs August
       ~90: the headline >=0.4 claim is on track; core <=0.3 rides on
       shelter/travel). ISM prices paid Thu (cons 72).
+      30 SEP BRIEF: rule-11 midpoint check RUN - September Brent settled
+      100-109 all month (+10% m/m per the recap; WTI a third straight monthly
+      gain) vs August ~90: the fuel input for the September CPI is intact,
+      4dfbd1d8 (headline >=0.4) stays open on a live mechanism; no relayed
+      telecom repricing or shelter nowcast in the delta - 62c34dbd (core
+      <=0.3) holds on its grounds, unverified. Australia CPI 4.0% on fuel
+      (trimmed mean 0.2) is the same passthrough abroad; RBA 4.60, Westpac
+      sees Nov. PCE today: cons 0.4/3.7, core 0.3/3.4, BEA revisions in the
+      same release. Brent Nov expired Wed - settle claims name the Dec
+      contract (rule 17).
     since: 2026-07-31
 
   - theme: us-fiscal-dominance
@@ -722,4 +774,10 @@ watchlist:
       Nov expiry, China dark from Thu). Trigger set unchanged: equities -2% with
       Nikkei and BTC down together, 2y -15bp, USDJPY <156 -> bearish-rates 50,
       base 20.
+      30 SEP: no crack - S&P -0.17%, BTC +0.5%, 2y -3.5bp, USDJPY 156.5
+      (half-year-end flows; the <156 marker is 50 pips away but ALONE); the
+      30y closed 5.594 (highest since 2002) and eased 3bp in Asia; GVZ 24.4
+      (-1.9%). Quarter-end session TODAY with PCE + revisions at 12:30Z: the
+      slot. Kill clock: week one of two (equity records with the 2y >=4.85 and
+      gold flat) still open; the 2y is 4.89 and gold is not flat.
     since: 2026-09-24
