@@ -1501,6 +1501,25 @@ events:
       >=4.95 -> 65; if a flip fires, book a close-out wakeup at Globex
       close +30. The Wed brief runs the midpoint check if the deepdive
       cannot.
+    outcome: >
+      RUN 13:15Z (#62): soft on the monthly - core +0.2 vs 0.3, headline
+      +0.3 vs 0.4; the BEA annual update cut the trend (July core y/y
+      3.3->3.0, headline 3.7->3.4, July m/m 0.2->0.1 on both); real PCE
+      +0.6, real DPI 0.0, saving rate 4.1%; Q2 GDP 2.2 (from 1.5), Q2 core
+      PCE prices 3.3 (from 3.6); ADP +90K vs 70K. Relay: October odds 34%
+      (investinglive, print+0) from 50/50 at the Tue wrap / 64% Monday -
+      b934960e MISS. Tape: 2y 4.833 (-5.6bp), 10y 5.232 (-2.3bp), 30y
+      5.591 (flat), DXY -0.3, GC 4216 -> 4241-4245 (+0.6%, inside the
+      chain's size for the first session this week). The stance's own
+      soft-PCE flip line (core <=0.2 + revisions down + relay <45%) fired
+      on the letter - target 35/40/25 - and weights are HELD 25/50/25
+      under rule 23 until the first GC_CLOSE row >=23:00Z (basis 4216,
+      pass >=4221); close-out wakeup #68 at 23:35Z. Component split not in
+      either relay (BEA 403, CNBC slug unreachable): energy is the
+      identifiable component via the headline-core gap (0.1pp on a
+      gasoline +3.9% CPI month), ex-that = core 0.2. Rule-11 midpoint:
+      4dfbd1d8 (Sept Brent front avg ~102.5 vs Aug ~90) and 62c34dbd (core
+      PCE 0.1/0.2 sequence, no telecom repricing relayed) both hold.
 
   - date: 2026-10-01
     time_dubai: "Thu 1 Oct 18:00 (14:00Z) - ISM manufacturing PMI (cons 55.0) and prices paid (cons 72, prev 71.1); claims 12:30Z; China Golden Week begins (SGE shut to 8 Oct)"
