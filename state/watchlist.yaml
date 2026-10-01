@@ -156,6 +156,25 @@ watchlist:
       the blind window - Thu brief verifies venues. Flip lines: governor pause
       + relay <50% -> 40; hawkish + relay >=60% -> 60; PCE core >=0.4 -> relay
       >=80% / 2y >=4.95 -> 65.
+      1 OCT BRIEF: #68 closed the PCE clause FAILED on the tape (row 4184.1 vs
+      print basis 4216, -0.76%) -> 30/45/25. Kashkari (voter) 22:13Z
+      'inflation still too high', pencils one more hike this year; Cook
+      (Richmond rural conference) and Barkin no content; latest dated relay
+      40% (Goldman 17:04Z, call moved to Dec); the wrap carried no figure. Wed
+      closes: 2y 4.887 field / 4.8953 wrap (862c95f7 Wed leg undetermined),
+      10y 5.293, 30y 5.639 field. Asia Thu: 2y 4.885-4.902, 10y high 5.31, 30y
+      high 5.653, DXY 101.58. Trump 20:00Z: Powell (governor) should resign
+      over the HQ renovation, AG Blanche to review the IG report, lawsuit
+      threat - governor-only, scan marker; the tape printed the anti-tell (DXY
+      up, 30y up, gold down). Thu: claims 12:30Z; Barkin/Collins/Schmid
+      13:05Z; ISM + Waller 14:00Z (#66 - no Waller relay since 3 Sep, Board
+      index entry undated and positioned ~19-23 Sep; verify, ISM alone
+      otherwise); Jefferson 17:30Z, Bowman 19:00Z, Cook 19:30Z, Logan 22:45Z -
+      no policy titles on the index at 03:32Z, scan markers (17:00Z/19:00Z
+      scans re-extract). Fri NFP 12:30Z (#61). Flip lines: Waller 'further
+      hikes' + relay >=60% -> 55; pause + relay <25% -> 35 (25-39% -> 40); ISM
+      prices paid >=75 + 2y close >=4.889 -> 55 (862c95f7 MISS); NFP <50K +
+      AHE <=0.2 -> 35.
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -426,6 +445,27 @@ watchlist:
       483bea33, d9142975; a0c82077 closes Wed 23:59Z on track (Al Funtas =
       hull class); successor 440d34a8 (no new-class act Thu 1 - Wed 7 Oct,
       0.7).
+      1 OCT BRIEF: Rubio ordered Iran's UNGA delegation (Araghchi) out of New
+      York Mon night after talks deadlocked (Axios via investinglive 00:19Z;
+      flew to Doha Tue); Qatari mediators 'little progress' but still
+      shuttling the compromise text; Trump Wed: 'might strike Iran', a
+      decision 'has to be made', 'will end very soon one way or the other';
+      US-official line (Axios/CNN 29-30 Sep) still puts major combat AFTER the
+      midterms. Hormuz: UKMTO 144/145/146-26 (Tue 29, three tankers incl.
+      ADNOC VLCC Mersin Prosperity and Sinbad, Liberian, dark transits,
+      unattributed; Fars 'warning shots'; IRGC spox 'will hit a mine' =
+      threat); Windward 17 transits Tue; Kpler Sept >=16.5 mb/d ex-Iran with
+      ~40% leaving by pipeline (17% pre-war); Yanbu loading 6.2M bbl 28 Sep -
+      'Iran's grip loosens' (Maritime Executive). RAF Fairford (Sun 27):
+      Burnham 'strong indications' Iran; no explosives (petrol), five Britons
+      bailed, a suspect tipped off police; Iran denies - a foiled plot class
+      on NATO soil, not a scorer. 'UAE condemns killing of tanker crew' = MT
+      Honour 25, Somali pirates, Puntland op 29 Sep - NOT Iran. Brent Nov
+      expired 103.53; Dec front ~98-100, BELOW 100 with the strike rhetoric on
+      record. a0c82077 HIT (class family 6/6). NEW 8aacb1e6 (no on-record US
+      strike on Iranian territory Thu 1 - Sun 4 Oct, 0.65; MISS -> kinetic
+      35). Live: 440d34a8 (Wed 7), 603c3c19 / 483bea33 / d9142975 (Sun 4).
+      OPEC+ Sun: delegates say unchanged.
     since: 2026-07-31
 
   - theme: kinetic-transmission-inverted
@@ -568,6 +608,16 @@ watchlist:
       not a regime change. BoJ minutes Mon 23:50Z. actionforex: DXY
       faces resistance at 101.80-102.86 and the yen leg reaches gold
       only through DXY. Pillar stays down. No claim.
+      1 OCT: BoJ summary of opinions - members open to FASTER hikes if
+      inflation risks overshooting 2%; Tankan large-manufacturer DI at an
+      eight-year high, firms' one-year inflation expectation 2.6% (from 2.7%);
+      Japan manufacturing PMI 54.1 (six-month low). Yet USDJPY 158.16 at
+      03:30Z (+0.5% from the Wed close 157.4, +1.05% on 24h) - the yen sold
+      into US long-end highs; 158 is the MoF/Mimura warning line of 25-28 Sep.
+      A real MoF round = DXY -0.3-0.5, gold +$15-25 (deepdive #56), not a
+      regime change. ECB Schnabel: do not look through the energy shock
+      (Lagarde 13:30Z; EZ flash CPI Fri 09:00Z). Pillar stays down; Tokyo CPI
+      23:30Z. No claim.
     since: 2026-09-03
 
   - theme: energy-pce-passthrough
@@ -723,6 +773,18 @@ watchlist:
       - one bp and one size short of the base-25 trigger. 5y/7y detail
       still UNVERIFIED (todo-185). Quarter-end Wed. Only mover for base:
       a 30y close >=5.50 with DXY DOWN and gold UP.
+      1 OCT: Trump 20:00Z Wed (Truth Social): Powell should resign from the
+      Board over the HQ renovation (>=$2.5bn per the IG report; his own
+      $3.5-4bn forecast), AG Blanche asked to review and 'determine what
+      action to take', a government lawsuit threatened if he stays. A
+      governor-only line (Warsh untouched) and the tape printed DXY UP 0.08%,
+      30y +3.7bp, gold DOWN - the anti-tell, not fiscal dominance (18 against
+      / 2 for). 288a87ac's breaker stays 'a move against Warsh priced as
+      fiscal dominance'; a filed suit or removal order against a sitting
+      governor is the next marker (read the 30y/DXY/gold shape at the next
+      scan). 30y field 5.639 Wed, 5.653 Asia high; MarketWatch 'a brutal
+      September for bonds points to an even darker October'; Paramount mega
+      debt sale as the corporate squeeze tell.
     since: 2026-08-20
 
   - theme: liquidity-crack-channel
@@ -780,4 +842,12 @@ watchlist:
       (-1.9%). Quarter-end session TODAY with PCE + revisions at 12:30Z: the
       slot. Kill clock: week one of two (equity records with the 2y >=4.85 and
       gold flat) still open; the 2y is 4.89 and gold is not flat.
+      1 OCT: no crack on quarter-end - S&P -0.25% (Dow at June lows), Nasdaq
+      +0.24% (Micron beat), BTC 83.4K flat, 2y flat 4.887, USDJPY 158.2 (UP,
+      away from the <156 marker), GVZ 23.7 (-2.6%); the 30y closed 5.639
+      (field) and printed 5.653 in Asia - the bond-rout half keeps extending
+      without the equity/front-end half. Golden Week (SGE shut to 8 Oct) thins
+      the physical bid under 4200. Kill clock: week one of two still open;
+      trigger set unchanged (equities -2% with Nikkei and BTC down together,
+      2y -15bp, USDJPY <156 -> bearish-rates 50, base 20).
     since: 2026-09-24

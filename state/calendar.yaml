@@ -1618,6 +1618,20 @@ events:
       the 14:00Z print to the 23:16Z row; NFP-eve - no new directional
       claims beyond what the flip requires; book the close-out only if a
       flip fires.
+    outcome: >
+      1 OCT BRIEF (pre-run note): the Board index --fresh at 03:32Z still
+      lists the Reuters NEXT entry undated, and its position - between
+      Bowman's Mansion House speeches and Barr's Second-Chance Lending
+      Forum (<=22 Sep) in a reverse-chronological list - is a 19-23 Sep
+      band; items carries NO Waller relay since 3 Sep. The Thu 14:00Z slot
+      rests on the events feed's name-only row. #66 keeps its first step
+      (any 'Fed's Waller' item after 14:00Z, else ISM alone); ISM prices
+      paid (cons 72) owns the odds trigger either way. Flip lines as of the
+      1 Oct stance: Waller 'further hikes' + relay >=60% -> bearish-rates
+      55; pause + relay <25% -> 35 (25-39% -> 40); ISM prices paid >=75 +
+      2y close >=4.889 -> 55 and 862c95f7 MISS; <=68 + no content -> hold.
+      Tape clause basis: the last GC snapshot before 14:00Z, read on the
+      first GC_CLOSE row >=23:00Z Thu (expected ~00:00Z Fri, todo-194).
 
   - date: 2026-09-30
     time_dubai: "Wed 30 Sep 23:25 (19:25Z; events-feed slot, Low, todo-188) - Cook (governor), after Barkin 17:30Z; Goolsbee 21:10Z and Kashkari 22:00Z follow. NO title or venue on the Board 2026 speeches index at 03:33Z (rule 24: conditional, not a firm slot)"
@@ -1678,6 +1692,15 @@ events:
       policy slot) with the same flip lines as #67; otherwise scan markers
       and the Friday brief reads the wrap. NFP-eve: no new directional
       claims in any case.
+    outcome: >
+      1 OCT BRIEF 03:32Z: Board 2026 speeches index extracted --fresh - no
+      title or venue for Jefferson, Bowman, Cook or Logan (the index tops
+      with Cook's 30 Sep rural-conference speech, Barr's 29 Sep Detroit
+      Economic Club 'Economic Conditions and Monetary Policy', Bowman's
+      cyber workshop). Rule 24: scan markers only, no conditional deepdive.
+      The 17:00Z and 19:00Z scans re-extract the index --fresh (30 Sep #67
+      lesson) and escalate only on a policy title; the Fri brief reads the
+      wrap for any evening line. NFP-eve: no new directional claims.
 
   - date: 2026-10-04
     time_dubai: "Sun 4 Oct (OPEC+ ministerial/JMMC slot; delegates via investinglive Tue: November quotas held steady)"
