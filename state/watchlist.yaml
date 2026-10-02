@@ -186,6 +186,21 @@ watchlist:
       stands). 30/45/25 held; the Fri brief reads the 2y close vs 4.889 (flip
       or 862c95f7 HIT) and the 10y >5.30 with the row's sign (base-35 tell).
       Barr Detroit 'Economic Conditions and Monetary Policy' = 29 Sep (relayed).
+      2 OCT BRIEF (03:45Z): Thu close 2y 4.787 (-10bp, biggest one-day fall in
+      >1y), 10y 5.234 (from a 5.344 2002 high), 30y 5.603 (from 5.693) THROUGH
+      ISM prices paid 77.9, Logan (voter, Dallas prepared remarks) '50bp or more
+      to become modestly restrictive, inflation unlikely <2.5% without it',
+      Kashkari 'more hikes into 2027, October open', Cook 'AI buildout +
+      persistent supply shocks', Schmid 'long rates straining housing/CRE'.
+      Jefferson (VC) 'weighing more data' echoed Williams - the leadership line
+      won: wrap 01:06Z Oct 28 odds 26% ('more than halved from last week').
+      Goldman next hike -> DECEMBER, 'strong chance' no more needed (Q4 core PCE
+      3.0 vs FOMC 3.4; Warsh 'less information' flagged); UBS: hike pricing too
+      aggressive. Logan + Schmid: term premium may reduce the need to tighten -
+      the hawks' own rationale for a falling 2y beside a 5.6% 30y. 862c95f7 HIT
+      (Wed leg basis-hit). Weights 35/40/25 (relay band, rule-23 clause passed:
+      row +28.7). NFP Fri 12:30Z (#61): soft <50K/AHE<=0.2 -> 30/45; hot
+      >=150K/AHE>=0.4 + relay >=50% -> 50/25; inside -> relay decides.
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -477,6 +492,24 @@ watchlist:
       strike on Iranian territory Thu 1 - Sun 4 Oct, 0.65; MISS -> kinetic
       35). Live: 440d34a8 (Wed 7), 603c3c19 / 483bea33 / d9142975 (Sun 4).
       OPEC+ Sun: delegates say unchanged.
+      2 OCT BRIEF: US POSTURE - Theodore Roosevelt CSG (dep. San Diego 27 Sep) +
+      Makin Island ARG w/ 2,000 Marines (28 Sep), ~9,000 personnel, arriving
+      late Oct-Nov -> THREE carriers (with Bush, Washington) first time since
+      April (Gulf News/WSJ, US officials anon.; WH: 'routine rotations'); WSJ:
+      aides 'privately discussed' resuming strikes in November after the
+      midterms; Trump (TIME, Wed): bombing 'possible' after the midterms. IRAQ
+      EXIT COMPLETE Wed 30 Sep (CENTCOM: orderly departure from Erbil, OIR
+      concluded; missed by the 1 Oct brief + 7 scans); IRGC: 'first step' to
+      'full expulsion from the region'. Hormuz: UKMTO 147-26 Thu 17:50Z (tanker,
+      unknown projectile, fire, crew safe, unattributed) = 5th hit in 96h (JMIC
+      4 + this, SEVERE), warnings 143-146 published a day+ late. Houthi BM
+      intercepted over Saudi (limited damage); Houthi hit on a MEDINA power
+      distribution station (UAE condemnation) - proxy class. Treasury sanctions
+      on Iran auto/rail/shadow banking. Deal branch: 'Iran offered nuclear
+      inspections for sanctions relief' (wrap, sources-only; Investing.com
+      'Iran says it receives US response' 403 - actor unextracted). Brent Dec
+      settle 102.31 (+~4%) with Gulf barrels flowing = premium rebuild. All
+      kinetic negatives stand; kinetic 25 held; stated US horizon = after 3 Nov.
     since: 2026-07-31
 
   - theme: kinetic-transmission-inverted
@@ -571,6 +604,14 @@ watchlist:
       up = gold down via the 2y, oil down = gold up via positioning. Two
       sessions; a hypothesis with a named test (the next Brent Dec settle down
       >=2%: does the row rise >=0.5% with the 2y down <5bp?), not a rule.
+      2 OCT BRIEF: FIRST OIL-UP / GOLD-UP SESSION of the regime - Thu Brent +~4%
+      (102.31), DXY 101.996 (52-wk high), gold +0.69% on the row WITH the 2y
+      -10bp: the oil -> 2y leg was overridden by the Fed-leadership channel
+      (Jefferson/Williams patience, Goldman to Dec). Not a haven bid - gold
+      rose with Treasuries. One session = hypothesis (rule 11); the theme's
+      'strike = hike + margin call' stands for an ACT; a posture build (3rd
+      carrier) priced into Brent did not reach the 2y. BofA same day: 'oil is
+      gold's biggest enemy', risk <4000 - the chain as house view.
     since: 2026-09-09
 
   - theme: boj-yen-pillar
@@ -629,6 +670,12 @@ watchlist:
       regime change. ECB Schnabel: do not look through the energy shock
       (Lagarde 13:30Z; EZ flash CPI Fri 09:00Z). Pillar stays down; Tokyo CPI
       23:30Z. No claim.
+      2 OCT BRIEF: Tokyo core CPI 2.7% y/y (cons 2.4, 10-month high), core-core
+      3.0%; Kiuchi 'no excessive easing'; Katayama eyes Y7tn idle funds -> the
+      29-30 Oct hike case firms. USDJPY still closed 158.01 (+63) after a
+      headline-less 50-pip early-US drop the wrap judged too small/odd for
+      intervention. Rule 22: no DXY -0.3 / no cross of 100 (DXY 102) -> the
+      yen leg stays subordinate; MoF line 158.5 is a scan marker.
     since: 2026-09-03
 
   - theme: energy-pce-passthrough
@@ -724,6 +771,14 @@ watchlist:
       sees Nov. PCE today: cons 0.4/3.7, core 0.3/3.4, BEA revisions in the
       same release. Brent Nov expired Wed - settle claims name the Dec
       contract (rule 17).
+      2 OCT BRIEF: oil-DOWN channel for the PRODUCT leg - US threatens a diesel
+      export ban unless Europe releases ~120mb 'immediately'; Wright 'highly
+      confident' Europe releases; EU diesel margins -7% on the talk; China fuel
+      export halt in the background. Crude untouched (Brent Dec 102.31, +4%
+      Thu on posture). September's fuel average is set -> 4dfbd1d8 (Sep
+      headline CPI >=0.4) unaffected; the October print is the one a release
+      touches. ISM prices paid 77.9 (steel, aluminum, petroleum, tariffs) =
+      the input-cost leg still rising.
     since: 2026-07-31
 
   - theme: us-fiscal-dominance
