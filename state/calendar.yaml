@@ -1717,3 +1717,73 @@ events:
       Monday 5 Oct brief: read the OPEC+ outcome first (investinglive
       /Reuters relay), name the Brent Dec move at the open, then the Sunday
       closers 483bea33 / d9142975 / 603c3c19 and 288a87ac (Mon).
+
+  - date: 2026-10-05
+    time_dubai: "Mon 5 Oct 18:00 (14:00Z) - ISM services PMI Sep (cons 55.1-55.3, prev 55.4; prices paid prev 72.6; employment prev 47.8); final US services PMI 13:45Z (verified 3 Oct: actionforex calendar summary + investinglive week-ahead)"
+    title: ISM services prices paid - the week's odds trigger; scan marker, no wakeup
+    why: >
+      October is dead on the relay (15-16%, Fri print post) and e5104cf2
+      (no dated relay >=25% through the Thu 8 Oct wrap, 0.55) has ~9 pts
+      of room; services prices paid at a 2022 high would be the only
+      inflation input before the mid-Oct CPI that could move the band. No
+      Fed speaker sits in the window (none on any list; events feed ends
+      3 Oct). Rule 14: print post first, name the largest component and the
+      ex-that number before the odds sentence; the #69 lesson adds the
+      print-day 2y close as co-trigger for any rates-data band move.
+    action: >
+      15:00Z scan (print+60): investinglive ISM post first (odds sentence),
+      actionforex front second; prices paid >=75 with the relay inside a
+      higher band -> bearish-rates 40 with a tape clause from the 14:00Z
+      print to the first GC_CLOSE row >=23:00Z Mon AND the Mon 2y close UP
+      >=5bp (both readings); <=68 -> hold. The Tue 03:30Z brief closes any
+      clause on the row and the 2y close; no wakeup (not CPI/NFP/FOMC class).
+
+  - date: 2026-10-07
+    time_dubai: "Wed 7 Oct 21:01 / 22:00 (17:01Z 10y auction; 18:00Z FOMC minutes of the 15-16 Sep meeting - verified 3 Oct: Board FOMC calendar page 'minutes three weeks after the decision', actionforex summary, investinglive week-ahead); RBI decision earlier (Wells Fargo: first hike to 5.50%)"
+    title: FOMC minutes + 10y auction - tone without guidance; scan marker for the 19:00Z scan, no wakeup
+    why: >
+      Rule 6: minutes are tone without guidance - 5/5 of the regime's >=10-pt
+      Fed repricings came from that channel, so the 19:00Z scan reads the
+      latest dated odds sentence after 18:00Z, but the stance moves only on
+      the relay band (never on wording). The minutes predate the 2 Oct
+      payrolls (investinglive) - a September-mindset document read against
+      an October-dead market. The 10y auction an hour earlier is a
+      fiscal-dominance tell: a tail with 30y UP / DXY DOWN / gold UP is the
+      288a87ac-successor breaker shape. 440d34a8 closes 23:59Z the same day.
+    action: >
+      19:00Z scan: odds sentence (investinglive minutes post; the wrap at
+      the Thu brief as the second reading), the 10y auction tail/grade,
+      the 30y/DXY/gold shape at 19:00Z; escalate to Telegram only on a
+      relay band change or the fiscal shape. Thu 03:30Z brief: the Wed row
+      vs the 2y close (both readings), score 440d34a8 on the window.
+
+  - date: 2026-10-08
+    time_dubai: "Thu 8 Oct 15:30 / 16:30 / 21:01 (11:30Z ECB accounts; 12:30Z claims cons 200K; 17:01Z 30y auction); SGE reopens (Golden Week ends); e5104cf2 closes at the Americas wrap"
+    title: 30y auction + ECB accounts + claims + SGE reopening - scan markers
+    why: >
+      The 30y auction at 5.62 (Fri close; 5.65 = the stagflation line in
+      the stance) is the second long-end tell of the week; the SGE
+      reopening restores the physical read under 4200 after a week of
+      paper-only tape - the first session on which level claims inside one
+      ATR can be written again. Claims are the first post-NFP labour read.
+    action: >
+      19:00Z scan: 30y auction result and the 30y/DXY/gold shape; Fri 03:30Z
+      brief: score e5104cf2 on the Thu wrap's latest dated October sentence,
+      read the SGE premium/discount vs the Fri row, lift the level-claim
+      suspension if the ATR has not changed regime.
+
+  - date: 2026-10-09
+    time_dubai: "Fri 9 Oct 16:30 / 18:00 (12:30Z Canada jobs; 14:00Z UMich Oct prelim - sentiment cons 48.1, 1y inflation expectations prev 4.6%)"
+    title: UMich inflation expectations - the week's last inflation input; the Sat 10 Oct brief closes the two 3-Oct claims on the Fri row
+    why: >
+      1y expectations at 4.6% are the survey leg of the passthrough theme;
+      a print >=5.0 is an odds-band input via the 2y into the mid-Oct CPI.
+      The Sat 10 Oct brief scores the 288a87ac successor (no both-up pair
+      Mon-Fri) and the sign-test claim on the Fri GC_CLOSE row (~00:30Z
+      Sat) and the Fri 2y close (5:05pm ET Yield line / wrap) - and retries
+      the CPI date (actionforex 10/12-10/16 summary, usually posted Sat).
+    action: >
+      15:00Z scan reads the UMich post for the expectations figure and any
+      odds sentence; Sat 10 Oct brief: score the two 3-Oct claims, verify the
+      CPI date and book its print+45 deepdive, re-verify the 12-16 Oct Fed
+      slots on the Board index and the regional pages (rule 24).
