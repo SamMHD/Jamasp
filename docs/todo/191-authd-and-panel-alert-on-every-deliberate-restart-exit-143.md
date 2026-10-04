@@ -78,3 +78,7 @@ produce **no** alert, and a forced failure must still produce one.
 - `docs/todo/013` — the real failure alert that went unnoticed in the same
   chat.
 - `reports/2026/09/2026-09-27-retro.md`, Verified-this-run.
+
+## Update 2026-10-04 (retro)
+
+4 Oct retro: two more — 1 Oct 06:28:50Z and 4 Oct 06:24:12Z alerts; the user-level journal shows `jamasp authd listening on 127.0.0.1:3301` at 06:28:20Z and 06:24:12Z respectively (a fresh start at the alert minute, deploy hour), and `panel/.next.bak/` appeared untracked in the same window. 9/9 lifetime alerts on this unit are deliberate restarts.

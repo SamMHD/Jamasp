@@ -71,3 +71,7 @@ paragraphs (paywall).
   the URL is known.
 - `docs/todo/192` — the same "hand read of a CNBC page" shape for oil.
 - #62 report section, `reports/2026/09/2026-09-30-brief.md`.
+
+## Update 2026-10-04 (retro)
+
+4 Oct retro: NFP's component split was available at print+0 (the investinglive print post carries the sector lines, #61 2 Oct), so the gap is PCE-specific — BEA 403s, neither relay carries goods/services/energy at print+50, and the CNBC article URL is not derivable from its index headline (six slug guesses 404 on 30 Sep). Playbook rule 14 now treats the PCE split as a next-brief item once the CNBC/MarketWatch piece lands in `items`.

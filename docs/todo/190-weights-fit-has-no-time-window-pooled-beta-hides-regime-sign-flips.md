@@ -88,3 +88,7 @@ one month's retrace into the map.
   fits sections.
 - `docs/todo/004` — theme vocabularies; `docs/todo/016` — Fit B
   normalisation.
+
+## Update 2026-10-04 (retro)
+
+4 Oct retro re-ran the split with the weighting recorded this time: hourly net exposure = Σ direction × (4 − tier) per theme, `item_scores` joined to `items` on `published_at`, 24h-forward GC return from `prices` (first GC row ≥ hour, first row ≥ hour+24h, ≤6h tolerance). geopolitics: Aug bull n=66 +0.14% / bear n=39 −0.54%; Sep bull n=242 −0.12% / bear n=87 −0.01%; Oct n=11 +0.11% / n=3 −0.45%. rates_dollar: Aug n=52 −0.19% / n=47 −0.18%; Sep n=101 −0.20% / n=193 −0.02%; Oct n=4 −0.23% / n=9 −0.04%. The September rates_dollar inversion persists (~1.2σ); the 27 Sep table used an unrecorded weighting so the two retros' numbers are not comparable — the case for the split living in `jamasp weights fit` rather than in a retro's ad-hoc script. Pooled fit 3 Oct 23:30Z: rates_dollar β +0.038 (2.5σ), geopolitics +0.030 (2.0σ), flags `negative:other` only (0.8σ).

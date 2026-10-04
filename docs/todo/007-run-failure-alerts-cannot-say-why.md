@@ -216,3 +216,7 @@ harder halves are untouched:
 The credential check helps only with the one cause it knows about. A quota
 exhaustion, a `PATH` change, or a malformed prompt would still produce the same
 undiagnosable `exit=1` wall it did in August.
+
+## Update 2026-10-04 (retro)
+
+4 Oct retro: the Thu 1 Oct 19:10Z alert read "Jamasp FAILURE: scan run timeout after retry, exit=None." — `agent_runs` #631 (started 19:00:00Z, finished 19:10:00Z, status timeout, exit_code NULL); the journal line is "scan: timeout" and nothing says what the run was doing at the 10-minute mark. No 19:00Z scan report exists for 1 Oct; the Yanbu terminal hit (Thu) surfaced at the Fri 09:00Z scan.

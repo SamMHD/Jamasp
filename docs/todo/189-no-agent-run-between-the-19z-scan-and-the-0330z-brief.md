@@ -57,3 +57,7 @@ desk's call on budget.
 - 26 Sep 2026 stance, "What flips me": "the 21:00Z Sunday scan re-reads
   Monday's wakeup premise."
 - 26 Sep 2026 scans 571–578: 25–75 seconds each, exit 0, no notify.
+
+## Update 2026-10-04 (retro)
+
+4 Oct retro: `42512099` (Sunday reopen band, 0.7) was the band family's first miss (5/6) and came on the first weekend whose kinetic input — an unverified Fars cruise-missile claim plus Trump "further strikes", Sun 27 Sep evening — landed after the 19:00Z scan and inside this window; Asia fell 2.1% with no reader until 03:30Z. Playbook rule 25 (new) now reads the blind-window input at the Monday brief before any level is written; the slot gap itself is unchanged.

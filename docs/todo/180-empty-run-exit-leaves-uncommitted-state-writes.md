@@ -41,3 +41,7 @@ reconstruct what the first attempt had done from `git diff`.
    should default to print+60, not print+45 — CME FedWatch relays on our
    feeds lag the print by ~45–60 min (the 4 Sep odds line first appeared
    on actionforex's front page at ~13:20Z for a 12:30Z print).
+
+## Update 2026-10-04 (retro)
+
+4 Oct retro: another instance — deepdive #620 (PCE tape-clause close-out, 30 Sep 23:35Z) exited `empty` at 23:38Z, eight minutes before the GC_CLOSE row it was booked to read printed (23:46:21Z); the retry #621 at 23:40Z caught it. The run had polled three minutes and exited without writing the note. See todo-194 for the cadence drift that caused the race.

@@ -119,3 +119,7 @@ firing. A real second source (options 1–3) remains the fix.
 - `reports/2026/08/2026-08-09-retro.md` and `...-16-retro.md` — where the
   phantom "calendar feed dark" task came from.
 - Playbook heuristic #8 (scheduled-event anchor) is the rule this gap weakens.
+
+## Update 2026-10-04 (retro)
+
+The feed refreshed at 06:32Z Sun 4 Oct to cover 5–9 Oct (9 events), after the 03:50Z Sunday brief had written "`jamasp calendar` returns 0 events for 14 days" — a Saturday/early-Sunday "feed ends" status is stale by the Monday brief. The two-to-three-week horizon the brief needs for CPI dates and Fed slots is covered by two pages that extract: `tradingeconomics.com/united-states/calendar` (UTC, consensus, ~3 weeks) and `marketwatch.com/economy-politics/calendar` (ET, venues, two weeks); playbook rule 16 now reads them before declaring a date unverified. Still the workaround, not the fix.

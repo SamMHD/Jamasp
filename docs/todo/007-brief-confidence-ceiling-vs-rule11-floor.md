@@ -89,3 +89,7 @@ Every brief-written structural negative this week (`a0429ae4` `e0e5cd9c`
 carries the "rule-10 floor blocked by the ceiling" boilerplate. Stated
 average this week 0.595 vs observed 0.864; roughly a third of that gap is
 this ceiling. The decision in Fix (A or B) is still Saman's.
+
+## Update 2026-10-04 (retro)
+
+4 Oct retro: 0.7 bucket 5/6 this week (the miss `42512099` was a reopen band, not a structural negative); structural-negative family 6/6, 63/64 lifetime; the ceiling still forces every brief-written structural negative to 0.7 while rule 10 says 0.8.

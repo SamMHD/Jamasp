@@ -112,3 +112,7 @@ than a hand lookup per speaker. This week's `jamasp calendar` (27 Sep
 16:00Z) does show "FOMC Member Waller Speaks" Thu 1 Oct 14:00Z tagged
 **Medium** — so the Low tag is not universal; the ingest override in Fix
 option 1 should key on the title pattern, not on the impact field.
+
+## Update 2026-10-04 (retro)
+
+4 Oct retro, verified in-run: for 5–9 Oct the `events` table carries `FOMC Member Bowman Speaks` (Tue 14:45Z), `Musalem` (Thu 17:40Z) and `Collins` (Fri 20:00Z) as Low rows — hidden by the CLI — and does NOT carry Williams (Tue 13:05Z), Logan (Tue 22:00Z) or Schmid (Fri 13:30Z) at all. The Trading Economics and MarketWatch calendars list all six and extract (see todo-001 update); the Sat 3 Oct brief wrote "no Fed speaker on any list" after reading four sources that do not list speakers.

@@ -85,3 +85,7 @@ Smallest change that removes the class of error:
 - `docs/todo/183` — the other GC feed gap (dark on a US holiday).
 - `docs/todo/003` — Yahoo chart timestamp errors on the same source.
 - `reports/2026/09/2026-09-20-retro.md` — the `f8b7b030` scorecard entry.
+
+## Update 2026-10-04 (retro)
+
+4 Oct retro: the GC_CLOSE row lands on the ingest tick after the technicals interval fires, so its slot drifts (observed 23:16Z Sun 27 Sep, 23:30Z Mon/Tue, 23:46Z Wed, 00:31Z Sat 3 Oct). Playbook rule 17 now names the basis as "the first GC_CLOSE row at or after 23:00Z" rather than "the 23:16Z row"; `42512099` missed on 28 Sep because its text named the brief's live price row (03:20Z, one ATR later) instead. Code side of the drift is todo-194.

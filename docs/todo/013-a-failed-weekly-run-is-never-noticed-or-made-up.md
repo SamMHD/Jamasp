@@ -177,3 +177,7 @@ Sundays. Nothing in Fix §1 or §2 has landed; the run succeeded because
 the day's session budget happened to hold, not because anything changed.
 The timer-slot move (17:00Z+) in the 20 Sep update is still the cheapest
 prevention.
+
+## Update 2026-10-04 (retro)
+
+4 Oct retro ran at its 16:00Z slot (agent_runs: retro started 16:00Z); 4 of the last 6 Sundays ok.
