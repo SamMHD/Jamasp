@@ -215,6 +215,21 @@ watchlist:
       UMich Fri 14:00Z. No Fed speaker on any list; events feed ends 3 Oct.
       CPI mid-Oct still unverified (BLS 403). e5104cf2 (no relay >=25% through
       Thu wrap) has ~9 pts of room.
+      4 OCT BRIEF (Sun, no tape): CORRECTION - the week is NOT speaker-free.
+      TE US calendar (UTC) + MarketWatch calendar (ET), both extract: Williams
+      Tue 13:05Z, Bowman Tue 14:45Z, 3y auction Tue 17:00Z, Logan Tue 22:00Z
+      (Dallas Fed Global Perspectives with Carstens; TE 23:00Z), Musalem Thu
+      17:40Z, Schmid Fri 13:30Z (KC Economic Outlook), Collins Fri 20:00Z -
+      three voters Tuesday; venues for Williams/Bowman unretrievable (scan
+      markers, rule 24; lesson filed). actionforex weekly (Sat): FedWatch Oct
+      pause 77.9% / hike 22.1% at Friday's close (pause 35.8% a week earlier),
+      Dec modal 4.00-4.25 at 67.3%, Apr-27 modal 4.50-4.75 at 35.3% - "NFP won
+      the first move, inflation risk won the closing argument"; 2y next
+      projection 5.055, 10y 5.413. The 22.1% counts on e5104cf2's basis -> ~3
+      pts of room, Logan Tue the named breaker. CPI VERIFIED (secondary): Wed
+      14 Oct 12:30Z, cons 0.5/3.7 headline, 0.3/2.5 core; Cleveland nowcast
+      0.53/0.20; wakeup #70 at 13:15Z. ISM services Mon: prices paid cons 72.9
+      (prev 72.6). Weights 40/35/25, conviction 0.5.
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -547,6 +562,27 @@ watchlist:
       Trump Thu 'very fair deal or they won't exist'; Rezaei Fri 'reality is
       shaped by Iran's missiles'. Brent Dec closed FLAT (102.25) through all
       of it. Kinetic 25 held; all four Sunday closers on track.
+      4 OCT BRIEF: CAMP DAVID - Vance chaired an unannounced several-hour NSC
+      meeting Fri (Rubio, Hegseth, Witkoff, Ratcliffe, Caine); Iran + the
+      Saudi-Houthi war on the agenda; decisions "made or at least discussed in
+      depth" (Axios via Gulf News); June 2025 precedent. Force: Roosevelt CSG
+      (left 27 Sep) + ~10K sailors/Marines, Makin Island ARG sailed Mon, Boxer
+      ARG off Hormuz; GW stays, Bush left; three carriers "when the Roosevelt
+      arrives" (last pre-2026: 2003); Patriot batteries to Qatar/KSA energy
+      sites (Axios). Trump: "possible after the midterms" / "You will see".
+      Two Iranian UNGA delegates left the US Sat; Araghchi privately offers
+      inspector access for sanctions relief (Bloomberg). HOUTHI CLAIM on Aramco
+      Riyadh (Saree: missiles+drones, "fires"; response to strikes on Sanaa) -
+      Saudi statements cover only Fri's Asir interceptions (3 missiles at
+      Khamis Mushait; debris injured one, prayer room damaged) and a Najran
+      school; no Riyadh confirmation 7h on -> 6927fc6a (0.6, through Mon).
+      AJ liveblog: "Yemeni forces strike Sanaa" (air campaign live; ground
+      offensive not announced), "UAE frees Iranian prisoners"; Velayati warns
+      the UAE. Hormuz: no eighth hull Sat-Sun; Iraq's state tankers transiting;
+      MarEx: Iran selling down floating stocks off Malaysia/China after 10
+      weeks of blockade - income drying up (= Kpler). Kinetic 25 held;
+      5c48606a (no on-record US strike Mon-Fri, 0.65) recorded; the four
+      Sunday closers run to 23:59Z on track.
     since: 2026-07-31
 
   - theme: kinetic-transmission-inverted
@@ -824,6 +860,14 @@ watchlist:
       headline CPI >=0.4) unaffected; the October print is the one a release
       touches. ISM prices paid 77.9 (steel, aluminum, petroleum, tariffs) =
       the input-cost leg still rising.
+      4 OCT BRIEF: the rule-11 midpoint for the two CPI claims, from the
+      Cleveland Fed nowcast (page extracts; 2 Oct): September headline 0.53,
+      core 0.20, y/y 3.60/2.39; October to date 0.22/0.20. TE consensus for
+      the 14 Oct print: headline 0.5 (y/y 3.7), core 0.3 (2.5). 4dfbd1d8
+      (headline >=0.4) has consensus and nowcast with it; 62c34dbd (core
+      <=0.3) has the nowcast with it and the consensus at its edge. PPI Thu
+      15 Oct (cons 0.5). The G7/IEA 100M-bbl release (front-loaded diesel,
+      first 20 days) is an October-print input, not a September one.
     since: 2026-07-31
 
   - theme: us-fiscal-dominance
@@ -973,4 +1017,9 @@ watchlist:
       Trigger set unchanged (equities -2% with Nikkei and BTC down together,
       2y -15bp, USDJPY <156 -> bearish-rates 50, base 20). Kill on 8 Oct if
       nothing has printed.
+      4 OCT BRIEF (kill clock day 10 of 14; no tape): BTC 84.8K (+0.3% on the
+      weekend), nothing else printed. The actionforex weekly adds the euro
+      leg: French-German 10y spread ~150bp (euro-crisis wide) as the dollar's
+      second support - a sovereign-stress tell outside the US, not the crack
+      this theme names. Trigger set unchanged; kill on 8 Oct if nothing prints.
     since: 2026-09-24

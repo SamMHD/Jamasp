@@ -1738,6 +1738,28 @@ events:
       >=5bp (both readings); <=68 -> hold. The Tue 03:30Z brief closes any
       clause on the row and the 2y close; no wakeup (not CPI/NFP/FOMC class).
 
+  - date: 2026-10-06
+    time_dubai: "Tue 6 Oct 17:05 / 18:45 / 21:00 / 02:00-03:00 Wed (13:05Z Williams; 14:45Z Bowman; 17:00Z 3y auction; 22:00Z MarketWatch / 23:00Z TE Logan - Dallas Fed Global Perspectives, conversation with Agustin Carstens; US trade 12:30Z) - verified 4 Oct on the Trading Economics US calendar (UTC) + MarketWatch economic calendar (ET); venues for Williams/Bowman not yet retrievable (NY Fed events page lists a 6 Oct event by date only; Board pages list delivered speeches only)"
+    title: Three voters on Tuesday (Williams, Bowman, Logan) + the 3y auction - scan markers under rule 24, no deepdive until venue/title known
+    why: >
+      Saturday's stance assumed no Fed speaker in the week and no governor
+      inside e5104cf2's window (no dated October relay >=25% through the
+      Thu wrap; the actionforex weekly's Friday-close FedWatch figure is
+      22.1% - three points of room). Williams' 29 Sep 'no need for urgency'
+      started the October repricing - a repeat with 'another hike
+      reasonable' is a December-firming line the 2y can read either way;
+      Logan's 'rates need to rise another 50bp or more' (1 Oct) is the
+      named breaker; Bowman's recent venues have been supervision (eSLR 1
+      Oct). Logan lands in the blind window (19:00Z-03:30Z, todo-189).
+    action: >
+      Tue 15:00Z scan: NY Fed text of Williams first (posted at speaking
+      time), then the dated odds sentence (investinglive post, actionforex
+      front); Tue 17:00Z scan: Bowman's title on the Board index - policy
+      vs supervision - and the 3y auction tail; Wed 03:30Z brief: Logan's
+      remarks and any Asia-session odds sentence, the Tue row vs the Tue 2y
+      close (both readings). Relay bands only (>=25% -> e5104cf2 MISS;
+      >=40% -> bearish-rates +10 with a tape clause); no move on wording.
+
   - date: 2026-10-07
     time_dubai: "Wed 7 Oct 21:01 / 22:00 (17:01Z 10y auction; 18:00Z FOMC minutes of the 15-16 Sep meeting - verified 3 Oct: Board FOMC calendar page 'minutes three weeks after the decision', actionforex summary, investinglive week-ahead); RBI decision earlier (Wells Fargo: first hike to 5.50%)"
     title: FOMC minutes + 10y auction - tone without guidance; scan marker for the 19:00Z scan, no wakeup
@@ -1759,7 +1781,7 @@ events:
 
   - date: 2026-10-08
     time_dubai: "Thu 8 Oct 15:30 / 16:30 / 21:01 (11:30Z ECB accounts; 12:30Z claims cons 200K; 17:01Z 30y auction); SGE reopens (Golden Week ends); e5104cf2 closes at the Americas wrap"
-    title: 30y auction + ECB accounts + claims + SGE reopening - scan markers
+    title: 30y auction + ECB accounts + claims + SGE reopening + Musalem 17:40Z (TE/MarketWatch, verified 4 Oct; non-voter, scan marker) - scan markers
     why: >
       The 30y auction at 5.62 (Fri close; 5.65 = the stagflation line in
       the stance) is the second long-end tell of the week; the SGE
@@ -1774,7 +1796,7 @@ events:
 
   - date: 2026-10-09
     time_dubai: "Fri 9 Oct 16:30 / 18:00 (12:30Z Canada jobs; 14:00Z UMich Oct prelim - sentiment cons 48.1, 1y inflation expectations prev 4.6%)"
-    title: UMich inflation expectations - the week's last inflation input; the Sat 10 Oct brief closes the two 3-Oct claims on the Fri row
+    title: UMich inflation expectations (1y cons 4.7 vs 4.6, 5y 3.5 vs 3.4; TE) - the week's last inflation input; Schmid 13:30Z (KC Economic Outlook, opening remarks) 30 min before it - UMich owns the odds trigger (rule 14); Collins 20:00Z (blind window, Sat brief reads); the Sat 10 Oct brief closes the two 3-Oct claims and 5c48606a on the Fri row
     why: >
       1y expectations at 4.6% are the survey leg of the passthrough theme;
       a print >=5.0 is an odds-band input via the 2y into the mid-Oct CPI.
@@ -1787,3 +1809,36 @@ events:
       odds sentence; Sat 10 Oct brief: score the two 3-Oct claims, verify the
       CPI date and book its print+45 deepdive, re-verify the 12-16 Oct Fed
       slots on the Board index and the regional pages (rule 24).
+
+  - date: 2026-10-14
+    time_dubai: "Wed 14 Oct 16:30 (12:30Z) CPI Sep; 22:00 (18:00Z) Beige Book - date per the Trading Economics US calendar read 4 Oct (BLS 403, todo-193); secondary-source flag until the Sat 10 Oct brief re-verifies (actionforex 10/12-10/16 summary)"
+    title: September CPI - the next flip owner; wakeup #70 booked at 13:15Z (print+45)
+    why: >
+      Consensus headline +0.5% m/m / 3.7% y/y (prev 0.4 / 3.4), core +0.3% /
+      2.5% (prev 0.3 / 2.4); Cleveland Fed nowcast (2 Oct) headline 0.53,
+      core 0.20. Open claims: 4dfbd1d8 (headline >=0.4, 0.65) and 62c34dbd
+      (core <=0.3, 0.7) score on the print. Stance flip lines: core >=0.4
+      with the 2y UP >=5bp -> 35/45/25; core <=0.2 with the 2y DOWN >=5bp
+      -> 45/30/25; tape clause from 12:30Z either way (rule 23). The
+      October-dead relay (15-22%) is a bet that core stays at 0.3; the
+      27-28 Oct FOMC is two weeks after the print.
+    action: >
+      Wakeup #70 (deepdive 13:15Z): investinglive print post first, CNBC
+      CPI article ~print+27, actionforex front ~print+50; largest component
+      and the ex-that number before the verdict; the odds sentence; score
+      the two claims; book the close-out wakeup at Globex close+30. No
+      fresh directional prediction at the 14 Oct 03:30Z brief (final hours
+      before a CPI-class print).
+
+  - date: 2026-10-15
+    time_dubai: "Thu 15 Oct 16:30 (12:30Z) PPI Sep (cons 0.5 m/m) + retail sales Sep (control group) + claims; Philly Fed - per the Trading Economics US calendar read 4 Oct"
+    title: PPI + retail sales - the day-after read on the CPI flip's tape clause
+    why: >
+      PPI's core services (the PCE inputs: portfolio management, airfares,
+      medical) decide whether a CPI surprise carries into the Fed's
+      preferred measure; retail sales control is the consumer leg of the
+      energy squeeze. Both land inside the 24h after the CPI deepdive.
+    action: >
+      Thu 15:00Z scan reads the PPI print post for the PCE-input lines and
+      the dated odds sentence; the Fri 16 Oct brief closes any CPI tape
+      clause still open on the Thu row.
