@@ -230,6 +230,15 @@ watchlist:
       14 Oct 12:30Z, cons 0.5/3.7 headline, 0.3/2.5 core; Cleveland nowcast
       0.53/0.20; wakeup #70 at 13:15Z. ISM services Mon: prices paid cons 72.9
       (prev 72.6). Weights 40/35/25, conviction 0.5.
+      5 OCT BRIEF: Sunday open 2y 4.81 (-1.5bp), 10y 5.26, 30y 5.61; October
+      22.1% (Fri close, actionforex weekly) stands as the latest dated figure;
+      the investinglive minutes preview ('below one in four'; Bowman 'prefers no
+      further hikes in 2026' Tue 14:45Z = the named early signal; Williams 'one
+      more reasonable, no rush') is context, not a relay (rule 14). ISM services
+      14:00Z: cons 55.3 (actionforex) / 55.0-55.3 (TE), prices paid prev 72.6
+      (cons 72.9), employment 47.8 -> the 15:00Z scan; prices paid >=75 with the
+      Mon 2y close UP >=5bp -> bearish-rates 40. Ueda Tue 06:35Z (feed High) is
+      a yen input only. Weights 40/35/25, conviction 0.5.
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -284,6 +293,17 @@ watchlist:
       physical read). WGC (Thu): pension funds in NL/US/UK/AU hold 2-5% gold
       since 2020-21 on the bond-equity correlation break - structural, not
       the tape. No floor claim (inside one ATR, Golden Week).
+      5 OCT BRIEF: Deutsche (Ghali, BNN 2 Oct; note 30 Sep): official-sector
+      buying more than double the 2021-22 pace, institutional participation +70%
+      since 2021; CTA net shorts the largest since Oct 2021, discretionary longs
+      -55% from June - 'oversold and underowned', 'buy in Sorrento' (LBMA
+      conference this week) but a Golden Week flush possible first. Sell-side
+      split: BofA 'oil is gold's biggest enemy, risk <4000' vs Morgan Stanley
+      '4000 a strong floor'. LBMA itself sued in London (trial Wed 7 Oct;
+      reserves GBP1.4m vs ~GBP3m costs; Good Delivery List exposed) - structural
+      marker, no price effect. Asian producers hoarding at home (Laos refining,
+      Indonesia 15% tax). Top-50 miners -$264bn (mining.com). SGE shut to Thu;
+      no floor claim inside one ATR.
     since: 2026-07-31
 
   - theme: warsh-credibility
@@ -583,6 +603,25 @@ watchlist:
       weeks of blockade - income drying up (= Kpler). Kinetic 25 held;
       5c48606a (no on-record US strike Mon-Fri, 0.65) recorded; the four
       Sunday closers run to 23:59Z on track.
+      5 OCT BRIEF: the four Sunday closers HIT (483bea33 Saudi restraint,
+      d9142975 escorts, 603c3c19 no arrangement, 8aacb1e6 no US strike);
+      successors 3fe07b8f / faa3ff57 / fed72d60 run to Sun 11 Oct 23:59Z (0.7
+      each). Weekend facts: eighth hull since 28 Sep (LR2 Lipsi, Sun, engine
+      room; MarEx ~1/day, WSJ: Iranian targeting improving); UKMTO: 31 of 48
+      strikes since 6 Jul on the southern Omani route, 25 engine rooms, AIS
+      traffic ~75% below pre-conflict; Houthi attempted strike S of Mokha (UKMTO
+      16:50Z Sun, no damage); Houthi claims on Riyadh + Khurais Aramco
+      UNCONFIRMED by Riyadh (6927fc6a to Mon 23:59Z); Yemen government offensive
+      Sun with Saudi air support + US intel targeting, no US combat role
+      (MarEx/NYT); Oman transit rules (licence 3 days ahead, AIS on, P&I) -
+      dark-shuttle friction; Ghalibaf (Majlis): Hormuz closed until seven
+      conditions, US proposals via a mediator (unconfirmed by Washington),
+      'surprises'; Iran oil minister Paknejad resigned (Bovard caretaker, no
+      reason); B-1s out of Fairford to CONUS after an IRGC-linked plot (Pentagon
+      'remain ready'); OPEC+ hold (core 7 ~25 mb/d, ~5 mb/d below Feb; capacity
+      review to mid-Nov; next 1 Nov); Aramco Nov Asia OSP -$3 (widest discount
+      since 2020); Mideast exports > pre-war on 4/7 days (Kpler). Brent Dec
+      101.4 (-0.8%) at the open - barrels over missiles. Kinetic 25 held.
     since: 2026-07-31
 
   - theme: kinetic-transmission-inverted
@@ -693,6 +732,12 @@ watchlist:
       nothing reached gold. Third session of gold = f(2y close) with DXY at
       a 52-wk high (30 Sep / 1 Oct / 2 Oct): rule 11's three are in, the sign
       test is a reading; recorded as a 0.6 claim for Mon-Fri 5-9 Oct.
+      5 OCT BRIEF: the Sunday open is the fourth chain-consistent shape: 2y
+      -1.5bp, gold +0.2% (4169, high 4191), Brent -0.8% on an eighth hull +
+      Houthi claims; DXY +0.44% to a 52-wk high (102.53) on the euro (OAT-Bund
+      >140bp) and gold UP - the dollar leg is ex-US and subordinate this week
+      (new divergence in the stance). 306d7862 / 968df4d5 session one = Monday's
+      row vs the Mon 2y close.
     since: 2026-09-09
 
   - theme: boj-yen-pillar
@@ -757,6 +802,14 @@ watchlist:
       headline-less 50-pip early-US drop the wrap judged too small/odd for
       intervention. Rule 22: no DXY -0.3 / no cross of 100 (DXY 102) -> the
       yen leg stays subordinate; MoF line 158.5 is a scan marker.
+      5 OCT BRIEF: Kiuchi 'no longer in deflation, no need for excessively loose
+      policy'; Katayama: not reflationist, 'Japan and the US stand ready to act
+      decisively' on FX, Y7tn fund review (Fri); USDJPY 157.96 - the 158.5
+      marker intact; Ueda Tue 06:35Z (feed High) = the 07:00Z scan's marker;
+      Uchida: AI a demand shock lifting prices; markets: BoJ Dec possible, March
+      more likely; Reuters: the pair may have topped <160, support 152.89 then
+      150. MUFG short EUR/JPY to 172. Rule 22: DXY 102.4, no -0.3 ->
+      subordinate.
     since: 2026-09-03
 
   - theme: energy-pce-passthrough
@@ -946,6 +999,12 @@ watchlist:
       Thu 17:01Z, minutes Wed 18:00Z). 30y closed 5.623 (high 5.647) vs the
       5.65 stagflation line; DFII10 2.88 (-5bp). The auctions are where a
       30y-UP / DXY-DOWN / gold-UP session would print if it is coming.
+      5 OCT BRIEF: Sunday open 30y 5.61 (-2bp), 10y 5.26, DXY UP to a 52-wk
+      high, gold UP - not the fiscal shape (DXY UP, long end DOWN). This week's
+      sovereign-stress story is France (OAT-Bund >140bp, above Italy; see
+      euro-sovereign-stress), not the Treasury. 968df4d5 (no both-up pair
+      Mon-Fri) session one is Monday; gates: 10y auction Wed 17:01Z, minutes Wed
+      18:00Z, 30y auction Thu 17:01Z. DFII10 2.88.
     since: 2026-08-20
 
   - theme: liquidity-crack-channel
@@ -1022,4 +1081,34 @@ watchlist:
       leg: French-German 10y spread ~150bp (euro-crisis wide) as the dollar's
       second support - a sovereign-stress tell outside the US, not the crack
       this theme names. Trigger set unchanged; kill on 8 Oct if nothing prints.
+      5 OCT BRIEF (kill clock day 11 of 14): BTC 86.4K (+1.9%), Nikkei +2.5% to
+      a 3-month high on softer hike bets, S&P 7722.7 Fri; nothing in the crack
+      set printed. The euro leg (France) now has its own theme
+      (euro-sovereign-stress, since 5 Oct) - the OAT move is sovereign stress
+      outside the US, not the crack this theme names. Kill on 8 Oct if nothing
+      prints.
     since: 2026-09-24
+
+  - theme: euro-sovereign-stress
+    why: >
+      France repriced as a non-core sovereign: OAT-Bund 10y spread ~110bp
+      (24 Sep) -> ~130 (1 Oct) -> >140bp (Reuters, 2012 wides), ABOVE
+      Italy's; Vanguard 'degrading credit' (FT); the CAC 40 broke its
+      multi-year rising support with no buying response (investinglive 4
+      Oct); EUR/USD 1.1380 -> 1.1165 low (actionforex: 1.1150 / 1.1080
+      below, 1.1275 / 1.1320 above); MUFG short EUR/JPY. This is what put
+      the DXY at a 52-wk high (102.53, Sun 4 Oct session) while the US 2y
+      FELL - an ex-US dollar bid. For gold: (a) the DXY leg of the chain
+      (oil -> 2y -> DXY -> gold, rule 22) carries less information when the
+      move is euro-driven - gold rose +0.2% through the new high on the
+      Sunday open; (b) gold in EUR terms sits near its highs - a European
+      safe-haven bid the paper tape will not show until the SGE/London desks
+      are back (Thu 8 Oct, LBMA conference week); (c) a disorderly OAT move
+      is the 'other central bank' channel (rule 6) for the ECB - accounts
+      Thu 11:30Z. Markers: OAT-Bund 150 / 160bp; EUR/USD 1.1150 / 1.1080;
+      DXY 103; CAC follow-through. Stance line: spread >=160bp with DXY
+      >=103 and gold DOWN -> the dollar leg is back in the chain; gold UP
+      through it -> the ex-US read stands. Not a weight input by itself;
+      enters via the DXY/2y sign test. Kill if the spread closes <120bp for
+      a week.
+    since: 2026-10-05

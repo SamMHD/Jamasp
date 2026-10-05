@@ -1739,6 +1739,24 @@ events:
       clause on the row and the 2y close; no wakeup (not CPI/NFP/FOMC class).
 
   - date: 2026-10-06
+    time_dubai: "Tue 6 Oct 10:35 (06:35Z) - BoJ Governor Ueda speaks (events feed, High)"
+    title: Ueda - yen-leg input, scan marker for the 07:00Z scan, no wakeup
+    why: >
+      Tokyo's tone turned this weekend (Kiuchi 'no longer in deflation';
+      Katayama 'Japan and the US stand ready to act' on FX; Uchida 'AI a
+      demand shock lifting prices') with USDJPY 157.96 against the 158.5
+      MoF marker and markets pricing a BoJ hike December-possible /
+      March-likely. Rule 22: the yen leg is subordinate to the chain unless
+      it moves the DXY -0.3 or through 100 (DXY 102.4, a 52-wk high on the
+      euro) - so this is a marker, not a deepdive; a 'hike at the next
+      meeting' line is read for its DXY effect only.
+    action: >
+      07:00Z scan: Ueda's line (investinglive/actionforex live-comments),
+      USDJPY vs 158.5 and the DXY move; escalate only on a DXY -0.3 with
+      gold moving against the 2y. The Wed 03:30Z brief carries any BoJ
+      repricing into the 29-30 Oct meeting note.
+
+  - date: 2026-10-06
     time_dubai: "Tue 6 Oct 17:05 / 18:45 / 21:00 / 02:00-03:00 Wed (13:05Z Williams; 14:45Z Bowman; 17:00Z 3y auction; 22:00Z MarketWatch / 23:00Z TE Logan - Dallas Fed Global Perspectives, conversation with Agustin Carstens; US trade 12:30Z) - verified 4 Oct on the Trading Economics US calendar (UTC) + MarketWatch economic calendar (ET); venues for Williams/Bowman not yet retrievable (NY Fed events page lists a 6 Oct event by date only; Board pages list delivered speeches only)"
     title: Three voters on Tuesday (Williams, Bowman, Logan) + the 3y auction - scan markers under rule 24, no deepdive until venue/title known
     why: >
