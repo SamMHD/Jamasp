@@ -1812,6 +1812,23 @@ events:
       read the SGE premium/discount vs the Fri row, lift the level-claim
       suspension if the ATR has not changed regime.
 
+  - date: 2026-10-08
+    time_dubai: "Thu 8 Oct 12:30 (08:30Z) - Governor Waller speaks (events feed, Medium; venue/title unknown - the Board 2026 index read 7 Oct 03:37Z lists no upcoming Waller entry; last listed is 'FRED Takes on AI', St. Louis)"
+    title: Waller - a governor inside the e5104cf2 window; rule-24 venue check first, scan marker only
+    why: >
+      A governor's line is a named stance trigger ("pause/done" with the
+      relay <15% -> bearish-rates 30; "further hikes" with the relay >=40%
+      -> +5), and Waller's venues this cycle have been data/AI talks with no
+      policy content. The relay stands at October 19.4% (Tue wrap); the
+      claim's room is ~5.6 pts and closes at the Thu Americas wrap.
+    action: >
+      07:00Z scan: re-extract the Board speeches index --fresh and probe
+      /speech/waller20261008a.htm - a non-policy title cancels the marker, a
+      policy title upgrades it to "read the text at 08:30Z". 09:00Z scan:
+      the dated odds sentence after any policy line (investinglive post,
+      actionforex front); band moves only on the relay, never on wording.
+      No deepdive (rule 24).
+
   - date: 2026-10-09
     time_dubai: "Fri 9 Oct 16:30 / 18:00 (12:30Z Canada jobs; 14:00Z UMich Oct prelim - sentiment cons 48.1, 1y inflation expectations prev 4.6%)"
     title: UMich inflation expectations (1y cons 4.7 vs 4.6, 5y 3.5 vs 3.4; TE) - the week's last inflation input; Schmid 13:30Z (KC Economic Outlook, opening remarks) 30 min before it - UMich owns the odds trigger (rule 14); Collins 20:00Z (blind window, Sat brief reads); the Sat 10 Oct brief closes the two 3-Oct claims and 5c48606a on the Fri row
