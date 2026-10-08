@@ -1877,3 +1877,34 @@ events:
       Thu 15:00Z scan reads the PPI print post for the PCE-input lines and
       the dated odds sentence; the Fri 16 Oct brief closes any CPI tape
       clause still open on the Thu row.
+
+  - date: 2026-10-15
+    time_dubai: "Thu 15 Oct 20:30 (16:30Z; 4:30pm ET per the MarketWatch calendar read 8 Oct) - Hammack (Cleveland) at the Women's Trading Network fireside hosted by Goldman Sachs / Girls Who Code (moderated discussion)"
+    title: Hammack fireside - a markets-adjacent networking venue the day after CPI; scan marker only (rule 24)
+    why: >
+      A moderated discussion, not a prepared policy text, but it lands the
+      evening after PPI/retail sales with any CPI tape clause still open;
+      a hawkish line could carry a dated odds sentence into the blind
+      window (19:00Z scan -> 03:30Z brief).
+    action: >
+      Thu 15 Oct 19:00Z scan: marker only (any relay post); the Fri 16 Oct
+      brief reads the wrap. No deepdive.
+
+  - date: 2026-10-16
+    time_dubai: "Fri 16 Oct 07:30 (03:30Z; 11:30pm ET Thu 15 Oct per the MarketWatch calendar read 8 Oct) - Fed Chair Warsh speaks in Thailand (title and host unknown; the Board 2026 speeches index read 8 Oct 03:32Z has no Warsh entry)"
+    title: Warsh in Thailand - the chair the day after the CPI print, 11 days before the 27-28 Oct FOMC; lands exactly at the Fri brief's start (blind-window slot, rule 16)
+    why: >
+      The chair hierarchy prices the SIZE of a Fed-pricing move (rule 19)
+      and Warsh's last two appearances (Jackson Hole payments symposium,
+      the 16 Sep presser) set the regime's two largest repricings. A
+      policy title would make this the first chair remarks after the CPI
+      flip with December ~80% priced. The slot has no reader: the Fri brief
+      starts as the speech begins.
+    action: >
+      Sat 10 Oct brief (the weekly re-verification): read the Board index
+      --fresh and probe /speech/warsh20261016a.htm and
+      /speech/warsh20261015a.htm; a policy or outlook title books a deepdive
+      wakeup at 04:30Z Fri 16 Oct (speech+60: Board text first, then the
+      investinglive relay and its dated odds sentence); a conference /
+      payments / non-policy title keeps it a Fri-brief marker (rule 24).
+      Re-verify the time against the host once named (Bangkok = UTC+7).

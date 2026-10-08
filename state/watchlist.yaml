@@ -263,6 +263,28 @@ watchlist:
       pending, conviction 0.5. Waller Thu 08:30Z (feed, Medium; no Board index
       entry yet - 07:00Z scan re-extracts the index, 09:00Z scan reads the
       relay). CPI Wed 14 Oct owns the next flip.
+      8 OCT BRIEF: MINUTES (15-16 Sep, out Wed 18:00Z) = tone without guidance
+      (rule 6): 12-0 hike; 'most participants' see another increase 'likely
+      appropriate by year end', 'open mind' each meeting; staff PCE 3.8 / 3.4
+      for Aug, 2% not before 2029; 'several' call policy not or only mildly
+      restrictive, a 'couple' raised r*; staff cite buyback-programme
+      uncertainty in the yield rise; a few asked for Treasury-market-
+      dysfunction contingency plans ('functioning smoothly' - preparedness,
+      not a signal). RELAY (latest dated, Reuters via investinglive Thu):
+      OCTOBER 18%, DECEMBER 80% (from 69% Wed morning) - October stayed dead,
+      December moved +10; fxempire 'over 85%' Dec. NY Fed SCE Sep: 1y
+      expectations 3.9% (highest since May 2023), 3y 3.3, 5y 3.0 anchored;
+      expected earnings 2.6% vs expected spending 5.5% (real squeeze). Wrap:
+      'waiting in October and hiking in December'; the risk now sits on the 14
+      Oct CPI. TAPE: the 2y CLOSED 4.764 (-2.7bp) while gold fell 43.7 on the
+      row - the first same-sign session since 30 Sep (the dollar and the long
+      end did the selling). SLOTS: Waller Thu 08:30Z (no Board entry,
+      MarketWatch silent - venue unknown; 07:00Z scan probes), Musalem 17:40Z
+      at Bloomberg's Future of Fixed Income (non-voter, markets venue), Schmid
+      Fri 13:30Z (KC outlook, opening remarks), UMich 14:00Z, Collins Fri
+      20:00Z (blind); Hammack Thu 15 Oct 20:30Z (fireside); WARSH IN THAILAND
+      Fri 16 Oct 03:30Z (MarketWatch) - the chair the day after CPI, lands at
+      brief time.
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -337,6 +359,20 @@ watchlist:
       exit. Perth Mint September sales nearly doubled to a 7-month high as
       prices slid. WGC Q3 Demand Trends webinar invitation out (6 Oct). SGE
       reopens Thu 8 Oct.
+      8 OCT: PBOC bought for a 23rd straight month in September - 77.47 Moz
+      from 76.73 (+0.74 Moz, about 23t, the largest monthly add of the run;
+      fxempire on the SAFE data). WGC: official purchases 39t in August (+70%
+      m/m, twice a year earlier; China, Poland, Uzbekistan led), YTD 170t.
+      ETFs: $10bn in September, Q3 a RECORD $31bn, holdings +67t to a record
+      4,256t while the price fell 8.5% - the slide was futures (managed money
+      -84t equivalent, spreads -156t; BMO/WGC), not investors leaving; UK-
+      listed funds $7.5bn in Q3 tracking gilt term premia (the fiscal hedge
+      lives in ETFs). India at a premium to London for the first time since
+      the May duty hike; China premiums 'healthy' (BMO), the Shanghai premium
+      at a three-month high before Golden Week; SGE reopened Thu 01:30Z -
+      premium unread at 03:31Z (no source yet; SGE_AU_CNY_G feed stale since
+      28 Sep). DNB moved 86t closer to home (custody reflex). The demand floor
+      is intact under 4100; the seller is the paper desk.
     since: 2026-07-31
 
   - theme: warsh-credibility
@@ -382,6 +418,12 @@ watchlist:
       up with the 2y DOWN is the rates desk). d8e247ef HIT LOCKED (Fri not
       both-up, no pair can complete Mon; Tuesday scores). Base 15. Confirm:
       a 30y close >=5.50 with gold UP and DXY DOWN -> base 25.
+      8 OCT: the minutes show the September hike unanimous and most pencilling
+      another - the pressure read keeps losing; the debasement tell did not
+      print Wed (30y UP 2bp, DXY UP 0.41, gold DOWN 43.7). Pepperstone (Weston
+      via Reuters): gold decouples from yields only when the long end is
+      repriced as sovereign/fiscal risk - the same test the stance runs
+      through the 968df4d5 shape.
     since: 2026-07-31
 
   - theme: middle-east-risk-premium
@@ -686,6 +728,37 @@ watchlist:
       to meet Putin in Turkmenistan; a sanctions-listed missile-industry
       veteran nominated defence minister. Class unchanged (rule 21) -> kinetic
       25 held; 440d34a8 closes Wed 23:59Z (Thu brief scores).
+      8 OCT BRIEF: THE WESTERN GULF REACHED - UKMTO-verified attack Wed
+      19:00Z: an unnamed tanker 'struck by multiple projectiles' ~50nm N of
+      Madinat ash Shamal, Qatar, crew casualties; unattributed. MarEx: the
+      first tanker attack in the western half of the Gulf in weeks; no US
+      surface combatants west of Hormuz, Manama no longer operationally
+      significant, land forces drawn down. Reuters/JMIC: 12 attacks 28 Sep-5
+      Oct, the war's highest week (IMO: 9). IRGC adviser Naqdi (Fars): the
+      'illegal' southern routes along Oman's coast 'will soon be blocked';
+      CENTCOM: 'FALSE' - 20 million barrels moving, 'the US and regional
+      partners clearly control the strait'. IRAN-OMAN: coordinates of the
+      designated safe routes agreed, to be filed with the IMO (Baghaei/IRNA) -
+      Iranian-side only, not a US-Iran text (fed72d60 untouched); Baghaei: the
+      reply to the US counterproposal goes 'through mediators'. SAUDI: GACA
+      confirmed the Houthi strikes on King Khalid Intl (Riyadh: 1 killed / 8
+      injured) and Abha (2 / 28) - 3 killed, 36 injured; coalition hit 82
+      Houthi targets in Saada, Hodeidah, Al-Jawf, Marib incl. 11 missile
+      depots; Riyadh attributes to the Houthis, not Iran (3fe07b8f untouched);
+      5bda2c98 MISS (scored 19:00Z scan). US POSTURE (Axios via investinglive,
+      extracted): the Pentagon told CENTCOM 'several days ago' to complete
+      preparations for resuming major combat (energy, infrastructure, nuclear
+      targets, likely with Israel); no date, Trump undecided; an Israeli
+      official: before the US midterms 'not high', 'significantly' higher
+      after; Trump-Netanyahu second call in days; Qatar awaiting Iran's reply
+      (Vance: 60% enrichment the 'threshold issue'). Trump: the war 'will be
+      over very quickly', oil 'will come tumbling down'; 'nice way or not-so-
+      nice way'. USS Abraham Lincoln home (Hegseth aboard in the Pacific) -
+      theatre carrier count down until the Roosevelt arrives late Oct. Oil
+      read the Qatar hit and Riyadh at -0.14 (Brent 100.44, 19:01Z) and +2.1%
+      overnight with Isaias. Class unchanged (rule 21) -> kinetic 25 held;
+      440d34a8 HIT (class-negative family 7/7); new claim: no second strike
+      west of 54E through Sun (0.6).
     since: 2026-07-31
 
   - theme: kinetic-transmission-inverted
@@ -814,6 +887,21 @@ watchlist:
       marker. NEW marker: 30y 5.685 in Asia with DXY UP and gold DOWN is NOT
       the stagflation shape; the 10y auction 17:01Z and the minutes 18:00Z are
       the test.
+      8 OCT: Wed printed the chain intraday and broke it on the close.
+      Europe's bond rout (10y 5.34 / 30y 5.73 at 12:50Z, DXY 102.4) took gold
+      to 4094.7 (two-month low, lowest since 5 Aug); yields reversed on the
+      France short-dated-issuance report and the 1.7bp 10y stop-through; gold
+      recovered to 4141.3 - but the 2y CLOSED DOWN 2.7bp (4.764) with the row
+      DOWN 43.7 = the first same-sign session since 30 Sep. Named seller: the
+      dollar (DXY +0.41 to 102.24, an 18-month high per Reuters, 'buying
+      relentless' - wrap) and the long end (30y +2bp close), the 2y a
+      passenger. The Qatar strike (19:00Z) and the Riyadh casualties moved
+      Brent -0.14 at 19:01Z - zero oil leg, zero gold leg (rule 22, kinetic
+      subordinate). Asia Thu: Brent +2.1% (Isaias + Qatar) -> 2y +1.7bp ->
+      gold UP 15 to 4156 (AGAINST the chain: SGE-reopen bid or short cover
+      from the low; DXY flat). Sign test 306d7862 after three sessions:
+      opposite 1 (Tue) / same 1 (Wed) / flat 1 (Mon) - a second same-sign
+      session is a MISS and base 40 -> 35.
     since: 2026-09-09
 
   - theme: boj-yen-pillar
@@ -893,6 +981,9 @@ watchlist:
       at 03:16Z after 158.48 at 01:15Z - AT the 158.5 MoF marker; DXY 102.03
       (+0.2) - no DXY -0.3, still subordinate (rule 22). Morgan Stanley:
       neutral USD with a bullish skew, bearish yen.
+      8 OCT: USDJPY 158.20 (157.59-158.22 Wed/Thu); the 158.5 MoF marker held
+      through a DXY 18-month high; TFX launches BoJ meeting-by-meeting rate
+      futures (investinglive). Not a chain input this session.
     since: 2026-09-03
 
   - theme: energy-pce-passthrough
@@ -1004,6 +1095,18 @@ watchlist:
       <=0.3) has the nowcast with it and the consensus at its edge. PPI Thu
       15 Oct (cons 0.5). The G7/IEA 100M-bbl release (front-loaded diesel,
       first 20 days) is an October-print input, not a September one.
+      8 OCT: Brent Dec 102.32 (+2.1%) at 03:31Z Thu on TS Isaias (Chevron 4 +
+      Shell 5 US Gulf facilities shut in; Mars, Olympus, Ursa, Vito,
+      Appomattox evacuated; volumes undisclosed) and the Qatar tanker; Wed
+      settled ~100.20 (WTI 88.48, -0.96) after EIA -3.19 mb vs +1.7 exp - the
+      market faded the Riyadh casualties and the Qatar hit on the day. IEA
+      members back a faster stock release (The National); the EU task force
+      meets on the G7 plan; diesel margins >10%. NY Fed SCE: expected gasoline
+      inflation 4.8%. MINUTES: 'the longer energy prices stayed high, the
+      greater the risk' of spreading - oil is now an explicit Fed input
+      (investinglive: 'further supply shocks would strengthen the case for
+      tightening rather than be looked through'). CPI 14 Oct: cons 0.5
+      headline, nowcast 0.53.
     since: 2026-07-31
 
   - theme: us-fiscal-dominance
@@ -1096,93 +1199,22 @@ watchlist:
       'may be overdone'; two veteran bond bears bullish on the long end >5%.
       New claim on the 10y auction (no tail >=1.0bp, 0.65) makes the breaker
       scoreable; the 30y auction Thu 17:01Z is the second gate. DFII10 2.95.
+      8 OCT: THE 10y AUCTION PASSED - $39bn at 5.300% vs WI 5.317% (1.7bp
+      stop-through; 18fe8bf5 HIT); the 30y fell from 5.73 (24-year high) to a
+      5.661 close (+2.0bp on the day), 10y 5.277 (+0.6), 2y 4.764 (-2.7): a
+      bear-steepener with DXY UP and gold DOWN = the rates desk, not
+      debasement (968df4d5: no both-up pair through Wed). The reversal's named
+      cause was a report that France is weighing more SHORT-DATED issuance ('a
+      classic move from countries facing a fiscal squeeze' - wrap) - the
+      fiscal squeeze is European. MINUTES: staff cite 'uncertainty related to
+      the Treasury's buyback program' in the yield rise (CNBC: buybacks 'had
+      little impact'); a few wanted contingency plans for Treasury-market
+      dysfunction. WGC/BMO: UK/EU ETF buying tracks term premia - the fiscal
+      hedge is in ETFs, not in COMEX. 30y AUCTION Thu 17:01Z (prev 5.308%) is
+      the week's second tell - new claim (0.6, no tail >=1bp); Asia Thu 30y
+      5.698 (+3.7) with DXY flat and gold UP - the Thu closes decide the
+      shape.
     since: 2026-08-20
-
-  - theme: liquidity-crack-channel
-    why: >
-      The only gold-UP route in the 15/60/25 regime: a liquidity event that
-      pulls the FRONT END down (equities -2% with Nikkei and BTC down
-      together, the 2y -15bp, USDJPY <156) - gold rises through the 2y,
-      not through a haven bid. Named since 22 Sep as the third channel;
-      given its own lines 24 Sep because Wed printed the first cracks: S&P
-      -0.75%, Russell -1.8%, Nasdaq down on a 5.11% 10y; MarketWatch: the
-      narrowest breadth since the dot-com peak; investinglive wrap: 'dam
-      breaking' language on bonds; BTC 84.3K (-2.6% after +14% on the
-      week, ETF inflows ~$1bn/day - the flow that beat gold 21-22 Sep);
-      USDJPY 157.93 vs the BoJ 158 rate-check line and the MoF 160; Japan
-      flash PMI at a four-month low; Australia unemployment 4.6% (highest
-      since 2021). Confirms (bearish-rates 50, base 20): the trigger set
-      above printing together on one session with gold UP. Kills (theme
-      out): two weeks of equity records with the 2y >=4.85 and gold flat;
-      or the crack prints and gold FALLS with everything (margin-call
-      regime - kinetic-transmission-inverted's read wins).
-      25 SEP: first datapoint on the line - investinglive/Reuters: the 10y
-      at 5.2 is 'testing how much the equity market can take', pressing AI
-      valuations with the Nasdaq near records. Thu: S&P -0.02% with Meta
-      +4.5% 'masking the losers' (Arm -7.9%), Dow -0.31%, Russell -0.11%,
-      Europe down 0.2-0.9%; Nikkei +1.2% Fri on chips; BTC flat at 84.3K (did
-      not follow the late equity rebound). Oxford Economics recession signal
-      flashing while spending holds. Trigger set NOT printed (needs equities
-      -2% with Nikkei and BTC down, 2y -15bp, USDJPY <156). Quarter-end Wed
-      30 Sep is the calendar's own stress point.
-      26 SEP: no crack - S&P +0.5% and Nasdaq at a record on the Iran hopes
-      and 'a retreat from the +5.20% highs in 10-year yields'; degrossing (Meta,
-      Intel sold; laggards bought) rather than a changed view; BTC 84.0K flat
-      for a third day (did not follow equities up - the BTC-beats-gold flow of
-      21-22 Sep has stalled); USDJPY 157.19 on verbal intervention; UMich 48.1.
-      Trigger set NOT printed. Quarter-end Wed 30 Sep with PCE + revisions at
-      12:30Z is the slot; the 30y at 5.49-5.53 is the pressure. Kill clock:
-      two weeks of equity records with the 2y >=4.85 and gold flat = theme out
-      (week one of two done, but the 2y just closed 4.86).
-      29 SEP: the closest print yet to the trigger set, and still not it - Mon
-      28 Sep the 10y closed 5.242 (June-2007 high, 5.27 intraday) and the 30y
-      5.562 (2004 high) on the weakest 7y bid-to-cover in a year with real
-      yields, not breakevens, doing the work (Aberdeen); GVZ +10.7% to 24.8,
-      silver broke its bear flag to 61.4, gold -3.3% on the row to 4156 (-$164
-      spot), S&P -0.8%, Nikkei down Tue on oil and yields - but BTC only -0.75%,
-      the 2y UP 6.4bp (4.924) and USDJPY 157.3: the bond-rout half without the
-      equity/BTC/front-end half. Read: the long end is now the price-setter for
-      gold (supply + real yields), the 2y a passenger. Kill clock RESET: the
-      theme stays live through quarter-end Wed (PCE + revisions 12:30Z, Brent
-      Nov expiry, China dark from Thu). Trigger set unchanged: equities -2% with
-      Nikkei and BTC down together, 2y -15bp, USDJPY <156 -> bearish-rates 50,
-      base 20.
-      30 SEP: no crack - S&P -0.17%, BTC +0.5%, 2y -3.5bp, USDJPY 156.5
-      (half-year-end flows; the <156 marker is 50 pips away but ALONE); the
-      30y closed 5.594 (highest since 2002) and eased 3bp in Asia; GVZ 24.4
-      (-1.9%). Quarter-end session TODAY with PCE + revisions at 12:30Z: the
-      slot. Kill clock: week one of two (equity records with the 2y >=4.85 and
-      gold flat) still open; the 2y is 4.89 and gold is not flat.
-      1 OCT: no crack on quarter-end - S&P -0.25% (Dow at June lows), Nasdaq
-      +0.24% (Micron beat), BTC 83.4K flat, 2y flat 4.887, USDJPY 158.2 (UP,
-      away from the <156 marker), GVZ 23.7 (-2.6%); the 30y closed 5.639
-      (field) and printed 5.653 in Asia - the bond-rout half keeps extending
-      without the equity/front-end half. Golden Week (SGE shut to 8 Oct) thins
-      the physical bid under 4200. Kill clock: week one of two still open;
-      trigger set unchanged (equities -2% with Nikkei and BTC down together,
-      2y -15bp, USDJPY <156 -> bearish-rates 50, base 20).
-      3 OCT BRIEF (kill clock day 9 of 14): Nasdaq-100 record close, S&P
-      +0.73%, BTC 84.5K (-0.9%), 2y UP, USDJPY 157.8, GVZ 23.2 - the equity /
-      front-end half is still absent; the bond-rout half paused (30y +2bp).
-      Trigger set unchanged (equities -2% with Nikkei and BTC down together,
-      2y -15bp, USDJPY <156 -> bearish-rates 50, base 20). Kill on 8 Oct if
-      nothing has printed.
-      4 OCT BRIEF (kill clock day 10 of 14; no tape): BTC 84.8K (+0.3% on the
-      weekend), nothing else printed. The actionforex weekly adds the euro
-      leg: French-German 10y spread ~150bp (euro-crisis wide) as the dollar's
-      second support - a sovereign-stress tell outside the US, not the crack
-      this theme names. Trigger set unchanged; kill on 8 Oct if nothing prints.
-      5 OCT BRIEF (kill clock day 11 of 14): BTC 86.4K (+1.9%), Nikkei +2.5% to
-      a 3-month high on softer hike bets, S&P 7722.7 Fri; nothing in the crack
-      set printed. The euro leg (France) now has its own theme
-      (euro-sovereign-stress, since 5 Oct) - the OAT move is sovereign stress
-      outside the US, not the crack this theme names. Kill on 8 Oct if nothing
-      prints.
-      7 OCT: nothing printed in the US - the S&P and Nasdaq closed at records
-      Mon and Tue; the Russell fell Tue and the Mon wrap flagged widening
-      credit spreads (the only candidate tell). Kill date 8 Oct stands: remove
-      at the Thu brief unless a US funding/credit print lands.
-    since: 2026-09-24
 
   - theme: euro-sovereign-stress
     why: >
@@ -1211,4 +1243,13 @@ watchlist:
       spread narrowed and EUR rebounded (investinglive 11:19Z), DXY closed
       101.83 with gold UP - the ex-US-dollar read held both ways. Spread level
       not relayed in figures; <120bp for a week kills the theme.
+      8 OCT: French relief lasted one day - the euro slid again Wed
+      (actionforex), European yields led the morning rout that took gold to
+      4094.7; a report that France is weighing more short-dated issuance
+      reversed global yields in the US afternoon; DXY closed 102.24 (+0.41;
+      Reuters: an 18-month high), 'some shift away from euros on debt worries'
+      (wrap). Gold followed the France dollar DOWN this time (-43.7 with the
+      2y down) - the 6 Oct marker ('gold ignores a France dollar, follows a 2y
+      dollar') is contradicted once; a second print makes the dollar leg a
+      chain input again.
     since: 2026-10-05
