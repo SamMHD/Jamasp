@@ -1845,6 +1845,22 @@ events:
       CPI date and book its print+45 deepdive, re-verify the 12-16 Oct Fed
       slots on the Board index and the regional pages (rule 24).
 
+  - date: 2026-10-12
+    time_dubai: "Mon 12 Oct - Columbus Day: US bond market SHUT (equities open), Tokyo shut (investinglive Asia wrap 9 Oct)"
+    title: No US 2y/10y close on Monday - the sign/pair claims exclude the session; the GC_CLOSE row still prints on a thin tape
+    why: >
+      The stance's basis for the 2y is the CNBC 5:05pm ET Yield line; with
+      the cash market closed there is no Monday close, so the Mon row has no
+      rates partner and a Monday gold move reads as positioning (rule 20,
+      holiday-thinned tape), not as information. The new no-both-up-pair
+      claim (Fri 9 / Tue 13 - Fri 16 Oct) and the 10y cap (Fri + Tue closes)
+      are written with Monday excluded; Tue's 2y compares to Friday's close.
+    action: >
+      Mon 12 Oct brief: score the three Sunday closers and 4ab9cef6 after
+      the time-late check; do not read 'Yield Prev Close' as a Monday close;
+      no level claim on the Monday row alone. Tue 13 Oct brief: the Fri ->
+      Tue 2y comparison is the first rates read of the week.
+
   - date: 2026-10-14
     time_dubai: "Wed 14 Oct 16:30 (12:30Z) CPI Sep; 22:00 (18:00Z) Beige Book - date per the Trading Economics US calendar read 4 Oct (BLS 403, todo-193); secondary-source flag until the Sat 10 Oct brief re-verifies (actionforex 10/12-10/16 summary)"
     title: September CPI - the next flip owner; wakeup #70 booked at 13:15Z (print+45)

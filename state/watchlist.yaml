@@ -285,6 +285,23 @@ watchlist:
       20:00Z (blind); Hammack Thu 15 Oct 20:30Z (fireside); WARSH IN THAILAND
       Fri 16 Oct 03:30Z (MarketWatch) - the chair the day after CPI, lands at
       brief time.
+      9 OCT: WALLER (Istanbul, CBRT Economic Forum, extracted): 'additional
+      hikes' if the economy evolves as expected, 'some flexibility' on
+      timing, hikes 'do not need to come at consecutive meetings', labor
+      market 'solid and stable', 'policy will be focused on the inflation
+      side'; energy, the AI buildout and tariffs named. MUSALEM (Bloomberg
+      NY, non-voter): 'more monetary policy firming will be required', rates
+      'ought to be going up further' over 6-9 months, October 'a very open
+      mind', 'financial conditions remain accommodative' - high yields are
+      not a substitute for hikes. RELAY: 20% October 'right now' in the
+      Waller post (Thu 08:38Z, the e5104cf2 window's high); CME 18% Oct /
+      82% Dec (investinglive Fri 02:21Z); 'at least three more hikes by
+      end-2027'. e5104cf2 HIT. Claims 197K; GDPNow 3.6. TAPE: the 2y CLOSED
+      4.756 (-0.8bp, flat band) with the row +27.7 - the long end (10y -4.4,
+      30y -5.4) and DXY (-0.10) did the moving; sign test 1/1/2, Fri decides.
+      SLOTS: Schmid Fri 13:30Z, UMich 14:00Z (1y cons 4.7, owns the trigger),
+      Collins 20:00Z (blind); MON 12 OCT US BOND MARKET SHUT (no 2y close);
+      Mon-Tue speakers unverified (feed ends Fri) - Sat reads TE/MarketWatch.
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -759,6 +776,33 @@ watchlist:
       overnight with Isaias. Class unchanged (rule 21) -> kinetic 25 held;
       440d34a8 HIT (class-negative family 7/7); new claim: no second strike
       west of 54E through Sun (0.6).
+      9 OCT: TRUMP ON RECORD (TruthSocial 16:25Z Thu, extracted): 'productive
+      discussions' with Iran, 'we will not be attacking Iran at any time
+      prior to the midterm elections... November 3', the blockade 'will
+      remain in full force and effect', no nuclear weapon, 22 mb through
+      Hormuz 'last night' (none Iranian). NYT (via investinglive/MarEx):
+      ~3-day campaign options (missile/drone arsenal, energy, IRGC C2)
+      discussed at Camp David; Trump has vetoed five major-operation
+      proposals; three carriers soon overlapping; commanders ready 'within
+      days' if he changes course. Oil: +5% in Europe on 'Trump weighs new
+      strikes' + Isaias (~60% of US Gulf output shut) -> settle +4% (Brent
+      ~104.3, WTI 91.09) after the pledge -> 103.3 Asia (-1%); Dated Brent
+      $136; Gulf-East Asia tanker rates >$1.4m/day. HULLS (MarEx 00:17Z Fri):
+      the Wed Qatar hit = Acers (Antigua-flagged product tanker, IMO
+      9301902; three drones, funnel/superstructure, engine-room fire out);
+      UKMTO Wed ~17:00Z hit off Musandam (unknown projectile, no casualties)
+      = the 13th strike of the month on the public tally, 'closer to 20
+      ships' per officials to the NYT; a possible Wed hit off Fujairah (NASA
+      FIRMS + Iranian-source claims, UNCONFIRMED - feeders outside the
+      strait if real). 'Arab sources: several severe explosions in the
+      Strait, a tanker targeted' (investinglive 16:58Z Thu) UNVERIFIED - no
+      UKMTO line by MarEx; position Hormuz (east of 54E). Hormuz transits a
+      two-month low (Kpler/Reuters) vs Trump's 22 mb; US sanctions 22 more
+      tankers, UK 12; Saudis in talks to formalise Hormuz shuttles
+      (gcaptain); Reuters: 'attack risks rise as Iran vows to block more
+      routes'. 5c48606a on track (closes Fri 23:59Z); 4ab9cef6 untouched
+      (Mehr's 'north of Qatar' item is the Wed incident). Class unchanged
+      -> kinetic 25. The drain bid gold on substance a third time (rule 22).
     since: 2026-07-31
 
   - theme: kinetic-transmission-inverted
@@ -902,6 +946,20 @@ watchlist:
       from the low; DXY flat). Sign test 306d7862 after three sessions:
       opposite 1 (Tue) / same 1 (Wed) / flat 1 (Mon) - a second same-sign
       session is a MISS and base 40 -> 35.
+      9 OCT (session four): Brent +4% SETTLE / 2y -0.8bp (flat) / DXY -0.10 /
+      row +27.7 (4169.0). The oil leg did not reach the 2y: Isaias is a US
+      supply shock and Trump's pledge drained the Gulf premium in the same
+      session; gold followed the LONG END (10y -4.4, 30y -5.4 after a 0.1bp
+      30y tail) and the dollar. Asia Fri: Brent -1%, gold +43 to 4200 with
+      the 2y +0.1 / 10y -0.2 / DXY -0.10 - a $43 move on no rates input =
+      positioning (CTA shorts, managed money -84t) or the Shanghai bid
+      (premium unread). Sign test 306d7862 after four sessions: opposite 1
+      (Tue) / same 1 (Wed) / flat 2 (Mon, Thu) - Fri decides (opposite =
+      HIT; same or flat = MISS and base 35, 'gold = f(2y)' demoted to
+      hypothesis with the long end + dollar as candidates). Premium-sign
+      letter met once (row UP >=5, 2y not down), substance against (long-end
+      relief) - 45 needs a second such session. Level claims resumed (cap
+      4375 through the Tue row, 0.6).
     since: 2026-09-09
 
   - theme: boj-yen-pillar
@@ -984,6 +1042,11 @@ watchlist:
       8 OCT: USDJPY 158.20 (157.59-158.22 Wed/Thu); the 158.5 MoF marker held
       through a DXY 18-month high; TFX launches BoJ meeting-by-meeting rate
       futures (investinglive). Not a chain input this session.
+      9 OCT: USDJPY 158.04 (-0.10%; 158.5 held); household spending -3.1% y/y
+      Aug (ninth month, better than -3.6 cons); Japan relaunches its
+      DOGE-style review of 201 special funds (~7tn yen) to fund the food-tax
+      cut with JGB yields at multi-decade highs; actionforex 'USD/JPY
+      breakout looms'. Tokyo shut Mon 12 Oct. Not a chain input.
     since: 2026-09-03
 
   - theme: energy-pce-passthrough
@@ -1214,6 +1277,21 @@ watchlist:
       the week's second tell - new claim (0.6, no tail >=1bp); Asia Thu 30y
       5.698 (+3.7) with DXY flat and gold UP - the Thu closes decide the
       shape.
+      9 OCT: THE 30y AUCTION PASSED - $22bn at 5.618% vs WI 5.617% (0.1bp
+      tail; b/c 2.54 vs 2.41; indirects 72.3% vs 69.1%; dealers 6.8% vs
+      10.3%; grade B) - bacb44c5 HIT, three for three this refunding week.
+      The long end then fell to the lows of the day: 30y 5.607 (-5.4), 10y
+      5.233 (-4.4), 2y 4.756 (-0.8); DXY -0.10; gold row +27.7 = yields DOWN
+      / DXY DOWN / gold UP - rates relief, the opposite of the fiscal shape;
+      968df4d5 HIT (no both-up session Mon-Thu). Morgan Stanley's bond
+      manager bullish on Treasuries for the first time in a decade (wrap:
+      'The Economist marking the top yet again?'); Musalem attributes the
+      yield rise to real rates and competition for capital (government
+      borrowing, tech capex) and calls conditions 'accommodative'. New
+      claims: the 10y does not close >=5.35 Fri/Tue (0.6) and no both-up
+      pair across Fri 9 / Tue 13 - Fri 16 Oct (0.7; Mon excluded). Watch:
+      the 20y auction (date unverified), Bessent on issuance, the France
+      short-dated-issuance thread.
     since: 2026-08-20
 
   - theme: euro-sovereign-stress
@@ -1252,4 +1330,15 @@ watchlist:
       2y down) - the 6 Oct marker ('gold ignores a France dollar, follows a 2y
       dollar') is contradicted once; a second print makes the dollar leg a
       chain input again.
+      9 OCT: Europe led the Thu morning rout again (US 10y ~5.35 in Europe
+      hours per actionforex; EUR/GBP breakdown - investinglive chart of the
+      day; ECB accounts 11:30Z: higher long-term yields 'could do part of
+      its tightening work') before the US afternoon reversed it. The Thu
+      dollar fall (DXY 102.138, -0.10) was AI-flows (the OpenAI revenue
+      report; wrap: 'AI flows have been a big part of the USD outperformance')
+      - not euro. Gold followed a non-2y dollar for the SECOND session (Wed
+      euro-up / gold-down, Thu AI-down / gold-up, the 2y down both days):
+      the written DXY >=0.3 trigger is unmet on 0.10, logged as substance; a
+      third session writes DXY -> gold into base. Spread level still not
+      relayed in figures.
     since: 2026-10-05
