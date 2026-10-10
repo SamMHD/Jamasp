@@ -1862,16 +1862,16 @@ events:
       Tue 2y comparison is the first rates read of the week.
 
   - date: 2026-10-14
-    time_dubai: "Wed 14 Oct 16:30 (12:30Z) CPI Sep; 22:00 (18:00Z) Beige Book - date per the Trading Economics US calendar read 4 Oct (BLS 403, todo-193); secondary-source flag until the Sat 10 Oct brief re-verifies (actionforex 10/12-10/16 summary)"
+    time_dubai: "Wed 14 Oct 16:30 (12:30Z) CPI Sep; 22:00 (18:00Z) Beige Book - date per the Trading Economics US calendar read 4 Oct (BLS 403, todo-193); re-verified Sat 10 Oct: TE, investinglive and MarketWatch agree, BLS confirms the date per investinglive"
     title: September CPI - the next flip owner; wakeup #70 booked at 13:15Z (print+45)
     why: >
-      Consensus headline +0.5% m/m / 3.7% y/y (prev 0.4 / 3.4), core +0.3% /
-      2.5% (prev 0.3 / 2.4); Cleveland Fed nowcast (2 Oct) headline 0.53,
-      core 0.20. Open claims: 4dfbd1d8 (headline >=0.4, 0.65) and 62c34dbd
-      (core <=0.3, 0.7) score on the print. Stance flip lines: core >=0.4
-      with the 2y UP >=5bp -> 35/45/25; core <=0.2 with the 2y DOWN >=5bp
-      -> 45/30/25; tape clause from 12:30Z either way (rule 23). The
-      October-dead relay (15-22%) is a bet that core stays at 0.3; the
+      Consensus (re-read 10 Oct) headline +0.6% m/m / 3.6-3.7% y/y, core
+      +0.2% / 2.5% (the 4 Oct read of 0.5 / 0.3 is STALE - a 0.2 core is now
+      in line); Cleveland Fed nowcast (2 Oct) headline 0.53, core 0.20. Open claims: 4dfbd1d8 (headline >=0.4, 0.65) and 62c34dbd
+      (core <=0.3, 0.7) score on the print. Stance flip lines: core >=0.3
+      with the 2y UP >=5bp -> 25/45/30; core <=0.1 with the 2y DOWN >=5bp
+      -> 45/25/30; core 0.2 -> hold 35/35/30; tape clause from 12:30Z either way (rule 23). The
+      October-dead relay (15-22%) is a bet that core prints 0.2; the
       27-28 Oct FOMC is two weeks after the print.
     action: >
       Wakeup #70 (deepdive 13:15Z): investinglive print post first, CNBC
@@ -1907,7 +1907,7 @@ events:
       brief reads the wrap. No deepdive.
 
   - date: 2026-10-16
-    time_dubai: "Fri 16 Oct 07:30 (03:30Z; 11:30pm ET Thu 15 Oct per the MarketWatch calendar read 8 Oct) - Fed Chair Warsh speaks in Thailand (title and host unknown; the Board 2026 speeches index read 8 Oct 03:32Z has no Warsh entry)"
+    time_dubai: "Fri 16 Oct 07:30 (03:30Z; 11:30pm ET Thu 15 Oct per the MarketWatch calendar read 8 Oct) - Fed Chair Warsh speaks in Thailand (title and host unknown; Board 2026 speeches index read 8 and 10 Oct has no Warsh entry; /speech/warsh20261016a.htm and warsh20261015a.htm 404 at 03:33Z Sat 10 Oct; slot triple-sourced: TE 03:30 UTC, investinglive week-ahead 11:30pm ET Thu, MarketWatch)"
     title: Warsh in Thailand - the chair the day after the CPI print, 11 days before the 27-28 Oct FOMC; lands exactly at the Fri brief's start (blind-window slot, rule 16)
     why: >
       The chair hierarchy prices the SIZE of a Fed-pricing move (rule 19)
@@ -1924,3 +1924,7 @@ events:
       investinglive relay and its dated odds sentence); a conference /
       payments / non-policy title keeps it a Fri-brief marker (rule 24).
       Re-verify the time against the host once named (Bangkok = UTC+7).
+      OUTCOME 10 Oct: probes 404, title still unknown -> wakeup #71 booked as
+      a CONDITIONAL deepdive at 04:30Z Fri 16 Oct; the Thu 15 Oct 19:00Z scan
+      re-extracts the Board index --fresh and cancels #71 on a payments /
+      non-policy title.
