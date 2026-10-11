@@ -2,7 +2,8 @@
 
 Earned heuristics only — rewritten weekly by /retro, never by other runs.
 Cap: 25 heuristics, one page. Each carries an evidence note.
-Rewritten 4 Oct 2026 (covers 28 Sep–4 Oct; 25 heuristics).
+Rewritten 11 Oct 2026 (covers 5–11 Oct; 25 heuristics; make-up run for the
+failed 16:00Z slot).
 
 ## Heuristics
 
@@ -27,12 +28,16 @@ Rewritten 4 Oct 2026 (covers 28 Sep–4 Oct; 25 heuristics).
    unreachable (26 Sep).
 
 
-3. **Gold ignoring its own news names the price-setter — not the
-   direction.** Repeated non-response to a textbook driver identifies the
-   marginal desk; "rates desk in control" read as "range-bound" is the error.
+3. **Gold ignoring its own news names the price-setter — per session, not
+   per regime — and "none of the above" is the positioning read.** Repeated
+   non-response to a textbook driver identifies the marginal desk; "rates
+   desk in control" read as "range-bound" is the error; a setter named last
+   week is re-earned this week.
    — evidence: `f7d39052` `394dfea7` `031e3470` caps vs `52e1b990`
    `54b6127f` `8e425cab` hits; fifteen oil-UP sessions 2–24 Sep closed gold
-   flat/down; 28 Sep–2 Oct gold = f(2y close) on five of five sessions.
+   flat/down; 28 Sep–2 Oct gold = f(2y close) 5/5; 5–9 Oct the setter
+   changed twice (2y → long end + dollar → none: Fri +1.5% with every input
+   against), `306d7862` MISS.
 
 
 4. **Chokepoint and shipping claims go through the maritime trade press —
@@ -42,7 +47,8 @@ Rewritten 4 Oct 2026 (covers 28 Sep–4 Oct; 25 heuristics).
    says "as carried by" the named outlets.
    — evidence: 2 Aug; 19 Aug Wafa (todo-005); `f04926f1` `2fbc22dd` 13 Sep;
    `2df323fa` 24 Sep; Friday 2 Oct's second Hormuz hit reached the feed
-   only via AFP/Gulf News 02:23Z Sat, ~10h late.
+   only via AFP/Gulf News 02:23Z Sat, ~10h late; 10–11 Oct two UKMTO hits
+   logged inside scan hours.
 
 
 5. **A cap is written against the controlling impulse only under three
@@ -56,7 +62,7 @@ Rewritten 4 Oct 2026 (covers 28 Sep–4 Oct; 25 heuristics).
    — evidence: `a3ad30b1` hit at 0.6 under all three; `f8b7b030`
    `65cd057e` `09cb81a7` missed; `f5fd7c62` `95c71900` hit at 0.5 with the
    impulse (no information); `f7a0c23d` Brent cap inside 1× range fired in
-   18h. Against-impulse 4/17 lifetime.
+   18h. Against-impulse 4/17 lifetime; none written 5–11 Oct.
 
 
 6. **"Only X can cause Y" must enumerate and reject the third channel —
@@ -66,19 +72,23 @@ Rewritten 4 Oct 2026 (covers 28 Sep–4 Oct; 25 heuristics).
    "only."
    — evidence: `394dfea7` `98bbfd33` `b6450c7a`; tone without guidance 4/4
    for ≥10-pt Fed repricings (16 Sep); 11 Sep core 0.318 fired the flip,
-   gold +1.4% on oil.
+   gold +1.4% on oil; 8 Oct Waller/Musalem moved December, not October
+   (`e5104cf2`).
 
 
-7. **A conditional claim's trigger is sized like a target.** If the trigger
-   is not expected inside the window at ≥1× its own ATR-days, the claim is
-   written as a band on the settle or as a sign claim on the chain's
-   input, not as a conditional; a sign pair on one trigger is one claim;
-   UNCLEAR is a cost, not a neutral outcome. A near-miss trigger with the
-   target running against is scored "substance against" (rule 9).
-   — evidence: `a270f3f1` `9e1829f8` both UNCLEAR by construction (Brent
-   ~3%/day ATR, ±2–3% settle triggers inside 2–3 sessions); Tue 29 Sep
-   −2.55% / gold +1.41% carried the week's one drain-leg signal and scored
-   nothing; `64c7ba41` UNCLEAR 27 Sep the same way.
+7. **A conditional claim's trigger is sized like a target — or is a
+   scheduled gate.** If the trigger is not expected inside the window at
+   ≥1× its own ATR-days, the claim is written as a band on the settle or as
+   a sign claim on the chain's input, not as a conditional; a sign pair on
+   one trigger is one claim; UNCLEAR is a cost, not a neutral outcome. The
+   form that never goes UNCLEAR is the gate certain to print (an auction, a
+   release): the claim scores in-session from one named basis. A near-miss
+   trigger with the target running against is scored "substance against"
+   (rule 9).
+   — evidence: `a270f3f1` `9e1829f8` UNCLEAR by construction (Brent ~3%/day
+   ATR, ±2–3% settle triggers inside 2–3 sessions); Tue 29 Sep −2.55% /
+   gold +1.41% scored nothing; `64c7ba41` UNCLEAR 27 Sep; `18fe8bf5`
+   `bacb44c5` auction-tail gates 2/2 (7–8 Oct), scored same day.
 
 8. **No-incident and no-talks claims require a live feed and a falsifier
    the feed can resolve — format and outlet named in the falsifier
@@ -89,7 +99,8 @@ Rewritten 4 Oct 2026 (covers 28 Sep–4 Oct; 25 heuristics).
    government.
    — evidence: `aba1ae09` miss; `6b3ad492` UNCLEAR; `f04926f1` node held
    while the chain was cut; `645cc78a` MISS on "resumption" vs "direct";
-   `0d52e7da` `9083e952` `603c3c19` hit with the format named.
+   `0d52e7da` `9083e952` `603c3c19` hit with the format named — Ghalibaf's
+   seven conditions and sources-only proposals did not score (4 Oct).
 
 
 9. **Separate trigger from target in compound claims; score substance
@@ -107,40 +118,54 @@ Rewritten 4 Oct 2026 (covers 28 Sep–4 Oct; 25 heuristics).
 
 10. **Skeptic's edge is a floor: structural-negative claims start at 0.8 —
     except across a scheduled gate with both principals present, where the
-    ceiling is 0.7 and the format is named (rule 8).** "No co-confirmed
-    text / no strike on class X / regime persists" backed by on-record
-    positions is written at 0.8+. The brief's 0.7 ceiling (todo-007) still
-    blocks it — name the compliant floor in the text.
-    — evidence: 63/64 across 3 Aug–4 Oct; 6/6 this week; the one miss
-    `645cc78a` fell at UNGA with Witkoff and Araghchi in one city.
+    ceiling is 0.7 and the format is named (rule 8) — and only on a class
+    the actor has not reached (rule 12).** "No co-confirmed text / no
+    strike on class X / regime persists" backed by on-record positions is
+    written at 0.8+. The brief's 0.7 ceiling (todo-007) still blocks it —
+    name the compliant floor in the text.
+    — evidence: 70/72 across 3 Aug–11 Oct; 6/6 class negatives 5–11 Oct;
+    the two misses are named — `645cc78a` at UNGA with Witkoff and Araghchi
+    in one city; `5bda2c98` a location inside a reached class.
 
 
 11. **Pattern extrapolation needs a live transmission mechanism; a horizon
     >14 days re-verifies it at the midpoint; a reaction-function line is a
-    pattern claim.** Name what carries the pattern forward (else cap 0.6);
-    kill at the midpoint if it died. A reaction-function observation
-    enters the stance as fact only after three sessions in the same
-    direction with the driver moving ≥1 daily ATR; before that it is a
-    hypothesis with a named test claim, and both branches of a gate carry
-    the chain's sign.
+    pattern claim — and a sign test counts only sessions on which its
+    driver moved.** Name what carries the pattern forward (else cap 0.6);
+    kill at the midpoint if it died. A reaction-function observation enters
+    the stance as fact only after three sessions in the same direction with
+    the driver moving ≥1 daily ATR; before that it is a hypothesis with a
+    named test claim, and both branches of a gate carry the chain's sign.
+    The test counts a session only when the driver moves ≥0.5 of its own
+    daily ATR (2y ≥2bp, 10y ≥4bp, DXY ≥0.2); two flat-driver sessions in a
+    five-session window demote the line to hypothesis on their own; the
+    next test names as driver the instrument that moved ≥1 ATR on the
+    sessions gold moved ≥0.5 ATR, not the one that worked last week.
     — evidence: `9a757c1a` `71096269` misses; `a64b23c1` `bb86ccc9` hits;
-    `ec71ce01` (41 days, midpoint never run); 22 Sep one-session line vs
-    25 Sep chain; gold = f(2y close) entered as fact on the third session
-    (2 Oct) with `306d7862` as the test.
+    `ec71ce01` (41 days, midpoint never run); gold = f(2y close) entered
+    as fact on the third session (2 Oct); `306d7862` MISS 5–9 Oct — 1
+    opposite / 2 same / 2 flat, the 2y <1bp on Mon and Thu while the long
+    end moved 5–12bp and DXY 0.3–0.4 on the sessions gold moved most.
 
 
 12. **Operator confirmation stands alone; an act is scored by its incident
-    date; adversary claims are never a trigger.** Incident-count and
-    attribution claims score on UKMTO/operator/host-state/US-official
-    statements only. Namelessness downgrades detail, not the event. The
-    brief that scores a hull/mine/US-hull negative re-checks UKMTO,
-    gcaptain and Gulf News time-late warnings for the last two window days
-    before writing HIT; a confirmation published after scoring re-opens the
-    score at the next retro.
+    date; adversary claims are never a trigger — and an adversary-claim
+    negative is a class negative only on a class the actor has not
+    reached.** Incident-count and attribution claims score on
+    UKMTO/operator/host-state/US-official statements only. Namelessness
+    downgrades detail, not the event. A negative on a *location* inside a
+    class the actor has reached with host-confirmed hits in the prior 72h
+    is a location bet: cap 0.5, and the claim text names the
+    location-vs-class distinction; the adversary-claim family record does
+    not transfer to it. The brief that scores a hull/mine/US-hull negative
+    re-checks UKMTO, gcaptain and Gulf News time-late warnings for the last
+    two window days before writing HIT; a confirmation published after
+    scoring re-opens the score at the next retro.
     — evidence: `0aaec9a2` hit, `71096269` miss; `c2eafbf8` `bd825267`
-    "or IRGC-claimed" carrying zero information; `dd31b40f`; UKMTO
-    144–146 published Wed 30 Sep for Tue 29 Sep; `a0c82077` swept at the
-    Thu brief; `6927fc6a` on the Houthi Riyadh claim.
+    "or IRGC-claimed" carrying zero information; `dd31b40f`; UKMTO 144–146
+    published Wed 30 Sep for Tue 29 Sep; `a0c82077` swept at the Thu brief;
+    `6927fc6a` HIT (Aramco Riyadh, class unreached); `5bda2c98` MISS 7 Oct
+    (GACA KKIA casualties; Jazan/Najran confirmed inside 48h); family 3/4.
 
 
 13. **Status claims come from running the check against a source that
@@ -150,11 +175,13 @@ Rewritten 4 Oct 2026 (covers 28 Sep–4 Oct; 25 heuristics).
     the same run; a task handed to a slot names a slot that exists in
     `agent_runs` and will run it — an extraction the brief cannot do is a
     deepdive wakeup or "unextracted, sources-only" in the stance, never a
-    scan errand.
+    scan errand; a failed weekly slot is made up by a same-day wakeup that
+    names the slot and its scope.
     — evidence: calendar "outage" ×4 retros; "`bars` empty" (6 Sep); 26 Sep
     "21:00Z Sunday scan" (todo-189); 1 Oct extraction errand handed to the
     15:00Z/17:00Z scans, never run; 3 Oct "no Fed speaker on any list" —
-    six on TE/MarketWatch.
+    six on TE/MarketWatch; 11 Oct retro failed 16:00Z, made up 19:30Z (#72);
+    Tue 6 Oct lost day swept by the Wed brief, nothing matured unscored.
 
 
 14. **Data-event runs: schedule off the US print (print+45); read the print
@@ -178,7 +205,8 @@ Rewritten 4 Oct 2026 (covers 28 Sep–4 Oct; 25 heuristics).
     — evidence: 12 Aug CPI empty; #59/#60 Barr/PMI; #65 two October
     figures in one hour, the later post stale; #62 task thresholds stale at
     run time; #68 `empty` eight minutes before the row; #69 00:31Z row read
-    at 00:35Z, wrap restating a post-release figure.
+    at 00:35Z, wrap restating a post-release figure; #70's task carries the
+    4 Oct consensus, the stance's "as of the run" line overrides it.
 
 
 15. **Date agency copy from its own dateline; trust extracts only as of the
@@ -205,7 +233,7 @@ Rewritten 4 Oct 2026 (covers 28 Sep–4 Oct; 25 heuristics).
     `8babc60f` `6c6ed87f` 0/7; three hand-built date errors (Aug); #55 on
     Baghaei's line; 26 Sep 18:09Z rejection unread to 03:30Z; #67 Cook
     booked blind, resolved as a community venue; #71 six speakers where
-    #70 wrote none.
+    #70 wrote none; Warsh 16 Oct reached the feed as a High row on 11 Oct.
 
 
 17. **A falsifier is scoreable from one named basis, outside the readings'
@@ -222,7 +250,8 @@ Rewritten 4 Oct 2026 (covers 28 Sep–4 Oct; 25 heuristics).
     — evidence: `599d9586` `a1fc647f` UNCLEAR; `f8b7b030` on a running
     value (todo-187); `42512099` MISS on the live row while the open held
     the band; `862c95f7` three readings 0.8bp apart across a 0.4bp line;
-    #70 the field still Thursday's at 03:33Z Saturday.
+    #70 the field still Thursday's at 03:33Z Saturday; `18fe8bf5`
+    `bacb44c5` scored on the auction post's WI line, one basis.
 
 
 18. **Align the horizon with the claim-text window; score a determinate
@@ -232,28 +261,32 @@ Rewritten 4 Oct 2026 (covers 28 Sep–4 Oct; 25 heuristics).
     scores only at window close; a claim whose remaining sessions cannot
     change the outcome scores now. todo-182.
     — evidence: `8babc60f` early; 31 Aug "score ALL 8"; `1889819a`
-    `d8e247ef` `288a87ac` scored with a session open — no pair possible;
-    `80f91584` on the first row ≥23:00Z Fri.
+    `d8e247ef` `288a87ac` `968df4d5` scored with a session open — no pair
+    possible; `80f91584` on the first row ≥23:00Z Fri; `18fe8bf5` window
+    closed 17:01Z Wed, `due` silent, scored Thu.
 
 
 19. **A threshold claim spanning a Fed appearance, an FOMC or a tier-1
     print lists it as a breaker and caps; a Fed-pricing breaker says "any
-    voter"; an odds-threshold hold is written at ≤0.5 with its room dated.**
-    The chair/governor/president hierarchy prices the size of a move, not
-    whether it counts. USD/yield levels spanning an FOMC/presser/CPI/NFP
-    cap at 0.5 unless ≥1.5× range from spot including the event day's move;
-    while Brent is up ≥5 straight sessions or a UKMTO-confirmed enforcement
-    change sits in the window, a threshold with <15 pts of room over >3
-    sessions caps at 0.5; a bracket pair is one band claim. A Fed-pricing
-    threshold names the relay figure and the room at writing; if the room
-    is under one data-day move (~15–25 pts) it is written as a band or not
-    at all; one written ≥2 sessions before its window is re-verified at
-    each relay and retired "offside — room gone" when the room disappears
-    before the window opens. The family runs 5/12 lifetime.
+    voter"; an odds-threshold hold is written at ≤0.5 against the relay's
+    direction and 0.55 with it, its room dated.** The chair/governor/
+    president hierarchy prices the size of a move, not whether it counts.
+    USD/yield levels spanning an FOMC/presser/CPI/NFP cap at 0.5 unless
+    ≥1.5× range from spot including the event day's move; while Brent is
+    up ≥5 straight sessions or a UKMTO-confirmed enforcement change sits in
+    the window, a threshold with <15 pts of room over >3 sessions caps at
+    0.5; a bracket pair is one band claim. A Fed-pricing threshold names
+    the relay figure and the room at writing; if the room is under one
+    data-day move (~15–25 pts) it is written as a band or not at all; one
+    written ≥2 sessions before its window is re-verified at each relay and
+    retired "offside — room gone" when the room disappears before the
+    window opens. The family runs 6/13 lifetime; every hit is with the
+    relay's direction.
     — evidence: 0/3 Aug on tone; `41aec282` `09cb81a7` `1a513d72` missed;
     `a2171cad` `e694f252` `4872cd75` hit; `efd9700b` MISS on Williams (a
     permanent voter, 64 → 54, breaker said "governor"); `b934960e` MISS —
-    22.5 pts of room spent before the window, print post 34%.
+    22.5 pts of room spent before the window, print post 34%; `e5104cf2`
+    HIT at 0.55 with the impulse (October <25% after the 29K print).
 
 
 20. **Distance is measured on the instrument's own ATR; 0.55 is not a
@@ -268,10 +301,11 @@ Rewritten 4 Oct 2026 (covers 28 Sep–4 Oct; 25 heuristics).
     and cap claims inside one ATR are not written — write the sign claim on
     the chain's input and read the size as positioning.
     — evidence: `b6450c7a` miss; floors 11/11 this regime at 0.55;
-    `fc5c5a29` by 25bp; 0.55 bucket 21–27 Sep with-impulse 8/8 / against
-    0/2, 28 Sep–4 Oct 3/5 with the two misses odds floors; lifetime 0.55 →
-    77%, 0.60 → 68%; Mon 28 Sep −3.3% / Tue +1.41% on inputs worth ~1% /
-    ~0.5% (quarter-end, stochastics 11).
+    `fc5c5a29` by 25bp; 0.55 bucket with-impulse 9/9 since 21 Sep / against
+    0/2; lifetime 0.55 → 78%, 0.60 → 68% (the 0.60 bucket holds the sign
+    tests and location negatives); Mon 28 Sep −3.3% / Tue +1.41% on inputs
+    worth ~1% / ~0.5%; 11 Oct `1e9e6e4a` written as the chain-input sign
+    claim into the Columbus Day tape.
 
 
 21. **The next act is not the last act's class.** "At least one more X of
@@ -279,28 +313,38 @@ Rewritten 4 Oct 2026 (covers 28 Sep–4 Oct; 25 heuristics).
     stated policy trigger or scheduled gate for that class is named; the
     default is the structural negative on the current class.
     — evidence: `81564330` `c4ef5615` missed; class negatives `03627b6b`
-    `e1e9ba8f` `87e409a7` `9e629d6e` `d96debd5` `a0c82077` 6/6 — US stayed
-    hull/blockade class through 4 Oct, Iran stayed unattributed-hull.
+    `e1e9ba8f` `87e409a7` `9e629d6e` `d96debd5` `a0c82077` `8aacb1e6`
+    `440d34a8` `5c48606a` 9/9 — US stayed hull/blockade class through 11
+    Oct (pledge on record Thu 8 Oct "not before the midterms"; the
+    blockade's form escalated to air-delivered munitions on a runner inside
+    the class), Iran stayed unattributed-hull, the Houthis stayed Saudi
+    civil airports.
 
 
 22. **The regime chain is oil → 2y → DXY → gold; kinetic and foreign-CB
-    legs are conditional on it; the drain leg is a band, not a cap.** An
-    escalation reaches gold as a hike and a margin call, not a haven bid: a
-    kinetic gap-up or "≥X in session one" claim is not written above 0.5
-    while hike odds are ≥50%; a yen or foreign-CB leg states the DXY move it
-    requires (≥0.3 or a cross of 100) or is subordinate; a named risk that
-    has printed ≥3 times without moving gold against the claim leaves the
-    risk list. De-escalation drains the premium through the same 2y and has
-    now bid gold twice on substance — "the drain sells gold" is 0/2.
+    legs are conditional on it; the drain leg is a band, not a cap; the 2y
+    leg is a per-session hypothesis, not a standing fact.** An escalation
+    reaches gold as a hike and a margin call, not a haven bid: a kinetic
+    gap-up or "≥X in session one" claim is not written above 0.5 while hike
+    odds are ≥50%; a yen or foreign-CB leg states the DXY move it requires
+    (≥0.3 or a cross of 100) or is subordinate; a named risk that has
+    printed ≥3 times without moving gold against the claim leaves the risk
+    list. De-escalation drains the premium through the same 2y and has bid
+    gold twice on substance — "the drain sells gold" is 0/2. A session no
+    input explains is read as positioning (rule 3), not as a new leg.
     — evidence: `85f08a28` miss / `58b7daab` `ac946837` hits; `52e1b990`
     `54b6127f` `8e425cab` (23 Sep oil-UP leg); 25 Sep faded drain bid; 29
     Sep Brent −2.55% / 2y −3.3bp / gold +1.41%; 28 Sep–2 Oct gold = f(2y
-    close) with DXY at a 52-week high and oil both ways.
+    close) 5/5; 7–8 Oct the long end + dollar set the low and the bounce;
+    Fri 9 Oct +1.5% with 2y +3.5 / 10y +0.9 / DXY +0.09 / Brent +0.4
+    (`306d7862` MISS); oil did not trade a Gulf-proper VLCC, a mine claim
+    or Riyadh.
 
 
 23. **Every re-weight flip carries a tape clause from the FIRST trigger's
-    print, with a one row-step margin, and a rates-data flip carries the
-    print-day 2y close as co-trigger.** The named trigger AND GC in the
+    print, with a one row-step margin; a rates-data flip carries the
+    print-day 2y close as co-trigger; flip lines on one weight are checked
+    for co-triggerability when written.** The named trigger AND GC in the
     flip's direction from the first trigger's print to that session's first
     ≥23:00Z row, by ~5 pts / 0.1%; a trigger printing after 17:30Z reads to
     the same session's row when a tier-1 print sits before the next settle,
@@ -309,32 +353,43 @@ Rewritten 4 Oct 2026 (covers 28 Sep–4 Oct; 25 heuristics).
     written on the next-meeting odds sentence plus the tape, never on
     statement wording. A print whose 2y close reverses the print's sign is
     "trigger printed, target failed" on the mechanism; a tape close inside
-    the margin is "inside the noise"; either moves the weight ≤5.
+    the margin is "inside the noise"; either moves the weight ≤5. Two lines
+    on one weight that a single session's tape can fire in opposite
+    directions are rewritten as one net line before the session; a scored
+    prediction's written consequence outranks an unscored observation's.
     — evidence: 9 Sep; 11 Sep CPI; 16 Sep FOMC; #60 (23 Sep) passed with
     the 2y following the PMI into the close; #64/#65 Williams read to the
-    Tue row (+25, passed) ahead of Wednesday's PCE; #68 PCE (−31.9, failed);
-    #69 NFP (soft print, 2y closed +4bp, GC −50.5 — failed on the
-    mechanism).
+    Tue row (+25, passed); #68 PCE (−31.9, failed); #69 NFP (soft print, 2y
+    closed +4bp, GC −50.5 — failed on the mechanism); Fri 9 Oct "sign-test
+    MISS → 35" and "second row-UP with the 2y not down → 45" fired on one
+    row, resolved 35 at the Sat brief.
 
 
 24. **A Fed-speaker slot is booked on venue and title, not on the calendar
-    name; an undated Board entry is dated by one URL probe; a speech run
-    extracts the Board text first.** The ff rows carry the name only (and
-    hide most speakers, todo-188); `federalreserve.gov/newsevents/speech/
+    name; an undated Board entry is dated by one URL probe; a foreign slot
+    is checked against the multilateral calendar; a speech run extracts the
+    Board text first.** The ff rows carry the name only (and hide most
+    speakers, todo-188); `federalreserve.gov/newsevents/speech/
     2026-speeches.htm` lists title and venue without dates (todo-195) —
     probe `/speech/<lastname><yyyymmdd>a.htm` for the speaker's last relay
     date first, then read the entry's dated neighbours; the regional banks'
     own pages (dallasfed `/news/speeches/<name>`) carry venues; the full
-    text posts at speaking time. A plumbing / supervision / community venue
-    gets a scan marker or a conditional task, never a deepdive; the last
-    scan before a conditional slot re-extracts the index `--fresh` — a
-    non-policy title cancels it, a policy title upgrades it. A Medium tag
-    is a name and a time, not a content signal. A no-policy speech produces
-    no relay post, so rule 14's relay-first order does not apply.
+    text posts at speaking time. A foreign Fed or central-bank slot with no
+    venue is checked by date overlap against that week's multilaterals —
+    IMF/World Bank meetings, BIS, G20/G7, the ECB Forum — before it is
+    called unknown (IMF pages 403; it is a date check, not a programme
+    read). A plumbing / supervision / community venue gets a scan marker or
+    a conditional task, never a deepdive; the last scan before a
+    conditional slot re-extracts the index `--fresh` — a non-policy title
+    cancels it, a policy title upgrades it. A Medium tag is a name and a
+    time, not a content signal. A no-policy speech produces no relay post,
+    so rule 14's relay-first order does not apply.
     — evidence: #57 Jefferson (discount-window plumbing); #59 Barr; Waller
     "Reuters NEXT" dated 3 Sep by one probe after #63/#66 were booked on
     it; #67 Cook (Richmond rural conference, one sentence, no relay); Logan
-    2 Oct welcome remarks at a migration workshop.
+    2 Oct welcome remarks at a migration workshop; Warsh "Thailand" 16 Oct
+    unexplained through three calendar reads and the #71 booking until a
+    business item placed the IMF/WB meetings in Bangkok from 12 Oct.
 
 
 25. **Pattern-breaking weekend reads: the Sunday reopen band is written on
@@ -343,8 +398,9 @@ Rewritten 4 Oct 2026 (covers 28 Sep–4 Oct; 25 heuristics).
     family is 5/6; the miss came on the first weekend whose kinetic input
     (an unverified Fars claim + "further strikes") arrived after the 19:00Z
     scan. A gap at the open is a rates move, not a haven bid, until the 2y's
-    Asia open says otherwise (rule 22).
+    Asia open says otherwise (rule 22) — and on a US bond holiday there is
+    no 2y close, so a Monday gap is positioning until Tuesday.
     — evidence: `ac946837` `58b7daab` and three earlier bands held;
     `42512099` MISS 28 Sep (open inside the band, Asia −2.1% on Brent +1.7%
-    / 2y +3.7bp / Fars claim); todo-189.
-
+    / 2y +3.7bp / Fars claim); todo-189; `3db62da8` (11 Oct) written on the
+    first ≥23:00Z row with the weekend's inputs all inside scan hours.

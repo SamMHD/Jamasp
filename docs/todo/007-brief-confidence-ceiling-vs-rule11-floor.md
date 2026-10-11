@@ -93,3 +93,10 @@ this ceiling. The decision in Fix (A or B) is still Saman's.
 ## Update 2026-10-04 (retro)
 
 4 Oct retro: 0.7 bucket 5/6 this week (the miss `42512099` was a reopen band, not a structural negative); structural-negative family 6/6, 63/64 lifetime; the ceiling still forces every brief-written structural negative to 0.7 while rule 10 says 0.8.
+
+## Update 2026-10-11 (make-up retro)
+
+11 Oct retro: 0.7 bucket 5/5 this week, all brief-written structural
+negatives carrying the "compliant floor 0.8" boilerplate; family 70/72
+lifetime (the week's miss `5bda2c98` was a 0.65 location bet, not a 0.7
+class negative). Stated average this week 0.650 vs observed 0.846.

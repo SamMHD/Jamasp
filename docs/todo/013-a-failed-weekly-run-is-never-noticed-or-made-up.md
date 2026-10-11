@@ -181,3 +181,17 @@ prevention.
 ## Update 2026-10-04 (retro)
 
 4 Oct retro ran at its 16:00Z slot (agent_runs: retro started 16:00Z); 4 of the last 6 Sundays ok.
+
+## Update 2026-10-11 (make-up retro)
+
+11 Oct retro **failed** at its 16:00Z slot after retry (#723, "You've hit
+your session limit · resets 4:30pm (UTC)"; the 15:00Z scan #722 failed the
+same way). The 17:00Z scan noticed and booked wakeup #72 (retro, 19:30Z)
+with the full scope in the task text; that run wrote
+`reports/2026/10/2026-10-11-retro.md`, rewrote the playbook and emptied
+the lessons inbox — the first make-up on record. Slot record: 2, 9, 16, 23
+Aug ok; 30 Aug failed; 6 Sep ok; 13 Sep failed; 20, 27 Sep, 4 Oct ok; 11
+Oct failed → made up same day. 5 of the last 7 Sundays on the slot. The
+"noticed after the fact" half was done by hand by a scan this time; Fix §1
+(the Monday brief checks for a missing retro report and books the make-up
+itself) is still the thing to land.

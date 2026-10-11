@@ -68,3 +68,12 @@ a new count the morning after it happens. Confirm by reading
   line.
 - 4 Oct retro report (`reports/2026/10/2026-10-04-retro.md`, verified-this-
   run section).
+
+## Update 2026-10-11 (make-up retro)
+
+Fix merged into `live` 11 Oct 09:27Z via PR #50 (`d2e7092` "fix(watchdog):
+scope the abandoned-row probe to what --force can clear"; this file was not
+touched by the PR). The 05:00Z watchdog that day still fired "gave up on
+1318 items" — a fifteenth consecutive day, four hours before the merge.
+Verify at the 12, 13 and 14 Oct 05:00Z runs per Verification above, then
+close.

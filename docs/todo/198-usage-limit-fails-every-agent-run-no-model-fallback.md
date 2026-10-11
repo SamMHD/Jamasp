@@ -63,3 +63,14 @@ closer `6927fc6a` were all read for the first time at the Wed 7 Oct brief.
 - `journalctl -u jamasp-brief -u 'jamasp-scan*' --since 2026-10-06 03:00`:
   "You've reached your Fable limit" on every run.
 - Wed 7 Oct brief (#680) ran normally at 03:30Z: the window had reset.
+
+## Update 2026-10-11 (make-up retro)
+
+Second occurrence, different cap: Sun 11 Oct the 15:00Z scan (#722) and
+the 16:00Z retro (#723) both failed after retry on "You've hit your
+session limit · resets 4:30pm (UTC)" — a session cap rather than the
+weekly usage cap of 6 Oct — and both fired the paired FAILURE + unit alert
+(notify_log 307–310). The 17:00Z scan ran normally and rebooked the retro
+as wakeup #72 (19:30Z), which completed. Fix §3 (one "runs paused until
+<time>" alert, cleared on the next success) would have collapsed four
+messages into one here; §1 (model fallback) would have saved the slot.

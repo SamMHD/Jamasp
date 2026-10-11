@@ -89,3 +89,13 @@ GC low. The 20 Sep retro folded the analysis half into playbook rule 17
 (name the proxy series and basis, or don't write the level); the feed
 half — a GC series that survives a US holiday's open Globex session — is
 this item. GC rows resumed 8 Sep 04:05Z per the `52e1b990` scoring note.
+
+## Update 2026-10-11 (make-up retro)
+
+PR #50 (`0696a89` "fix(prices): read Yahoo's meta price when the chart
+window has no bars") merged into `live` 11 Oct 09:27Z. Mon 12 Oct 2026 is
+Columbus Day — US bond market shut, Globex open — the first live test of
+whether a GC row prints through a holiday session. The Tue 13 Oct brief
+reads `select count(*) from prices where symbol='GC' and ts between
+'2026-10-11T22:00Z' and '2026-10-13T00:00Z'` and notes the result here;
+`3db62da8` (reopen band) and the Monday tape read depend on it.
