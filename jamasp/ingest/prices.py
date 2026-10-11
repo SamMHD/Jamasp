@@ -59,27 +59,6 @@ def parse_yahoo_chart_json(text: str) -> tuple[str, str, float]:
     raise ValueError(f"no non-null closes in yahoo chart json for {symbol}")
 
 
-def _parse_lbma_json(text: str, symbol: str, auction_utc: str) -> tuple[str, str, float]:
-    # LBMA serves the full auction history (records like
-    # {"d": "2026-07-30", "v": [usd, gbp, eur]}); today's record can exist
-    # with null prices before the auction settles, so walk back to the
-    # latest non-null USD value.
-    records = json.loads(text)
-    for rec in sorted(records, key=lambda r: r["d"], reverse=True):
-        v = rec.get("v") or []
-        if v and v[0]:
-            return symbol, f"{rec['d']}T{auction_utc}Z", float(v[0])
-    raise ValueError(f"no non-null USD price in LBMA json for {symbol}")
-
-
-def parse_lbma_am_json(text: str) -> tuple[str, str, float]:
-    return _parse_lbma_json(text, "XAU_AM", "10:30:00")
-
-
-def parse_lbma_pm_json(text: str) -> tuple[str, str, float]:
-    return _parse_lbma_json(text, "XAU_PM", "15:00:00")
-
-
 def parse_cftc_cot_json(text: str) -> tuple[str, str, float]:
     records = json.loads(text)
     if not records:
@@ -183,8 +162,6 @@ def fetch_technicals(source: Source, client: httpx.Client) -> list[tuple[str, st
 PARSERS["stooq_csv"] = parse_stooq_csv
 PARSERS["fred_csv"] = parse_fred_csv
 PARSERS["yahoo_chart_json"] = parse_yahoo_chart_json
-PARSERS["lbma_am_json"] = parse_lbma_am_json
-PARSERS["lbma_pm_json"] = parse_lbma_pm_json
 PARSERS["cftc_cot_json"] = parse_cftc_cot_json
 PARSERS["sge_json"] = parse_sge_json
 

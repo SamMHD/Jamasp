@@ -237,21 +237,6 @@ sources:
     interval_minutes: 60
     topic: prices
     parser: fred_csv
-  # lbma_gold_am/pm: added 2026-07-31 — the actual global benchmark price
-  # (vs. GC=F futures proxy). Full-history JSON (~900KB), hence the long
-  # interval; verified working direct from the Hetzner host.
-  - name: lbma_gold_am
-    type: price_api
-    url: "https://prices.lbma.org.uk/json/gold_am.json"
-    interval_minutes: 360
-    topic: prices
-    parser: lbma_am_json
-  - name: lbma_gold_pm
-    type: price_api
-    url: "https://prices.lbma.org.uk/json/gold_pm.json"
-    interval_minutes: 360
-    topic: prices
-    parser: lbma_pm_json
   # cftc_gold_cot: added 2026-07-31 — weekly net non-commercial (speculative)
   # positioning in the main 100-oz COMEX contract, released Fridays with
   # data through Tuesday. The market_and_exchange_names filter pins the main
@@ -309,8 +294,10 @@ sources:
     parser: yahoo_chart_json
   # sge_benchmark: added 2026-07-31 — official Shanghai Gold Exchange daily
   # benchmark (Au99.99, CNY/gram). The China physical-demand gauge: SGE
-  # premium vs London = CNY/g × 31.1035 / USDCNY − LBMA PM, computed at
-  # analysis time. Daily print, so the long interval.
+  # premium vs London = CNY/g × 31.1035 / USDCNY − the London reference,
+  # computed at analysis time. That reference was LBMA PM until LBMA's free
+  # JSON went behind a WAF (2026-09-30); GC (GC=F) is the proxy now, and
+  # carries the futures basis. Daily print, so the long interval.
   - name: sge_benchmark
     type: price_api
     url: "https://en.sge.com.cn/graph/DayilyJzj"

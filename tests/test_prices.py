@@ -31,20 +31,6 @@ def test_parse_yahoo_chart_json_uses_latest_non_null_close():
     assert value == 4167.7998046875
 
 
-def test_parse_lbma_am_json_takes_latest_non_null_usd():
-    symbol, ts, value = prices.parse_lbma_am_json((FIXTURES / "lbma_gold.json").read_text())
-    assert symbol == "XAU_AM"
-    assert ts == "2026-07-30T10:30:00Z"
-    assert value == 4061.5
-
-
-def test_parse_lbma_pm_json_takes_latest_non_null_usd():
-    symbol, ts, value = prices.parse_lbma_pm_json((FIXTURES / "lbma_gold.json").read_text())
-    assert symbol == "XAU_PM"
-    assert ts == "2026-07-30T15:00:00Z"
-    assert value == 4061.5
-
-
 def test_parse_cftc_cot_json_net_noncommercial():
     symbol, ts, value = prices.parse_cftc_cot_json(
         (FIXTURES / "cftc_cot_gold.json").read_text()

@@ -70,11 +70,19 @@ def _tech_line(conn: sqlite3.Connection, prefix: str, vals: dict[str, sqlite3.Ro
     return f"{prefix} technicals @{date}: " + ", ".join(parts)
 
 
+# Series whose source is gone. Their history stays in `prices` (reports cite
+# it), but a frozen last value in every price block reads as live data.
+# XAU_AM/XAU_PM: LBMA put its free JSON behind a Cloudflare WAF on 2026-09-30
+# and the fix prices are licensed, so the sources were removed.
+RETIRED = frozenset({"XAU_AM", "XAU_PM"})
+
+
 def render(conn: sqlite3.Connection, now: str | None = None) -> str:
     now = now or utcnow()
     symbols = [
         r["symbol"]
         for r in conn.execute("SELECT DISTINCT symbol FROM prices ORDER BY symbol")
+        if r["symbol"] not in RETIRED
     ]
     if not symbols:
         return "no price data"

@@ -72,3 +72,16 @@ def test_all_four_regime_strings(tmp_path):
 def test_regime_comparison_is_strict(tmp_path):
     # Spot exactly on both SMAs is "below both" — strict `>`, matching the panel.
     assert "spot below both" in _regime_line(tmp_path, "eq", 4200.0, 4200.0, 4200.0)
+
+
+def test_retired_series_are_left_out_of_the_summary(tmp_path):
+    # LBMA put its free JSON behind a WAF on 2026-09-30 and the sources were
+    # removed. Their history stays in `prices` for grep, but a frozen value
+    # in every brief's price block reads as live data.
+    conn = db.connect(tmp_path / "t.db")
+    prices.store_price(conn, "GC", "2026-10-09T20:00:00Z", 4220.3)
+    prices.store_price(conn, "XAU_AM", "2026-09-29T10:30:00Z", 4139.0)
+    prices.store_price(conn, "XAU_PM", "2026-09-29T15:00:00Z", 4163.4)
+    out = pricesummary.render(conn, now="2026-10-11T09:00:00Z")
+    assert "GC 4220.3" in out
+    assert "XAU_AM" not in out and "XAU_PM" not in out
