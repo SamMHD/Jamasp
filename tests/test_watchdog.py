@@ -571,3 +571,45 @@ def test_watchdog_run_reads_scored_only_from_settings(tmp_path):
                               now="2026-09-13T12:00:00Z",
                               credentials_path=tmp_path / "none.json")
     assert not any("translate backlog" in v for v in violations), violations
+
+
+def test_abandoned_row_outside_the_window_does_not_violate(tmp_path):
+    """An abandoned row older than translate's window can never be cleared:
+    `--force` re-arms only inside the window (translate.rearm) and
+    pending_rows never selects outside it. Reporting it is a violation
+    nobody can act on — on the live host 1,318 rows from a September quota
+    storm re-sent the same 'gave up' line to the desk every day for weeks."""
+    conn = db.connect(tmp_path / "t.db")
+    conn.execute(
+        "INSERT INTO items (id, source, published_at, headline, url, topic,"
+        " fetched_at, fa_attempts) VALUES ('i1','a','2026-08-14T12:00:00Z','H',"
+        " 'https://e/1','gold','2026-08-14T12:00:00Z', 3)"
+    )
+    conn.commit()
+    db.set_meta(conn, "last_translate_at", "2026-09-13T11:55:00Z")
+    violations = watchdog.check(conn, tmp_path, now="2026-09-13T12:00:00Z",
+                                credentials_path=tmp_path / "none.json",
+                                translate_window_days=7)
+    assert not any("gave up" in v for v in violations), violations
+
+
+def test_abandoned_probe_mirrors_scored_only(tmp_path):
+    """Under scored_only, `--force` re-arms only scored rows, so an unscored
+    abandoned row (left over from before scored_only) is likewise beyond
+    reach. A scored one in the window is still reported."""
+    conn = db.connect(tmp_path / "t.db")
+    for i in ("i1", "i2"):
+        conn.execute(
+            "INSERT INTO items (id, source, published_at, headline, url, topic,"
+            " fetched_at, fa_attempts) VALUES (?,'a','2026-09-13T10:00:00Z','H',"
+            " ?,'gold','2026-09-13T10:00:00Z', 3)", (i, f"https://e/{i}"),
+        )
+    conn.commit()
+    db.set_meta(conn, "last_translate_at", "2026-09-13T11:55:00Z")
+    kw = dict(now="2026-09-13T12:00:00Z", credentials_path=tmp_path / "none.json",
+              translate_window_days=7, translate_scored_only=True)
+    assert not any("gave up" in v for v in watchdog.check(conn, tmp_path, **kw))
+
+    _add_score(conn, "i2")
+    violations = watchdog.check(conn, tmp_path, **kw)
+    assert any("gave up on 1 items" in v for v in violations), violations
