@@ -1710,8 +1710,12 @@ def test_rows_pass_skips_history_behind_the_floor(tmp_path):
     """The whole point: an old item is never selected once the floor is set."""
     conn = db.connect(tmp_path / "t.db")
     old, fresh = seed(conn, [("Ancient news", 24 * 5), ("Todays news", 1)])
+    # The floor is pinned relative to the seed's clock, not to FLOOR_CFG's
+    # fixed date: once that date falls behind the rolling 7-day window the
+    # window wins (by design) and this test stops exercising the floor.
+    cfg = {**CFG, "translate_from": ago(48)}
     ids = [r["id"] for r in translate.pending_rows(
-        conn, 7, 10, since=translate.floor_for(FLOOR_CFG, 7))]
+        conn, 7, 10, since=translate.floor_for(cfg, 7))]
     assert fresh in ids
     assert old not in ids, "an item behind translate_from must never be selected"
 
