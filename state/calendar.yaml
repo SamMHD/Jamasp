@@ -1928,3 +1928,47 @@ events:
       a CONDITIONAL deepdive at 04:30Z Fri 16 Oct; the Thu 15 Oct 19:00Z scan
       re-extracts the Board index --fresh and cancels #71 on a payments /
       non-policy title.
+
+  - date: 2026-10-12
+    time_dubai: "Mon 12 Oct - Sun 18 Oct (IMF/World Bank annual meetings, Bangkok; The National 11 Oct 03:00Z - the first non-Washington meetings since 2023; Bangkok = UTC+7)"
+    title: IMF/WB annual meetings in Bangkok - the global hiking-cycle venue, and the probable host of Warsh's Fri 16 Oct 03:30Z 'speaks in Thailand' slot
+    why: >
+      Georgieva (Singapore, Tue 6 Oct): the environment is right for a 'prudently hawkish'
+      posture in most countries, austerity 'back on the menu'; CME pricing three more Fed
+      hikes by Jul 2027; BoE expected to hike in November; the 10y at a 24-year high. A Fed
+      chair 'speaking in Thailand' during the meetings is a policy venue by default (an IMF
+      seminar or a Governor talk), which raises the prior that #71 upgrades - but the title is
+      unread: meetings.imf.org and imf.org/News/Seminars return 403 to extract, the Board
+      index has no Warsh entry and /speech/warsh20261016a.htm 404s until speaking time. The
+      meetings also carry the ECB/BoJ/BoE communications week: every central bank line lands
+      in the same window as CPI (Wed) and PPI (Thu), so the dated-odds discipline (rule 14)
+      matters more than usual - a roundup's figure is context, the latest dated relay
+      sentence is operative.
+    action: >
+      Scans Mon-Thu: a Warsh/IMF line in investinglive or CNBC naming the session title or
+      time re-dates #71 (Bangkok UTC+7); the Thu 15 Oct 19:00Z scan re-extracts the Board
+      index --fresh as already tasked. Any Fed participant quoted from Bangkok with an
+      October/December sentence is read under the bearish-rates bands (>=25% dated -> 40;
+      >=40% -> 45 with the tape clause; a governor 'pause/done' with <15% -> 30). No new
+      wakeup: #71 (04:30Z Fri) is the reader.
+
+  - date: 2026-10-13
+    time_dubai: "Tue 13 Oct - Waller 07:45Z (11:45 Dubai; TE only, venue unverified - the Board index's Istanbul SEP entry is the 8 Oct speech, dated by probe 11 Oct), Barkin 17:00Z (21:00), Collins 20:00Z (00:00 Wed); US 2y cash close 21:05Z (01:05 Wed) - the first of the week"
+    title: Tuesday - the first rates read of CPI week (2y vs Fri 4.791; row vs 4216.3) with three Fed speakers and no verified venue
+    why: >
+      Monday has no US cash close (Columbus Day), so Tuesday's 2y close is the first partner
+      for a gold row since Friday's unexplained +1.5% with the 2y +3.5bp. The stance's live
+      questions all read off this session: a both-up Tuesday is c1f9579d MISS (base rewritten
+      around the long end); f11f1021 (no row >=4375) and 3be2f207 (no 10y close >=5.35) close
+      on the Tue row/close; the new 2y sign claim (above 4.791, 0.55) scores here. Waller is
+      the governor slot before CPI and the one voice that has moved October pricing this cycle
+      ('more hikes needed, flexible on pace', 8 Oct); Barkin and Collins are the regional
+      hawks. Venues unverified (rule 24: a name and a time is not a content signal) - no
+      deepdive; scan markers.
+    action: >
+      Tue 09:00Z scan: read the investinglive/actionforex relay for a DATED October sentence
+      from Waller (bands: >=25% -> 40; >=40% -> 45 with the tape clause; 'pause/done' with
+      <15% -> 30); 17:00Z/19:00Z scans: Barkin/Collins relay for policy only; Wed 14 Oct
+      brief: read the CNBC 5:05pm 2y/10y lines and the Tue row FIRST - score f11f1021 and
+      3be2f207, read c1f9579d's pair status and the 2y sign claim, then set weights for the
+      CPI flip lines; no fresh directional predictions at the Wed brief.

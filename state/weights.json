@@ -1,5 +1,5 @@
 {
- "fitted_at": "2026-10-09T23:31:12Z",
+ "fitted_at": "2026-10-10T23:31:12Z",
  "fits": {
   "technical": {
    "n": 6276,
@@ -32,41 +32,41 @@
    ],
    "coefficients": {
     "sma50@1d": {
-     "beta": 0.1812907444786837,
-     "se": 0.04673745204128826,
-     "multiplier": 2.150889253500994,
+     "beta": 0.18129006398489117,
+     "se": 0.04673744068810882,
+     "multiplier": 2.15087769264341,
      "observations": 6276,
      "fitted": true,
      "pinned": false
     },
     "sma50@4h": {
-     "beta": 0.03689910876075509,
-     "se": 0.03377229379500254,
-     "multiplier": 0.43778239603734653,
+     "beta": 0.03689934749577141,
+     "se": 0.033772285591241014,
+     "multiplier": 0.4377845186726097,
      "observations": 6155,
      "fitted": true,
      "pinned": false
     },
     "sma50@1w": {
-     "beta": 0.06409138802837977,
-     "se": 0.077008199781685,
-     "multiplier": 0.7603999760087764,
+     "beta": 0.06409590828070398,
+     "se": 0.07700818107531904,
+     "multiplier": 0.7604523727355171,
      "observations": 6276,
      "fitted": true,
      "pinned": false
     },
     "sma200@1d": {
-     "beta": 0.2251379494427977,
-     "se": 0.048856062216342984,
-     "multiplier": 2.6711060038076115,
+     "beta": 0.22513558824543944,
+     "se": 0.0488560503485237,
+     "multiplier": 2.671073659158863,
      "observations": 6276,
      "fitted": true,
      "pinned": false
     },
     "sma200@4h": {
-     "beta": 0.05938686224908611,
-     "se": 0.02367369907689278,
-     "multiplier": 0.7045840325605939,
+     "beta": 0.05938656611128377,
+     "se": 0.023673693326220865,
+     "multiplier": 0.7045793767390293,
      "observations": 5753,
      "fitted": true,
      "pinned": false
@@ -80,136 +80,136 @@
      "pinned": false
     },
     "macd@1d": {
-     "beta": -0.17265815917244337,
-     "se": 0.027491628220750422,
+     "beta": -0.17265894504854945,
+     "se": 0.027491621542650172,
      "multiplier": 0.25,
      "observations": 6276,
      "fitted": true,
      "pinned": false
     },
     "macd@4h": {
-     "beta": -0.13679201000584087,
-     "se": 0.020808680996950442,
+     "beta": -0.13679177694097427,
+     "se": 0.020808675942231427,
      "multiplier": 0.25,
      "observations": 6188,
      "fitted": true,
      "pinned": false
     },
     "macd@1w": {
-     "beta": -0.22156362207114677,
-     "se": 0.038709451677450164,
+     "beta": -0.22156704200043117,
+     "se": 0.03870944227438391,
      "multiplier": 0.25,
      "observations": 6276,
      "fitted": true,
      "pinned": false
     },
     "adx@1d": {
-     "beta": -0.11358352702695293,
-     "se": 0.04448444467071796,
+     "beta": -0.11358297532302593,
+     "se": 0.04448443386482531,
      "multiplier": 0.25,
      "observations": 6276,
      "fitted": true,
      "pinned": false
     },
     "adx@4h": {
-     "beta": -0.04460045869190484,
-     "se": 0.033659515504003694,
+     "beta": -0.04460041794611107,
+     "se": 0.033659507327637644,
      "multiplier": 0.25,
      "observations": 6155,
      "fitted": true,
      "pinned": false
     },
     "adx@1w": {
-     "beta": -0.18723813544066448,
-     "se": 0.04259090622243288,
+     "beta": -0.1872399106023887,
+     "se": 0.042590895876507315,
      "multiplier": 0.25,
      "observations": 6276,
      "fitted": true,
      "pinned": false
     },
     "rsi14@1d": {
-     "beta": -0.12460902334464422,
-     "se": 0.05744049114177238,
+     "beta": -0.1246118555268861,
+     "se": 0.05744047718867555,
      "multiplier": 0.25,
      "observations": 6276,
      "fitted": true,
      "pinned": false
     },
     "rsi14@4h": {
-     "beta": -0.012557624168785432,
-     "se": 0.037260743833010625,
+     "beta": -0.01255566026418518,
+     "se": 0.03726073478185591,
      "multiplier": 0.25,
      "observations": 6251,
      "fitted": true,
      "pinned": false
     },
     "rsi14@1w": {
-     "beta": -0.440480513448667,
-     "se": 0.06539128930045743,
+     "beta": -0.4404774313201143,
+     "se": 0.06539127341600048,
      "multiplier": 0.25,
      "observations": 6276,
      "fitted": true,
      "pinned": false
     },
     "stoch@1d": {
-     "beta": -0.06473225826190444,
-     "se": 0.017007602168069534,
+     "beta": -0.06473205507801376,
+     "se": 0.01700759803667288,
      "multiplier": 0.25,
      "observations": 6276,
      "fitted": true,
      "pinned": false
     },
     "stoch@4h": {
-     "beta": -0.039343881018589384,
-     "se": 0.014330654693607187,
+     "beta": -0.039343618442407705,
+     "se": 0.014330651212479542,
      "multiplier": 0.25,
      "observations": 6255,
      "fitted": true,
      "pinned": false
     },
     "stoch@1w": {
-     "beta": 0.07843240331381073,
-     "se": 0.02384546986770842,
-     "multiplier": 0.9305462002433722,
+     "beta": 0.07843093212166921,
+     "se": 0.023845464075312787,
+     "multiplier": 0.9305272368803784,
      "observations": 6276,
      "fitted": true,
      "pinned": false
     },
     "willr@1d": {
-     "beta": -0.06473225826269248,
-     "se": 0.017007602168057325,
+     "beta": -0.06473205507897242,
+     "se": 0.017007598036662623,
      "multiplier": 0.25,
      "observations": 6276,
      "fitted": true,
      "pinned": false
     },
     "willr@4h": {
-     "beta": -0.0393438810211406,
-     "se": 0.014330654693954357,
+     "beta": -0.039343618444845234,
+     "se": 0.01433065121284096,
      "multiplier": 0.25,
      "observations": 6255,
      "fitted": true,
      "pinned": false
     },
     "willr@1w": {
-     "beta": 0.07843240331854093,
-     "se": 0.023845469867697287,
-     "multiplier": 0.9305462002994928,
+     "beta": 0.07843093212627353,
+     "se": 0.023845464075305422,
+     "multiplier": 0.9305272369350054,
      "observations": 6276,
      "fitted": true,
      "pinned": false
     },
     "fib618@1d": {
-     "beta": 0.08079727498282574,
-     "se": 0.03457838514971908,
-     "multiplier": 0.9586037664110231,
+     "beta": 0.0807975630623805,
+     "se": 0.03457837675014647,
+     "multiplier": 0.9586056300653455,
      "observations": 6276,
      "fitted": true,
      "pinned": false
     },
     "fib618@4h": {
-     "beta": -0.10528216046695167,
-     "se": 0.019853191932935124,
+     "beta": -0.10528177313695565,
+     "se": 0.019853187110317746,
      "multiplier": 0.25,
      "observations": 6003,
      "fitted": true,
@@ -224,105 +224,105 @@
      "pinned": false
     },
     "fib50@1d": {
-     "beta": -0.2742575449402901,
-     "se": 0.03408450893321376,
+     "beta": -0.2742587135428609,
+     "se": 0.03408450065361093,
      "multiplier": 0.25,
      "observations": 6276,
      "fitted": true,
      "pinned": false
     },
     "fib50@4h": {
-     "beta": -0.08466567480355518,
-     "se": 0.024729790330347376,
+     "beta": -0.08466549268628498,
+     "se": 0.02472978432313616,
      "multiplier": 0.25,
      "observations": 6003,
      "fitted": true,
      "pinned": false
     },
     "fib50@1w": {
-     "beta": -0.16755605362726195,
-     "se": 0.025955778114170408,
+     "beta": -0.16755663818657507,
+     "se": 0.02595577180914982,
      "multiplier": 0.25,
      "observations": 6276,
      "fitted": true,
      "pinned": false
     },
     "pivot@1d": {
-     "beta": -0.04262984257407278,
-     "se": 0.015521703794132728,
+     "beta": -0.042629327769416796,
+     "se": 0.015521700023694249,
      "multiplier": 0.25,
      "observations": 6276,
      "fitted": true,
      "pinned": false
     },
     "pivot@4h": {
-     "beta": -0.019592465303914865,
-     "se": 0.01068540368642753,
+     "beta": -0.019592758627377017,
+     "se": 0.010685401090793847,
      "multiplier": 0.25,
      "observations": 6271,
      "fitted": true,
      "pinned": false
     },
     "pivot@1w": {
-     "beta": -0.022855806767061063,
-     "se": 0.016874881602687443,
+     "beta": -0.02285573950437877,
+     "se": 0.016874877503543183,
      "multiplier": 0.25,
      "observations": 6276,
      "fitted": true,
      "pinned": false
     },
     "bollinger@1d": {
-     "beta": 0.060301892400862235,
-     "se": 0.03623205596252557,
-     "multiplier": 0.7154402322289451,
+     "beta": 0.060302716790279355,
+     "se": 0.03623204716125351,
+     "multiplier": 0.7154488530646372,
      "observations": 6276,
      "fitted": true,
      "pinned": false
     },
     "bollinger@4h": {
-     "beta": -0.06896762197007451,
-     "se": 0.030378254442844747,
+     "beta": -0.06896886765266845,
+     "se": 0.03037824706354284,
      "multiplier": 0.25,
      "observations": 6233,
      "fitted": true,
      "pinned": false
     },
     "bollinger@1w": {
-     "beta": -0.032357005349442164,
-     "se": 0.061708680416059515,
+     "beta": -0.032360038812751755,
+     "se": 0.06170866542616058,
      "multiplier": 0.25,
      "observations": 6276,
      "fitted": true,
      "pinned": false
     },
     "atr14@1d": {
-     "beta": 0.01693038917967728,
-     "se": 0.018318595634746363,
+     "beta": 0.016931830738032852,
+     "se": 0.018318591184903827,
      "multiplier": 0.25,
      "observations": 6276,
      "fitted": true,
      "pinned": false
     },
     "atr14@4h": {
-     "beta": 0.09072501852741624,
-     "se": 0.010808586182111802,
-     "multiplier": 1.0763895748535734,
+     "beta": 0.09072522330768933,
+     "se": 0.01080858355655537,
+     "multiplier": 1.076390259252509,
      "observations": 6118,
      "fitted": true,
      "pinned": false
     },
     "atr14@1w": {
-     "beta": -0.2354619484003119,
-     "se": 0.019317899219333225,
+     "beta": -0.2354604573438921,
+     "se": 0.019317894526745934,
      "multiplier": 0.25,
      "observations": 6276,
      "fitted": true,
      "pinned": false
     },
     "gvz@1d": {
-     "beta": 0.03901154665089409,
-     "se": 0.00975802689828301,
-     "multiplier": 0.4628450100701469,
+     "beta": 0.03901194893633207,
+     "se": 0.009758024527922089,
+     "multiplier": 0.4628490324803105,
      "observations": 835,
      "fitted": true,
      "pinned": false
@@ -347,48 +347,48 @@
    ],
    "coefficients": {
     "rates_dollar": {
-     "beta": 0.03165196771474232,
-     "se": 0.014741365665523299,
-     "multiplier": 1.1749618618469198,
+     "beta": 0.03165476754900344,
+     "se": 0.014741109866372898,
+     "multiplier": 1.1751037102721178,
      "observations": 667,
      "fitted": true,
      "pinned": false
     },
     "geopolitics": {
-     "beta": 0.037449417581562096,
-     "se": 0.015278868509272915,
-     "multiplier": 1.3901706776422824,
+     "beta": 0.037445957282606426,
+     "se": 0.015278603383118901,
+     "multiplier": 1.3900870783322918,
      "observations": 670,
      "fitted": true,
      "pinned": false
     },
     "physical_cb": {
-     "beta": -0.008205304470353954,
-     "se": 0.014512261078741774,
+     "beta": -0.008203872177339911,
+     "se": 0.014512009255122532,
      "multiplier": 1.0,
      "observations": 49,
      "fitted": false,
      "pinned": false
     },
     "etf_flows": {
-     "beta": 0.028944705979302925,
-     "se": 0.014528669656157437,
+     "beta": 0.028944884574413424,
+     "se": 0.014528417547808805,
      "multiplier": 1.0,
      "observations": 12,
      "fitted": false,
      "pinned": false
     },
     "supply_mining": {
-     "beta": 0.009708785686913511,
-     "se": 0.014687776223545036,
-     "multiplier": 0.3604026457304724,
+     "beta": 0.00970579082289156,
+     "se": 0.014687521354303975,
+     "multiplier": 0.36030309777030745,
      "observations": 216,
      "fitted": true,
      "pinned": false
     },
     "other": {
-     "beta": -0.014814403224204348,
-     "se": 0.014684728506280796,
+     "beta": -0.014812908776538925,
+     "se": 0.014684473689925167,
      "multiplier": 0.25,
      "observations": 503,
      "fitted": true,
