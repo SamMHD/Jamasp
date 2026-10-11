@@ -230,14 +230,14 @@ def check(
     # stuck backlog every single day — a probe that never clears is
     # indistinguishable from a probe that caught nothing, which is worse than
     # no probe at all.
+    scored_clause = (
+        " AND EXISTS (SELECT 1 FROM item_scores s WHERE s.item_id = items.id)"
+        if translate_scored_only else ""
+    )
     if translate_has_run and translate_window_days is not None:
         threshold = (now_dt - timedelta(minutes=TRANSLATE_BACKLOG_MINUTES)).strftime(
             "%Y-%m-%dT%H:%M:%SZ")
         window_bound = _since(translate_window_days, now)
-        scored_clause = (
-            " AND EXISTS (SELECT 1 FROM item_scores s WHERE s.item_id = items.id)"
-            if translate_scored_only else ""
-        )
         backlog = conn.execute(
             "SELECT COUNT(*) FROM items"
             " WHERE headline_fa IS NULL AND fa_attempts < ? AND published_at < ?"
@@ -249,16 +249,27 @@ def check(
                 f"translate backlog: {backlog} items untranslated"
                 f" > {TRANSLATE_BACKLOG_MINUTES} min after publication; {_TRANSLATE}")
 
-    # A row at the attempt cap is abandoned regardless of the window, so this
-    # is checked whether or not window_days was supplied — but still only once
-    # the job has run: rows cannot have been abandoned by a job that has never
+    # A row at the attempt cap is abandoned, and only `--force` brings it back
+    # — but `--force` (translate.rearm) re-arms only the rows inside the window
+    # and, under scored_only, only scored ones. So this probe counts exactly
+    # that set: a row outside it can never be cleared, and a violation nobody
+    # can clear repeats forever. On the live host 1,318 rows abandoned in the
+    # September quota storm (docs/todo/025) re-sent the same "gave up" line to
+    # the desk daily for weeks after falling out of the window. Without a
+    # window_days it falls back to every row, and it still waits for the job
+    # to have run: rows cannot have been abandoned by a job that has never
     # attempted them.
     abandoned = 0
     if translate_has_run:
+        window_clause, window_params = "", ()
+        if translate_window_days is not None:
+            window_clause = " AND published_at >= ?"
+            window_params = (_since(translate_window_days, now),)
         abandoned = conn.execute(
             "SELECT COUNT(*) FROM items"
-            " WHERE headline_fa IS NULL AND fa_attempts >= ?",
-            (translate_mod.MAX_ATTEMPTS,),
+            " WHERE headline_fa IS NULL AND fa_attempts >= ?"
+            f"{window_clause}{scored_clause}",
+            (translate_mod.MAX_ATTEMPTS, *window_params),
         ).fetchone()[0]
     if abandoned:
         violations.append(
