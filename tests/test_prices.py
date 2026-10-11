@@ -253,3 +253,25 @@ def test_configured_tv_url_requests_every_mapped_field():
     query = parse_qs(urlsplit(src.url).query)
     requested = set(query["fields"][0].split(","))
     assert requested == set(prices.TV_FIELD_SUFFIXES)
+
+
+def test_parse_yahoo_chart_json_falls_back_to_meta_when_the_window_is_empty():
+    # range=1d covers only the current exchange-local day. Before its first
+    # bar (all Sunday, GC=F at 04:00Z, ^GVZ before the 13:30Z cash open) Yahoo
+    # omits `timestamp` and leaves `quote` empty, which used to surface as a
+    # bare KeyError: 'timestamp'. meta still carries the last trade.
+    symbol, ts, value = prices.parse_yahoo_chart_json(
+        (FIXTURES / "yahoo_gc_empty_window.json").read_text()
+    )
+    assert symbol == "GC"
+    assert ts == "2026-10-09T20:59:59Z"
+    assert value == 4216.3
+
+
+def test_parse_yahoo_chart_json_empty_window_without_meta_price_raises_cleanly():
+    text = (
+        '{"chart":{"result":[{"meta":{"symbol":"GC=F"},'
+        '"indicators":{"quote":[{}]}}],"error":null}}'
+    )
+    with pytest.raises(ValueError, match="no bars"):
+        prices.parse_yahoo_chart_json(text)

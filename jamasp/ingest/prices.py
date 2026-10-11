@@ -41,6 +41,15 @@ def parse_yahoo_chart_json(text: str) -> tuple[str, str, float]:
         if symbol.endswith(suffix):
             symbol = symbol[: -len(suffix)]
             break
+    meta = result["meta"]
+    if "timestamp" not in result:
+        # range=1d covers only the current exchange-local day; before its
+        # first bar (Sunday, GC=F at the 04:00Z day roll, ^GVZ before the cash
+        # open) Yahoo omits the bars entirely. meta still holds the last trade.
+        if meta.get("regularMarketPrice") is None or not meta.get("regularMarketTime"):
+            raise ValueError(f"no bars and no meta price in yahoo chart json for {symbol}")
+        dt = datetime.fromtimestamp(meta["regularMarketTime"], tz=timezone.utc)
+        return symbol, dt.strftime("%Y-%m-%dT%H:%M:%SZ"), float(meta["regularMarketPrice"])
     timestamps = result["timestamp"]
     closes = result["indicators"]["quote"][0]["close"]
     for ts, close in zip(reversed(timestamps), reversed(closes)):
