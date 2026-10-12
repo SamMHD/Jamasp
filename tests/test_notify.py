@@ -109,3 +109,41 @@ def test_resolve_chat_news_missing_env_raises(monkeypatch):
     }
     with pytest.raises(RuntimeError, match="JAMASP_TG_NEWS_CHAT"):
         notify.resolve_chat(settings, "news")
+
+
+def test_send_telegram_threads_a_reply_and_tolerates_a_deleted_target():
+    sent = {}
+
+    def fake_post(url, data):
+        sent["data"] = data
+        return {"ok": True, "result": {"message_id": 9}}
+
+    notify.send_telegram("x", "T", "-100", post=fake_post, reply_to=42)
+    assert sent["data"]["reply_to_message_id"] == 42
+    # a /brief deleted while codex ran must not make the brief undeliverable
+    assert sent["data"]["allow_sending_without_reply"] == "true"
+
+
+def test_send_telegram_without_reply_to_sends_no_reply_fields():
+    sent = {}
+    notify.send_telegram("x", "T", "C", post=lambda u, d: sent.update(d) or
+                         {"ok": True, "result": {"message_id": 1}})
+    assert "reply_to_message_id" not in sent
+
+
+def test_split_message_keeps_short_text_whole():
+    assert notify.split_message("سلام\n\nدنیا") == ["سلام\n\nدنیا"]
+
+
+def test_split_message_breaks_at_paragraphs_under_the_limit():
+    paras = ["ا" * 30, "ب" * 30, "پ" * 30]
+    # two paragraphs + separator = 62 chars fit under 70; the third does not
+    parts = notify.split_message("\n\n".join(paras), limit=70)
+    assert parts == [f"{paras[0]}\n\n{paras[1]}", paras[2]]
+
+
+def test_split_message_falls_back_to_lines_then_hard_cut():
+    text = ("a" * 50 + "\n") * 3 + "b" * 200
+    parts = notify.split_message(text, limit=80)
+    assert all(len(p) <= 80 for p in parts)
+    assert "".join(parts).replace("\n", "") == text.replace("\n", "")

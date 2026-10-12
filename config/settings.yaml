@@ -150,3 +150,11 @@ translate:
   doc_chunk_bytes: 8000
   # Spec decision 18: new reports only. Set to the date this shipped.
   reports_since: "2026-09-13"
+farsi_brief:
+  # `/brief` in the desk chat (jamasp bot → jamasp farsi-brief). An
+  # independent read by codex, in Persian — see
+  # docs/superpowers/specs/2026-10-12-telegram-farsi-brief-design.md.
+  # cmd omitted = reuse translate.cmd (same codex, same flags). One call
+  # writes the whole brief, so it gets a far longer ceiling than a
+  # translate batch.
+  timeout_seconds: 600

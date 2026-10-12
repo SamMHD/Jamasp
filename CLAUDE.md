@@ -38,6 +38,7 @@ for the sage-advisor of the Shahnameh: measured, far-sighted, never breathless.
 | `uv run jamasp flash-rollup [--dry-run]` | send one Persian roundup of held middle-tier items (own timer, 4x/day) |
 | `uv run jamasp translate` | fill Persian renderings for the panel (own timer, 10-min) |
 | `uv run jamasp calendar` | upcoming economic events (UTC + Dubai), high/medium impact |
+| `uv run jamasp farsi-brief [--dry-run]` | independent codex Persian brief to the desk (normally triggered by `/brief` via `jamasp-bot`) |
 | `uv run jamasp bars backfill` | refresh OHLC bars (idempotent; also the daily refresh) |
 | `uv run jamasp signals refresh` | recompute current technical signal states |
 | `uv run jamasp weights fit` | refit the market maps' learned multipliers |
@@ -66,9 +67,11 @@ Claude's file-based `~/.claude/.credentials.json` rather than the whole
 directory) — is the **`deploy` skill** (`.claude/skills/deploy/SKILL.md`).
 Invoke it when standing up a new host or repairing one.
 
-Alongside the timers the host runs two always-on services: `jamasp-panel`
-(the web control panel) and `jamasp-authd` (the Cloudflare Access JWT
-sidecar that fronts it). Every unit carries
+Alongside the timers the host runs three always-on services: `jamasp-panel`
+(the web control panel), `jamasp-authd` (the Cloudflare Access JWT
+sidecar that fronts it), and `jamasp-bot` (the desk-chat listener that
+answers `/brief` with an independent codex Farsi brief — never an analysis
+run, and no analysis run reads it). Every unit carries
 `OnFailure=jamasp-alert@%n.service`, so a failure reaches the desk chat
 rather than sitting silently in the journal.
 

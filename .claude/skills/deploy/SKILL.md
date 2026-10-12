@@ -374,6 +374,7 @@ of which restructure `panel/` — it's still the same `next start` on
 | `ops/systemd-root/nginx.service.d/requires-jamasp-edge.conf` | `/etc/systemd/system/nginx.service.d/` | `Requires=`/`After=jamasp-edge.service` — without it, nginx starts (fail-open) even when the lockdown failed to load, since `Before=` alone is ordering, not a dependency |
 | `ops/nginx/jamasp-panel.conf` | `/etc/nginx/sites-available/`, symlinked into `sites-enabled/` | public vhost + catch-all `444` default servers; `satisfy any` over `auth_request` + `auth_basic` |
 | `ops/systemd/jamasp-authd.service` | `/etc/systemd/system/` **via the ordinary step-5 loop** (it must run as `jamasp`, so it belongs in `ops/systemd/`, not `-root/`) | the Access JWT sidecar on `127.0.0.1:3301` |
+| `ops/systemd/jamasp-bot.service` | `/etc/systemd/system/` with the same `sed` + `User=jamasp` step as authd (snippet below) | the desk-chat listener that answers `/brief` with an independent codex Farsi brief; long-polls Telegram, so no inbound port |
 | `panel/next.config.ts` | built into the panel | `experimental.serverActions.allowedOrigins: ["jamasp.mkagent.co", "jamasp.mahdanian.xyz"]` — without the current hostname, pages render fine but every Server Action POST silently fails Origin checking; the legacy hostname stays listed only for the transition (a tab already open on it still POSTs from that Origin, and browsers don't reliably follow a 301 for a POST) |
 | *(not in repo — issued via the Cloudflare API)* | `/etc/ssl/certs/jamasp-origin.pem` (0644, root) + `/etc/ssl/private/jamasp-origin.key` (0600, root) | Origin CA cert/key that `ops/nginx/jamasp-panel.conf`'s `ssl_certificate`/`ssl_certificate_key` point at — see "TLS: Cloudflare Origin CA certificate" below |
 
@@ -394,6 +395,20 @@ ssh jamasp 'sed -e "s|%h|/home/jamasp|g" -e "/^\[Service\]/a User=jamasp" \
   /home/jamasp/Jamasp/ops/systemd/jamasp-authd.service \
   > /etc/systemd/system/jamasp-authd.service'
 ssh jamasp 'systemctl daemon-reload && systemctl enable --now jamasp-authd'
+```
+
+The desk-chat listener (`jamasp-bot`) installs the same way. It needs only
+the Telegram token and desk chat id already in `~/.config/jamasp/env`, and
+codex logged in for the `jamasp` user (the translate timer already needs
+that):
+
+```bash
+ssh jamasp 'sed -e "s|%h|/home/jamasp|g" -e "/^\[Service\]/a User=jamasp" \
+  /home/jamasp/Jamasp/ops/systemd/jamasp-bot.service \
+  > /etc/systemd/system/jamasp-bot.service'
+ssh jamasp 'systemctl daemon-reload && systemctl enable --now jamasp-bot'
+# verify: send /brief in the desk chat; expect "در حال آماده‌سازی بریف…" at once
+ssh jamasp 'journalctl -u jamasp-bot -n 20 --no-pager'
 ```
 
 Two values must be in `~/.config/jamasp/env`, and the daemon **refuses to

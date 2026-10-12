@@ -10,12 +10,14 @@ import click
 import httpx
 
 from jamasp import authd as authd_mod
+from jamasp import bot as bot_mod
 from jamasp import calendarview as calendarview_mod
 from jamasp import cluster as cluster_mod
 from jamasp import db as db_mod
 from jamasp import digest as digest_mod
 from jamasp import dispatch as dispatch_mod
 from jamasp import extract as extract_mod
+from jamasp import farsibrief as farsibrief_mod
 from jamasp import fit as fit_mod
 from jamasp import flash as flash_mod
 from jamasp import inbox as inbox_mod
@@ -27,7 +29,9 @@ from jamasp import signals as signals_mod
 from jamasp import translate as translate_mod
 from jamasp import wakeup as wakeup_mod
 from jamasp import watchdog as watchdog_mod
-from jamasp.config import load_glossary, load_settings, load_sources, load_weights
+from jamasp.config import (
+    display_names, load_glossary, load_settings, load_sources, load_weights,
+)
 from jamasp.ingest import bars as bars_mod
 from jamasp.ingest import calendar as calendar_mod
 from jamasp.ingest import prices as prices_mod
@@ -569,6 +573,25 @@ def calendar(days, all_impacts, db_path, config_dir):
     ))
 
 
+@main.command("farsi-brief")
+@click.option("--reply-to", type=int, default=None, help="desk message id to reply to")
+@click.option("--dry-run", is_flag=True, help="print the brief; don't send")
+@db_opt
+@cfg_opt
+def farsi_brief(reply_to, dry_run, db_path, config_dir):
+    """Write an independent Persian brief with codex and send it to the desk."""
+    conn, sources, settings = _common(db_path, config_dir)
+    try:
+        out = farsibrief_mod.generate(
+            conn, settings, Path(config_dir), display_names(sources),
+            reply_to=reply_to, dry_run=dry_run,
+        )
+    except farsibrief_mod.FarsiBriefFailed as exc:
+        click.echo(f"farsi-brief: failed — {exc}", err=True)
+        raise SystemExit(1)
+    click.echo(out)
+
+
 @main.command("run")
 @click.argument("run_type", type=click.Choice(["brief", "scan", "deepdive", "retro"]))
 @click.argument("task", required=False, default=None)
@@ -662,6 +685,41 @@ def predictions_score(pred_id, outcome, note, pred_path, db_path, config_dir):
     except (KeyError, ValueError) as exc:
         raise click.ClickException(str(exc))
     click.echo(f"scored {e['id']} {outcome}: {e['claim']}")
+
+
+@main.command()
+@db_opt
+@cfg_opt
+def bot(db_path, config_dir):
+    """Listen on the desk Telegram chat and serve /brief (long-polling)."""
+    import logging
+    import subprocess
+
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
+    conn, _, settings = _common(db_path, config_dir)
+    try:
+        token, chat_id = notify_mod.resolve_chat(settings, "desk")
+    except RuntimeError as exc:
+        raise click.ClickException(str(exc))
+
+    last: list[subprocess.Popen] = []
+
+    def spawn(message_id: int) -> None:
+        # Detached so the listener returns to polling at once; output goes to
+        # the listener's journal. `jamasp` resolves to this venv's entry point
+        # because the unit runs under `uv run`.
+        last[:] = [subprocess.Popen(
+            ["jamasp", "farsi-brief", "--reply-to", str(message_id),
+             "--db", db_path, "--config-dir", config_dir],
+            start_new_session=True,
+        )]
+
+    def running() -> bool:
+        # poll() also reaps the finished child, so no zombie lingers.
+        return bool(last) and last[0].poll() is None
+
+    bot_mod.run_forever(conn, bot_mod.TelegramAPI(token), chat_id, spawn,
+                        running=running)
 
 
 @main.command()
