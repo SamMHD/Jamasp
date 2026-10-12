@@ -261,3 +261,15 @@ def test_parse_yahoo_chart_json_empty_window_without_meta_price_raises_cleanly()
     )
     with pytest.raises(ValueError, match="no bars"):
         prices.parse_yahoo_chart_json(text)
+
+
+def test_every_yahoo_fx_pair_in_sources_pins_its_symbol():
+    # Yahoo reports an FX pair's meta.symbol as "CNY=X" (parsed to "CNY") or,
+    # for some pairs, flip-flops between forms across calls — so an unpinned
+    # pair splits its series or files it under a currency, not a pair.
+    from jamasp.config import load_sources
+    fx = [s for s in load_sources(Path(__file__).parent.parent / "config/sources.yaml")
+          if s.parser == "yahoo_chart_json" and "=X" in s.url]
+    assert fx, "expected at least one Yahoo FX pair"
+    assert {s.name: s.symbol for s in fx if not s.symbol} == {}
+    assert {s.symbol for s in fx} >= {"USDJPY", "USDCNY"}
