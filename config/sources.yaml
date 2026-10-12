@@ -274,6 +274,16 @@ sources:
     # Yahoo's meta.symbol for this pair flip-flops between JPY and USDJPY
     # across calls; pin it so the series doesn't split
     symbol: USDJPY
+  # usdcny: added 2026-10-12 — the missing input to the SGE premium (see
+  # sge_benchmark below: CNY/g × 31.1035 / USDCNY − the London reference).
+  # Onshore CNY; Yahoo reports meta.symbol as "CNY=X", so pin the pair name.
+  - name: usdcny
+    type: price_api
+    url: "https://query1.finance.yahoo.com/v8/finance/chart/CNY=X?range=1d&interval=1h"
+    interval_minutes: 60
+    topic: prices
+    parser: yahoo_chart_json
+    symbol: USDCNY
   - name: btc_usd
     type: price_api
     url: "https://query1.finance.yahoo.com/v8/finance/chart/BTC-USD?range=1d&interval=1h"
