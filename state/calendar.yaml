@@ -1972,3 +1972,22 @@ events:
       brief: read the CNBC 5:05pm 2y/10y lines and the Tue row FIRST - score f11f1021 and
       3be2f207, read c1f9579d's pair status and the 2y sign claim, then set weights for the
       CPI flip lines; no fresh directional predictions at the Wed brief.
+
+  - date: 2026-10-16
+    time_dubai: "Fri 16 Oct 08:30 (04:30Z; 00:30 ET) - Warsh moderated conversation at the IMF/World Bank Annual Meetings, Bangkok (investinglive week-ahead 11 Oct 21:09Z); TE / ff_calendar / MarketWatch still carry 03:30Z (07:30 Dubai) - the two readings disagree by one hour; Bangkok = UTC+7 (04:30Z = 11:30 local)"
+    title: Warsh in Bangkok - venue and format now named (policy venue, rule 24); #71 cancelled, #73 deepdive booked 05:30Z
+    why: >
+      The week-ahead post names what the Sat 10 Oct re-verification could not: a
+      moderated conversation at the IMF/WB meetings, 'his final scheduled appearance
+      before the pre-meeting blackout', with markets to read tone over timing since
+      Warsh has dropped forward guidance. That is a policy venue by default (the
+      IMF-meetings prior the 11 Oct brief set), so the conditional booking upgrades
+      to a confirmed deepdive. The 1h disagreement across sources is unresolved
+      (IMF pages 403): a 03:30Z start with a 05:30Z run is print+120 (fine); a
+      04:30Z start with the old 04:30Z run would have been print+0 (useless).
+    action: >
+      #73 deepdive 05:30Z Fri 16 Oct (booked 12 Oct): Board text/index --fresh first,
+      investinglive relay and dated odds sentence, CNBC, actionforex ~+50; read the
+      stance's flip lines as of the run. Thu 15 Oct 19:00Z scan: re-extract the Board
+      index --fresh and any investinglive/CNBC Warsh-session line for the start time;
+      the Fri 03:30Z brief reads whatever has printed and leaves the odds verdict to #73.

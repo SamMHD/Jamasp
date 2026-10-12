@@ -333,6 +333,21 @@ watchlist:
       likely an IMF-meetings appearance (policy venue by default; title unread, IMF pages
       403). October still 19-20% dated; no new figure over the weekend. CPI Wed consensus
       0.6 / core 0.2 - the pre-print asymmetry is to a hot headline (2y sign claim, 0.55).
+      12 OCT: CPI Wed 12:30Z previews converge - investinglive 0.6 m/m /
+      3.7 y/y headline, core 'steady at 2.4' y/y; MUFG 3.6 y/y, 'core must
+      surprise to revive an October hike'; August base 0.4 / 3.4, core 0.3
+      / 2.4 (week-ahead). Warsh: investinglive week-ahead names the venue -
+      a MODERATED CONVERSATION at the IMF/WB Annual Meetings, Bangkok,
+      'around 04:30 GMT Fri (00:30 ET)', his last appearance before the
+      blackout; TE/ff/MarketWatch still say 03:30Z - 1h disagreement, #71
+      cancelled, #73 deepdive booked 05:30Z (later reading +60). Hammack
+      Mon: ff 16:10Z vs TE 16:50Z, venue unknown - 17:00Z scan marker.
+      Monday: no US cash close (Columbus Day); Fri 2y 4.791 / 10y 5.242 /
+      30y 5.600 are Tuesday's comparators. c1f9579d CORRECTION: the claim
+      text excludes Monday so Fri-Tue is NOT a pair - a both-up Tuesday
+      needs a both-up Wednesday to score MISS (the 11 Oct stance's
+      'both-up Tuesday = MISS' was wrong by the text; the Tue row compares
+      to Monday's 4231.6, the Tue 2y to Friday's 4.791).
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -877,6 +892,34 @@ watchlist:
       Friday's call (Peskov) - a Moscow channel beside Doha, no text. Brent did not trade.
       Markers: UKMTO position/name of the Saturday hull; Riyadh naming Iran (claim B); US
       strikes on the Houthis (class unchanged, read Brent); a Saudi east-coast oil node hit.
+      12 OCT (Mon brief): the five Sunday closers all HIT (3fe07b8f Saudi
+      restraint 5/5, faa3ff57 escorts 5/5, fed72d60 arrangement 4/4,
+      4ab9cef6 western Gulf 1/1, 3db62da8 reopen band 6/7). Weekend facts
+      (extracted): KKIA Sat toll 13 / 300+ wounded incl. one US citizen;
+      Terminal 4 hit again Sun; Dammam KFIA tarmac strike CONFIRMED by GACA
+      (~17:30Z Sat); Houthis CLAIM two Aramco sites - Aramco silent,
+      unverified (rule 12, no flip); the Saudi FM spoke to Araghchi on
+      de-escalation Sun (SPA) - first public contact since the escalation,
+      supports 17921803; Trump 'considering joining' Saudi strikes on the
+      Houthis. Hormuz: UKMTO-verified outbound hulls Sat 19:20Z (fire) and
+      Sun 12:00Z (port side), both unnamed, both in the Strait; Petro
+      Dolphin (UAE-owned 4,000 dwt product tanker, false Nicaragua flag,
+      AIS dark since May) droned off Sohar, 2 missing / 9 rescued - the
+      first hit off a neutral coast far from the strait (MarEx); the Sat
+      ~16:35Z UAE National Guard rescue hull (22 crew) remains unnamed and
+      unplaced; IRGC 'mine' claims x2 unverified. CENTCOM Sat: Ocean
+      Molica/Arika Sun disabled by fighter-jet strike (4th since 14 Jul),
+      135 ships turned around, 10 shadow tankers destroyed. Rezaei (SNSC)
+      Sun: US reply 'insufficient', US 'accepted some conditions', Iran
+      'no longer responding'. Goldman: Gulf exports incl. dark flows back
+      at 22-23 mb/d (2025 average; Saudi crude ~12 mb/d, Iran zero),
+      products at half, Dated Brent ~120 = premium not barrels; JPM 89%.
+      Oil traded NONE of the kinetic weekend: Brent 102.84 (-1.8%) on the
+      Trump Russia-Ukraine 'energy ceasefire' (disputed within hours -
+      Kharkiv CHP-5 struck; Kremlin silent) and the 4.8mt Russian diesel
+      deal. Successors: bffc2a77 (arrangement, 0.7), bb801f68 (western
+      Gulf, 0.6), ef8476cc (escorts, 0.7); the Saudi-restraint successor
+      is folded into 17921803's 'announced response against Iran' clause.
     since: 2026-07-31
 
   - theme: kinetic-transmission-inverted
@@ -1034,6 +1077,15 @@ watchlist:
       letter met once (row UP >=5, 2y not down), substance against (long-end
       relief) - 45 needs a second such session. Level claims resumed (cap
       4375 through the Tue row, 0.6).
+      12 OCT: Sunday reopen row 4231.6 (+15.3, +0.36%) inside the band
+      (3db62da8 HIT, family 6/7) with Brent -1.8% / DXY -0.05 / no US 2y
+      (holiday) after the most kinetic weekend since spring: the sign is
+      chain-consistent (oil down -> gold up) but has no 2y partner and
+      sits inside the noise (0.18 ATR) - positioning by rule 25. Friday's
+      divergence (+47.3 with every input against) is unresolved; Tuesday's
+      2y close vs 4.791 is the first test. MACD -58.23 vs signal -58.17 -
+      a bullish cross is one up-session away; the row sits at the 20DMA
+      (~4232); Globex high 4242.3 above it, the row not.
     since: 2026-09-09
 
   - theme: boj-yen-pillar
@@ -1244,6 +1296,18 @@ watchlist:
       (investinglive: 'further supply shocks would strengthen the case for
       tightening rather than be looked through'). CPI 14 Oct: cons 0.5
       headline, nowcast 0.53.
+      12 OCT: Brent Dec 102.84 (-1.80%, day range 102.33-105.63), WTI
+      89.94 (-2.08%) on Trump's Sunday Russia-Ukraine 'energy ceasefire'
+      (Kyiv learned of it from the post; Russia struck Kharkiv CHP-5 hours
+      later; Kremlin silent) two days after the ~4.8mt (36 mb) Russian
+      diesel deal that reverses last month's sanctions law; bipartisan
+      pushback (senator: 'may be illegal'). Goldman: Gulf exports back at
+      22-23 mb/d, products at HALF of normal, Dated Brent ~120 vs futures
+      ~103 (spread premium $22/bbl Sep avg, second-highest on record),
+      Brent $85 YE base case; JPM flags the tanker fleet near full use.
+      The passthrough input is now products (diesel/jet), not crude: the
+      diesel deal is the first supply-side relief on that leg. 4dfbd1d8
+      (headline >=0.4) and 62c34dbd (core <=0.3) score Wed.
     since: 2026-07-31
 
   - theme: us-fiscal-dominance
