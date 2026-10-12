@@ -103,3 +103,112 @@ def test_lock_is_exclusive_and_released(conn):
             assert not second
     assert not farsibrief.lock_is_held(conn)
     assert farsibrief.lock_path(conn).endswith("t.db.farsibrief.lock")
+
+
+from pathlib import Path
+
+from jamasp import modelrun
+
+CONFIG = Path(__file__).parent.parent / "config"
+SETTINGS = {
+    "telegram": {"bot_token_env": "JAMASP_TG_TOKEN", "chat_id_env": "JAMASP_TG_CHAT"},
+    "translate": {"cmd": ["codex", "exec"], "protocol": "codex"},
+    "farsi_brief": {"timeout_seconds": 600},
+}
+
+
+@pytest.fixture
+def tg(monkeypatch):
+    monkeypatch.setenv("JAMASP_TG_TOKEN", "T")
+    monkeypatch.setenv("JAMASP_TG_CHAT", "-100")
+    sent = []
+
+    def post(url, data):
+        sent.append(data)
+        return {"ok": True, "result": {"message_id": len(sent)}}
+    return sent, post
+
+
+def test_generate_calls_codex_with_schema_and_replies(conn, tg):
+    sent, post = tg
+    calls = {}
+
+    def run(cmd, protocol, prompt, schema, timeout):
+        calls.update(cmd=cmd, protocol=protocol, schema=schema, timeout=timeout,
+                     prompt=prompt)
+        return {"brief": "  جمع‌بندی: طلا آرام است.  "}
+
+    out = farsibrief.generate(conn, SETTINGS, CONFIG, {}, reply_to=7, run=run,
+                              post=post, now=NOW)
+    assert calls["cmd"] == ["codex", "exec"] and calls["protocol"] == "codex"
+    assert calls["schema"] == farsibrief.SCHEMA and calls["timeout"] == 600
+    assert "Plain, everyday Persian" in calls["prompt"]  # the prompt file
+    assert sent[0]["text"] == "جمع‌بندی: طلا آرام است."
+    assert sent[0]["reply_to_message_id"] == 7
+    assert out == "sent 1 part(s)"
+    assert conn.execute("SELECT ok FROM notify_log").fetchone()[0] == 1
+
+
+def test_generate_strips_a_code_fence(conn, tg):
+    sent, post = tg
+    run = lambda *a, **k: {"brief": "```\nمتن بریف\n```"}
+    farsibrief.generate(conn, SETTINGS, CONFIG, {}, run=run, post=post, now=NOW)
+    assert sent[0]["text"] == "متن بریف"
+
+
+def test_generate_splits_a_long_brief(conn, tg):
+    sent, post = tg
+    long = "\n\n".join(["پاراگراف " * 300] * 3)
+    farsibrief.generate(conn, SETTINGS, CONFIG, {}, reply_to=7,
+                        run=lambda *a, **k: {"brief": long}, post=post, now=NOW)
+    assert len(sent) > 1 and all(len(d["text"]) <= 4096 for d in sent)
+    assert sent[0]["reply_to_message_id"] == 7
+    assert "reply_to_message_id" not in sent[1]
+
+
+def test_generate_dry_run_returns_text_without_sending(conn, tg):
+    sent, post = tg
+    out = farsibrief.generate(conn, SETTINGS, CONFIG, {}, dry_run=True,
+                              run=lambda *a, **k: {"brief": "متن"}, post=post, now=NOW)
+    assert out == "متن" and sent == []
+
+
+@pytest.mark.parametrize("exc,msg", [
+    (modelrun.QuotaExhausted("usage limit"), farsibrief.MSG_QUOTA),
+    (modelrun.ModelError("timed out"), farsibrief.MSG_FAILED),
+])
+def test_generate_reports_codex_failures_to_the_chat(conn, tg, exc, msg):
+    sent, post = tg
+
+    def run(*a, **k):
+        raise exc
+    with pytest.raises(farsibrief.FarsiBriefFailed):
+        farsibrief.generate(conn, SETTINGS, CONFIG, {}, reply_to=3, run=run,
+                            post=post, now=NOW)
+    assert sent[0]["text"] == msg and sent[0]["reply_to_message_id"] == 3
+
+
+def test_generate_treats_an_empty_brief_as_failure(conn, tg):
+    sent, post = tg
+    with pytest.raises(farsibrief.FarsiBriefFailed):
+        farsibrief.generate(conn, SETTINGS, CONFIG, {},
+                            run=lambda *a, **k: {"brief": " ``` ``` "}, post=post, now=NOW)
+    assert sent[0]["text"] == farsibrief.MSG_FAILED
+
+
+def test_generate_logs_a_failed_send_and_raises(conn, monkeypatch):
+    monkeypatch.setenv("JAMASP_TG_TOKEN", "T")
+    monkeypatch.setenv("JAMASP_TG_CHAT", "-100")
+    bad = lambda u, d: {"ok": False, "description": "chat not found"}
+    with pytest.raises(farsibrief.FarsiBriefFailed):
+        farsibrief.generate(conn, SETTINGS, CONFIG, {},
+                            run=lambda *a, **k: {"brief": "متن"}, post=bad, now=NOW)
+    assert conn.execute("SELECT ok FROM notify_log").fetchone()[0] == 0
+
+
+def test_generate_skips_quietly_when_another_run_holds_the_lock(conn, tg):
+    sent, post = tg
+    with farsibrief.run_lock(conn):
+        out = farsibrief.generate(conn, SETTINGS, CONFIG, {},
+                                  run=lambda *a, **k: pytest.fail("ran"), post=post, now=NOW)
+    assert out == "busy" and sent == []

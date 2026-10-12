@@ -16,6 +16,7 @@ from jamasp import db as db_mod
 from jamasp import digest as digest_mod
 from jamasp import dispatch as dispatch_mod
 from jamasp import extract as extract_mod
+from jamasp import farsibrief as farsibrief_mod
 from jamasp import fit as fit_mod
 from jamasp import flash as flash_mod
 from jamasp import inbox as inbox_mod
@@ -27,7 +28,9 @@ from jamasp import signals as signals_mod
 from jamasp import translate as translate_mod
 from jamasp import wakeup as wakeup_mod
 from jamasp import watchdog as watchdog_mod
-from jamasp.config import load_glossary, load_settings, load_sources, load_weights
+from jamasp.config import (
+    display_names, load_glossary, load_settings, load_sources, load_weights,
+)
 from jamasp.ingest import bars as bars_mod
 from jamasp.ingest import calendar as calendar_mod
 from jamasp.ingest import prices as prices_mod
@@ -567,6 +570,25 @@ def calendar(days, all_impacts, db_path, config_dir):
     click.echo(calendarview_mod.render(
         conn, days=days, impact_min="all" if all_impacts else "default"
     ))
+
+
+@main.command("farsi-brief")
+@click.option("--reply-to", type=int, default=None, help="desk message id to reply to")
+@click.option("--dry-run", is_flag=True, help="print the brief; don't send")
+@db_opt
+@cfg_opt
+def farsi_brief(reply_to, dry_run, db_path, config_dir):
+    """Write an independent Persian brief with codex and send it to the desk."""
+    conn, sources, settings = _common(db_path, config_dir)
+    try:
+        out = farsibrief_mod.generate(
+            conn, settings, Path(config_dir), display_names(sources),
+            reply_to=reply_to, dry_run=dry_run,
+        )
+    except farsibrief_mod.FarsiBriefFailed as exc:
+        click.echo(f"farsi-brief: failed — {exc}", err=True)
+        raise SystemExit(1)
+    click.echo(out)
 
 
 @main.command("run")

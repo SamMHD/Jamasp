@@ -11,8 +11,10 @@ import contextlib
 import fcntl
 import sqlite3
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
-from jamasp import calendarview, pricesummary
+from jamasp import calendarview, modelrun, notify, pricesummary
+from jamasp.config import load_glossary
 from jamasp.db import utcnow
 
 NEWS_WINDOW_HOURS = 24
@@ -113,3 +115,78 @@ def build_prompt(style: str, glossary: dict[str, str], bundle: str, now: str) ->
         f"# Pinned Persian terms (use exactly)\n{terms}\n\n"
         f"# Data (your only source; do not invent anything beyond it)\n{bundle}"
     )
+
+
+MSG_PREPARING = "در حال آماده‌سازی بریف… (چند دقیقه)"
+MSG_BUSY = "یک بریف در حال آماده‌سازی است؛ چند دقیقه دیگر می‌رسد."
+MSG_QUOTA = "سهمیهٔ codex فعلاً تمام شده؛ بعداً دوباره /brief بفرستید."
+MSG_FAILED = "ساخت بریف ناموفق بود؛ دوباره امتحان کنید."
+PROMPT_FILE = "farsi_brief_prompt.md"
+
+
+class FarsiBriefFailed(RuntimeError):
+    """The brief could not be produced or delivered; the chat has been told."""
+
+
+def _clean(text: str) -> str:
+    text = text.strip()
+    if text.startswith("```"):
+        text = text.split("\n", 1)[1] if "\n" in text else ""
+    if text.rstrip().endswith("```"):
+        text = text.rstrip()[:-3]
+    return text.strip().strip("`").strip()
+
+
+def _send(conn, token, chat_id, text, post, reply_to) -> None:
+    try:
+        notify.send_telegram(text, token, chat_id, post=post, reply_to=reply_to)
+    except Exception:
+        notify.log_sent(conn, text, ok=False)
+        raise
+    notify.log_sent(conn, text, ok=True)
+
+
+def generate(conn, settings: dict, config_dir: Path, names: dict[str, str],
+             reply_to: int | None = None, dry_run: bool = False,
+             run=modelrun.run_json, post=None, now: str | None = None) -> str:
+    with run_lock(conn) as got:
+        if not got:
+            return "busy"
+        now = now or utcnow()
+        cfg = settings.get("farsi_brief", {})
+        cmd = cfg.get("cmd") or settings["translate"]["cmd"]
+        style = (Path(config_dir) / PROMPT_FILE).read_text(encoding="utf-8")
+        try:
+            glossary = load_glossary(Path(config_dir) / "glossary.fa.yaml")
+        except OSError:
+            glossary = {}
+        prompt = build_prompt(style, glossary, build_bundle(conn, names, now), now)
+        token = chat_id = None
+        if not dry_run:
+            token, chat_id = notify.resolve_chat(settings, "desk")
+
+        def fail(message: str, why: str):
+            if not dry_run:
+                with contextlib.suppress(Exception):
+                    _send(conn, token, chat_id, message, post, reply_to)
+            raise FarsiBriefFailed(why)
+
+        try:
+            answer = run(cmd, "codex", prompt, SCHEMA,
+                         int(cfg.get("timeout_seconds", 600)))
+        except modelrun.QuotaExhausted as exc:
+            fail(MSG_QUOTA, f"codex quota: {exc}")
+        except modelrun.ModelError as exc:
+            fail(MSG_FAILED, f"codex failed: {exc}")
+        brief = _clean(str(answer.get("brief", "")))
+        if not brief:
+            fail(MSG_FAILED, "codex returned an empty brief")
+        if dry_run:
+            return brief
+        parts = notify.split_message(brief)
+        try:
+            for n, part in enumerate(parts):
+                _send(conn, token, chat_id, part, post, reply_to if n == 0 else None)
+        except Exception as exc:
+            raise FarsiBriefFailed(f"telegram send failed: {exc}") from exc
+        return f"sent {len(parts)} part(s)"
