@@ -123,3 +123,23 @@ def test_run_forever_backs_off_on_errors(conn):
     bot.run_forever(conn, Flaky(), DESK, lambda m: None, sleep=sleeps.append,
                     stop=lambda: len(sleeps) >= 7)
     assert sleeps == [2, 4, 8, 16, 32, 60, 60]
+
+
+def test_spawn_failure_after_preparing_tells_the_chat(conn):
+    api = FakeAPI()
+
+    def spawn(mid):
+        raise OSError("fork failed")
+    with pytest.raises(OSError):
+        bot.handle_update(msg(1, "/brief", mid=8), conn, api, DESK, "JamaspBot", spawn)
+    texts = [p["text"] for p in api.sent()]
+    assert texts == [farsibrief.MSG_PREPARING, farsibrief.MSG_FAILED]
+
+
+def test_busy_while_the_last_spawned_brief_is_still_starting(conn):
+    # Two /brief in quick succession: the first child may not hold the flock
+    # yet, so the listener's own "still running" view must also count.
+    api, spawned = FakeAPI(), []
+    bot.handle_update(msg(1, "/brief"), conn, api, DESK, "JamaspBot", spawned.append,
+                      running=lambda: True)
+    assert spawned == [] and api.sent()[0]["text"] == farsibrief.MSG_BUSY

@@ -212,3 +212,28 @@ def test_generate_skips_quietly_when_another_run_holds_the_lock(conn, tg):
         out = farsibrief.generate(conn, SETTINGS, CONFIG, {},
                                   run=lambda *a, **k: pytest.fail("ran"), post=post, now=NOW)
     assert out == "busy" and sent == []
+
+
+def test_generate_reports_an_unexpected_error_to_the_chat(conn, tg, monkeypatch):
+    # e.g. sqlite "database is locked" while ingest writes — the desk was
+    # promised a brief, so silence is never the answer.
+    sent, post = tg
+
+    def boom(*a, **k):
+        raise RuntimeError("database is locked")
+    monkeypatch.setattr(farsibrief, "build_bundle", boom)
+    with pytest.raises(farsibrief.FarsiBriefFailed):
+        farsibrief.generate(conn, SETTINGS, CONFIG, {}, reply_to=4,
+                            run=lambda *a, **k: {"brief": "x"}, post=post, now=NOW)
+    assert sent[0]["text"] == farsibrief.MSG_FAILED
+
+
+def test_a_logging_failure_does_not_count_as_a_failed_send(conn, tg, monkeypatch):
+    sent, post = tg
+
+    def log_fails(*a, **k):
+        raise RuntimeError("database is locked")
+    monkeypatch.setattr(farsibrief.notify, "log_sent", log_fails)
+    out = farsibrief.generate(conn, SETTINGS, CONFIG, {},
+                              run=lambda *a, **k: {"brief": "متن"}, post=post, now=NOW)
+    assert out == "sent 1 part(s)" and sent[0]["text"] == "متن"

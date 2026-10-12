@@ -137,13 +137,21 @@ def _clean(text: str) -> str:
     return text.strip().strip("`").strip()
 
 
+def _log(conn, text: str, ok: bool) -> None:
+    # Best effort: the DB is shared with the ingest/translate writers, and a
+    # "database is locked" here must not turn a delivered brief into a
+    # reported failure (or a failed one into a crash before the chat hears).
+    with contextlib.suppress(Exception):
+        notify.log_sent(conn, text, ok=ok)
+
+
 def _send(conn, token, chat_id, text, post, reply_to) -> None:
     try:
         notify.send_telegram(text, token, chat_id, post=post, reply_to=reply_to)
     except Exception:
-        notify.log_sent(conn, text, ok=False)
+        _log(conn, text, ok=False)
         raise
-    notify.log_sent(conn, text, ok=True)
+    _log(conn, text, ok=True)
 
 
 def generate(conn, settings: dict, config_dir: Path, names: dict[str, str],
@@ -152,15 +160,6 @@ def generate(conn, settings: dict, config_dir: Path, names: dict[str, str],
     with run_lock(conn) as got:
         if not got:
             return "busy"
-        now = now or utcnow()
-        cfg = settings.get("farsi_brief", {})
-        cmd = cfg.get("cmd") or settings["translate"]["cmd"]
-        style = (Path(config_dir) / PROMPT_FILE).read_text(encoding="utf-8")
-        try:
-            glossary = load_glossary(Path(config_dir) / "glossary.fa.yaml")
-        except OSError:
-            glossary = {}
-        prompt = build_prompt(style, glossary, build_bundle(conn, names, now), now)
         token = chat_id = None
         if not dry_run:
             token, chat_id = notify.resolve_chat(settings, "desk")
@@ -172,13 +171,15 @@ def generate(conn, settings: dict, config_dir: Path, names: dict[str, str],
             raise FarsiBriefFailed(why)
 
         try:
-            answer = run(cmd, "codex", prompt, SCHEMA,
-                         int(cfg.get("timeout_seconds", 600)))
+            brief = _write(conn, settings, config_dir, names, run, now)
+        except FarsiBriefFailed:
+            raise
         except modelrun.QuotaExhausted as exc:
             fail(MSG_QUOTA, f"codex quota: {exc}")
-        except modelrun.ModelError as exc:
-            fail(MSG_FAILED, f"codex failed: {exc}")
-        brief = _clean(str(answer.get("brief", "")))
+        except Exception as exc:
+            # codex failures and anything else (a locked DB, a missing prompt
+            # file): the desk was told "preparing", so it must hear back.
+            fail(MSG_FAILED, f"{type(exc).__name__}: {exc}")
         if not brief:
             fail(MSG_FAILED, "codex returned an empty brief")
         if dry_run:
@@ -190,3 +191,19 @@ def generate(conn, settings: dict, config_dir: Path, names: dict[str, str],
         except Exception as exc:
             raise FarsiBriefFailed(f"telegram send failed: {exc}") from exc
         return f"sent {len(parts)} part(s)"
+
+
+def _write(conn, settings: dict, config_dir: Path, names: dict[str, str],
+           run, now: str | None) -> str:
+    """Bundle → prompt → codex → cleaned brief text (possibly empty)."""
+    now = now or utcnow()
+    cfg = settings.get("farsi_brief", {})
+    cmd = cfg.get("cmd") or settings["translate"]["cmd"]
+    style = (Path(config_dir) / PROMPT_FILE).read_text(encoding="utf-8")
+    try:
+        glossary = load_glossary(Path(config_dir) / "glossary.fa.yaml")
+    except OSError:
+        glossary = {}
+    prompt = build_prompt(style, glossary, build_bundle(conn, names, now), now)
+    answer = run(cmd, "codex", prompt, SCHEMA, int(cfg.get("timeout_seconds", 600)))
+    return _clean(str(answer.get("brief", "")))

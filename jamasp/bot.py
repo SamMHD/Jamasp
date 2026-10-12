@@ -62,18 +62,24 @@ def _reply(api, chat_id, text: str, reply_to: int) -> None:
 
 
 def handle_update(update: dict, conn, api, desk_chat_id: str, username: str,
-                  spawn) -> None:
+                  spawn, running=lambda: False) -> None:
     message = update.get("message")
     if not message or str(message.get("chat", {}).get("id")) != str(desk_chat_id):
         return
     if parse_command(message.get("text"), username) != "brief":
         return
     mid = message["message_id"]
-    if farsibrief.lock_is_held(conn):
+    # The flock is taken by the child, so a child still starting up does not
+    # hold it yet; `running` is the listener's own view of its last spawn.
+    if running() or farsibrief.lock_is_held(conn):
         _reply(api, desk_chat_id, farsibrief.MSG_BUSY, mid)
         return
     _reply(api, desk_chat_id, farsibrief.MSG_PREPARING, mid)
-    spawn(mid)
+    try:
+        spawn(mid)
+    except Exception:
+        _reply(api, desk_chat_id, farsibrief.MSG_FAILED, mid)
+        raise
 
 
 def initial_offset(conn, api) -> int:
@@ -88,7 +94,8 @@ def initial_offset(conn, api) -> int:
 
 
 def poll_once(conn, api, desk_chat_id: str, username: str, spawn,
-              offset: int, timeout: int = POLL_TIMEOUT) -> int:
+              offset: int, timeout: int = POLL_TIMEOUT,
+              running=lambda: False) -> int:
     updates = api.call(
         "getUpdates",
         {"offset": offset, "timeout": timeout, "allowed_updates": ["message"]},
@@ -96,7 +103,7 @@ def poll_once(conn, api, desk_chat_id: str, username: str, spawn,
     )
     for update in updates:
         try:
-            handle_update(update, conn, api, desk_chat_id, username, spawn)
+            handle_update(update, conn, api, desk_chat_id, username, spawn, running)
         except Exception:  # one bad update must not stall the queue
             log.exception("update %s failed", update.get("update_id"))
         offset = update["update_id"] + 1
@@ -105,14 +112,15 @@ def poll_once(conn, api, desk_chat_id: str, username: str, spawn,
 
 
 def run_forever(conn, api, desk_chat_id: str, spawn, sleep=time.sleep,
-                stop=lambda: False) -> None:
+                stop=lambda: False, running=lambda: False) -> None:
     username = api.call("getMe", {})["username"]
     offset = initial_offset(conn, api)
     log.info("listening as @%s for the desk chat, offset %s", username, offset)
     delay = 2
     while not stop():
         try:
-            offset = poll_once(conn, api, desk_chat_id, username, spawn, offset)
+            offset = poll_once(conn, api, desk_chat_id, username, spawn, offset,
+                               running=running)
             delay = 2
         except Exception as exc:
             log.warning("poll failed (%s); retrying in %ss", exc, delay)

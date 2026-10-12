@@ -702,17 +702,24 @@ def bot(db_path, config_dir):
     except RuntimeError as exc:
         raise click.ClickException(str(exc))
 
+    last: list[subprocess.Popen] = []
+
     def spawn(message_id: int) -> None:
         # Detached so the listener returns to polling at once; output goes to
         # the listener's journal. `jamasp` resolves to this venv's entry point
         # because the unit runs under `uv run`.
-        subprocess.Popen(
+        last[:] = [subprocess.Popen(
             ["jamasp", "farsi-brief", "--reply-to", str(message_id),
              "--db", db_path, "--config-dir", config_dir],
             start_new_session=True,
-        )
+        )]
 
-    bot_mod.run_forever(conn, bot_mod.TelegramAPI(token), chat_id, spawn)
+    def running() -> bool:
+        # poll() also reaps the finished child, so no zombie lingers.
+        return bool(last) and last[0].poll() is None
+
+    bot_mod.run_forever(conn, bot_mod.TelegramAPI(token), chat_id, spawn,
+                        running=running)
 
 
 @main.command()
