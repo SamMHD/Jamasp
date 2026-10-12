@@ -21,12 +21,60 @@ class MessageGone(RuntimeError):
     """Telegram refused an edit because the target message no longer exists."""
 
 
-def send_telegram(text: str, token: str, chat_id: str, post: Poster | None = None) -> int:
+TELEGRAM_LIMIT = 4096
+
+
+def send_telegram(
+    text: str, token: str, chat_id: str, post: Poster | None = None,
+    reply_to: int | None = None,
+) -> int:
     url = f"https://api.telegram.org/bot{token}/sendMessage"
-    result = (post or _default_post)(url, {"chat_id": chat_id, "text": text})
+    data: dict = {"chat_id": chat_id, "text": text}
+    if reply_to is not None:
+        data["reply_to_message_id"] = reply_to
+        # The trigger may be deleted while the reply is being prepared; send
+        # anyway rather than lose minutes of work to a missing anchor.
+        data["allow_sending_without_reply"] = "true"
+    result = (post or _default_post)(url, data)
     if not result.get("ok"):
         raise RuntimeError(f"telegram send failed: {result.get('description', result)}")
     return int(result["result"]["message_id"])
+
+
+def _pack(pieces: list[str], sep: str, limit: int) -> list[str]:
+    parts: list[str] = []
+    current = ""
+    for piece in pieces:
+        candidate = f"{current}{sep}{piece}" if current else piece
+        if len(candidate) <= limit:
+            current = candidate
+            continue
+        if current:
+            parts.append(current)
+        current = piece
+    if current:
+        parts.append(current)
+    return parts
+
+
+def split_message(text: str, limit: int = TELEGRAM_LIMIT) -> list[str]:
+    """Split text into Telegram-sized parts: paragraphs, then lines, then a
+    hard cut — the coarsest boundary that fits wins, so a reader never sees a
+    sentence torn across two messages unless one line alone is over limit."""
+    if len(text) <= limit:
+        return [text]
+    out: list[str] = []
+    for para in _pack(text.split("\n\n"), "\n\n", limit):
+        if len(para) <= limit:
+            out.append(para)
+            continue
+        for line in _pack(para.split("\n"), "\n", limit):
+            while len(line) > limit:
+                out.append(line[:limit])
+                line = line[limit:]
+            if line:
+                out.append(line)
+    return out
 
 
 def edit_telegram(

@@ -1,0 +1,30 @@
+[Unit]
+Description=Jamasp desk Telegram listener — serves /brief (codex Farsi brief)
+After=network-online.target
+Wants=network-online.target
+OnFailure=jamasp-alert@%n.service
+
+[Service]
+WorkingDirectory=%h/Jamasp
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+# Required (no `-`): without the token and desk chat id the listener can
+# only fail, and failing at start is what reaches OnFailure.
+EnvironmentFile=%h/.config/jamasp/env
+ExecStart=/usr/bin/env uv run jamasp bot
+Restart=always
+RestartSec=5
+
+# Same hardening as jamasp-authd. Memory is higher: the spawned
+# `jamasp farsi-brief` and its codex child live in this unit's cgroup. A
+# restart (deploy) kills an in-flight brief with the cgroup; the desk just
+# sends /brief again.
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=full
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+MemoryMax=1G
+
+[Install]
+WantedBy=default.target
