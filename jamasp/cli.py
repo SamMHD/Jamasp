@@ -10,6 +10,7 @@ import click
 import httpx
 
 from jamasp import authd as authd_mod
+from jamasp import bot as bot_mod
 from jamasp import calendarview as calendarview_mod
 from jamasp import cluster as cluster_mod
 from jamasp import db as db_mod
@@ -684,6 +685,34 @@ def predictions_score(pred_id, outcome, note, pred_path, db_path, config_dir):
     except (KeyError, ValueError) as exc:
         raise click.ClickException(str(exc))
     click.echo(f"scored {e['id']} {outcome}: {e['claim']}")
+
+
+@main.command()
+@db_opt
+@cfg_opt
+def bot(db_path, config_dir):
+    """Listen on the desk Telegram chat and serve /brief (long-polling)."""
+    import logging
+    import subprocess
+
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
+    conn, _, settings = _common(db_path, config_dir)
+    try:
+        token, chat_id = notify_mod.resolve_chat(settings, "desk")
+    except RuntimeError as exc:
+        raise click.ClickException(str(exc))
+
+    def spawn(message_id: int) -> None:
+        # Detached so the listener returns to polling at once; output goes to
+        # the listener's journal. `jamasp` resolves to this venv's entry point
+        # because the unit runs under `uv run`.
+        subprocess.Popen(
+            ["jamasp", "farsi-brief", "--reply-to", str(message_id),
+             "--db", db_path, "--config-dir", config_dir],
+            start_new_session=True,
+        )
+
+    bot_mod.run_forever(conn, bot_mod.TelegramAPI(token), chat_id, spawn)
 
 
 @main.command()
