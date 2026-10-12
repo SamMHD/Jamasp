@@ -23,6 +23,21 @@ POLL_TIMEOUT = 50
 BACKOFF_MAX = 60
 
 
+def configure_logging() -> None:
+    """INFO for the listener, WARNING for the HTTP stack.
+
+    httpx logs every request URL at INFO, and a Bot API URL embeds the token.
+    The journal tail is pasted into desk-chat failure alerts, so an INFO
+    httpx line would post the token to the chat — and every 50-second poll
+    would add one more line of noise besides.
+    """
+    logging.basicConfig(level=logging.INFO,
+                        format="%(levelname)s %(name)s: %(message)s")
+    logging.getLogger("jamasp").setLevel(logging.INFO)
+    for name in ("httpx", "httpcore"):
+        logging.getLogger(name).setLevel(logging.WARNING)
+
+
 class TelegramError(RuntimeError):
     pass
 
