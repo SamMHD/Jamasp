@@ -692,10 +692,9 @@ def predictions_score(pred_id, outcome, note, pred_path, db_path, config_dir):
 @cfg_opt
 def bot(db_path, config_dir):
     """Listen on the desk Telegram chat and serve /brief (long-polling)."""
-    import logging
     import subprocess
 
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
+    bot_mod.configure_logging()
     conn, _, settings = _common(db_path, config_dir)
     try:
         token, chat_id = notify_mod.resolve_chat(settings, "desk")

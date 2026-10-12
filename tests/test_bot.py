@@ -143,3 +143,14 @@ def test_busy_while_the_last_spawned_brief_is_still_starting(conn):
     bot.handle_update(msg(1, "/brief"), conn, api, DESK, "JamaspBot", spawned.append,
                       running=lambda: True)
     assert spawned == [] and api.sent()[0]["text"] == farsibrief.MSG_BUSY
+
+
+def test_logging_never_writes_request_urls_that_carry_the_token():
+    # httpx logs every request URL at INFO, and a Bot API URL embeds the
+    # token. The journal tail goes into desk-chat failure alerts, so an INFO
+    # httpx line would post the token to the chat.
+    import logging
+    bot.configure_logging()
+    assert logging.getLogger("httpx").getEffectiveLevel() >= logging.WARNING
+    assert logging.getLogger("httpcore").getEffectiveLevel() >= logging.WARNING
+    assert logging.getLogger("jamasp.bot").getEffectiveLevel() <= logging.INFO
