@@ -348,6 +348,24 @@ watchlist:
       needs a both-up Wednesday to score MISS (the 11 Oct stance's
       'both-up Tuesday = MISS' was wrong by the text; the Tue row compares
       to Monday's 4231.6, the Tue 2y to Friday's 4.791).
+      13 OCT (Tue brief): HAMMACK Mon (NABE prepared remarks + Reuters
+      interview, voter, July hike dissenter): 'rates need to rise further
+      to restrain demand', inflation stuck 2.5-3.0% 'broad-based, not one
+      component', AI capex + wealth effect the demand, 'inflationary
+      mindset' risk, prefers 'smaller adjustments, relatively quickly' -
+      but an OPEN MIND on October timing; no October call. Relay (dated to
+      the actionforex Hammack post 01:16Z Tue): October hold >78% (hike
+      ~22%), December hike ~88% - below the 25% band, bearish-rates holds
+      35. No US cash close Mon; Asia Tue 03:30Z: 2y 4.772 (-1.9), 10y 5.198
+      (-4.6), 30y 5.559 (-4.0) with the Kospi -6% and BlackRock buying
+      Treasuries / cutting US stocks to neutral. Waller Tue 07:45Z: no
+      Board-index entry at 03:37Z (the Istanbul SEP entry is 8 Oct) -
+      a conversation or non-Board event; 09:00Z scan reads the relay.
+      BofA Mon: gold Q4 avg 4,000, 'struggles to hold above' for 3 months,
+      2027 avg 4,800 - 'the Iran war works against gold via oil -> Fed ->
+      dollar' (the chain, stated by a bank). ROW COMPARATOR FIX: the Tue
+      row compares to the MON row 4186.4 (first >=23:00Z Mon), not the
+      reopen row 4231.6; the Tue 2y to Fri 4.791.
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -920,6 +938,30 @@ watchlist:
       deal. Successors: bffc2a77 (arrangement, 0.7), bb801f68 (western
       Gulf, 0.6), ef8476cc (escorts, 0.7); the Saudi-restraint successor
       is folded into 17921803's 'announced response against Iran' clause.
+      13 OCT (Tue brief): SIX hulls struck 11 Oct (UKMTO 164-26 to
+      169-26; gcaptain/MarEx Mon 18:41-19:27Z, four of them time-late):
+      five in the Strait transit (4 outbound tankers + 1 inbound
+      container ship, 'unidentified projectiles') + 1 tanker at Sohar
+      anchorage (UAV) - ALL east of 54E, class unchanged, intensity ~6x
+      the ~1/day run-rate; JMIC: threat SEVERE, 'spreading to anchorages
+      and inside the Gulf'; NCAGS ~29 transits/day vs 138 historical.
+      Mehr '3rd super tanker hits mine' = IRGC claim, unverified. Saudi
+      energy minister: 'serious response' to the Houthi attacks (pointed
+      at Yemen; an investinglive summary line says 'on oil and gas
+      facilities' - NO Aramco/SPA/GACA confirmation of any oil-node hit,
+      the weekend's Houthi Aramco claims stay unverified, rule 12);
+      gas-line conversion adds 1.2 mb/d East-West capacity in 7-8 weeks
+      (Yanbu loads ~4.5 mb/d - the port is the cap); Saudi talks to
+      formalise non-Hormuz loadings in 2027 contracts (Bloomberg); Riyadh
+      frustrated with Western support, France sends defensive kit to
+      Yanbu, Trump 'we may' on joining strikes on the Houthis (Yemen, not
+      Iran); IMF cuts Gulf 2026 growth on the Hormuz closure; Saudi
+      economy -3.6% this year (budget statement via Bloomberg). Iran MFA:
+      messages via intermediaries continue, reply after the review; 'US
+      accepted some of the seven conditions via Qatar - insufficient'.
+      Oil: Brent Dec settled 106.65 Mon (the Asian truce dip 102.84 fully
+      reversed), live 105.32 (-1.25%) on Novak's 3-3.5mt diesel by
+      year-end; Zelensky: Russia struck after the truce announcement.
     since: 2026-07-31
 
   - theme: kinetic-transmission-inverted
@@ -1086,6 +1128,17 @@ watchlist:
       2y close vs 4.791 is the first test. MACD -58.23 vs signal -58.17 -
       a bullish cross is one up-session away; the row sits at the 20DMA
       (~4232); Globex high 4242.3 above it, the row not.
+      13 OCT (Tue brief): Monday ran the chain in the dollar leg with no
+      2y - Brent settle 106.65 (up), DXY +0.43 to a 52-wk high 102.589
+      (EURUSD 2026 low 1.1155, USDJPY above its 200DMA 158.54), XAU -0.59%,
+      the Mon row 4186.4 = -29.9 vs the Fri row (Friday's +47.3 half
+      unwound). Asia Tuesday ran it the other way: Kospi -6% (chip selloff
+      + oil fears), 2y -1.9 / 10y -4.6 / 30y -4.0, DXY -0.17, Brent -1.25%,
+      GC +0.26% - rates-relief, not haven. Rule-11 test claim written for
+      the Tue session (opposite signs, 2y >=2bp / row >=5 gates, 0.55);
+      1e9e6e4a (2y > 4.791) running AGAINST at 4.772. The six-hull day
+      (11 Oct) reached gold as a -0.7% row via oil/dollar - rule 22 holds:
+      0/n haven bid.
     since: 2026-09-09
 
   - theme: boj-yen-pillar
