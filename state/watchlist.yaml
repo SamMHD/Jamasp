@@ -377,6 +377,17 @@ watchlist:
       positioning into CPI. CPI flip lines in stance.md (core >=0.3 with
       2y UP >=5bp -> 25/45/30; core <=0.1 with 2y DOWN >=5bp -> 45/25/30;
       0.2 -> hold).
+      14 OCT CPI (#70 13:15Z): THE FLIP FIRED - core +0.33 (cons 0.2),
+      2.6 y/y, supercore 3.13; headline 0.6/3.7 on gasoline +9.1. Shelter
+      +0.4 and core goods +0.3 did the core beat (ex-shelter ~0.27); no
+      telecom repeat. October 21->47% (print post) / ~44% FedWatch
+      (CNBC 13:00Z), >96% by year-end, near 50-50 for 50bp. 2y 4.929
+      (+13.6bp), 10y 5.317, 30y 5.622 (cycle high), DXY 52-wk high
+      102.86, GC -1.66% to 4108 at print+45. Weights 25/45/30 (0.5);
+      tape clause to the Wed row (#74 01:20Z Thu); co-trigger 2y close
+      >=4.843. Collins' 'above 2% in the coming months' is the live
+      line; Williams' 'near 2% next year' is not. Blackout from Sat 17
+      Oct: Warsh Fri (#73) is the last word before 27-28 Oct.
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -1382,6 +1393,14 @@ watchlist:
       The passthrough input is now products (diesel/jet), not crude: the
       diesel deal is the first supply-side relief on that leg. 4dfbd1d8
       (headline >=0.4) and 62c34dbd (core <=0.3) score Wed.
+      14 OCT CPI: gasoline +9.1 m/m (energy +5.2, fuel oil +15.3, energy
+      20.4% y/y) = ~half of the 0.6 headline - 4dfbd1d8 HIT. The
+      passthrough reached CORE this month (core 0.33: shelter 0.4, core
+      goods 0.3, transport services 0.6, airfares 1.2) - the 'look
+      through the supply shock' reading lost the front end (2y +13.6bp).
+      Next leg: PPI Thu (core services = PCE inputs) decides whether it
+      carries into the Fed's measure; real weekly earnings -0.5% is the
+      demand cost.
     since: 2026-07-31
 
   - theme: us-fiscal-dominance
