@@ -1880,6 +1880,16 @@ events:
       the two claims; book the close-out wakeup at Globex close+30. No
       fresh directional prediction at the 14 Oct 03:30Z brief (final hours
       before a CPI-class print).
+      OUTCOME 14 Oct 03:35Z brief: event-pending, no claims written. Flip
+      lines as of the run (supersede #70's task text): core >=0.3 with the
+      2y UP >=5bp at print+45 -> 25/45/30; core <=0.1 with the 2y DOWN
+      >=5bp -> 45/25/30; core 0.2 -> hold 35/35/30; tape clause = GC from
+      the 12:30Z first print to the Wed row (~01:00Z Thu) by >=5 pts.
+      Tue closes read: row 4179.7 (-6.7), 2y 4.793/4.797, 10y 5.217;
+      Williams/Collins/Waller Tuesday carried no dated October sentence
+      (latest ~22%, 01:16Z Tue). Bowman 09:40Z owns the odds trigger only
+      until the print post. A Wed both-up (row UP >=5, 2y UP >=1bp) is the
+      first leg of a c1f9579d pair - note, do not score.
 
   - date: 2026-10-15
     time_dubai: "Thu 15 Oct 16:30 (12:30Z) PPI Sep (cons 0.5 m/m) + retail sales Sep (control group) + claims; Philly Fed - per the Trading Economics US calendar read 4 Oct"
