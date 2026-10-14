@@ -57,6 +57,12 @@ passlock from 17 Aug is the flash lock and is ignored. The 12 Oct 15:00Z
 scan staged with `git add -A state/ ':!state/jamasp.db.farsibrief.lock'` so
 the file is still untracked at the time of writing.
 
+**Recurrence 2026-10-14 05:00Z scan:** the predicted sweep happened. The brief
+of 14 Oct 03:35Z noted the lock "left uncommitted" but did not exclude it, and
+the 05:00Z scan's plain `git add -A state/` committed it in `9cdff04`
+(`state/jamasp.db.farsibrief.lock | 0`). The file is now tracked on `live`, so
+the fix must include the `git rm --cached` step below.
+
 ## Fix
 
 Either (pick one; the first is the smaller change):
