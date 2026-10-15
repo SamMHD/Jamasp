@@ -388,6 +388,27 @@ watchlist:
       >=4.843. Collins' 'above 2% in the coming months' is the live
       line; Williams' 'near 2% next year' is not. Blackout from Sat 17
       Oct: Warsh Fri (#73) is the last word before 27-28 Oct.
+      15 OCT BRIEF (03:30Z): THE PRINT FADED INTO THE CLOSE AND ASIA
+      KEPT FADING IT. 2y 4.802 Wed close (+0.9), 4.717 at 03:31Z Thu
+      (-8.5bp); 10y 5.19 -> 5.10 (21bp under the post-CPI high); 30y
+      5.524 -> ~5.46; DXY 102.553 -> 101.96 (-0.6). Dated October 32%
+      (Citi post 23:29Z Wed), December ~94%; Daly 'more hikes likely, no
+      urgency for October' owns the fade; Goolsbee 'discouraging' with no
+      prescription; Citi calls December +25. BOWMAN 02:55Z Thu =
+      'Supervisory Modernization After Silicon Valley Bank' at the
+      Bangkok Economic Festival (Board index, top entry; the speech URL
+      404 at 03:32Z) - a supervision venue, no relay, no odds (rule 24).
+      Weights 30/40/30 (#74). PPI Thu 12:30Z cons 0.5 / core 0.3 (prev
+      0.4 / 0.2), retail sales 0.3 (prev 1.2), control 0.3 (prev 1.4),
+      claims 200K, Philly 28.4 (TE read 03:34Z): the 13:00Z scan reads
+      the print post (print+30), the 15:00Z scan the fronts and the flip
+      lines (core services >=0.4 with the 2y >=4.80 -> 45; core <=0.1 on
+      a 2y <=4.75 -> 35). HAMMACK is 20:30Z (NOT 16:30Z - the 8 Oct
+      calendar.yaml conversion error, corrected) = blind window, the Fri
+      brief reads the wrap. Warsh Fri 03:30Z/04:30Z -> #73 05:30Z, the
+      last word before the Sat 17 Oct blackout. Claims added: the 2y
+      closes <4.802 (0.6); the chain sign test (0.55); 3395aae6 (>=35%,
+      at risk) and 1e052124 (<=45% at #73) live.
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -984,6 +1005,19 @@ watchlist:
       Oil: Brent Dec settled 106.65 Mon (the Asian truce dip 102.84 fully
       reversed), live 105.32 (-1.25%) on Novak's 3-3.5mt diesel by
       year-end; Zelensky: Russia struck after the truce announcement.
+      15 OCT: Oil catch-up (investinglive 21:17Z Wed): Brent settled ~106
+      (+0.4%), WTI ~95 (3-week high); IEA OMR - Gulf crude exports +4.4
+      mb/d in Sep to ~75% of pre-war (ex-Iran >81%, Saudi-led), Iran's
+      exports ZERO under the blockade, 2026 demand -2.6 mb/d, supply
+      -6 mb/d; 'the premium is threats to infrastructure and shipping,
+      not barrels'. Overnight: Reuters - a US official says Washington is
+      weighing EASING shadow-fleet tanker sanctions to cut record freight
+      rates before the 3 Nov midterms - Brent 104-105.8 (-1%). The
+      Houthis hit an Aramco ADMIN building in Dhahran (energy ministry
+      confirmed, 13 Oct) and the Yemeni spokesman warns airports AND oil
+      facilities 'will continue' - a stated intent for the supply class
+      (new claim: no Saudi-confirmed supply-node hit through Sun 18 Oct,
+      0.65; a MISS = kinetic 35).
     since: 2026-07-31
 
   - theme: kinetic-transmission-inverted
@@ -1171,6 +1205,24 @@ watchlist:
       stance's kinetic-35 trigger now names it. Gold's answer: row
       -6.7 with Brent ~flat - rule 22's 0/n haven bid stands. Tuesday
       chain test 97715583 UNCLEAR by construction (2y +0.2-0.6bp).
+      THU 15 OCT (brief): the Asia session is the FIRST haven-shape
+      session of the regime - 2y DOWN 8.5bp, gold UP 1.5% from the
+      settle, Brent DOWN 1%, yen UP 0.4%, DXY -0.6% - on UNCONFIRMED IRGC
+      base-evacuation reports (investinglive 00:40Z; no Tehran or
+      Washington statement by the 03:22Z Asia wrap; 23a83bcb live)
+      layered on a Treasury rally with its own drivers (Daly, the
+      AI-credit selloff: Nikkei -3.5%, Kospi ~-8%). Rule 11: 1/3, a
+      hypothesis - and the rates driver moved WITH gold, so the session
+      does not separate 'haven bid' from 'chain'. Also: CENTCOM
+      destroyed an Iranian-linked dhow accused of targeting Navy ships
+      (gcaptain/MarEx - at-sea defensive class, not 91d78370's
+      falsifier); an Iranian official says 'new tactics' against shipping
+      began ~10 days ago 'to keep oil prices high'; the IRGC Navy CLAIMS
+      a container ship sank south of Hormuz after a mine (adversary
+      claim, unverified - rule 12; the Sat brief's time-late check owns
+      it); Ghalibaf (Mehr): the US 'must be punished' before Iran
+      accepts - the channel is frozen (bffc2a77 on track). Gold ignored
+      none of it: the chain's sign and the haven's sign coincided.
     since: 2026-09-09
 
   - theme: boj-yen-pillar
@@ -1258,6 +1310,11 @@ watchlist:
       DOGE-style review of 201 special funds (~7tn yen) to fund the food-tax
       cut with JGB yields at multi-decade highs; actionforex 'USD/JPY
       breakout looms'. Tokyo shut Mon 12 Oct. Not a chain input.
+      15 OCT: BoJ's Koeda (board): the bank 'should not be overly
+      cautious about raising rates', neutral 'considerably above 1%'
+      with the policy rate ~1.25% - a hawkish board voice into the 30 Oct
+      meeting; USDJPY 157.71 (-0.4%, with DXY -0.6 - the dollar leg, not
+      a yen leg; the 158.5 MoF marker held). Not a chain input.
     since: 2026-09-03
 
   - theme: energy-pce-passthrough
@@ -1573,3 +1630,26 @@ watchlist:
       third session writes DXY -> gold into base. Spread level still not
       relayed in figures.
     since: 2026-10-05
+
+  - theme: ai-credit-risk-off
+    why: >
+      The third channel (rule 6) for 'hot print -> gold down': an
+      equity/credit risk-off that bids Treasuries and pulls yields DOWN
+      on an inflation day. 14 Oct: the Nasdaq -1.9% (worst since 23 Jul)
+      on AI financing - CoreWeave bonds at distressed levels (~15%),
+      Oracle CDS wider, MarketWatch 'the AI trade is splintering as
+      inflation fears rattle hyped-up tech' - and the 10y/30y CLOSED
+      LOWER on a hot-CPI day (10y 5.19 -2.7, 30y 5.524 -3.9 off a 5.62
+      cycle high). 15 Oct Asia: the Nikkei -3.5%, the Kospi ~-8% (the
+      Kosdaq halted 20 min), BTC under 81K; the 10y 21bp under its
+      post-CPI high, the 2y -8.5bp, gold +1.5% from the settle. Two
+      sessions; the stance treats it as a per-session input into the 2y,
+      not a standing leg (rule 11: three sessions with the driver >=1
+      ATR). Tell for a standing leg: yields DOWN with gold UP on a day
+      with NO kinetic or Fed input, repeated; breakers: a hot print that
+      the long end sells (the 11 Sep shape), or a risk-off day that sells
+      gold as a margin call (the 28 Sep shape). Also carries a
+      Treasury-demand datum: Bloomberg 'China routing US Treasury
+      holdings through Canada' (~$600bn Canadian holdings, unconfirmed)
+      - demand for the bonds, not a reserve-diversification bid for gold.
+    since: 2026-10-15

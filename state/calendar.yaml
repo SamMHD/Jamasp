@@ -1920,9 +1920,20 @@ events:
       Thu 15:00Z scan reads the PPI print post for the PCE-input lines and
       the dated odds sentence; the Fri 16 Oct brief closes any CPI tape
       clause still open on the Thu row.
+      15 OCT BRIEF (TE read 03:34Z): cons PPI 0.5 (prev 0.4), core 0.3
+      (prev 0.2), retail sales 0.3 (prev 1.2), control 0.3 (prev 1.4),
+      ex-autos 0.3 (prev 1.4), claims 200K (prev 197K), Philly 28.4 (prev
+      37.8), Empire 10.3 (prev 7.6). Readers: the 13:00Z scan (print post
+      at print+30 - core services, the dated October sentence for 3395aae6,
+      the 2y at the post vs 4.80) and the 15:00Z scan (actionforex front
+      ~print+50, the stance's PPI flip lines; rewrite the stance if a
+      weight moves and book the Thu-row close-out wakeup then, not before).
+      The CPI tape clause itself CLOSED at #74 (inside the noise); what is
+      open on the Thu row is the 2y sign claim (<4.802), the chain sign
+      test and 23a83bcb.
 
   - date: 2026-10-15
-    time_dubai: "Thu 15 Oct 20:30 (16:30Z; 4:30pm ET per the MarketWatch calendar read 8 Oct) - Hammack (Cleveland) at the Women's Trading Network fireside hosted by Goldman Sachs / Girls Who Code (moderated discussion)"
+    time_dubai: "Fri 16 Oct 00:30 Dubai (Thu 20:30Z; 4:30pm ET per the MarketWatch calendar read 8 Oct; TE and ff_calendar both 20:30Z - the 16:30Z written here on 8 Oct was a conversion error, corrected at the 15 Oct brief) - Hammack (Cleveland) at the Women's Trading Network fireside hosted by Goldman Sachs / Girls Who Code (moderated discussion)"
     title: Hammack fireside - a markets-adjacent networking venue the day after CPI; scan marker only (rule 24)
     why: >
       A moderated discussion, not a prepared policy text, but it lands the
@@ -1932,6 +1943,11 @@ events:
     action: >
       Thu 15 Oct 19:00Z scan: marker only (any relay post); the Fri 16 Oct
       brief reads the wrap. No deepdive.
+      15 OCT BRIEF: the slot is 20:30Z, i.e. INSIDE the blind window
+      (19:00Z scan -> 03:30Z brief) - no scan sees it; the Fri brief reads
+      the Americas wrap and any investinglive Hammack relay for a dated
+      October/December sentence (rule 14: a dated figure from the fireside
+      outranks the PPI print post's).
 
   - date: 2026-10-16
     time_dubai: "Fri 16 Oct 07:30 (03:30Z; 11:30pm ET Thu 15 Oct per the MarketWatch calendar read 8 Oct) - Fed Chair Warsh speaks in Thailand (title and host unknown; Board 2026 speeches index read 8 and 10 Oct has no Warsh entry; /speech/warsh20261016a.htm and warsh20261015a.htm 404 at 03:33Z Sat 10 Oct; slot triple-sourced: TE 03:30 UTC, investinglive week-ahead 11:30pm ET Thu, MarketWatch)"
