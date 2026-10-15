@@ -1902,6 +1902,11 @@ events:
       proxy 4170.7 -> Wed row (~01:01Z Thu): wakeup #74 01:20Z Thu. New
       claims ac495b27 (row <=4165.7), 7f2116ce (2y close >=4.843),
       3395aae6 (dated October >=35% at the Thu 15:00Z scan).
+      CLOSED at #74 (Thu 01:20Z): Wed row 4167.5 (inside the noise; COMEX
+      settle 4107.9), 2y close 4.802 (+0.9bp); ac495b27 and 7f2116ce MISS;
+      latest dated October 32% (Citi post 23:29Z); bearish-rates 45->40,
+      weights 30/40/30, conviction 0.45. Overnight: unconfirmed IRGC
+      base-evacuation reports, gold +1.35% from the settle, 2y 4.73.
 
   - date: 2026-10-15
     time_dubai: "Thu 15 Oct 16:30 (12:30Z) PPI Sep (cons 0.5 m/m) + retail sales Sep (control group) + claims; Philly Fed - per the Trading Economics US calendar read 4 Oct"
