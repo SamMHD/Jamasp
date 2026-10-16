@@ -2034,3 +2034,20 @@ events:
       stance's flip lines as of the run. Thu 15 Oct 19:00Z scan: re-extract the Board
       index --fresh and any investinglive/CNBC Warsh-session line for the start time;
       the Fri 03:30Z brief reads whatever has printed and leaves the odds verdict to #73.
+
+  - date: 2026-10-19
+    time_dubai: "Mon 19 - Fri 23 Oct (FOMC blackout week - no Fed speakers from Sat 17 Oct); 20y auction Wed 21 Oct 21:00 Dubai (17:00Z); 5y TIPS Thu 22 Oct 21:00 (17:00Z); UMich final Fri 23 Oct 18:00 (14:00Z); FOMC decision Wed 28 Oct 22:00 Dubai (18:00Z) - TE US calendar read --fresh 03:32Z Fri 16 Oct"
+    title: Blackout week - the rates leg with no Fed voice; the 20y auction is the week's one scheduled gate for the long end (rule 7), UMich 5y expectations the named trigger in Hammack's reaction function
+    why: >
+      With weights 35/35/30 and the AI-credit Treasury bid the per-session 2y driver, the week
+      has no Fed sentence to re-date October (27% at the Thu wrap) - pricing moves on data
+      (housing, claims, UMich expectations) and on credit/oil. The 20y auction is the one gate
+      certain to print (rule 7) and the long end's test of the fiscal-dominance shape that
+      c1f9579d (HIT, family 5/5) keeps failing to find; the successor pair claim is booked at
+      the Sat brief with the auction named.
+    action: >
+      Sat 17 Oct brief: re-verify the week against TE and MarketWatch (rule 16); book the
+      successor pair claim (Mon 19 - Fri 23 Oct) and an auction-gate claim for Wed 21 Oct (WI
+      vs result, scored in-session from the investinglive auction post, as 18fe8bf5/bacb44c5);
+      the Wed 21 Oct 17:00Z scan reads the auction post (tail/through, indirects) and marks a
+      breach trajectory for the Thu brief; no deepdive - there is no document to read.

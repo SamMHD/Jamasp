@@ -409,6 +409,21 @@ watchlist:
       last word before the Sat 17 Oct blackout. Claims added: the 2y
       closes <4.802 (0.6); the chain sign test (0.55); 3395aae6 (>=35%,
       at risk) and 1e052124 (<=45% at #73) live.
+      16 Oct (Fri brief): PPI Thu = the hottest on record (headline 1.3,
+      core 0.7, ex-FET 0.5; retail control 0.1; claims 199K) and the 2y
+      CLOSED LOWER - day high 4.791, never 4.80, close 4.751 (-5.1bp);
+      10y 5.087 (-10), 30y 5.428. The 45 line = trigger printed, target
+      failed (rule 23); the '<=4.75' tiebreak landed 0.1bp inside the
+      reading gap -> bearish-rates 40 -> 35. Hammack (voter, Goldman NY,
+      20:30Z): 'financial conditions do not appear restrictive',
+      expectations-driven, no timing - tone without guidance; dated
+      October 33% at print+68 (3395aae6 MISS) -> 27% at the wrap 19:50Z;
+      December ~94%. Warsh Bangkok 03:30Z/04:30Z -> #73 05:30Z owns the
+      weight (bands: >=40% -> 40; >=50% with the 2y >=4.85 -> 45;
+      <15% with 'done/pause' -> 30); blackout from Sat 17 Oct, FOMC
+      27-28 Oct. Claims scored: eeb3faaf HIT, 31da0c7d HIT, c1f9579d
+      HIT (rule 18; family 5/5). Fri claims: chain sign test (0.55), row
+      band 4050-4320 (0.6).
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -1652,4 +1667,18 @@ watchlist:
       Treasury-demand datum: Bloomberg 'China routing US Treasury
       holdings through Canada' (~$600bn Canadian holdings, unconfirmed)
       - demand for the bonds, not a reserve-diversification bid for gold.
+      16 Oct (Fri brief): THIRD session - the US session bought
+      Treasuries through the hottest PPI on record; the wrap names the
+      channel ('fears of a credit blowup in AI names like CoreWeave as
+      its debt has been struggling'; a rumoured ~$40bn AI-fund blowup -
+      Nebius/Bloom/Lumentum/CoreWeave - then dip-buying snowballed, S&P
+      +0.4%; Korea's rout reverberated; Dell -17% in two days). 2y 4.751
+      (-5.1), 10y 5.087 (-10), DXY -0.5%, gold settle +1.5%. Written
+      into base as a STANDING LEG (base 30 -> 35) with two caveats: the
+      index bounced while yields stayed down (credit, not the equity
+      tape, is the channel), and Thu's Asia leg had Fed (Daly) and
+      kinetic (IRGC reports) inputs - not a clean third. Kill: a
+      risk-off day that SELLS gold (28 Sep shape) or a credit scare with
+      yields UP -> base 30. Oil -> 2y lost the day to this channel
+      (Brent flat, WTI +2.50 on an 8.6M draw, 2y -5).
     since: 2026-10-15
