@@ -2035,6 +2035,16 @@ events:
       index --fresh and any investinglive/CNBC Warsh-session line for the start time;
       the Fri 03:30Z brief reads whatever has printed and leaves the odds verdict to #73.
 
+    outcome: >
+      RESOLVED 16 Oct 05:30Z (#73): the session ran at 03:30Z (TE/ff/MarketWatch right;
+      the investinglive week-ahead's 04:30Z was the outlier - its own preview post Thu
+      21:20Z carried 03:30Z). Fireside with Georgieva; no Board text (404; index has no
+      entry). Warsh: 'I don't prejudge meetings... not in that business anymore'; October
+      and December the 'crystallising moments'; the world has 'broadly conformed' to
+      expectations since the September hike. No dated October sentence in any relay ->
+      tone without guidance, bearish-rates HELD 35 (35/35/30); the figure stays 27% (Thu
+      wrap); 1e052124 HIT; 2y unchanged 4.751 at +90, GC +23 vs the settle. Blackout from
+      Sat 17 Oct.
   - date: 2026-10-19
     time_dubai: "Mon 19 - Fri 23 Oct (FOMC blackout week - no Fed speakers from Sat 17 Oct); 20y auction Wed 21 Oct 21:00 Dubai (17:00Z); 5y TIPS Thu 22 Oct 21:00 (17:00Z); UMich final Fri 23 Oct 18:00 (14:00Z); FOMC decision Wed 28 Oct 22:00 Dubai (18:00Z) - TE US calendar read --fresh 03:32Z Fri 16 Oct"
     title: Blackout week - the rates leg with no Fed voice; the 20y auction is the week's one scheduled gate for the long end (rule 7), UMich 5y expectations the named trigger in Hammack's reaction function
@@ -2051,3 +2061,17 @@ events:
       vs result, scored in-session from the investinglive auction post, as 18fe8bf5/bacb44c5);
       the Wed 21 Oct 17:00Z scan reads the auction post (tail/through, indirects) and marks a
       breach trajectory for the Thu brief; no deepdive - there is no document to read.
+  - date: 2026-11-16
+    time_dubai: "Mon 16 Nov (time TBC) - Federal Reserve field hearing on AI, San Francisco Bay Area (Warsh, Bangkok 16 Oct: 'part of its task force work')"
+    title: Fed AI task-force field hearing - a task-force venue (rule 24), scan marker only, no deepdive
+    why: >
+      Named by the chair himself at the IMF/WB meetings; it sits between the 28 Oct and
+      the December FOMC and is the communications/productivity task-force work made
+      public. A task-force hearing is a plumbing-class venue by rule 24 - it carries no
+      rates guidance by construction, and Warsh has now said on record that the Fed is
+      'not in that business anymore'. Worth a marker because the relay will post it and
+      an AI-demand-before-supply line from the chair can move the 2y on a quiet day.
+    action: >
+      The brief of the week before re-verifies date and time on the Board calendar and TE
+      (rule 16); the scan covering the slot reads the relay for a dated December sentence
+      only; no deepdive unless the Board index gives it a monetary-policy title.
