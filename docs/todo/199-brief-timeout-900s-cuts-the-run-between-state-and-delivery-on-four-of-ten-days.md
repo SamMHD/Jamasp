@@ -64,6 +64,7 @@ means the first attempt timed out and the retry finished the run):
 | 10 Oct | 707 | 03:30:02Z | 03:52:02Z | 22:00 | **yes** (cut before the stance rewrite) |
 | 11 Oct | 716 | 03:30:01Z | 03:45:00Z | 14:59 | no - finished with ~1s to spare |
 | 12 Oct | 727 | 03:29:37Z | ~03:48Z | ~18:30 | **yes** (this run; cut after stance+lessons, before notify) |
+| 17 Oct | 775 | 03:30:00Z | ~03:50Z | ~20:00 | **yes** (cut at 03:45:00Z, 30s after the stance/report rewrite, before notify) |
 
 12 Oct detail, checked in the same sitting: `ps -eo pid,etimes,cmd` at
 03:45:17Z showed `jamasp run brief` at etimes 940 and the retry `claude -p`
@@ -75,6 +76,8 @@ committed. The retry did only notify -> mark-read -> commit (notify_log 313,
 commit 0a00129). The first attempt's stance header also carried the wrong
 run number (#717 for max(agent_runs.id)+1 = 727) - a side effect of the
 header being written under time pressure.
+
+17 Oct detail (Sat brief, checked in the retry): `ps` at 03:46Z showed `jamasp run brief` at etimes 965 and the retry `claude -p` at etimes 64; report + `state/stance.md` mtime 03:44:30Z, lessons/calendar/watchlist 03:44:04Z, predictions 03:44:06Z (five scorings + three claims present, wakeup #75 booked); `notify_log` max id 325 (the 16 Oct brief), 63 unread, nothing committed. The retry did only todo-append -> notify -> mark-read -> commit. Fifth cut in sixteen days; the first attempt reached the end of step 4 with ~30s left - the cap is short by roughly 3-5 minutes on a heavy news day, not by a step.
 
 The 6 Oct row (671, `failed`, 9:41) is the usage-limit failure of todo-198,
 not a timeout. Scans (300s cap) and deepdives (900s) show no comparable

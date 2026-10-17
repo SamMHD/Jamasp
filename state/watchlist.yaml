@@ -444,6 +444,22 @@ watchlist:
       2y's credit/oil drivers; Goldman: less guidance = bigger data-day
       moves. New claim: 2y Fri close inside 4.68-4.83 (0.6). Successor pair
       claim + 20y auction gate booked at the Sat brief.
+      17 Oct (Sat brief): BLACKOUT LIVE. Fri: import prices +1.1 (cons
+      0.8), IP +0.7 (cons 0.4) and the 2y CLOSED 4.715 (-3.6bp; day
+      4.704-4.783) on the AI-credit equity selloff - the fourth hot-data
+      session this week with yields down; 10y 5.081 (-0.6), 30y 5.428
+      unch (2s30s 71), DXY -0.27%. No dated October sentence Friday -
+      27% (Thu wrap) stands, Dec ~94%; actionforex Sat: 'late October
+      less likely, December more probable' (context). TE listed Goolsbee
+      Fri 22:00Z - no relay post (rule 24 no-policy). Rule-16 weekly re-
+      verification (TE + MarketWatch --fresh): NO Fed speaker 19-23 Oct;
+      housing starts Tue 12:30Z (cons 1.30M), 20y auction Wed 17:00Z
+      (last 5.420%, TE only), claims Thu 12:30Z (cons 200K), 5y TIPS Thu
+      17:00Z, flash PMIs Fri 13:45Z, UMich final Fri 14:00Z (5y prelim
+      3.5%); 2y auction Mon 26, 5y Tue 27, FOMC Wed 28 18:00Z (deepdive
+      19:30Z booked), GDP adv + Sep PCE Thu 29, 7y Thu 29. 37907696 HIT
+      (2y band). Flip lines unchanged: >=4.85 calm-credit close -> 40;
+      <4.68 with gold UP -> 30 (3.5bp away).
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -1053,6 +1069,22 @@ watchlist:
       facilities 'will continue' - a stated intent for the supply class
       (new claim: no Saudi-confirmed supply-node hit through Sun 18 Oct,
       0.65; a MISS = kinetic 35).
+      17 Oct (Sat brief): oil +4% Fri with NO catalyst (WTI 101.84,
+      Brent 109.86, touched 110 first since May) - the relay: weekend
+      US-strike worries after the MOAB reports, Trump 'didn't push
+      back'; oil priced the weekend, gold did not (spot flat). UKMTO
+      weekly (gcaptain): 12 attacks to 14 Oct (10 Hormuz / 1 Arabian
+      Gulf / 1 Gulf of Oman), most struck hulls do not report, 55/74
+      projectile strikes since 6 Jul on the southern route, transits
+      254/wk (-70%), 42 on AIS vs Cooper '~400 in 7 days'; MT ST 3 hit
+      16 Oct (crew safe). Hatami: closed until rights respected; 'new
+      operational plans'; Lavrov to Tehran next week. 91d78370 HIT (US
+      class, 8/8), bb801f68 HIT (west of 54E, 2/2). Saudi: >=18 dead
+      (Bloomberg), KKIA shut through 17 Oct, interceptions Fri; no
+      supply-node confirmation, no attribution; the coalition
+      'infrastructure' list still 403/unextracted. Kinetic 30 HOLD;
+      successor strike negative Mon-Fri booked; reopen band 4055-4310
+      with the strike breaker named.
     since: 2026-07-31
 
   - theme: kinetic-transmission-inverted
@@ -1615,6 +1647,16 @@ watchlist:
       pair across Fri 9 / Tue 13 - Fri 16 Oct (0.7; Mon excluded). Watch:
       the 20y auction (date unverified), Bessent on issuance, the France
       short-dated-issuance thread.
+      17 Oct (Sat brief): FY2026 deficit $1.992T (FY25 $1.775T), largest
+      in five years; gross interest a RECORD $1.36T (+$144B, +12%) =
+      two-thirds of the deterioration; Sep -$27B; net customs receipts
+      $5.9B after $19.4B refunds (investinglive). Friday's curve: the 2y
+      got the credit bid (-3.6), the 30y did not (unch 5.428) - the
+      fiscal shape's precondition (steepening) printed. Gate: the Wed 21
+      Oct 20y auction 17:00Z (last 5.420%); a >=1.5bp tail with the 2y
+      UP and the row UP = leg one of the no-both-up-pair successor
+      (c1f9579d family 5/5) booked today. India/China demand soft; net
+      spec 199.7K.
     since: 2026-08-20
 
   - theme: euro-sovereign-stress
@@ -1701,4 +1743,18 @@ watchlist:
       risk-off day that SELLS gold (28 Sep shape) or a credit scare with
       yields UP -> base 30. Oil -> 2y lost the day to this channel
       (Brent flat, WTI +2.50 on an 8.6M draw, 2y -5).
+      17 Oct (Sat brief): FOURTH session on substance - Fri the Nasdaq
+      -2.3% / S&P -1.1% (the 'AI fund blowing up' rumour persisted and
+      spread; CoreWeave on equity-for-debt talk; SOX -8 days; Nasdaq 100
+      worst week since Apr 2025), the 2y -3.6bp through hot import
+      prices, DXY -0.27% ('the correlation between AI investment and the
+      dollar' - NZD led on a -2% Nasdaq day), GC settle-area +16.6. But
+      the ROW was +4.7 (0.3 inside the 5-pt noise) and spot closed flat
+      because oil did +4% in the session - fourth session unconfirmed on
+      the letter, with a kinetic input. Base 35 HOLD, the leg stands,
+      not strengthened. The 30y did NOT join the bid (unch) - the credit
+      bid is a front-end bid; the long end's test is the 20y auction Wed
+      21 Oct. Kill unchanged: a risk-off day that SELLS gold, or yields
+      UP on a credit scare -> base 30. Oil -> 2y lost to this channel a
+      second day (Brent 110, 2y -3.6).
     since: 2026-10-15

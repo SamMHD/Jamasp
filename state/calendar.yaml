@@ -2061,6 +2061,28 @@ events:
       vs result, scored in-session from the investinglive auction post, as 18fe8bf5/bacb44c5);
       the Wed 21 Oct 17:00Z scan reads the auction post (tail/through, indirects) and marks a
       breach trajectory for the Thu brief; no deepdive - there is no document to read.
+      AMENDED Sat 17 Oct brief: week re-verified on TE + MarketWatch --fresh (no Fed speaker;
+      Wed 21 on TE only; UMich 5y prelim 3.5%; claims cons 200K; housing starts cons 1.30M).
+      The pair successor and the strike negative are booked; the auction-TAIL claim moves to
+      the Tue 20 Oct brief (size/WI unknown Saturday); the reader is the 19:00Z scan, not
+      17:00Z (results print ~17:02Z, the post ~17:10Z - rule 13: a slot that will run it).
+  - date: 2026-10-28
+    time_dubai: "Wed 28 Oct 22:00 decision (18:00Z) + 22:30 presser (18:30Z) - TE US calendar --fresh 03:33Z Sat 17 Oct; blackout from Sat 17 Oct; 2y auction Mon 26 17:00Z, 5y Tue 27, durable goods Tue 12:30Z, GDP adv + Sep PCE Thu 29 12:30Z, 7y Thu 29; BoC Wed 28; BoJ Fri 30"
+    title: FOMC - the first Fed sentence after eleven blind sessions; 'December, not October' is the priced premise (27% Thu 15 Oct wrap, Dec ~94%)
+    why: >
+      The rates leg (35) has no owner until this decision; the statement/presser is the only
+      text that can re-date December or open a pause. Rule 23: a Fed-event flip is written
+      on the next-meeting (December) odds sentence plus the tape, never on statement wording;
+      the chair prices the size (rule 19). The Sep PCE print lands the next morning (Thu 29
+      12:30Z) - a tier-1 inside 24h of the decision, so the Tue 27 and Wed 28 briefs record
+      NO fresh directional claims (positioned, not predicting).
+    action: >
+      Deepdive booked Sat 17 Oct at presser+60 = 19:30Z (rule 14 order: Board statement and
+      SEP if any, the investinglive presser post and its dated December sentence, CNBC 2y/10y/
+      30y/DXY/@GC.1, actionforex ~+50; read against the stance's flip lines AS OF THE RUN; tape
+      clause on the settle and the row from the statement print, per the 15 Oct lesson). The
+      Sat 24 Oct brief re-verifies the slot (rule 16) and rewrites the wakeup task with the
+      week's weights; the Thu 29 brief closes out on the row and reads PCE.
   - date: 2026-11-16
     time_dubai: "Mon 16 Nov (time TBC) - Federal Reserve field hearing on AI, San Francisco Bay Area (Warsh, Bangkok 16 Oct: 'part of its task force work')"
     title: Fed AI task-force field hearing - a task-force venue (rule 24), scan marker only, no deepdive
