@@ -107,3 +107,18 @@ move) now has two months behind it; the pooled β stays positive on August
 and the intercept. Still no pin or scorer change — the split has no
 standard error. If the November row inverts too, the rates_dollar
 direction scorer becomes its own todo.
+
+## Update 2026-10-18 (retro)
+
+Pooled fit 17 Oct 23:35Z (n=817): rates_dollar β +0.0356 (2.6σ, back on
+top), geopolitics +0.0273 (1.9σ); flags `negative:physical_cb` (−0.0078,
+0.6σ, n=56 — first fit past `min_observations`, so the floor clamp 0.25
+now applies; pinned to 1.0 until 15 Nov by this retro) and
+`negative:other` (−0.0097, 0.7σ). Per-month split re-run on today's DB
+(same weighting; Aug/Sep rows shift slightly because the scored set has
+grown): rates_dollar Oct bull n=58 −0.08% / bear n=88 +0.29% — inverted
+for the second month, spread 0.37% (0.57% on 11 Oct's n=75); by half-month
+1–11 Oct bear +0.37 / bull −0.08, 12–18 Oct bear +0.18 / bull −0.07. Sep
+bull −0.18 / bear −0.01 stands. The relay-lag reading holds on three
+samples now; still no scorer change — the November row is the trigger
+named on 11 Oct.

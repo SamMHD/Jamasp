@@ -1,10 +1,10 @@
 ---
 id: 197
 title: "The watchdog's \"translate gave up on N items\" count is not scoped to the translate window, so a one-off quota incident fires the same alert every day forever"
-status: open
+status: done
 opened: 2026-10-04
 owner: unassigned
-closed:
+closed: 2026-10-18
 ---
 
 ## Problem
@@ -77,3 +77,10 @@ touched by the PR). The 05:00Z watchdog that day still fired "gave up on
 1318 items" — a fifteenth consecutive day, four hours before the merge.
 Verify at the 12, 13 and 14 Oct 05:00Z runs per Verification above, then
 close.
+
+## Update 2026-10-18 (retro) — closed
+
+Verified: `jamasp-watchdog` ran 05:00:02Z every day 12–18 Oct (journal:
+`OK` ×7) and `notify_log` carries no "translate gave up" alert since the
+fix merged 11 Oct 09:27Z (d2e7092) — after fifteen consecutive daily
+alerts through 11 Oct 05:00Z. Closed by the 18 Oct retro.

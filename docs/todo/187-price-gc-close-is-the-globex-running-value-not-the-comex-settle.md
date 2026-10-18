@@ -89,3 +89,19 @@ Smallest change that removes the class of error:
 ## Update 2026-10-04 (retro)
 
 4 Oct retro: the GC_CLOSE row lands on the ingest tick after the technicals interval fires, so its slot drifts (observed 23:16Z Sun 27 Sep, 23:30Z Mon/Tue, 23:46Z Wed, 00:31Z Sat 3 Oct). Playbook rule 17 now names the basis as "the first GC_CLOSE row at or after 23:00Z" rather than "the 23:16Z row"; `42512099` missed on 28 Sep because its text named the brief's live price row (03:20Z, one ATR later) instead. Code side of the drift is todo-194.
+
+## Update 2026-10-18 (retro)
+
+The basis question bit twice this week in the other direction — the row
+carrying Asia on top of the US reaction: `ac495b27` (CPI tape clause, 0.7)
+MISSED on the row by 1.8 pts while the COMEX settle (CNBC `@GC.1` prev
+close 4107.9, −54) would have passed 12×; `1a45f84e` (chain sign test)
+went UNCLEAR on the row by 0.3 pt while the settle ran +16.6 with the 2y
+−3.6bp. Playbook rule 17 (18 Oct) now names the settle as the first basis
+for tape clauses, chain tests and print co-triggers, the row for bands,
+reopen claims and pairs. Code side: `prices` still has no settle series —
+every settle is a hand read of the CNBC prev-close line at ~23:00Z. A
+`GC_SETTLE` row written from that line (or from the Yahoo daily close)
+would let a claim name the basis from the tool, the same way GC_CLOSE
+names the row. todo-194 (row-slot drift) and todo-192 (no oil series)
+are the same family.

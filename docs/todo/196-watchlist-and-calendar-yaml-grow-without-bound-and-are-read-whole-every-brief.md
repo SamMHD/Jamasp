@@ -53,3 +53,12 @@ pruned files, and add a size check to the watchdog.
   truncated by the harness at 193.8KB.
 - `calendar.yaml` entries by month: Aug 25, Sep 30, Oct 8 — 55 of 63 are
   past events with `outcome:` text.
+
+## Update 2026-10-18 (retro)
+
+Fifteen days on: `watchlist.yaml` 126,768 bytes / 1,781 lines (64,807 on
+3 Oct — nearly doubled; ten themes, `fed-rate-path` alone ~470 lines of
+dated run annotations), `calendar.yaml` 136,362 (107,110). The retro's
+own `cat` of stance + lessons + watchlist was truncated by the harness at
+143 KB this run. Nothing prunes; the brief's rule-13 "2 themes annotated"
+line is the growth mechanism.

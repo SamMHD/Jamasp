@@ -134,3 +134,14 @@ the retry could read (todo-007 says it does not).
   (a failed weekly run is never noticed).
 - Brief commits that were retries: 0a00129 (12 Oct), 10 Oct and 8 Oct
   brief commits (`git log --format='%ci %s' -- reports/2026/10/`).
+
+## Update 2026-10-18 (retro)
+
+Two more this week, 2 of 7 briefs: Mon 12 Oct (`agent_runs` 727,
+03:30:01Z → 03:49:07Z, 1146 s total; the Telegram summary landed 03:47:14Z,
+i.e. from the retry) and Sat 17 Oct (775, 03:30:01Z → 03:47:52Z, 1071 s;
+summary 03:47:29Z). Both `status: ok` — the runner records the retry's
+exit, so the cap breach is invisible in the status column and only the
+duration shows it. The other five briefs ran 599–888 s; the 13 Oct brief
+at 888 s had 12 s of margin. Memory note `brief-retry-resume.md` still the
+only duplicate-prevention. 6 of the last 17 brief days now.

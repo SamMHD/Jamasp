@@ -100,3 +100,10 @@ this ceiling. The decision in Fix (A or B) is still Saman's.
 negatives carrying the "compliant floor 0.8" boilerplate; family 70/72
 lifetime (the week's miss `5bda2c98` was a 0.65 location bet, not a 0.7
 class negative). Stated average this week 0.650 vs observed 0.846.
+
+## Update 2026-10-18 (retro)
+
+18 Oct retro: 0.70 bucket 7/8 this week (the miss `ac495b27` was a CPI
+tape clause, not a structural negative); structural negatives 7/7, 77/79
+lifetime; 0.70 lifetime 54/60 (90%). Stated average this week 0.646 vs
+observed 0.870 — the seventh underconfident week in eight.

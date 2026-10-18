@@ -82,3 +82,13 @@ produce **no** alert, and a forced failure must still produce one.
 ## Update 2026-10-04 (retro)
 
 4 Oct retro: two more — 1 Oct 06:28:50Z and 4 Oct 06:24:12Z alerts; the user-level journal shows `jamasp authd listening on 127.0.0.1:3301` at 06:28:20Z and 06:24:12Z respectively (a fresh start at the alert minute, deploy hour), and `panel/.next.bak/` appeared untracked in the same window. 9/9 lifetime alerts on this unit are deliberate restarts.
+
+## Update 2026-10-18 (retro)
+
+Two more restart-shaped alerts this week, now on two units: `jamasp-authd`
+Thu 15 Oct 06:13:33Z (notify_log 322, `result: success, state:
+active/running`) — 8/8 lifetime authd alerts are this shape — and
+`jamasp-bot` Mon 12 Oct 13:20:15Z (notify_log 314, same `success /
+active/running` text, the PR #52 deploy restart). The bot alert also
+carried the bot token in its log tail (todo-202) — the cost of a
+non-failure firing an alert that quotes the journal.

@@ -195,3 +195,12 @@ Oct failed → made up same day. 5 of the last 7 Sundays on the slot. The
 "noticed after the fact" half was done by hand by a scan this time; Fix §1
 (the Monday brief checks for a missing retro report and books the make-up
 itself) is still the thing to land.
+
+## Update 2026-10-18 (retro)
+
+18 Oct: the retro ran on its 16:00:00Z slot (`jamasp-retro.timer` last
+trigger 16:00:00Z; this report) — the first on-slot success since 4 Oct.
+Slot record: 2, 9, 16, 23 Aug ok; 30 Aug failed; 6 Sep ok; 13 Sep failed;
+20, 27 Sep, 4 Oct ok; 11 Oct failed → made up 19:30Z; 18 Oct ok. 6 of the
+last 8 Sundays on the slot, 7 of 8 counting the make-up. Fix §1 (the
+Monday brief checks for a missing retro report) still not landed.

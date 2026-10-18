@@ -1,10 +1,10 @@
 ---
 id: 183
 title: gold_spot (GC=F, range=1d) returns no bars through an open Globex session on a US holiday — no GC print since 4 Sep 20:59Z
-status: open
+status: done
 opened: 2026-09-07
 owner: unassigned
-closed:
+closed: 2026-10-18
 ---
 
 ## Problem
@@ -99,3 +99,12 @@ whether a GC row prints through a holiday session. The Tue 13 Oct brief
 reads `select count(*) from prices where symbol='GC' and ts between
 '2026-10-11T22:00Z' and '2026-10-13T00:00Z'` and notes the result here;
 `3db62da8` (reopen band) and the Monday tape read depend on it.
+
+## Update 2026-10-18 (retro) — closed
+
+Live test passed. Mon 12 Oct (Columbus Day, US bond market shut, Globex
+open) printed 88 `GC` ticks 00:05Z–23:51Z and the 01:00Z Tue GC_CLOSE row
+(4186.4) landed on cadence; the 13 Oct brief read the row count. The fix
+(0696a89, Yahoo meta price when the chart window has no bars; merged 11
+Oct) did what it was meant to on the first holiday after it. Closed by
+the 18 Oct retro.

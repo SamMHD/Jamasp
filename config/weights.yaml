@@ -75,4 +75,8 @@ fit:
 # needs a reason and an expiry — an un-expiring pin is how a fit quietly
 # stops mattering. `key` is a theme slug or a signal column ("rsi14@1d").
 # Expired pins lapse automatically at fit time; nobody has to remember.
-pins: []
+pins:
+  - key: physical_cb
+    value: 1.0
+    reason: "18 Oct retro: beta -0.008 (0.6 sigma) on n=56 hours - the first fit past min_observations, so a noise-sign coefficient fell to the 0.25 floor. The per-month split shows no direction-scoring signal (Sep bull hours +0.28%, Oct n=4). Hold the unfitted 1.0 until the column has a sign worth clamping on; the 15 Nov retro revisits."
+    expires: "2026-11-15"
