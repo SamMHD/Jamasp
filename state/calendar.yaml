@@ -2066,6 +2066,12 @@ events:
       The pair successor and the strike negative are booked; the auction-TAIL claim moves to
       the Tue 20 Oct brief (size/WI unknown Saturday); the reader is the 19:00Z scan, not
       17:00Z (results print ~17:02Z, the post ~17:10Z - rule 13: a slot that will run it).
+      AMENDED Sun 18 Oct brief: weekend kinetic input read (rule 25) - IRGC mine claims unconfirmed
+      (aa7d1d8f, no confirmed mine Sun-Fri, 0.65), Jubail pair no successor (55f22cae, location
+      bet 0.5), both principals de-escalation rhetoric without a text. Mon brief reads oil's reopen
+      first (Brent <~107 drain / >=109 chain), then the reopen row vs 4181.1 (8bcc8f8d), then the 2y
+      Asia sign, then scores the four Sunday claims after the rule-12 time-late check. Events feed
+      ended 18 Oct (todo-001): the week's slots stand on TE/MarketWatch --fresh Sat 03:33Z.
   - date: 2026-10-28
     time_dubai: "Wed 28 Oct 22:00 decision (18:00Z) + 22:30 presser (18:30Z) - TE US calendar --fresh 03:33Z Sat 17 Oct; blackout from Sat 17 Oct; 2y auction Mon 26 17:00Z, 5y Tue 27, durable goods Tue 12:30Z, GDP adv + Sep PCE Thu 29 12:30Z, 7y Thu 29; BoC Wed 28; BoJ Fri 30"
     title: FOMC - the first Fed sentence after eleven blind sessions; 'December, not October' is the priced premise (27% Thu 15 Oct wrap, Dec ~94%)
