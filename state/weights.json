@@ -1,5 +1,5 @@
 {
- "fitted_at": "2026-10-17T23:35:07Z",
+ "fitted_at": "2026-10-18T23:32:16Z",
  "fits": {
   "technical": {
    "n": 6373,
@@ -365,10 +365,10 @@
     "physical_cb": {
      "beta": -0.007841157143277426,
      "se": 0.013396133325800693,
-     "multiplier": 0.25,
+     "multiplier": 1.0,
      "observations": 56,
      "fitted": true,
-     "pinned": false
+     "pinned": true
     },
     "etf_flows": {
      "beta": 0.028825753606330308,
