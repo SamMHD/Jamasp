@@ -465,6 +465,14 @@ watchlist:
       (rule 14), the operative dated figure stays 27% (Thu wrap), Dec ~94%.
       No Fed voice until 28 Oct; the 2y runs on housing Tue, 20y Wed, claims
       Thu, UMich 5y Fri + credit/oil. Flip lines unchanged.
+      20 OCT TUE BRIEF: Monday = the rates desk. 2y 4.761 (+4.6), 10y 5.136 (+5.5), 30y 5.473
+      (+4.5), DXY +0.20 - a parallel sell-off on global duration (OAT +7.8, GS 'competition
+      for capital', Treasury-financing anxiety, MSIM 'growth not fear'; BlackRock the UST
+      dissent) and a risk-on unwind of the credit bid; gold followed the 2y (settle -21, row
+      -38). BoC hike calls for 28 Oct (RBC, Scotia); 'CBs shifted hawkishly' at the IMF. Oct
+      27% / Dec ~94% stay operative (no dated relay sentence Mon). Flip lines unchanged:
+      >=4.85 calm-credit close -> 40 (8.9bp away); <4.68 with gold UP -> 30. Gate: 20y Wed
+      17:00Z (no-tail claim booked at 0.6); housing Tue, claims Thu, UMich 5y Fri.
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -553,6 +561,11 @@ watchlist:
       premium unread at 03:31Z (no source yet; SGE_AU_CNY_G feed stale since
       28 Sep). DNB moved 86t closer to home (custody reflex). The demand floor
       is intact under 4100; the seller is the paper desk.
+      20 OCT: Goldman estimates official buying 79t in August (July 44t; pre-2022 average
+      17t/month), China ~25t vs the PBOC's ~20t print. CIBC cuts: Q4-26 $4,500 (from 6,500),
+      2027 avg $5,200, 2028 $5,500 - consensus 2027 $4,620 / 2028 $4,451 - recovery needs a
+      Fed pivot or a growth/inflation break. The floor is official and slow; the paper desk
+      sets the price (net spec 199.7K, 13 Oct).
     since: 2026-07-31
 
   - theme: warsh-credibility
@@ -1117,6 +1130,20 @@ watchlist:
       An IDF/Israeli-confirmed strike on Iranian energy sites = kinetic 40 with the clause
       (Brent first, then the 2y's sign); record on the class unextracted - no claim yet.
       Egypt NDC approved a defensive troop mission to Saudi (MP Bakry; presidency vaguer).
+      20 OCT TUE BRIEF: record unmoved, claims and declarations up. Iranian Navy CLAIMS a US
+      strike on Konarak naval base ('two light projectiles', two injured) - CENTCOM/DoD silent
+      (df0e8755 on track); Houthis CLAIM six attacks in 48h incl. Aramco Yanbu + the Shaybah
+      field - 'Saudi Arabia did not confirm' (fxempire); Riyadh postponed FII to 2027 and two
+      November events, ministries WFH, KKIA shut 'until further notice' (5c2c638f / 799938fb
+      on track, pressure rising). Houthi ballistic strike killed 53 at a Yemeni-govt camp
+      (Shabwa). Katz 18 Oct (via Iran's UN letter): 'all energy facilities' targeted in any
+      new war, 'Stone Age'; Iran invokes Art. 51; FT: officials openly for the bomb (>50%),
+      a new SL ruling possible. Trump-Netanyahu call ('tremendous' win 27 Oct). Channels:
+      Lavrov Mon (no text), Munir Tue (mediation on the agenda), Qatari 'new proposals'
+      (sources-only); Trump: Russia/China 'very little' = 'very positive'. Oil: GS $25 war
+      premium, Dec $90; SPR 283mb (lowest since 1982); Brent settled DOWN 109.55 after a
+      106.8-110.7 swing. Kinetic 35 HOLD; the energy-strike class is now a stated trigger on
+      both sides (rule 21) - flip line to 40 stands, no claim.
     since: 2026-07-31
 
   - theme: kinetic-transmission-inverted
@@ -1322,6 +1349,12 @@ watchlist:
       it); Ghalibaf (Mehr): the US 'must be punished' before Iran
       accepts - the channel is frozen (bffc2a77 on track). Gold ignored
       none of it: the chain's sign and the haven's sign coincided.
+      20 OCT: Monday shape = the chain on the letter (2y +4.6, settle -21, row -38) with oil
+      NET DOWN on the settle (109.55 vs 109.86) after a +3.9 intraday reversal on two
+      unconfirmed claims - the 2y's driver was global duration + risk-on, not oil. No haven
+      bid on a two-claim day: gold priced the session oil -> 2y -> gold (rule 22) and
+      closed on the 2y's sign (10/11 of the >=2bp sessions since 28 Sep). Lesson filed: a
+      branch label is a hypothesis; read the driver from oil's net settle and the curve.
     since: 2026-09-09
 
   - theme: boj-yen-pillar
@@ -1414,6 +1447,9 @@ watchlist:
       with the policy rate ~1.25% - a hawkish board voice into the 30 Oct
       meeting; USDJPY 157.71 (-0.4%, with DXY -0.6 - the dollar leg, not
       a yen leg; the 158.5 MoF marker held). Not a chain input.
+      20 OCT: USDJPY 158.47 (+0.33) at the 158.5 MoF marker, with DXY +0.20 and the 2y UP -
+      the dollar leg's threshold (>=0.3) unmet; the yen leg stays subordinate. BoJ 29-30 Oct
+      (slot unverified, rule 16 - the Sat 24 brief re-verifies). Not a chain input.
     since: 2026-09-03
 
   - theme: energy-pce-passthrough
@@ -1557,6 +1593,12 @@ watchlist:
       Next leg: PPI Thu (core services = PCE inputs) decides whether it
       carries into the Fed's measure; real weekly earnings -0.5% is the
       demand cost.
+      20 OCT: Goldman - ~$25/bbl war premium in Brent, Dec-26 $90 (from 85), 2027 $80, Gulf
+      exports near 2025 averages, surplus from Q4; SPR 283mb, lowest since Oct 1982 (<40% of
+      capacity, ~200mb due back); Wright: dark-fleet hulls may convert to legitimate trade
+      ('dozens to hundreds'); Oct-2027 Brent $83 (+13 since Sep); US $8bn farmer diesel
+      programme (fiscal). Products, not crude, remain the passthrough input; UMich 5y final
+      Fri (prelim 3.5%) is the week's expectations print.
     since: 2026-07-31
 
   - theme: us-fiscal-dominance
@@ -1689,6 +1731,13 @@ watchlist:
       UP and the row UP = leg one of the no-both-up-pair successor
       (c1f9579d family 5/5) booked today. India/China demand soft; net
       spec 199.7K.
+      20 OCT TUE BRIEF: the long end sold with the front end Monday (10y +5.5 to 5.136, 30y
+      +4.5 to 5.473, 2y +4.6) - parallel, not the steepening the fiscal shape needs; the
+      narrative was supply/term premium (MarketWatch financing anxiety; GS 'competition for
+      capital'; Citi Australia: Treasuries losing their hedge edge; MSIM: growth not fear).
+      Gate: 20y Wed 17:00Z - no-tail claim booked (0.6; a >=1.5bp tail with the 2y UP and
+      the row UP = pair leg one for 7ea8a0de; Mon = neither). 2y auction Mon 26, 5y Tue 27,
+      7y Thu 29.
     since: 2026-08-20
 
   - theme: euro-sovereign-stress
@@ -1738,6 +1787,11 @@ watchlist:
       the written DXY >=0.3 trigger is unmet on 0.10, logged as substance; a
       third session writes DXY -> gold into base. Spread level still not
       relayed in figures.
+      20 OCT: OAT 10y 4.866% (+7.8bp), Bund 3.42 (+1), spread ~145bp (two-week high);
+      BlackRock: France 'near 5%', +100bp since August, Moody's the next catalyst; UBS sees
+      EUR 1.16 by year-end (1.11 an overshoot). DXY +0.20 with the 2y the same sign - not
+      a dollar-leg session (count 0). France led the global duration sell-off that set the
+      2y and gold Monday.
     since: 2026-10-05
 
   - theme: ai-credit-risk-off
@@ -1795,4 +1849,10 @@ watchlist:
       30y -2.6 bid, 2y FLAT (+0.4 at 4.719), gold +13.4 on the row - NOT a counted session
       (2y <2bp, rule 11); the leg stays at four sessions. Fifth needs the Mon row UP >=5 vs
       4181.1 with the 2y DOWN >=2 vs 4.715 (Tue brief reads it).
+      20 OCT TUE BRIEF: Monday was the leg's MIRROR - the AI trade rebounded (Nasdaq led,
+      Amazon +5%, memory/chips up; CoreWeave lower on debt worries; UBS: neocloud sell-off
+      does not derail the boom), Treasuries sold (2y +4.6, 10y +5.5), gold -21/-38. Consistent
+      with the mechanism, not a fifth session (needs 2y DOWN >=2 + row UP >=5). Kill unmet:
+      not a risk-off day that sold gold; the MarketWatch junk-dispersion piece is a column,
+      not a scare. The 30y sold with everything - the long end's test is still the 20y Wed.
     since: 2026-10-15
