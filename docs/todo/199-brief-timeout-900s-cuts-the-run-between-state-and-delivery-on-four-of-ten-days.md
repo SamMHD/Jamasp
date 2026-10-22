@@ -145,3 +145,14 @@ exit, so the cap breach is invisible in the status column and only the
 duration shows it. The other five briefs ran 599–888 s; the 13 Oct brief
 at 888 s had 12 s of margin. Memory note `brief-retry-resume.md` still the
 only duplicate-prevention. 6 of the last 17 brief days now.
+
+## Update 2026-10-22 (brief)
+
+Another one. Thu 22 Oct: the first attempt (started 03:30:01Z) wrote the
+full report, scored `0a646c8b` / `55f22cae`, added `0575b2c0` / `ddf6e395`,
+appended two lessons and amended calendar/watchlist — then was killed
+before the stance rewrite, the Telegram summary and the commit. The retry
+started 03:45:07Z and finished only the missing steps via the
+`brief-retry-resume.md` memory rule (no duplicate predictions, no duplicate
+Telegram). Same shape as 12 and 17 Oct: everything expensive done, the
+cheap tail lost to the cap.

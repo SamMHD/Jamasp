@@ -2103,6 +2103,14 @@ events:
       tail a posture fact (Hegseth-Netanyahu at Ovda Mon, 'a job to finish') against both election pledges
       - pre-election Israeli negative booked Wed 21-Mon 26 (0.65, scored Tue 27). Meta after the Wed close
       is the credit leg's next input. Weights 30/35/35 held; not event-pending.
+      AMENDED Thu 22 Oct brief: Wednesday read - the 20y gate HIT (0.9bp tail; family 3/3); gold settled +7.4
+      (4150.0) BEFORE the ordered-departure headline (~18:00Z) fired the chain (2y 4.823 +3.6 close, GC -24 in
+      an hour, row 4128.5 -12.7) - a timing split (lesson filed); Wed = neither leg for 7ea8a0de (pair now
+      needs Thu+Fri; Thu comparators row 4128.5 / 2y 4.823). Overnight: an escalation bid Treasuries and yen,
+      not gold (2y 4.782, Brent 110.5, GC 4123). Al-Faw now on MarEx -> 55f22cae MISS (scored). Riyadh
+      confirmed an intercepted drone at Shaybah (two dead from debris) - 5c2c638f holds on the letter. Basra
+      barrels negative 0575b2c0 booked Thu-Sun (0.7, scored Mon 26); 2y band ddf6e395 4.68-4.92 on the Tue 27
+      close booked (0.6, scored Wed 28). Weights 30/35/35 held; credit leg DORMANT; not event-pending.
   - date: 2026-10-27
     time_dubai: "Tue 27 Oct (Israeli election day; polls close ~22:00 Israel = 23:00 Dubai; result overnight into Wed 28) - Gulf News explainer 20 Oct; Netanyahu on record 'no major attack before the election', Trump on record 'not before 3 Nov'"
     title: Israeli election - the day Netanyahu's own 'not before the election' pledge expires; a scan marker, not a document event
@@ -2122,6 +2130,10 @@ events:
       to 3 Nov) only with the actor's post-election posture extracted; every scan carries an
       IDF/PMO/Katz line on Iran as a rule-1 extract with kinetic 40 and the tape clause from the
       first print on the settle and the row.
+      AMENDED Thu 22 Oct brief: Axios (via Gulf News) - dozens of Israeli jets flew to Iran's border Mon 19
+      Oct in a deterrence sortie; NYT - the US-Israeli strike plans are for AFTER the US midterms and the 27
+      Oct vote 'could complicate' them; Mohammadi (Ghalibaf adviser): 'zero hour' nearer. Still no
+      IDF/PMO/Katz-confirmed act; 1ae4e017 on track.
   - date: 2026-10-28
     time_dubai: "Wed 28 Oct 22:00 decision (18:00Z) + 22:30 presser (18:30Z) - TE US calendar --fresh 03:33Z Sat 17 Oct; blackout from Sat 17 Oct; 2y auction Mon 26 17:00Z, 5y Tue 27, durable goods Tue 12:30Z, GDP adv + Sep PCE Thu 29 12:30Z, 7y Thu 29; BoC Wed 28; BoJ Fri 30"
     title: FOMC - the first Fed sentence after eleven blind sessions; 'December, not October' is the priced premise (27% Thu 15 Oct wrap, Dec ~94%)
@@ -2139,6 +2151,23 @@ events:
       clause on the settle and the row from the statement print, per the 15 Oct lesson). The
       Sat 24 Oct brief re-verifies the slot (rule 16) and rewrites the wakeup task with the
       week's weights; the Thu 29 brief closes out on the row and reads PCE.
+  - date: 2026-11-03
+    time_dubai: "Tue 3 Nov (US midterm election day; polls close from 03:00 Dubai Wed 4 Nov) - the day Trump's written 'not before the midterms' pledge (8 Oct; restated 15 Oct) expires; NYT 21 Oct: US-Israeli strike plans for after the vote, three carriers in place by early November"
+    title: US midterms - the US pledge window closes; the post-election strike class becomes live on the record (NYT plans, sources-only) - a scan marker, not a document event
+    why: >
+      The strike-class negative family (8/8 through 17 Oct, df0e8755 to 23 Oct) rests on a pledge with a
+      date; the NYT report (21 Oct) says the two militaries have specific plans for a short, intense
+      round after the vote - nuclear, missile/drone and energy targets, refineries possibly spared - with
+      practice strike flights over Iraq and the force 'fully in place by early November'. Trump has
+      vetoed twice this year and the White House declined comment: sources-only, do-not-score for the
+      negatives, but it dates the tail. A strike reaches gold through Brent and the 2y's sign (rule 22).
+    action: >
+      No wakeup (no text at a known time). The Sat 24 Oct brief writes the US-class successor for Mon 26
+      Oct - Tue 3 Nov with the NYT window named in the 'against' and the floor unchanged (the pledge
+      is on record through the date); the Wed 4 Nov brief re-reads the US class against the result and
+      writes the post-pledge successor only with the actor's posture extracted (rule 1). Every scan
+      carries a CENTCOM/DoD/White House on-record strike line as a rule-1 extract with kinetic 40 and
+      the tape clause from the first print on the settle and the row.
   - date: 2026-11-16
     time_dubai: "Mon 16 Nov (time TBC) - Federal Reserve field hearing on AI, San Francisco Bay Area (Warsh, Bangkok 16 Oct: 'part of its task force work')"
     title: Fed AI task-force field hearing - a task-force venue (rule 24), scan marker only, no deepdive
