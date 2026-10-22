@@ -92,3 +92,11 @@ active/running`) — 8/8 lifetime authd alerts are this shape — and
 active/running` text, the PR #52 deploy restart). The bot alert also
 carried the bot token in its log tail (todo-202) — the cost of a
 non-failure firing an alert that quotes the journal.
+
+## Recurrence — 2026-10-22 06:36Z
+
+`notify_log` ids 339 (`jamasp-bot.service`) and 340 (`jamasp-authd.service`):
+both alerts carry `result: success`, `state: active/running` — the units were
+restarted deliberately (journal: authd listening 06:36:13Z, bot listening
+06:36:13Z, alert fired 06:36:14Z). Same class as the original item; the bot
+unit is in the set too, not only authd/panel. Noted by the 09:00Z scan.
