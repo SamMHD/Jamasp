@@ -2151,6 +2151,35 @@ events:
       clause on the settle and the row from the statement print, per the 15 Oct lesson). The
       Sat 24 Oct brief re-verifies the slot (rule 16) and rewrites the wakeup task with the
       week's weights; the Thu 29 brief closes out on the row and reads PCE.
+      AMENDED Fri 23 Oct brief: the priced premise moved on Thu 22 Oct - investinglive 18:19Z (operative,
+      dated to its own clause): October 5% (lowest this month), December 78% ('no longer a sure thing'),
+      January 27bp, 63.5bp for 2026 vs 80-90bp earlier in October - after the 2y fell 18.8bp to 4.635 on
+      the AI-capital-raise scare (Meta share-class filing), the biggest Treasury rally since the 2023
+      banking crisis; the actionforex preview's undated '15-25%' for October is NOT operative (rule 14).
+      Preview consensus: hold with 2-3 hawkish dissents (Hammack, Logan named), hikes Dec and Mar; Brent
+      113 is the hawks' input. BoC decides the SAME DAY (hike ~80% per the Thu wrap's morning report).
+      The Sat 24 brief re-verifies the FOMC/BoC/ECB (Thu 29)/BoJ (Fri 30) slots on TE/MarketWatch and
+      rewrites #75's task with the Sat weights; the deepdive's flip is written on the dated December
+      sentence plus the tape (settle and row) - the 2y band ddf6e395 (4.68-4.92 on the Tue 27 close) is
+      offside at 4.635 and scores at the Wed 28 brief, not the deepdive.
+
+  - date: 2026-10-29
+    time_dubai: "Thu 29 Oct (ECB decision ~12:15Z / presser 12:45Z - slot UNVERIFIED, inferred from the MUFG and Panetta previews relayed 22 Oct; the Sat 24 Oct brief verifies on TE/MarketWatch, rule 16); the same morning carries Sep PCE + Q3 GDP advance 12:30Z (16:30 Dubai) and the 7y auction"
+    title: ECB meeting - a hold on the bond sell-off and French fiscal risk (MUFG), the day after the FOMC and BoC
+    why: >
+      MUFG (22 Oct): October hold because the global bond sell-off and the French spread remove the hike;
+      still +25bp in December and Q1 2027 (to 3.00%), then a cut to 2.75% by Q3 2027; base case (45%)
+      OAT-Bund near 170bp, EUR/USD 1.08-1.14; credibility-crisis case (15%) spreads >200bp, EUR/USD
+      1.02-1.10. Panetta (Turin, 21 Oct): rising yields led by the US are 'a drag on growth, not a
+      crisis'; tighter conditions could help contain energy-driven inflation near double the target;
+      France and spillover to Italy are the stress points. For gold the ECB is a 2y-floor input (the
+      global hike cycle) and a DXY input (the euro leg of the dollar) - context unless the statement
+      re-dates December or the French spread breaks 200bp inside the window.
+    action: >
+      No wakeup unless the Sat brief's verification puts the presser inside a scan gap; the 13:00Z and
+      15:00Z scans that day read the investinglive decision/presser relay for the December sentence and
+      the OAT-Bund spread beside the US PCE print (12:30Z, tier-1 - the Tue/Wed briefs record no fresh
+      directional claims). The euro-sovereign-stress watchlist theme carries the spread.
   - date: 2026-11-03
     time_dubai: "Tue 3 Nov (US midterm election day; polls close from 03:00 Dubai Wed 4 Nov) - the day Trump's written 'not before the midterms' pledge (8 Oct; restated 15 Oct) expires; NYT 21 Oct: US-Israeli strike plans for after the vote, three carriers in place by early November"
     title: US midterms - the US pledge window closes; the post-election strike class becomes live on the record (NYT plans, sources-only) - a scan marker, not a document event

@@ -156,3 +156,16 @@ started 03:45:07Z and finished only the missing steps via the
 `brief-retry-resume.md` memory rule (no duplicate predictions, no duplicate
 Telegram). Same shape as 12 and 17 Oct: everything expensive done, the
 cheap tail lost to the cap.
+
+## Update 2026-10-23 (brief)
+
+Second consecutive day. Fri 23 Oct: the first attempt (started ~03:30Z)
+wrote the full report (03:41Z file mtime), scored `7ea8a0de`, added
+`e7b83ef8`, appended one lesson, rewrote the stance and amended
+calendar/watchlist — then was killed before the Telegram summary, the
+mark-read and the commit. The retry started 03:45Z and finished only the
+tail via `brief-retry-resume.md`. Shape identical to 12, 17 and 22 Oct:
+all the expensive work survived, the cheap delivery tail was lost. The
+stance rewrite now survives too (it did not on 22 Oct), so the cap is
+landing ~1 min later each day as the retry-resume path gets cheaper —
+7 of the last 18 brief days.
