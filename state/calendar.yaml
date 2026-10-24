@@ -1185,6 +1185,11 @@ events:
       sets the differential baseline. Scans from mid-October carry BoJ
       leaks (Nikkei/Jiji), Takaichi/Katayama on rates, USDJPY vs
       158.5/160.
+      AMENDED Sat 24 Oct brief: actionforex weekly row (03:32Z) - decision 06:00Z, presser 06:30Z, cons hold
+      1.25%; Tokyo CPI Thu 23:30Z (core cons 2.6%). The BoJ's clock is unfixed (18 Sep 02:30Z vs a 05:30Z
+      row), so per rule 16 wakeup #76 is booked off the LATER reading +60 = Fri 30 Oct 07:30Z, scoped to the
+      yen/DXY leg (a hold beside a Fed hold = differential unchanged; the leg needs DXY >=0.3 or a cross of
+      100 to move a weight). Musalem 16:30Z the same day is the first post-blackout Fed voice (19:00Z scan).
   - date: 2026-09-21
     time_dubai: "Week of Mon 21 - Fri 25 Sep; slots below VERIFIED 19 Sep 00:00Z from the actionforex weekly summary (the jamasp calendar feed ends 19 Sep, todo-001)"
     title: Week of 21-25 Sep - no US tier-1 print; SNB Thu; flash PMIs Wed; Fed speakers and Treasury auctions UNVERIFIED
@@ -2163,6 +2168,12 @@ events:
       sentence plus the tape (settle and row) - the 2y band ddf6e395 (4.68-4.92 on the Tue 27 close) is
       offside at 4.635 and scores at the Wed 28 brief, not the deepdive.
 
+      AMENDED Sat 24 Oct brief: slots VERIFIED --fresh (actionforex weekly summary + TE US calendar, 03:32Z):
+      FOMC 18:00Z (cons hold 4.00%) / presser 18:30Z; BoC 13:45Z (cons HIKE to 2.50%; presser 14:30Z); RBNZ
+      01:00Z (cons hike to 3.00%); AU CPI 00:30Z; MSFT/GOOGL after the close. Operative odds moved WITH oil:
+      hold ~90-92%, December 85% (investinglive week-ahead Fri 23 Oct 18:40Z; 78% Thu). #75 left as booked -
+      its task already reads the stance AS OF THE RUN and carries no figures. Friday's 2y close 4.686 put
+      ddf6e395 back inside its band by 0.6bp; it scores at the Wed 28 brief on the Tue close.
   - date: 2026-10-29
     time_dubai: "Thu 29 Oct (ECB decision ~12:15Z / presser 12:45Z - slot UNVERIFIED, inferred from the MUFG and Panetta previews relayed 22 Oct; the Sat 24 Oct brief verifies on TE/MarketWatch, rule 16); the same morning carries Sep PCE + Q3 GDP advance 12:30Z (16:30 Dubai) and the 7y auction"
     title: ECB meeting - a hold on the bond sell-off and French fiscal risk (MUFG), the day after the FOMC and BoC
@@ -2180,6 +2191,11 @@ events:
       15:00Z scans that day read the investinglive decision/presser relay for the December sentence and
       the OAT-Bund spread beside the US PCE print (12:30Z, tier-1 - the Tue/Wed briefs record no fresh
       directional claims). The euro-sovereign-stress watchlist theme carries the spread.
+      AMENDED Sat 24 Oct brief: slot VERIFIED on the actionforex weekly summary (03:32Z) - decision 13:15Z,
+      statement 13:15Z, presser 13:45Z (Europe leaves DST Sun 25 Oct; 14:15 CET); cons refi 2.65% / deposit
+      2.50% unchanged. Same morning: Sep PCE 12:30Z (core cons 0.3% m/m / 3.1% y/y; headline 0.5% / 3.4%),
+      Q3 GDP adv 3.0% (price index 3.5%), claims 196K; 7y 17:00Z; AMZN after the close. No wakeup: the 13:00Z
+      scan reads PCE, the 15:00Z scan reads the ECB presser relay for the December sentence and OAT-Bund.
   - date: 2026-11-03
     time_dubai: "Tue 3 Nov (US midterm election day; polls close from 03:00 Dubai Wed 4 Nov) - the day Trump's written 'not before the midterms' pledge (8 Oct; restated 15 Oct) expires; NYT 21 Oct: US-Israeli strike plans for after the vote, three carriers in place by early November"
     title: US midterms - the US pledge window closes; the post-election strike class becomes live on the record (NYT plans, sources-only) - a scan marker, not a document event
@@ -2197,6 +2213,14 @@ events:
       writes the post-pledge successor only with the actor's posture extracted (rule 1). Every scan
       carries a CENTCOM/DoD/White House on-record strike line as a rule-1 extract with kinetic 40 and
       the tape clause from the first print on the settle and the row.
+      AMENDED Sat 24 Oct brief: the US-class successor (Sat 24 Oct 04:00Z - Tue 3 Nov 23:59Z) is written at
+      0.55, NOT the planned 0.7: the principal hinted on record on Fri 23 Oct ('we may do another little Epic
+      Fury'; 'finish it off or let it wither') and envoy Barrack said a weekend strike is 'absolutely'
+      possible (Trump: 'I don't know anything about it'); AFP: no land strikes by either side since early
+      Sep; Brookings expects strikes AFTER the vote; the relay reads a short, telegraphed strike with a
+      declared victory by Monday. A weekend act is read by the Sun 25 / Mon 26 brief and scores the claim
+      MISS that run (kinetic 35 -> 40 with the tape clause). Lesson filed: the rule-10 floor is a property
+      of the principal's position, withdrawn when the principal states intent.
   - date: 2026-11-16
     time_dubai: "Mon 16 Nov (time TBC) - Federal Reserve field hearing on AI, San Francisco Bay Area (Warsh, Bangkok 16 Oct: 'part of its task force work')"
     title: Fed AI task-force field hearing - a task-force venue (rule 24), scan marker only, no deepdive

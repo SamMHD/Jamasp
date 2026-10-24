@@ -492,6 +492,13 @@ watchlist:
       ignored the dovish repricing (-2.2% on the settle): f(2y) demotion count 1 of 2. ddf6e395 (4.68-4.92 on
       the Tue 27 close) offside at 4.635. Preview: hold Wed with 2-3 dissents (Hammack, Logan), Dec + Mar hikes.
       Fri: flash PMIs 13:45Z (prices paid), UMich 5y 14:00Z - the 2y at print+30 vs 4.635.
+      24 OCT SAT BRIEF: Friday = the chain - oil net UP (Brent 116.72 +3.1%) lifted the curve in parallel
+      (2y 4.686 +5.1, 10y 4.999 +4.6, 30y 5.327 +4.0) and gold followed (settle 4010.0 -50.4); f(2y)
+      12/15. Dated odds moved WITH oil: hold ~90-92%, December 85% (investinglive week-ahead Fri 18:40Z;
+      78% Thu) - the operative figures. ddf6e395 back INSIDE 4.68-4.92 at 4.686 (scores Wed). Week verified
+      (actionforex + TE): 2y Mon 17:00Z, 5y Tue, FOMC Wed 18:00Z (#75 19:30Z), PCE+GDP Thu 12:30Z, 7y Thu,
+      Musalem Fri 16:30Z = first post-blackout voice. Mon line: 2y >=4.72 with gold DOWN -> 45; <=4.64 with
+      gold UP >=5 -> 35. Prints Fri: flash composite 57.6 (selling prices fastest since 2022), UMich 5y 3.5%.
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -590,6 +597,10 @@ watchlist:
       calls, 'cashing in an insurance policy'; the long-term case rests on debasement, CB reserve
       diversification and geopolitical fragmentation, with new institutional buyers (Chinese insurers, Indian
       AMs) and ETF inflows. The floor is official and slow; Thursday's price was set by the margin book.
+      24 OCT SAT BRIEF: Goldman (via mining.com, 23 Oct): CBs ~79t in August (July 44t; pre-2022 avg 17t),
+      China ~25t vs the PBoC's reported ~20t; PBoC September addition the largest in ~3 years, 23rd month;
+      October data ~7 Nov. Net spec 191.8K (20 Oct, -4% w/w, pre-liquidation). The floor is long-horizon:
+      Thursday's -2.2% and Friday's -1.2% met no visible official bid intraday.
     since: 2026-07-31
 
   - theme: warsh-credibility
@@ -1209,6 +1220,15 @@ watchlist:
       2026; no SOMO/Basra text. US policy: DPA s303 memo on petroleum ('little near-term change'); OFAC-listed
       tankers cleared for sale to legitimate operators (BI/Vortexa: relief, not a solution); Bessent: Kharg 'a
       monument to failure', Operation Economic Outcast; CENTCOM >=25bn blocked in 100 days. Kinetic HELD 35.
+      24 OCT SAT BRIEF: US posture (extracted): Barrack 'a strike this weekend? Absolutely' (no Iran role,
+      'not regime change'); Trump 'I don't know anything about it' then at a rally 'we may do another little
+      Epic Fury'; AFP: no land strikes by either side since early Sep; Brookings: after the midterms; relay: a
+      short, leaking, telegraphed strike (Pickaxe/missile sites). Iran's retaliation menu on record: seven
+      subsea cables (Javani), bases, Gulf energy. df0e8755 HIT (9/9); successor to 3 Nov at 0.55 (floor
+      withdrawn - the principal hinted). Mines: IRGC claims x4/week, CENTCOM 'no mines' - aa7d1d8f HIT,
+      successor to 30 Oct at 0.7. UKMTO weekly: 12 attacks, GFS Pride lost, most victims not reporting;
+      transits -70% vs pre-war. Saudi Sat: Riyadh missile + EP drone intercepted - Houthi class. UAE spill
+      ashore (Gem No. 2). Blockade: CENTCOM 100 days / 138 hulls; MarEx: Iran losing ~40% of budget revenue.
     since: 2026-07-31
 
   - theme: kinetic-transmission-inverted
@@ -1445,6 +1465,10 @@ watchlist:
       Meta's equity-raise filing). Rule 3 names the price-setter: the margin book. The oil -> 2y link broke the
       same day (Brent +4%, 2y -19). In this tape the first read of any strike print is a margin call, not a
       haven; Brent first, then the 2y's sign, then the equity tape.
+      24 OCT SAT BRIEF: fifth inversion-class reading in nine sessions, this one orthodox - a weekend-strike
+      premium reached gold as a HIKE (oil +3% -> 2y +5 -> gold -1.2%), equities flat; the margin-call read
+      stays the first read for any strike print. Blind window Sat-Sun with the principal hinting; the Sun brief
+      reads oil first then the 2y's Asia sign (rule 25). Reopen band 3850-4150 written (0.65).
     since: 2026-09-09
 
   - theme: boj-yen-pillar
@@ -1556,6 +1580,11 @@ watchlist:
       Dec hike to 1.50% the base, terminal 1.75-2%. USDJPY 156.83 (-0.82%) - the yen was Thursday's haven while
       gold sold. BoC 28 Oct hike ~80% (Canada PPI +2.0% m/m); MUFG: ECB hold Oct, Dec + Q1 hikes to 3.00%. The
       global hike cycle is the 2y's floor once the credit scare passes - Thursday the floor gave way.
+      24 OCT SAT BRIEF: BoJ 29-30 Oct verified on the actionforex weekly row (decision 06:00Z / presser
+      06:30Z - the BoJ's own clock is unfixed; 18 Sep printed 02:30Z vs a 05:30Z row): wakeup #76 booked
+      Fri 30 Oct 07:30Z (later reading +60, rule 16). Street: hold 1.25%, outlook report, December to 1.50%;
+      Tokyo CPI Thu 23:30Z (core cons 2.6%). USDJPY 156.81 Fri (-0.07%); the yen was Thursday's haven, not
+      Friday's. The leg stays subordinate until it states a DXY >=0.3 move or a cross of 100.
     since: 2026-09-03
 
   - theme: energy-pce-passthrough
@@ -2019,4 +2048,9 @@ watchlist:
       (settle / row), silver -5.9%, BTC -3.3%: the leg's bid went to Treasuries and the yen, and the gold desk
       sold for cash. Leg KILLED at the 19:00Z scan (base 30 -> 25, rates 35 -> 40); re-arms on a fifth clean
       session (2y DOWN >=2 + settle UP >=5 vs 4060.4 on a credit input). Friday's tell is the equity open.
+      24 OCT SAT BRIEF: Friday was NOT a leg session - the equity tape sat flat (Nasdaq -0.21%, NDX unch,
+      S&P -0.52%, Dow -1.24% on consumer/financials; Russell +2% on the week; cyber bid, Nvidia -0.6%, Meta
+      -1% ahead of the share-class launch) while yields ROSE on oil - the chain, not credit. Leg stays
+      KILLED; re-arms on 2y DOWN >=2 + settle UP >=5 vs 4010.0 on a credit input. Next inputs: MSFT/GOOGL
+      Wed after the close, AMZN Thu; the relay: 'where will the money come from' (equity, not debt).
     since: 2026-10-15
