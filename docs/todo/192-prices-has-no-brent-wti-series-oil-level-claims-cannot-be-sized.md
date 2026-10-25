@@ -68,3 +68,20 @@ claims (`b3adcf1e`, `65cd057e`, `f7a0c23d`, `a270f3f1`, `9e1829f8`).
 - `docs/todo/187` — GC_CLOSE is the Globex running value, not the settle;
   the same labelling question applies here.
 - Memory note: CNBC `@LCO.1` / `@CL.1` with `--fresh` give live oil levels.
+
+## Update 2026-10-25 (retro) — scope widened to the 2y
+
+`prices` has no US 2y (or 30y) series either: `^TNX` is the 10y, and the 2y
+close every brief and chain test runs on is a hand read of CNBC
+`/quotes/US2Y`. The cost landed this week: `ddf6e395` (2y close Tue 27 Oct
+inside 4.68–4.92, 0.6, written Thu 22 Oct 03:40Z) was sized on a "~5bp
+daily ATR" quoted from memory and went offside fourteen hours later on a
+19bp session (4.823 → 4.635) — the measured record already held an 8.7bp
+four-session move (13–16 Oct). Playbook rule 7 (25 Oct) now requires a
+chain-input band to be sized on the input's 10-session realized range, and
+that measurement is impossible from the tool for the 2y, Brent, WTI or the
+30y. Ask: a `US2Y` daily close row (and ideally `US30Y`) beside the
+`BRENT`/`WTI` ask above, with a 10-session realized range the brief can
+print — same cadence and basis-labelling as `^TNX`. Source: the CNBC quote
+page already extracts; Yahoo `^IRX`/`2YY=F` are alternatives if the Yahoo
+path is alive (todo-012).

@@ -119,3 +119,13 @@ claim text.
   Backfill regex note: every claim text this fortnight carries "through
   <weekday> <d> <Mon> 23:59Z" or "on <weekday> <d> <Mon>" — the Fix §3
   one-off parser is feasible on the current ledger.
+
+## Update 2026-10-25 (retro)
+
+`due` printed 0 at every brief for a second consecutive week while rule 18
+scored 11 (five Sunday closers at the Mon 19 brief; `7ea8a0de` scored Fri
+23 with one session open because no outcome could print a pair; `55f22cae`
+scored Thu 22 with two window days open because its trigger had fired).
+The determinate-early scoring is correct and the window-close scoring is
+correct; neither is visible to `due`, which still keys on `created_at +
+horizon_days`.

@@ -100,3 +100,12 @@ both alerts carry `result: success`, `state: active/running` — the units were
 restarted deliberately (journal: authd listening 06:36:13Z, bot listening
 06:36:13Z, alert fired 06:36:14Z). Same class as the original item; the bot
 unit is in the set too, not only authd/panel. Noted by the 09:00Z scan.
+
+## Update 2026-10-25 (retro)
+
+Two more restart-shaped alerts, each firing on BOTH units in the same
+second: 22 Oct 06:36:14Z and 24 Oct 06:40:09Z (`result: success`,
+`state: active/running` for `jamasp-bot` and `jamasp-authd`). The paired
+timing says a deploy or a `systemctl restart` of both services; the desk
+received four alerts for two deliberate restarts. authd now 10/10 lifetime
+on this shape; the bot 3/3.

@@ -105,3 +105,18 @@ every settle is a hand read of the CNBC prev-close line at ~23:00Z. A
 would let a claim name the basis from the tool, the same way GC_CLOSE
 names the row. todo-194 (row-slot drift) and todo-192 (no oil series)
 are the same family.
+
+## Update 2026-10-25 (retro)
+
+Two more row-vs-settle outcomes this week. (1) `51f5086d` (Fri row inside
+3990–4300): the row 4007.9 held by 17.9 while the Dec future's tick broke
+the 3990 edge by 0.9 in the US session — HIT on the named basis, margin on
+record. (2) Wed 21 Oct split the bases by TIME: gold settled 4150.0 (+7.4)
+at 17:30Z with the curve bid, the ordered-departure headline ~18:00Z took
+the 2y 4.768 → 4.827 by the 5:05pm ET close and the row to 4128.5 (−12.7).
+A chain test scored "settle first" reads a 1:30pm ET gold print against a
+5:05pm ET yield — a 3.5h gap one headline straddled. Playbook rule 11 (25
+Oct) now logs this as a "timing split" counted on the row, and names the
+13:30 ET 2y as a second comparator — which is a second hand read of CNBC
+intraday. The code side is unchanged: a `GC_SETTLE` row at ~18:30Z and a
+`US2Y_1330ET` read would make both bases tool-backed.

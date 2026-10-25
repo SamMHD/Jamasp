@@ -107,3 +107,14 @@ class negative). Stated average this week 0.650 vs observed 0.846.
 tape clause, not a structural negative); structural negatives 7/7, 77/79
 lifetime; 0.70 lifetime 54/60 (90%). Stated average this week 0.646 vs
 observed 0.870 — the seventh underconfident week in eight.
+
+## Update 2026-10-25 (retro)
+
+0.70 bucket 5/5 this week (59/65 lifetime, 91%); 0.65 bucket 2/2 (29/35,
+83%). Stated 0.645 vs observed 0.909 on n=11 — the eighth underconfident
+week in nine. Six structural negatives written at 0.65–0.7 under the
+ceiling with the "compliant floor 0.8" boilerplate all hit; Brier 0.130
+this week, 0.096 had they been written at 0.8. Structural-negative family
+83/86 lifetime. Rule 10 (25 Oct) now also withdraws the floor when the
+principal states intent (`b4938377` at 0.55) — so the ceiling's cost is
+confined to the cases where the floor actually applies.

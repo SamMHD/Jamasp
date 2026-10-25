@@ -169,3 +169,14 @@ all the expensive work survived, the cheap delivery tail was lost. The
 stance rewrite now survives too (it did not on 22 Oct), so the cap is
 landing ~1 min later each day as the retry-resume path gets cheaper —
 7 of the last 18 brief days.
+
+## Update 2026-10-25 (retro)
+
+Weekly tally: 2 of 7 briefs over the cap this week — Thu 22 (`agent_runs`
+821, 03:30:01Z → 03:49:06Z, 1145 s) and Fri 23 (830, 03:30:01Z →
+03:47:56Z, 1075 s), both already logged above by the briefs themselves,
+both rescued by the retry via the resume rule with no duplicate state. The
+other five ran 618–781 s. 7 of the last 20 brief days. The resume rule is
+holding, but the pattern is now "the day after a big session" (Thu after
+the 2σ Wednesday-night headline, Fri after the 2σ Thursday), i.e. the days
+the desk most needs the summary on time.

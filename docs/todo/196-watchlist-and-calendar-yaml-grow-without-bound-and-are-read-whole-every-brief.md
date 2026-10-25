@@ -62,3 +62,10 @@ dated run annotations), `calendar.yaml` 136,362 (107,110). The retro's
 own `cat` of stance + lessons + watchlist was truncated by the harness at
 143 KB this run. Nothing prunes; the brief's rule-13 "2 themes annotated"
 line is the growth mechanism.
+
+## Update 2026-10-25 (retro)
+
+`state/watchlist.yaml` 155.3 KB and `state/calendar.yaml` 150.2 KB (126.8 /
+136.4 on 18 Oct; 64.8 / 107.1 on 3 Oct) — the watchlist grew 28 KB in a
+week in which no theme was added or removed (six to nine themes annotated
+per brief). Both are still read whole by every brief.

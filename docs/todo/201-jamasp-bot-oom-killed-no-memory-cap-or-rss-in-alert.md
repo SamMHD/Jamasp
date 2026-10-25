@@ -51,3 +51,13 @@ file. Same unit, one more data point: the 12 Oct 13:20Z `jamasp-bot` alert
 (notify_log 314) was `result: success, state: active/running` — a deploy
 restart firing `OnFailure`, the todo-191 shape on a second unit — so the
 bot's lifetime alerts are 1 restart + 1 OOM, and only the OOM is a failure.
+
+## Update 2026-10-25 (retro)
+
+Two more OOM kills this week: 18 Oct 23:33:55Z and 22 Oct 00:49:05Z (both
+`oom-kill`, status 137, `activating/auto-restart`; the 22 Oct restart's
+"restart counter is at 3"). Three lifetime (15, 18, 22 Oct). Each alert's
+log tail is a run of `poll failed (The read operation timed out)` warnings
+over the preceding hours — the same pre-kill shape each time, still no RSS
+figure in the alert. Auto-restart recovered the listener every time; no
+`/brief` was requested this week, so nothing was lost that we know of.

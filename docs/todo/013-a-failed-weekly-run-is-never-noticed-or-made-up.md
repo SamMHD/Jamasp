@@ -204,3 +204,11 @@ Slot record: 2, 9, 16, 23 Aug ok; 30 Aug failed; 6 Sep ok; 13 Sep failed;
 20, 27 Sep, 4 Oct ok; 11 Oct failed → made up 19:30Z; 18 Oct ok. 6 of the
 last 8 Sundays on the slot, 7 of 8 counting the make-up. Fix §1 (the
 Monday brief checks for a missing retro report) still not landed.
+
+## Update 2026-10-25 (retro)
+
+25 Oct retro started on the slot (16:00Z, `jamasp-retro.timer`), the second
+consecutive on-slot run. Record: 7 of the last 9 Sundays on the slot, 8 of 9
+counting the 11 Oct make-up. Watchdog `OK` ×6 this week; today's run
+reported the OAuth refresh-token expiry (27 Oct 12:02Z) to the desk — the
+first VIOLATION since the 11 Oct fix, and a real one.

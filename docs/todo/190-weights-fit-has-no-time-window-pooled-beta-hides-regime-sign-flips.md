@@ -122,3 +122,23 @@ for the second month, spread 0.37% (0.57% on 11 Oct's n=75); by half-month
 bull −0.18 / bear −0.01 stands. The relay-lag reading holds on three
 samples now; still no scorer change — the November row is the trigger
 named on 11 Oct.
+
+## Update 2026-10-25 (retro)
+
+Pooled fit 24 Oct 23:38Z (n=915): rates_dollar β +0.0393 (se 0.0132,
+**3.0σ**, multiplier 1.23 — down from 1.47 as the normalisation compressed
+the columns), geopolitics +0.0287 (2.1σ, 0.90). Flags
+`negative:physical_cb` (−0.0086, 0.7σ, n=57, pinned 1.0 to 15 Nov),
+`negative:supply_mining` (**new**: −0.0009, 0.07σ, n=285 — the multiplier
+was already at the 0.25 floor on last week's +0.0052, so the sign flip
+changed the flag and nothing on the map) and `negative:other` (−0.0148,
+1.1σ). Per-month split re-run, same weighting: rates_dollar Oct bull n=82
+−0.47% / bear n=118 −0.04% (ordering still inverted, spread 0.43%); by
+week — 1–11 Oct bull −0.16 / bear +0.43; 12–18 Oct −0.09 / +0.18;
+**19–25 Oct −1.07 / −0.94** — the third row is the −4.1% week, every hour's
+forward return negative whichever way the item was scored, so it says
+nothing about direction. geopolitics Oct bull n=218 −0.23% / bear n=37
+−0.34%. Still no scorer change; the November row stays the trigger. The
+19–25 Oct row is also an argument for the conditional means carrying a
+trend-adjusted (demeaned-by-day) variant, else any trending week swamps
+the sign.
