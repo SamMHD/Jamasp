@@ -97,3 +97,15 @@ closed it). The fix here — whether the retry loop or the `jamasp commit`
 subcommand — should also add `state/jamasp.db-journal` (and `-wal`/`-shm`
 for safety) to `.gitignore`, otherwise a committed journal alongside a
 mid-write DB blob is the worst-case artefact of the race.
+
+## Update 2026-10-26 (scan 15:00Z)
+
+Recurred twice in one close-out: `git add -A state/ && git commit` failed
+with `fatal: confused by unstable object source data for <hash>` on two
+consecutive attempts (~15:01Z and ~15:02Z), i.e. `state/jamasp.db` changed
+underneath git while it was hashing the blob. No `jamasp ingest`/`translate`
+process was visible in `ps` by the time the third attempt ran a few seconds
+later, and that attempt committed cleanly (`1ca5ac2`). The 15:00Z scan sits
+on the 15-minute ingest boundary and the 10-minute translate boundary, so
+this slot will keep hitting the race until the retry loop or the
+`jamasp commit` subcommand lands. Manual retry worked; no data lost.
