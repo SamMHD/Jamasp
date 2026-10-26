@@ -500,6 +500,15 @@ watchlist:
       Musalem Fri 16:30Z = first post-blackout voice. Mon line: 2y >=4.72 with gold DOWN -> 45; <=4.64 with
       gold UP >=5 -> 35. Prints Fri: flash composite 57.6 (selling prices fastest since 2022), UMich 5y 3.5%.
       SUN 25 OCT brief: two December readings on the record - investinglive week-ahead Fri 23 Oct 18:40Z (DATED, operative per rule 14): hold ~90-92%, December 85%; actionforex weekly Sat 24 Oct 09:31Z (undated clause, context): hold ~90% / hike ~10%, December ~76% 'at least one increase'. The 9-pt gap is the readings' disagreement - no odds threshold is written inside it (rule 19). FOMC Wed 28 Oct 18:00Z (no SEP at an October meeting; the statement + Warsh presser are the text), #75 at 19:30Z; 2y auction Mon 17:00Z, 5y Tue, 7y Thu; Sep PCE + Q3 GDP Thu 12:30Z. 10y 4.999 at the 5% / 55-EMA 4.976 decision zone (actionforex): a break lower targets 4.815 (the credit-leg reading), a hold above 5% with Brent >120 is the inflation reading (the chain).
+      26 OCT MON BRIEF: no dated December sentence in the weekend relays (rule 14) - operative stays Fri 23 Oct
+      18:40Z: hold ~90-92% Wed, December 85%. Global hike week around the FOMC: BoC hike to 2.50% priced 81% (Wed
+      13:45Z), RBNZ to 3.00% (Wed 01:00Z), RBA Hunter 'oil shock has further to run', November rise 'in view'; ECB
+      hold Thu (MS: December 'the natural moment'); BoJ hold Fri, Ueda 'further hikes toward neutral' (preview).
+      2y 4.660 in Asia (-2.6) - ddf6e395 (4.68-4.92 on the Tue close) 2bp outside on the low side, scores Wed.
+      Mon line: 2y close >=4.72 with gold DOWN -> 45; <=4.64 with gold UP >=5 -> 35. UK Budget Wed 12:30Z = gilt
+      marker. fed_press feed 404 since 13 Oct (todo-203) - #75 reads the Board statement URL directly.
+      warsh-credibility (last annotated 8 Oct) KEPT at the Monday prune - Wednesday's chair read runs through this
+      theme; the debasement tell stays 2 for / 17 against with DFII10 2.64 and gold at 4000.
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -602,6 +611,11 @@ watchlist:
       China ~25t vs the PBoC's reported ~20t; PBoC September addition the largest in ~3 years, 23rd month;
       October data ~7 Nov. Net spec 191.8K (20 Oct, -4% w/w, pre-liquidation). The floor is long-horizon:
       Thursday's -2.2% and Friday's -1.2% met no visible official bid intraday.
+      26 OCT MON BRIEF: Goldman's 79 t/month official-sector estimate 'goes mainstream' with reserves shifting to
+      London (investinglive lede, not extracted); Saxo: ETF holdings back above ~100 Moz, buying 'almost
+      uninterrupted since July' while COMEX spec length is pared - the slow book is the floor UBS names at 4000.
+      SGE 862.91 CNY/g (22 Oct) from 884.95 (21 Oct) - Shanghai fell with COMEX, no premium bid visible. Long-
+      horizon only; no weight moved. PBoC October reserves 7 Nov.
     since: 2026-07-31
 
   - theme: warsh-credibility
@@ -1231,6 +1245,21 @@ watchlist:
       transits -70% vs pre-war. Saudi Sat: Riyadh missile + EP drone intercepted - Houthi class. UAE spill
       ashore (Gem No. 2). Blockade: CENTCOM 100 days / 138 hulls; MarEx: Iran losing ~40% of budget revenue.
       SUN 25 OCT brief: blind weekend read (rule 25) - NO US strike on record through 03:30Z Sun (CENTCOM/DoD/WH silent; Gulf News live page: WSJ - munitions loaded aboard the George Washington CSG; US intel (Axios/CNN/NBC) - Iranian plots vs Americans 'advanced'; Israel pressing for speed; Iran willing to resume Pakistan-brokered talks if the blockade lifts; Pezeshkian blames the US for the interim-deal failure). Houthi class UNCHANGED: Sat two ballistic missiles toward Mecca/Medina intercepted, debris Mecca/Jeddah/Taif/Masturah-Rabigh (Civil Defence, no damage detail - Rabigh governorate, NOT the Petro Rabigh node); Sun ~02:00Z Riyadh drone intercepted (al-Maliki); KKIA resumes T1/T2 Sun; Dammam KFIA 21 Oct = second death. No mine claim this weekend; no SOMO text; no co-confirmed text. Brent Fri 116.72 (CFD 117.39), resistance 119.50/120.53, RSI 74 (actionforex weekly); 'no new military operation approved'.
+      26 OCT MON BRIEF: blind window closed quiet on the record (rule 25) - no CENTCOM/DoD/WH or IDF/PMO/Katz line;
+      Trump (WH rapid response) 'there's a possibility I will' AND 'a possibility we'll have a nice, big, beautiful
+      agreement... will they hold the deal?' - both branches, posture. Posture fact extracted: State Dept ORDERED
+      DEPARTURE of non-emergency staff/families from Saudi Arabia (effective 23 Oct, embassy alert 25 Oct, 'Iranian-
+      supported Houthi forces', 'could escalate rapidly'). Houthi class unchanged, attempt set kingdom-wide: Sat
+      missiles toward Mecca/Medina/Taif/YANBU/Riyadh intercepted, debris Jeddah/Taif/Masturah-Rabigh; Sun Riyadh
+      missile destroyed (al-Maliki), Khamis Mushait debris 2 injured; Houthis claim 'energy installations, a pipeline'
+      (adversary claim), deny the holy cities; 'red line' = Sheikh Al Sudais (religious), no Saudi attribution to
+      Iran. Hormuz: JMIC 101 US-facilitated transits 22-24 Oct (~138/day baseline), 492 waiting, blockade in force;
+      Cooper (CENTCOM) on record 'primary transit routes... free and clear of Iranian sea mines', 95% safe transits;
+      UKMTO: LPG tanker 22 Oct 7nm NE of Limah, 'unknown projectile'; Araghchi: strait management 'will not be as it
+      was', 'negotiations will continue'; Saudi crude storage in Singapore caverns from 2027. Scored HIT x4
+      (799938fb 5c2c638f 813c1e8d 0575b2c0); successors 84eb0ffc (supply node, 0.65 - western nodes named),
+      329ced60 (attribution, 0.7), b0ebbba3 (co-confirmed arrangement, 0.7). Kinetic HELD 35; ->30 if Brent (Dec)
+      settles <113.17 Mon; Brent Dec EXPIRES Fri 30 Oct - comparators re-base on Jan.
     since: 2026-07-31
 
   - theme: kinetic-transmission-inverted
@@ -1471,6 +1500,12 @@ watchlist:
       premium reached gold as a HIKE (oil +3% -> 2y +5 -> gold -1.2%), equities flat; the margin-call read
       stays the first read for any strike print. Blind window Sat-Sun with the principal hinting; the Sun brief
       reads oil first then the 2y's Asia sign (rule 25). Reopen band 3850-4150 written (0.65).
+      26 OCT MON BRIEF: the quiet half of the blind window priced as the inversion in reverse - Brent -2.47 (-2.1%),
+      WTI -2.25%, 2y -2.6bp (4.660), 10y -3.5, DXY -0.19, @GC.1 +15.8 (4023.7), reopen row 4005.6 inside 3850-4150
+      (78ccbcea HIT; reopen family 8/9). A rates move, not a haven bid (rule 25). Saxo: the 22-23 Oct break came
+      'alongside a powerful rally in US Treasuries' - long liquidation over lower yields; spec length pared, ETFs
+      >100 Moz; gold-silver ratio >74 = de-risking. Margin-book demotion count 1 of 2; f(2y) stays the setter on
+      the quiet session; db5c80e2 (2y auction chain test) scores Tue on the 5:05pm ET 2y and the settle vs 4010.0.
     since: 2026-09-09
 
   - theme: boj-yen-pillar
