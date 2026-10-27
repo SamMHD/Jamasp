@@ -549,7 +549,12 @@ events:
       Escalation markers that WOULD anchor one: Iranian official naming a
       date, US pre-emptive strike on launch infrastructure, or insurance/
       charter market pulling out of Fujairah calls.
-
+      AMENDED Tue 27 Oct brief: Monday passed with NO act on record (CENTCOM/DoD/WH silent; WH 'declined to comment' to
+      CNN). CNN via unnamed US officials (Gulf News 26 Oct): forces prepared to act 'within 96 hours of an order from
+      President Donald Trump', 'It will be a big effort', 'potentially after the November 3 US midterm elections'; target
+      list 'nuclear facilities, energy infrastructure and military installations'; the Riyadh embassy is the only post
+      under ordered departure. Sources-only - posture, not a trigger; b4938377 (0.55) on track. investinglive's relay
+      scenario: a bad midterm for Republicans -> escalation risk, not a rebuke read. Oil: Brent Dec 115.81 settle.
   - date: 2026-09-09
     time_dubai: "~18:00-19:30 (operation intraday US morning; slot unverified)"
     title: First Treasury buyback operation (Bessent on record 24 Aug)
@@ -2143,6 +2148,14 @@ events:
       03:33Z Mon (Gulf News live page extracted); Trump endorsed Netanyahu on Truth Social before the vote ('an outstanding
       Warrior Prime Minister'). 1ae4e017 scores at the Tue 27 brief after the time-late check; the Tue brief writes the
       post-election successor only with the actor's posture extracted (rule 1).
+      AMENDED Tue 27 Oct brief: 1ae4e017 scored HIT after the time-late check (Gulf News roundup + target-list piece,
+      Mehr, items table) - Katz 'denied that Israel intended to initiate an attack before its October 27 elections';
+      CNN via unnamed US officials: Trump 'reportedly declined to approve an Israeli attack before the elections', US
+      action 'potentially after the November 3 midterms', forces ready 'within 96 hours of an order'. Polls close ~21:00Z
+      Tue; result overnight into Wed; betting markets ~30% Netanyahu stays PM after coalition-building (investinglive).
+      The post-election successor is written at the Wed 28 (or Thu 29) brief ONLY with the actor's post-election posture
+      extracted (rule 1) - a 1-2 day gap in Israeli-alone coverage, accepted; b4938377 covers US-with-Israel to 3 Nov.
+      Baqaei: the outcome 'would make no difference to Tehran's position'.
   - date: 2026-10-28
     time_dubai: "Wed 28 Oct 22:00 decision (18:00Z) + 22:30 presser (18:30Z) - TE US calendar --fresh 03:33Z Sat 17 Oct; blackout from Sat 17 Oct; 2y auction Mon 26 17:00Z, 5y Tue 27, durable goods Tue 12:30Z, GDP adv + Sep PCE Thu 29 12:30Z, 7y Thu 29; BoC Wed 28; BoJ Fri 30"
     title: FOMC - the first Fed sentence after eleven blind sessions; 'December, not October' is the priced premise (27% Thu 15 Oct wrap, Dec ~94%)
@@ -2178,6 +2191,14 @@ events:
       hold ~90-92%, December 85% (investinglive week-ahead Fri 23 Oct 18:40Z; 78% Thu). #75 left as booked -
       its task already reads the stance AS OF THE RUN and carries no figures. Friday's 2y close 4.686 put
       ddf6e395 back inside its band by 0.6bp; it scores at the Wed 28 brief on the Tue close.
+      AMENDED Tue 27 Oct brief (event-pending from this brief): Mon 2y close 4.711 (+2.5) on a C- 2y auction (4.708,
+      0.3bp tail) with the 10y/30y DOWN - neither Mon flip line fired; rates HELD 40; ddf6e395 back INSIDE 4.68-4.92 at
+      4.711, scores Wed on the Tue close. NO dated odds sentence printed Mon (Kickstart, Americas wrap, Zandi relay) -
+      operative stays Fri 23 Oct 18:40Z hold ~90-92% / December 85% (rule 14); Goldman (relay 27 Oct 00:27Z): skip
+      October, hike December; Zandi (X, 26 Oct): a hike 'would be a mistake'. #75 stands as booked; its flip is written
+      on the dated December sentence plus the tape from the 18:00Z print on the settle (@GC.1 prev close 4038.4 is the
+      Mon comparator; Wed's own settle is the clause's base) and the Wed row. Tue 27 row band written (3900-4160, 0.6)
+      as the pre-print band; no directional claims.
   - date: 2026-10-29
     time_dubai: "Thu 29 Oct (ECB decision ~12:15Z / presser 12:45Z - slot UNVERIFIED, inferred from the MUFG and Panetta previews relayed 22 Oct; the Sat 24 Oct brief verifies on TE/MarketWatch, rule 16); the same morning carries Sep PCE + Q3 GDP advance 12:30Z (16:30 Dubai) and the 7y auction"
     title: ECB meeting - a hold on the bond sell-off and French fiscal risk (MUFG), the day after the FOMC and BoC
