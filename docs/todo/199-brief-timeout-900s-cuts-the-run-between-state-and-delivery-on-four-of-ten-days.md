@@ -180,3 +180,5 @@ other five ran 618–781 s. 7 of the last 20 brief days. The resume rule is
 holding, but the pattern is now "the day after a big session" (Thu after
 the 2σ Wednesday-night headline, Fri after the 2σ Thursday), i.e. the days
 the desk most needs the summary on time.
+
+**Recurrence 2026-10-28 13:00Z (scan variant):** after the OAuth-expiry outage (Tue 12:02Z → Wed 11:00Z, nine runs failed incl. the Wed brief) the 13:00Z scan faced a 506-item / 26-hour delta. The first attempt scored `3f88c2b5` and `ddf6e395` at 13:04:47Z and was cut at the scan cap (~300s) before mark-read/commit; the retry (13:05:02Z) had to close out without verifying the Ras Tanura Saudi-confirmation class. Proposal: when the previous N runs failed, `jamasp run` should grant the first successful run the brief timeout, or the scan skill should cap its read to the last 2h of items and defer the backlog to the next brief.
