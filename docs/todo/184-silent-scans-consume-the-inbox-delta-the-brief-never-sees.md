@@ -101,3 +101,13 @@ scans for non-urgent confirmations).
 - `docs/todo/README.md` "three queues" table — this would be the fourth if
   option 2 is chosen; prefer option 1 to avoid that.
 - Scan run `jamasp: scan 2026-09-08 19:00`.
+
+## Recurrence 2026-10-28 — post-outage scan closed a 506-story delta after reading ~120
+
+The OAuth refresh token expired on 27 Oct at 12:02Z, and nine agent runs failed. The first run back was the 13:00Z scan on 28 Oct. It ran `inbox --mark-read` over the whole backlog, stamping 506 representative stories `read_at = 2026-10-28T13:08:17Z`, after reviewing only the newest ~120 (those published from ~07:11Z on 28 Oct) one by one. `--mark-read` has no notion of "what this run actually read", so the older ~385 were closed unread. Among them was the evidence layer on the 27 Oct Ras Tanura hit (MarEx 21:43Z: NASA FIRMS heat, a Bloomberg unnamed source) and the Israeli election posture.
+
+The scan also mis-timed the 14:05Z Reuters relay of the Houthi Ras Tanura claim as landing after the settle.
+
+A human exported the batch to `/home/jamasp/catchup/outage-backlog-2026-10-28.jsonl` (`export_backlog.py`), and an outage deepdive read all 506 (`reports/2026/10/2026-10-28-brief.md`). Nothing was lost this time, but only because of that manual recovery.
+
+The same fix family applies here: `--mark-read` should close only the ids the run was served, which is bounded by `--cap`. Alternatively, a post-outage first run could refuse to mark read more than N items without a catch-up path.

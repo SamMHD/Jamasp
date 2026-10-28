@@ -2156,6 +2156,12 @@ events:
       The post-election successor is written at the Wed 28 (or Thu 29) brief ONLY with the actor's post-election posture
       extracted (rule 1) - a 1-2 day gap in Israeli-alone coverage, accepted; b4938377 covers US-with-Israel to 3 Nov.
       Baqaei: the outcome 'would make no difference to Tehran's position'.
+      AMENDED Wed 28 Oct outage deepdive (the Wed brief did not run - OAuth expiry): result INCONCLUSIVE - exit polls
+      Eisenkot bloc 51-53 / Netanyahu ~50 (Ch14 60/43); 66% counted Netanyahu 54 / Eisenkot 48 / Arab 18, no 61; full
+      count Thu evening-Fri, official by 4 Nov; Netanyahu caretaker. Posture EXTRACTED (Gulf News live page, Wed 28 Oct,
+      to reporters): 'Israel has a unique opportunity with our partner President Trump to forever eliminate the
+      existential threat of Iran' - no timing, no order. Successor written: 8f429298 (0.65, Wed 28 14:00Z - Tue 3 Nov
+      23:59Z, IDF/PMO/Katz on record), scored Wed 4 Nov beside b4938377.
   - date: 2026-10-28
     time_dubai: "Wed 28 Oct 22:00 decision (18:00Z) + 22:30 presser (18:30Z) - TE US calendar --fresh 03:33Z Sat 17 Oct; blackout from Sat 17 Oct; 2y auction Mon 26 17:00Z, 5y Tue 27, durable goods Tue 12:30Z, GDP adv + Sep PCE Thu 29 12:30Z, 7y Thu 29; BoC Wed 28; BoJ Fri 30"
     title: FOMC - the first Fed sentence after eleven blind sessions; 'December, not October' is the priced premise (27% Thu 15 Oct wrap, Dec ~94%)
@@ -2199,6 +2205,13 @@ events:
       on the dated December sentence plus the tape from the 18:00Z print on the settle (@GC.1 prev close 4038.4 is the
       Mon comparator; Wed's own settle is the clause's base) and the Wed row. Tue 27 row band written (3900-4160, 0.6)
       as the pre-print band; no directional claims.
+      AMENDED Wed 28 Oct outage deepdive: operative odds moved to the investinglive FOMC preview Tue 27 Oct 12:04Z -
+      hold 90%, DECEMBER 80%, ~2 hikes in 2027 (April first fully priced) - written before the Tue 14:00Z data beat
+      (CB confidence 91.7 vs 81.0; 2y close 4.737 +2.6). #75's flip lines rebased +/-10 on 80%: >=90% + gold DOWN on
+      the settle -> rates 45; <=70% + gold UP >=5 -> 35; no sentence -> tape alone at 80%. Overnight: AU trimmed mean
+      3.7% (vs 3.6%); RBNZ HELD 2.75% 4-3 vs a priced hike (more hikes guided). Comparators: Tue settle 4074.6, Tue row
+      4060.0. Wed row band 0f7c8323 (3930-4210, 0.6) scores at the Thu 29 brief. ddf6e395 and 3f88c2b5 scored HIT at
+      the 13:00Z scan.
   - date: 2026-10-29
     time_dubai: "Thu 29 Oct (ECB decision ~12:15Z / presser 12:45Z - slot UNVERIFIED, inferred from the MUFG and Panetta previews relayed 22 Oct; the Sat 24 Oct brief verifies on TE/MarketWatch, rule 16); the same morning carries Sep PCE + Q3 GDP advance 12:30Z (16:30 Dubai) and the 7y auction"
     title: ECB meeting - a hold on the bond sell-off and French fiscal risk (MUFG), the day after the FOMC and BoC
@@ -2259,6 +2272,25 @@ events:
       Dept ORDERED DEPARTURE of non-emergency staff/families from Saudi Arabia (effective 23 Oct, embassy alert 25 Oct).
       Tape: Brent -2.1% / 2y -2.6bp / gold +16 at the reopen - the premium drained without a text. b4938377 (0.55) on
       track; kinetic held 35, ->30 if Brent (Dec) settles <113.17 Mon.
+      AMENDED Wed 28 Oct outage deepdive: WSJ via investinglive (02:12Z Wed, unnamed 'people briefed') - the US told
+      Gulf states to prepare for a possible 'short, intense' campaign AFTER the midterms; Trump leaning to a large
+      strike on infrastructure + nuclear sites, undecided; Patriot battery, extra carrier group, Marine unit moving in;
+      WH declined comment. Trump Wed (Joint Base Andrews): 'I can't tell you that... But anything is possible.'
+      Posture, sources-only - b4938377 on track. The Israeli-class successor 8f429298 shares this window close. The
+      Wed 4 Nov brief writes BOTH post-pledge successors only with each actor's posture extracted (rule 1).
+  - date: 2026-11-01
+    time_dubai: "Sun 1 Nov (no clock) - Iran's Gulf Strait Authority 'legal action' against Sinokor vessels takes effect (Gulf News live page / gcaptain / MarEx, 27-28 Oct)"
+    title: Sinokor 'legal action' start - Iranian enforcement against a named carrier; a scan marker, not a document event
+    why: >
+      Tehran named a South Korean shipper and says 'appropriate actions' were already taken against at
+      least 7 vessels. A seizure or boarding of a named carrier's hull would be an enforcement act in the
+      Strait, but it is Iran's own claim until UKMTO, the operator or the flag state confirms it (rule
+      12). It reaches gold through Brent first and then the 2y's sign (rule 22).
+    action: >
+      No wakeup - there is no text at a known time (rule 13/24). The Sun 1 Nov brief and the scans read
+      gcaptain/MarEx/Gulf News for a Sinokor boarding, seizure or diversion, operator-confirmed. The Mon
+      2 Nov brief scores the four Sun-closing negatives (84eb0ffc 329ced60 b0ebbba3 7ee74d07) after the
+      rule-12 time-late check.
   - date: 2026-11-16
     time_dubai: "Mon 16 Nov (time TBC) - Federal Reserve field hearing on AI, San Francisco Bay Area (Warsh, Bangkok 16 Oct: 'part of its task force work')"
     title: Fed AI task-force field hearing - a task-force venue (rule 24), scan marker only, no deepdive

@@ -518,6 +518,13 @@ watchlist:
       this week would be a mistake... 5% yields, 7% mortgages do the tightening' - a marker for the doves, not pricing.
       Goldman: AI buildout adds up to 50bp to core PCE, temporary. Dallas Fed mfg 13.4 vs 9.8. No fresh directional
       claims Tue/Wed; #75 Wed 19:30Z writes the flip on the December sentence plus the tape (rule 23).
+      28 OCT WED OUTAGE DEEPDIVE (no Wed brief): Tue data hawkish - CB confidence 91.7 vs 81.0, durable goods +1.8%,
+      new home sales 676K, FHFA +0.3%; 2y close 4.737 (+2.6) with the 10y +0.7 = a policy-shaped front-end move; 5y
+      auction result carried by no feed (unread). Operative odds now the investinglive FOMC preview Tue 27 Oct 12:04Z:
+      hold 90%, DECEMBER 80%, ~2 hikes 2027 (April first fully priced) - pre-data. Calls: Fitch Dec to 4.25%; BlackRock
+      'one more', pricing for more 'too hawkish'; CNBC survey 76% Dec, >=2 dissents expected, 30% 'hike now'. Global:
+      AU trimmed mean 3.7% (vs 3.6%), Bullock 'far too high'; RBNZ HELD 2.75% 4-3 vs a priced hike (dovish surprise,
+      hawkish guidance). Wed 10y tagged 5.032. #75 flip lines rebased +/-10 on 80% (>=90 / <=70).
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -1287,6 +1294,17 @@ watchlist:
       vote; Trump 'reportedly declined to approve an Israeli attack before the elections' (CNN). 1ae4e017 HIT;
       Israeli post-election successor waits for the extracted posture (Wed/Thu). NEW claim: SOMO/Basra-class negative
       (rule 12 next-class), window to Sun 1 Nov. Brent Dec EXPIRES Fri 30 - re-base on Jan.
+      28 OCT WED OUTAGE DEEPDIVE: no act on record in any class. Ras Tanura (Tue 27): Houthi claim (Saree: fire) ->
+      Saudi 'intercepted three ballistic missiles and four drones' WITHOUT confirming damage; Bloomberg unnamed source
+      'hit, fire contained' near the terminal; NASA FIRMS heat at the export terminal (MarEx) - the closest the Houthi
+      class has come; 84eb0ffc/329ced60 unscored (anonymous/satellite excluded). Iran Army mine CLAIM (Mehr Tue
+      17:26Z, unnamed tanker, tracking off) - adversary, 5f78f5af on track. Gulf Strait Authority: Sinokor 'legal
+      action' from 1 Nov, >=7 vessels 'actioned'. JMIC 016-26 (28 Oct) SEVERE = unchanged level. Brent Dec settled
+      113.88 Tue (-1.93, talks; 0.71 above 113.17 - kinetic HELD 35), 114.1-116.35 Wed. WSJ (unnamed): US 'short,
+      intense' campaign AFTER 3 Nov, Patriot/CSG/Marines moving; Trump 'anything is possible'. Israel inconclusive
+      (66%: Netanyahu 54 / Eisenkot 48 / Arab 18); Netanyahu 'unique opportunity with our partner President Trump to
+      forever eliminate the existential threat of Iran' -> 8f429298 (0.65, to 3 Nov). Qatar draft (Reuters, unnamed:
+      7-day confidence steps, reply by week-end, no navigation text) vs Iranian official 'unacceptable'.
     since: 2026-07-31
 
   - theme: kinetic-transmission-inverted
@@ -1540,6 +1558,12 @@ watchlist:
       above' = positioning. f(2y) 12/16 on the settle since 28 Sep - still the setter by record, but an auction-day
       2y is not a policy 2y (lesson filed). Margin-book demotion count stays 1 of 2 (needs a DOWN settle). The next
       clean read is Wednesday's: the FOMC statement/odds sentence IS a policy 2y move.
+      28 OCT WED OUTAGE DEEPDIVE: Tuesday gold +36.2 settle / +29.1 row with Brent -1.93, 2y +2.6, DXY +0.3, GVZ
+      -0.75, S&P +0.6% - the rally (4038 -> 4072, 14:00-15:06Z) coincided with the Reuters relay of the Houthi Ras
+      Tanura claim (14:05Z) while oil traded the talks. Haven-shaped on the clock, but oil did not confirm and vol
+      fell: rule 3 'none of the above' = positioning off the fifth 4000 test (4006.2 Tue 08:51Z), not a transmission
+      change. f(2y) 12/17 on the settle, two running against (Mon supply split, Tue policy 2y). The first read for a
+      CONFIRMED supply-node hit stays the hike/margin path (oil -> 2y), not a haven bid, while December is ~80%.
     since: 2026-09-09
 
   - theme: boj-yen-pillar
@@ -2030,6 +2054,8 @@ watchlist:
       1.02-1.10 (15%), EUR/USD 1.12 year-end; Panetta (Turin 21 Oct): rising yields 'a drag on growth, not a
       crisis', France and Italy the stress points. EUR/USD 1.1213 (-0.17%); DXY -0.17 with the 2y DOWN - not a
       dollar-leg session (count 0). ECB 29 Oct added to calendar (slot unverified).
+      28 OCT WED OUTAGE DEEPDIVE: French spreads widened again Tue (actionforex 12:51Z: euro weakest; investinglive
+      17:07Z: French yields climb) - no OAT-Bund level read; ECB Thu 13:15Z/13:45Z carries the spread (15:00Z scan).
     since: 2026-10-05
 
   - theme: ai-credit-risk-off
@@ -2131,4 +2157,9 @@ watchlist:
       end bid, the front end sold on the auction. Re-arm needs 2y DOWN >=2 + settle UP >=5 on a credit input: the
       settle passed (+28.4) but the 2y failed -> count unchanged, leg stays KILLED. Gates: MSFT/GOOGL Wed, AMZN/INTC
       Thu after the close; Goldman's Kospi target cut (-25%) is the bear-side marker.
+      28 OCT WED OUTAGE DEEPDIVE: Tue risk-on, not a leg session - Nasdaq second-day rally ('Anthropic's update
+      restored faith in sustained spending', CoreWeave bid), S&P +0.6%, 2y UP 2.6 -> leg stays KILLED. Inputs only:
+      MarketWatch opinion that AI-debt stress could get Warsh 'fewer hikes'; UBS 'AI stocks obey normal valuation rules
+      at higher rates'; World Bank's Banga 'capital availability not an issue'. Gates: MSFT/GOOGL Wed after the close,
+      AMZN/INTC Thu; re-arm needs 2y DOWN >=2 + settle UP >=5 vs 4074.6 on a credit input.
     since: 2026-10-15
