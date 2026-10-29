@@ -2212,6 +2212,11 @@ events:
       3.7% (vs 3.6%); RBNZ HELD 2.75% 4-3 vs a priced hike (more hikes guided). Comparators: Tue settle 4074.6, Tue row
       4060.0. Wed row band 0f7c8323 (3930-4210, 0.6) scores at the Thu 29 brief. ddf6e395 and 3f88c2b5 scored HIT at
       the 13:00Z scan.
+      AMENDED Thu 29 Oct brief: #75 CLOSED, no step - December 22bp (~88%, investinglive Warsh post 18:34Z) vs 80%, under
+      the 90 bar. Settle 4051.6 (-23.0 vs Tue 4074.6; +4.1 vs the 18:00Z print row 4047.5, noise); Wed row 4064.3 (+4.3 vs
+      4060.0, noise); 2y 5:05pm 4.735 = 44% of the presser's -3.4bp retained (wrap 4.7245 = 75% - pass line inside the
+      readings' gap, lesson filed); 10y 5.045 (+5.2), 30y 5.361 (+5.6). Gold followed the long end with the 2y flat.
+      0f7c8323 and 9f1ab39d HIT on the row. Weights 25/40/35 held, event-pending into PCE.
   - date: 2026-10-29
     time_dubai: "Thu 29 Oct (ECB decision ~12:15Z / presser 12:45Z - slot UNVERIFIED, inferred from the MUFG and Panetta previews relayed 22 Oct; the Sat 24 Oct brief verifies on TE/MarketWatch, rule 16); the same morning carries Sep PCE + Q3 GDP advance 12:30Z (16:30 Dubai) and the 7y auction"
     title: ECB meeting - a hold on the bond sell-off and French fiscal risk (MUFG), the day after the FOMC and BoC
@@ -2234,6 +2239,12 @@ events:
       2.50% unchanged. Same morning: Sep PCE 12:30Z (core cons 0.3% m/m / 3.1% y/y; headline 0.5% / 3.4%),
       Q3 GDP adv 3.0% (price index 3.5%), claims 196K; 7y 17:00Z; AMZN after the close. No wakeup: the 13:00Z
       scan reads PCE, the 15:00Z scan reads the ECB presser relay for the December sentence and OAT-Bund.
+      AMENDED Thu 29 Oct brief: TE US calendar --fresh 03:34Z - core PCE cons 0.3% m/m (prev 0.2), headline 0.5% (prev 0.3),
+      3.6% y/y (prev 3.4), GDP Q3 adv 3.1% (prev 2.2), 7y 17:00Z (prior 5.085%); ECB 13:15Z/13:45Z unchanged. Readers: 13:00Z
+      scan = print post + December sentence; 15:00Z scan = actionforex front + ECB relay, SCORES 872dc8e5 and fires/holds the
+      rates flip (>=22.5bp + gold DOWN on the settle -> 45; <=17.5bp + gold UP >=5 -> 35); 17:00Z scan = 7y tail; Fri brief
+      closes on the settle and the row. No 21:00Z scan exists (todo-189) - AMZN/INTC are the Fri brief's. Thu row band
+      3925-4180 (0.6) written as the pre-print band; no directional claims.
   - date: 2026-11-03
     time_dubai: "Tue 3 Nov (US midterm election day; polls close from 03:00 Dubai Wed 4 Nov) - the day Trump's written 'not before the midterms' pledge (8 Oct; restated 15 Oct) expires; NYT 21 Oct: US-Israeli strike plans for after the vote, three carriers in place by early November"
     title: US midterms - the US pledge window closes; the post-election strike class becomes live on the record (NYT plans, sources-only) - a scan marker, not a document event
@@ -2291,6 +2302,20 @@ events:
       gcaptain/MarEx/Gulf News for a Sinokor boarding, seizure or diversion, operator-confirmed. The Mon
       2 Nov brief scores the four Sun-closing negatives (84eb0ffc 329ced60 b0ebbba3 7ee74d07) after the
       rule-12 time-late check.
+  - date: 2026-11-06
+    time_dubai: "Fri 6 Nov 17:30 Dubai (13:30Z - US clocks fall back Sun 1 Nov; TE US calendar --fresh Thu 29 Oct 03:34Z: NFP cons +40K vs +29K, UR 4.2%, AHE m/m; Oct CPI follows Tue 10 Nov 13:30Z); slot to be RE-VERIFIED at the Sat 31 Oct brief (rule 16: TE's post-DST rows disagree by 1h - ISM Mon 2 Nov shows 14:00Z where 10:00 ET = 15:00Z)"
+    title: October 2026 US payrolls - first tier-1 labour print after the 28 Oct hold; deepdive wakeup at print+45
+    why: >
+      Warsh called the period to December 'information rich' and declined to prejudge the meeting; December is
+      priced ~88% (22bp, 28 Oct 18:34Z). Payrolls plus AHE is the first labour gate of that period and lands three
+      days after the midterms, inside the post-pledge strike window (rule 19 breaker for any level claim spanning
+      it). A hot print with AHE >=0.3 locks December and moves the 2y; a negative print reopens the pause with the
+      long end as the third channel (rule 6). The Thu 5 Nov brief records no directional claims (NFP-class).
+    action: >
+      Deepdive wakeup booked Thu 29 Oct at 14:15Z Fri 6 Nov (print+45, rule 14): investinglive print post first (component,
+      odds sentence dated to its clause), CNBC 2y/10y/30y/DXY/@GC.1 --fresh, actionforex ~+50; read against the stance's
+      flip lines AS OF THE RUN; tape clause from the print on the settle and the row; close-out at the Sat 7 Nov brief.
+      The Sat 31 Oct brief re-verifies date and time on TE and MarketWatch and rebooks if they disagree.
   - date: 2026-11-16
     time_dubai: "Mon 16 Nov (time TBC) - Federal Reserve field hearing on AI, San Francisco Bay Area (Warsh, Bangkok 16 Oct: 'part of its task force work')"
     title: Fed AI task-force field hearing - a task-force venue (rule 24), scan marker only, no deepdive
