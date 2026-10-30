@@ -1680,6 +1680,12 @@ watchlist:
       Fri 30 Oct 07:30Z (later reading +60, rule 16). Street: hold 1.25%, outlook report, December to 1.50%;
       Tokyo CPI Thu 23:30Z (core cons 2.6%). USDJPY 156.81 Fri (-0.07%); the yen was Thursday's haven, not
       Friday's. The leg stays subordinate until it states a DXY >=0.3 move or a cross of 100.
+      30 OCT BRIEF: BoJ HELD 1.25% 8-1 (Takata for 1.50%); outlook: underlying
+      inflation 'generally consistent with 2%', FY27 core 2.4->2.6, 'further
+      hikes appropriate', ETF sales 330bn->860bn yen/yr from Jan 2027; Tokyo CPI
+      2.8 vs 2.7. USDJPY 157.39 (-0.3), DXY -0.28 - short of the leg's bar;
+      differential unchanged beside the Fed hold. #76 reads the Ueda presser
+      (feed 05:30Z) for the dated December line (~80% priced).
     since: 2026-09-03
 
   - theme: energy-pce-passthrough
@@ -2162,4 +2168,12 @@ watchlist:
       MarketWatch opinion that AI-debt stress could get Warsh 'fewer hikes'; UBS 'AI stocks obey normal valuation rules
       at higher rates'; World Bank's Banga 'capital availability not an issue'. Gates: MSFT/GOOGL Wed after the close,
       AMZN/INTC Thu; re-arm needs 2y DOWN >=2 + settle UP >=5 vs 4074.6 on a credit input.
+      30 OCT BRIEF: second de-grossing session in eight days that sold gold with
+      yields DOWN - AMZN -12% / INTC -22% AH after GOOGL -12.5%; Treasuries
+      'flight to safety' (10y ~4.90, 30y ~5.26 one-month lows), 2y -16bp over
+      Thu+Fri Asia, DXY -0.4, gold -48 to 4003 (sixth test of 4000). Binance
+      hack ($3-6bn, Tether/Circle froze $2.4bn) a second liquidation channel.
+      Credit leg stays KILLED (needed settle UP with the 2y down; got -20.2);
+      net line on the Fri settle vs 4031.4 (UP >=5 re-arms; DOWN with 2y down
+      demotes f(2y)). MSFT $25bn bond, Nvidia/Nscale/Anthropic guarantee next.
     since: 2026-10-15
