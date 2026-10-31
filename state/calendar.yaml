@@ -2330,3 +2330,21 @@ events:
       The brief of the week before re-verifies date and time on the Board calendar and TE
       (rule 16); the scan covering the slot reads the relay for a dated December sentence
       only; no deepdive unless the Board index gives it a monetary-policy title.
+  - date: 2026-11-02
+    time_dubai: "Mon 2-Fri 6 Nov, verified Sat 31 Oct on TE (UTC) + MarketWatch (ET) + investinglive week-ahead; US clocks fall back Sun 1 Nov (ET = UTC-5; 8:30 ET = 13:30Z; Globex close 22:00Z, 5:05pm ET line = 22:05Z)"
+    title: Week of 2-6 Nov - ISM / RBA / midterms / BoE / NFP and seven Fed slots (four voters); scan markers, rule-24 venue checks by the day's brief
+    why: >
+      Mon ISM mfg 15:00Z (cons 54.7, prices 77.5), Goolsbee 16:15Z, Treasury refunding estimates 20:00Z;
+      Tue RBA 03:30Z (hike to 4.85% expected - the global-hike-cycle pillar), JOLTS 15:00Z (7.11M), midterms
+      (polls close from ~23:00Z Tue; the US pledge window closes); Wed Eurozone CPI 10:00Z (headline 4.0 from 3.8),
+      ADP 13:15Z, ISM services 15:00Z (54.9), Israeli official results; Thu BoE 12:00Z (hike to 4.00% expected, 7-0-2),
+      claims 13:30Z (197K), Hammack (VOTER) 13:50Z, Barkin 14:10Z, Lagarde 18:00Z, Canada budget 21:00Z;
+      Fri Logan (VOTER) 00:00Z, Williams (VOTER) 09:30Z, NFP 13:30Z (TE cons 65K / investinglive 63K vs the 40K
+      TE forecast carried in #77's text; UR 4.2%), Musalem 14:10Z (Greater St. Louis Inc), UMich 15:00Z, Bowman
+      (VOTER) 17:15Z. The events feed ends 31 Oct (sourcing-health note), so TE/MarketWatch are the calendar.
+    action: >
+      No new deepdive: #77 (NFP print+45, 14:15Z Fri 6 Nov) is verified on three sources and stands. Rule 24:
+      the Thu 5 Nov brief probes the Board index / Cleveland Fed page for Hammack's and Bowman's titles and venues
+      and the Dallas Fed page for Logan's 00:00Z slot before any wakeup; the 13:00Z Thu scan reads the BoE, the
+      15:00Z scan Hammack's relay for a dated December sentence; the Tue 3 Nov brief reads the RBA at 03:3xZ and
+      the 05:00Z scan the presser. Rule 20: Thu 5 Nov is the positioning session (no directional claims).
