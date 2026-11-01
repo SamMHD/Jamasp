@@ -118,3 +118,7 @@ this week, 0.096 had they been written at 0.8. Structural-negative family
 83/86 lifetime. Rule 10 (25 Oct) now also withdraws the floor when the
 principal states intent (`b4938377` at 0.55) — so the ceiling's cost is
 confined to the cases where the floor actually applies.
+
+## Update 2026-11-01 (retro)
+
+0.70 bucket 3/4 this week (62/69 lifetime, 90%); the miss (`5f78f5af`) was a class-definition error (two weapons in one negative), not a ceiling matter. Stated 0.624 vs observed 0.882 on n=17, the ninth underconfident week in ten; Brier 0.174 — 0.164 had all six structural negatives been written at 0.8 (the miss in the family costs most of the gain this week). Structural-negative family 88/92 lifetime.

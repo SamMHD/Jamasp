@@ -142,3 +142,7 @@ nothing about direction. geopolitics Oct bull n=218 −0.23% / bear n=37
 19–25 Oct row is also an argument for the conditional means carrying a
 trend-adjusted (demeaned-by-day) variant, else any trending week swamps
 the sign.
+
+## Update 2026-11-01 (retro)
+
+31 Oct 23:40Z fit, theme n=1013 (915 last week), 24h horizon. rates_dollar β +0.0271 (se 0.0136, 2.0σ, n=936) multiplier 0.91 (1.23 on 24 Oct, 1.47 on 17 Oct); geopolitics +0.0332 (2.3σ, n=941) multiplier 1.11 (0.90); other −0.0250 (1.85σ, n=718) 0.25; supply_mining −0.0089 (0.7σ, n=323) 0.25; physical_cb −0.0065 (0.5σ, n=59) pinned 1.0; etf_flows n=20 unfitted. Flags unchanged (negative:physical_cb / supply_mining / other). The two live columns swapped order on one −3% week — the rates_dollar items of the FOMC/PCE week were scored bullish into Friday's −146 settle. Per-month split re-run (hourly net exposure Σ direction×(4−tier), 24h-forward GC return, ≤6h tolerance): rates_dollar Oct bull n=100 −0.43% / bear n=178 −0.17% (ordering still inverted); geopolitics Oct bull n=297 −0.26% / bear n=54 −0.29% (no separation); ISO week 44 rates bull −0.63 / bear −0.45, geo −0.46 / −0.34 — a trend week again, both signs negative. No scorer change; the November row remains the trigger; the demeaned-by-day variant ask stands.

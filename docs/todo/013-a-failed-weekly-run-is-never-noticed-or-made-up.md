@@ -212,3 +212,7 @@ consecutive on-slot run. Record: 7 of the last 9 Sundays on the slot, 8 of 9
 counting the 11 Oct make-up. Watchdog `OK` ×6 this week; today's run
 reported the OAuth refresh-token expiry (27 Oct 12:02Z) to the desk — the
 first VIOLATION since the 11 Oct fix, and a real one.
+
+## Update 2026-11-01 (retro)
+
+1 Nov retro started on the slot (16:00Z, `jamasp-retro.timer`), the third consecutive on-slot run. Record: 8 of the last 10 Sundays on the slot, 9 of 10 counting the 11 Oct make-up. The watchdog's credential probe fired three mornings running (25–27 Oct) and was right — the escalation gap it exposed is todo-204.

@@ -69,3 +69,7 @@ line is the growth mechanism.
 136.4 on 18 Oct; 64.8 / 107.1 on 3 Oct) — the watchlist grew 28 KB in a
 week in which no theme was added or removed (six to nine themes annotated
 per brief). Both are still read whole by every brief.
+
+## Update 2026-11-01 (retro)
+
+`state/watchlist.yaml` 171.4 KB and `state/calendar.yaml` 161.6 KB (155.3 / 150.2 on 25 Oct; 126.8 / 136.4 on 18 Oct). +16 KB and +11 KB in a week with one failed brief day. Still read whole by every brief.

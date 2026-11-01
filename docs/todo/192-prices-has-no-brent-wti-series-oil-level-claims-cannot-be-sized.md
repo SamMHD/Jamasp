@@ -85,3 +85,7 @@ that measurement is impossible from the tool for the 2y, Brent, WTI or the
 print — same cadence and basis-labelling as `^TNX`. Source: the CNBC quote
 page already extracts; Yahoo `^IRX`/`2YY=F` are alternatives if the Yahoo
 path is alive (todo-012).
+
+## Update 2026-11-01 (retro)
+
+`ddf6e395` closed HIT inside 4.68–4.92 after the 25 Oct rule-7 resize to the measured 2y range; `7d5c839b` (USDJPY 156.20–158.70) was sized on a hand-read 10-session range and HIT. Both measurements were manual. New wrinkle: Brent Dec expired 30 Oct at 117.64 with Jan at 113.43 — the Sat brief now names "Brent Jan = the oil basis" by hand; a `BRENT` series needs roll handling (front-month label in the row) or the week's oil comparator jumps 4 dollars on expiry day.

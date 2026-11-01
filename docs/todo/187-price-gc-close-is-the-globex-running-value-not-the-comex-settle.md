@@ -120,3 +120,7 @@ Oct) now logs this as a "timing split" counted on the row, and names the
 13:30 ET 2y as a second comparator — which is a second hand read of CNBC
 intraday. The code side is unchanged: a `GC_SETTLE` row at ~18:30Z and a
 `US2Y_1330ET` read would make both bases tool-backed.
+
+## Update 2026-11-01 (retro)
+
+`6754924a` (Fri 30 Oct row band 3890–4115): the Fri row 3898.9 (02:46Z Sat) held the floor by 8.9; the COMEX settle 3884.9, the day low 3879.3 and the 20:45Z pre-close row 3885.6 were all below it — a letter-only hit inside the ~25-pt settle/row gap (rule 9 discount). A `GC_SETTLE` row at ~18:30Z ET-equivalent (now 19:30Z post-DST) would have made the band's basis choice explicit in the tool rather than in the claim text.

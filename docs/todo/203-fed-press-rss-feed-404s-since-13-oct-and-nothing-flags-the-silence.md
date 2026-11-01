@@ -33,3 +33,7 @@ speech announcements — now reaches the pipeline only via relays.
    an item outside a known quiet window — the same class of gap as the
    calendar-feed outages (todo-001) that four retros re-raised before a
    file existed for them.
+
+## Update 2026-11-01 (retro)
+
+Still 404 on `feeds/press_all.xml` (source_errors 25 Oct 23:16Z, 30 Oct 03:01Z), yet one `fed_press` item carries published_at 29 Oct 20:30Z — some path produced an item during the FOMC week; check which URL before repointing. No alert fired for the silence; the ≥48h-quiet probe asked for above remains the fix.

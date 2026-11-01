@@ -182,3 +182,7 @@ the 2σ Wednesday-night headline, Fri after the 2σ Thursday), i.e. the days
 the desk most needs the summary on time.
 
 **Recurrence 2026-10-28 13:00Z (scan variant):** after the OAuth-expiry outage (Tue 12:02Z → Wed 11:00Z, nine runs failed incl. the Wed brief) the 13:00Z scan faced a 506-item / 26-hour delta. The first attempt scored `3f88c2b5` and `ddf6e395` at 13:04:47Z and was cut at the scan cap (~300s) before mark-read/commit; the retry (13:05:02Z) had to close out without verifying the Ras Tanura Saudi-confirmation class. Proposal: when the previous N runs failed, `jamasp run` should grant the first successful run the brief timeout, or the scan skill should cap its read to the last 2h of items and defer the backlog to the next brief.
+
+## Update 2026-11-01 (retro)
+
+Six briefs 26 Oct–1 Nov all finished under the 900s cap: 854 / 813 / 667 / 684 / 819 / 542 s (Mon–Sun, no Wed — the 28 Oct brief failed on auth, not on time; todo-204). 7 of the last 26 brief days over the cap, none this week. The 28 Oct 13:00Z scan-variant recurrence (506-item delta cut at the scan cap) stands as logged above.

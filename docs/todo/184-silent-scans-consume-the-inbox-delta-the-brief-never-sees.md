@@ -111,3 +111,7 @@ The scan also mis-timed the 14:05Z Reuters relay of the Houthi Ras Tanura claim 
 A human exported the batch to `/home/jamasp/catchup/outage-backlog-2026-10-28.jsonl` (`export_backlog.py`), and an outage deepdive read all 506 (`reports/2026/10/2026-10-28-brief.md`). Nothing was lost this time, but only because of that manual recovery.
 
 The same fix family applies here: `--mark-read` should close only the ids the run was served, which is bounded by `--cap`. Alternatively, a post-outage first run could refuse to mark read more than N items without a catch-up path.
+
+## Update 2026-11-01 (retro)
+
+Retro note: the 28 Oct first-run mark-read over a 506-item delta is the clearest instance of this item so far; nothing was lost only because a human exported the backlog and dispatched a catch-up deepdive (#882). The ask stands: `--mark-read` closes only the ids the run was served, or a first run after a ≥6h gap refuses to mark read more than the cap without a catch-up path. Cross-ref todo-204 (the outage) and todo-199 (the scan cap).

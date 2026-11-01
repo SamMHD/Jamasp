@@ -74,3 +74,7 @@ weekly usage cap of 6 Oct — and both fired the paired FAILURE + unit alert
 as wakeup #72 (19:30Z), which completed. Fix §3 (one "runs paused until
 <time>" alert, cleared on the next success) would have collapsed four
 messages into one here; §1 (model fallback) would have saved the slot.
+
+## Update 2026-11-01 (retro)
+
+Third occurrence, 28 Oct 15:00Z scan (#883): "You've hit your 5-hour limit · resets 4:30pm (UTC)" — the window had absorbed the OAuth-outage recovery: the 13:00Z scan's two attempts over a 506-item delta plus the human-dispatched catch-up deepdive #882 (13:14–13:24Z, Sonnet subagents over the whole backlog). The 17:00Z scan ran. The paired FAILURE + unit alert fired again (notify_log 376/377). §1 (model/credential fallback) and §3 (one 'paused until' alert) both still apply; the auth half of the same day is todo-204.
