@@ -525,6 +525,10 @@ watchlist:
       'one more', pricing for more 'too hawkish'; CNBC survey 76% Dec, >=2 dissents expected, 30% 'hike now'. Global:
       AU trimmed mean 3.7% (vs 3.6%), Bullock 'far too high'; RBNZ HELD 2.75% 4-3 vs a priced hike (dovish surprise,
       hawkish guidance). Wed 10y tagged 5.032. #75 flip lines rebased +/-10 on 80% (>=90 / <=70).
+      2 NOV MON BRIEF: no dated December sentence since Fri 12:53Z (CME 72.7%); fxempire 03:08Z Mon '75% ... per
+      FedWatch' is a weekend read of Friday's close - inside the hold band (flip >=82% / <=60%). First dated sentence
+      this week: ISM relay 15:00Z (cons 54.7 / prices 77.5, 17:00Z scan) or Goolsbee 16:15Z. 2y 4.596 Asia (+1.5).
+      RBA Tue 03:30Z (+25bp to 4.85% expected, JPM joined - 8b3e9d27) and BoE Thu are the global-hike pillar.
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -1305,6 +1309,17 @@ watchlist:
       (66%: Netanyahu 54 / Eisenkot 48 / Arab 18); Netanyahu 'unique opportunity with our partner President Trump to
       forever eliminate the existential threat of Iran' -> 8f429298 (0.65, to 3 Nov). Qatar draft (Reuters, unnamed:
       7-day confidence steps, reply by week-end, no navigation text) vs Iranian official 'unacceptable'.
+      2 NOV MON BRIEF: blind window closed with no act on the record - reopen row 3909.3 (b97bed09 HIT); 84eb0ffc /
+      329ced60 / b0ebbba3 / 7ee74d07 all HIT after the rule-12 time-late check. The campaign WIDENED at sea while the
+      words softened: UKMTO tanker hit by two projectiles 72nm E of Ras al Khafji (northern Gulf - new geography on the
+      operator record, the Saudi/Kuwaiti export approaches); UAE tug Selat Storm hit ~15:00Z Sun NW of Musandam,
+      'partially sinking' (Vanguard, not operator); Qatari LNGC Al Mayeda hit ~18:00Z Sat despite Iranian clearance
+      (Nakilat: operational; GCC SG 'dangerous escalation'); ~10 incidents 31 Oct-2 Nov; IRGC 'two tankers incl. a
+      VLCC hit mines' = claim (rule 12), laid-mine class still unreached (bf1e1b54 on track). Riyadh changed class:
+      first offensive coalition strike on Houthi missile/drone 'resources' (al-Maliki, no Iran named); Mehr's Dammam
+      'fire after a Yemeni attack' a claim with no Saudi text. Brent Jan opened 111.69, 110.14 at 03:32Z (-2.9%) on
+      the Doha track, not the sea - the drain line 109.4 (settle, gold UP) is 0.7 below the quote; kinetic held 37.5.
+      Successors written: arrangement week six 0.65, Houthi supply-node week four 0.6, Iraqi-export week two 0.7.
     since: 2026-07-31
 
   - theme: kinetic-transmission-inverted
@@ -1686,6 +1701,9 @@ watchlist:
       2.8 vs 2.7. USDJPY 157.39 (-0.3), DXY -0.28 - short of the leg's bar;
       differential unchanged beside the Fed hold. #76 reads the Ueda presser
       (feed 05:30Z) for the dated December line (~80% priced).
+      2 NOV MON BRIEF: Katayama - the US-Japan FX statement is 'alive', warns on disorderly yen moves; USDJPY 157.94
+      (+0.26% Asia), DXY 101.95 (+0.07). A MoF line is a marker; the leg still states the DXY move it requires (>=0.3
+      or a cross of 100, rule 22) - count 0. Japan factory PMI 53.3 (seven-month low, cost pressures up).
     since: 2026-09-03
 
   - theme: energy-pce-passthrough
@@ -2200,6 +2218,10 @@ watchlist:
       (the new structural negative, scores Sat 7 Nov); war-risk premium and
       P&I withdrawals; the Sinokor 'legal action' marker Sun 1 Nov; CENTCOM /
       IRGC demining dispute. Score only on UKMTO / operator / host-state text.
+      2 NOV MON BRIEF: no second limpet and no laid-mine hull on the operator record over the weekend; the new hits
+      are projectiles (Ras al Khafji tanker, Selat Storm, Al Mayeda) - the IRGC's 'struck mines' wording for the two
+      southern-route tankers is its own claim, later restated as 'hit' by the Guards. bf1e1b54 on track to Fri 23:59Z.
+      The geography moved north (72nm E of Ras al Khafji) - a location read, not a class read (rule 12/21).
     since: 2026-10-31
   - theme: us-iran-mediation-track
     why: >
@@ -2221,4 +2243,13 @@ watchlist:
       'talks resume' and one-sided 'deal done' claims do not drain. Tape: a
       drain reaches gold as Brent Jan <109.4 with gold UP on the settle.
       Weekly negative is the b0ebbba3 family (5/5 since the format rule).
+      2 NOV MON BRIEF: Araghchi (Doha, day three) - a 'two-day plan': US measures day one, Hormuz reopens and transit
+      'returns to its previous state' day two; six conditions (new routes, unfrozen assets, an end to regional conflicts
+      incl. Lebanon, lifting of maritime blockades, Iranian oil-export exemptions, removal of post-Islamabad sanctions);
+      'moving toward implementation', no direct meetings; Gulf News/AJ/Washington Times: a proposal, the US has not
+      publicly accepted. Trump (Iowa rally): war ends 'very soon', oil 'plunging' after; Axios: Netanyahu presses for a
+      strike right after Tuesday, Trump wants talks to play out; Rubio: undecided; Atlantic: no order given. Tape: Brent
+      Jan -2.9% at the open, 2y +1.5, gold +10 - the premium is pricing in oil before any text; the drain reaches gold
+      on the settle (rule 22). Both principals have stated intent -> the week-six negative is written at 0.65 (rule 10
+      floor withdrawn). Scoring format unchanged: a named US official AND Tehran, or an IRGC regime lift via UKMTO/JMIC.
     since: 2026-11-01
