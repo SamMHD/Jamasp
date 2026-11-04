@@ -2255,6 +2255,12 @@ watchlist:
     since: 2026-11-01
   - theme: us-unannounced-strike-campaign
     why: >
+      4 Nov (Wed brief): CLASS REACHED ON RECORD - Trump to Fox News Tue 3 Nov (Gulf News 23:33Z, extracted): US forces
+      struck a Qeshm air-defence facility Mon night, 'we watched it get built... we hit it', a 'limited military action';
+      MarEx: Qeshm 'has been hit repeatedly over the course of the months-long conflict'. b4938377 scored MISS; the
+      tape from the 21:48Z Mon first print to the Tue settle was AGAINST (Brent 104.77 -> 103.60, gold 3969.6 -> 3940.4)
+      so kinetic took the half step (32.5 -> 35) and the oil-transmission count for this class is 1 of 3 (rule 22).
+      Trump to FT the same evening: 'no immediate plan to strike Iran', 'ready if needed, may be no reason'.
       3 Nov (Tue brief): WSJ via investinglive/Gulf News, US officials anonymous - the US struck Qeshm Island Mon 2 Nov
       (N12: an air-defence system; Qeshm hosts an underground missile site, a naval base, a desalination plant), 'the
       latest of several unannounced limited strikes in recent weeks', some 'defensive' (SAM sites used against US
@@ -2270,3 +2276,24 @@ watchlist:
       negative names 'US officials to WSJ/NYT/Reuters confirming a specific strike' as a second basis (lesson filed).
       Oil transmission test: a confirmed strike with Brent not >=3% up = count 1 of 3 toward leaving the list (rule 22).
     since: 2026-11-03
+  - theme: post-midterm-strike-window
+    why: >
+      4 Nov (Wed brief): the pledge window ('not before the midterms') closed with the polls; what replaces it is a
+      reported operational window, not a pledge. NYT (US officials, via investinglive 21:20Z 3 Nov, extracted): CENTCOM
+      'has a plan to strike Iran beginning as early as Wednesday', while three carriers (Bush, George Washington,
+      Roosevelt) are in the region - one must leave early November - and early November is the moonless period the
+      military prefers; WSJ 2 Nov: Gulf states told to prepare for a 'short, intense operation shortly after' the vote.
+      Against: Trump to FT 3 Nov 'no immediate plan', 'getting everything it wanted'; Fox calls the Iran war 'a disaster
+      at the ballot box' as Democrats sweep; CIA's Ratcliffe 'no war, no deal' (Axios). The US-Israel gap is the second
+      axis: Netanyahu (caretaker, lost his majority - AP) 'hints at an attack later this week', is 'pressing Trump' for
+      strikes, and US funding to Israel ends after this year (arms sales continue). Tehran: 'far from a deal', seven
+      conditions, Qatar feedback within 36h; Mojtaba Khamenei's 'no geographic limits' doctrine stands.
+    watch: >
+      Scores (rule 12/8/1): CENTCOM/DoD/WH on record OR acting-state officials to WSJ/NYT/Reuters/AP naming a strike
+      on an Iranian ENERGY-EXPORT node (the new negative) or a CENTCOM-announced resumption of major combat
+      operations; IDF/PMO/Katz on record for an Israeli strike (the new negative). Each = kinetic +5 with the tape
+      clause (Brent first, then the 2y's sign - a hike and a margin call first with December at 76.6%, rule 22).
+      Hold on: more Qeshm-class limited strikes (count toward leaving the list), plans, hints, claims. The window's
+      natural close is the carrier departure / the end of the moonless period (~10 Nov) - re-verify on the relay
+      before extending any negative past Sun 8 Nov.
+    since: 2026-11-04

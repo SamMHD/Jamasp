@@ -2365,3 +2365,21 @@ events:
       and the Dallas Fed page for Logan's 00:00Z slot before any wakeup; the 13:00Z Thu scan reads the BoE, the
       15:00Z scan Hammack's relay for a dated December sentence; the Tue 3 Nov brief reads the RBA at 03:3xZ and
       the 05:00Z scan the presser. Rule 20: Thu 5 Nov is the positioning session (no directional claims).
+  - date: 2026-11-04
+    time_dubai: "Wed 4 Nov 17:30 (refunding 13:30Z) / 19:00 (ISM services 15:00Z) / Qatar feedback by ~Thu 12:00 Dubai (36h from Tue evening, per a Reuters-briefed official; 'no deadline' per Tehran)"
+    title: Post-midterm Wednesday - refunding (long-end gate), ISM services (December-sentence carrier), Qatar 36h feedback, NYT 'as early as Wednesday' strike window; scan markers, no deepdive
+    why: >
+      Three unscheduled-or-unverified gates land inside one day with four of eight scan slots lost the day before
+      (todo-205). The refunding (Treasury pages do not extract) is the long-end channel of rule 6 - a coupon-size
+      increase moves the 10y/30y with the 2y flat and gold follows the long end (28 Oct precedent); ISM services
+      prices paid is the first print that can carry a dated December sentence against the stale 76.6% (rule 14);
+      Qatar's feedback window is the 4564d0ca gate (both halves on record = the drain's second leg, Brent toward
+      100, gold bid through the 2y 4/4); the NYT window is the kinetic +5 gate for the two new class negatives
+      (energy-export node; Israeli strike) - Brent first, then the 2y's sign (rule 22).
+    action: >
+      15:00Z scan reads the refunding relay (investinglive) and names the channel; 17:00Z scan reads the ISM
+      services post BODY for prices paid and the December sentence, then the actionforex front ~+50; every scan
+      reads CENTCOM/DoD/WH, IDF/PMO and Qatar/US/Tehran texts; a text landing 19:00Z-03:30Z is the Thu brief's
+      (rule 16), which also does the rule-24 venue probes for Hammack/Barkin/Logan/Williams/Musalem/Bowman and
+      records no directional claims (NFP-class positioning). No wakeup booked - a deepdive shares the host memory
+      squeeze that killed the scans.
