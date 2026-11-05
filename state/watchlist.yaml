@@ -1,6 +1,11 @@
 watchlist:
   - theme: fed-rate-path
     why: >
+      5 Nov (Thu brief): December ~83% (~20.75bp) per investinglive 02:12Z Thu citing FedWatch - UP from 76.6% on a day oil fell
+      9%: ADP +86K, ISM services employment up, Dow +1,570; the 2y -3.3 vs the 10y -6.4 (long end led). The front end read
+      growth, not oil - the Citi hikes-to-cuts mechanism (4,500 / 5,000 conditional on a reopening) has no Fed leg yet. Flip
+      lines rebased: >=90% (22.5bp) + gold DOWN -> bearish-rates 40; <=70% (17.5bp) + gold UP >=5 -> 30. Hammack (voter) 13:50Z
+      and Barkin 14:10Z Thu are the next dated-sentence carriers (venues unknown after probes); NFP Fri (#77).
       Real yields are gold's dominant driver, and this Fed just HIKED: 16
       Sep +25bp to 3.75-4.00%, 12-0, no guidance sentence; dots one more in
       2026 (median 4.1; 16 of 18 see >=1 more). Warsh: 'not restrictive',
@@ -2225,6 +2230,11 @@ watchlist:
     since: 2026-10-31
   - theme: us-iran-mediation-track
     why: >
+      5 Nov (Thu brief): Qatar expects feedback 'over the next day or so' (Bloomberg Tue, via gcaptain); no US text, no Tehran
+      text. Tehran 'far from a deal', seven conditions; Ghalibaf 'NO TO WAR', a 'nightmare' if mass attacks restart; Pezeshkian:
+      the Supreme Leader widened his authority to the 'non-negotiable'; parliament exempts Chinese/Indian/Iraqi/Qatari vessels
+      (an enforcement-regime gesture, not a reopening - does not score 4564d0ca). The drain's second leg came through Congress
+      (see congress-war-powers-channel) and oil priced it: Brent -20% from Friday's peak in four sessions.
       The drain leg's input (rule 22: de-escalation drains the kinetic premium
       through Brent and the 2y, 3/3 bid gold). 1 Nov: Rezaei on Iranian TV
       called the tone of VP Vance's letter 'changed completely', a positive
@@ -2278,6 +2288,11 @@ watchlist:
     since: 2026-11-03
   - theme: post-midterm-strike-window
     why: >
+      5 Nov (Thu brief): no act. Trump on record (FT, via gcaptain/Bloomberg extracted): 'getting everything we want... locked and
+      loaded if we need to go, but there may be no reason for it'; Fox: 'haven't finished a job, and maybe I will, and maybe I
+      won't'. Sources: Axios - the military is 'finishing preparations for possible major combat'. Netanyahu's 'this week' stands.
+      Tape: Brent 103.60 -> 94.62 (-8.7%) on the sweep, gold +3.4% - the window is now priced LESS, so a strike's margin call is
+      larger. f7604251 / 93496971 untouched; hold on plans and hints (rule 1/12).
       4 Nov (Wed brief): the pledge window ('not before the midterms') closed with the polls; what replaces it is a
       reported operational window, not a pledge. NYT (US officials, via investinglive 21:20Z 3 Nov, extracted): CENTCOM
       'has a plan to strike Iran beginning as early as Wednesday', while three carriers (Bush, George Washington,
@@ -2297,3 +2312,20 @@ watchlist:
       natural close is the carrier departure / the end of the moonless period (~10 Nov) - re-verify on the relay
       before extending any negative past Sun 8 Nov.
     since: 2026-11-04
+  - theme: congress-war-powers-channel
+    why: >
+      5 Nov (Thu brief): the drain's second leg arrived through Congress, not Qatar. The Democratic sweep (both chambers;
+      ~56 Senate seats per the wrap) was read by the market as the beginning of the end of the war: Vance 'the real
+      reason we lost', Trump acknowledged it on Fox then walked it back, Jeffries will bring a bill to end US involvement
+      and the tariffs (needs the Senate, Trump's signature or 2/3; the new Congress seats in January), the Republican
+      Speaker steps down. Brent 103.60 -> 94.62 (-8.7%, WTI lowest close since 31 Aug), the whole curve down together;
+      gold +3.4% on oil and the dollar with the 2y only -3.3 and December odds UP to ~83%. Button (investinglive): 'the
+      market is making a big bet on ending the Iran war'; Althunayyan (Kuwait Univ): the next several weeks 'carry a
+      high risk of military escalation before the new Congress is sworn in'.
+    watch: >
+      Texts that score: a war-powers / funding bill PASSING a chamber (a vote count, not a pledge), a Trump post or
+      statement accepting a text, a CENTCOM/DoD/WH act (the kinetic family). The channel is a tone trade: it reverses
+      on one post - Brent reclaiming 100 on a settle with gold DOWN is the log line. January seating is the structural
+      gate; before it the channel moves oil through expectations only. Rule 6: this is the third channel for 'only a
+      Qatar text drains the premium' - enumerated and NOT rejected.
+    since: 2026-11-05
