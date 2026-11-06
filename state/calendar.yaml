@@ -2383,3 +2383,25 @@ events:
       (rule 16), which also does the rule-24 venue probes for Hammack/Barkin/Logan/Williams/Musalem/Bowman and
       records no directional claims (NFP-class positioning). No wakeup booked - a deepdive shares the host memory
       squeeze that killed the scans.
+
+  - date: 2026-11-10
+    time_dubai: "17:30 (13:30Z)"
+    title: October 2026 US CPI - the first inflation print after the AI de-grossing moved the front end (2y -11 Thu 5 Nov); deepdive wakeup at print+45
+    why: >
+      TE US calendar read Fri 6 Nov 03:35Z (rule 16, <=7 days): headline m/m
+      cons 0.3% vs prev 0.6%, core m/m 0.2% vs 0.3%, y/y 3.7% vs 3.7%, core
+      y/y 2.5% vs 2.6%. December sits ~70% (Reuters, Thu) after the Thursday
+      rout took 11bp off the 2y from the equity channel, not from oil (Brent
+      back at 98-100 on the Gulf count) - CPI is the first print that can
+      re-arm the hike path on data. The energy line carries October's oil
+      spike (Brent 70 -> 117 through October), so the headline/core split and
+      the shelter and core-goods components decide the read (todo-193); a hot
+      core with the 2y UP while equities stay down is the one combination
+      that hits gold from both sides (rule 22 credit leg + rates).
+    action: >
+      wakeup #78 deepdive 2026-11-10T14:15Z (print+45, rule 14): investinglive
+      print post body first, CNBC 2y/10y/30y/DXY/gold --fresh, actionforex
+      front ~+50; tape clause from the print on the settle AND the row; the
+      Sat 7 Nov and Mon 9 Nov briefs re-verify the slot on TE + MarketWatch.
+      Close-out at the Wed 11 Nov brief. PPI Fri 13 Nov 13:30Z (prev 1.3%
+      m/m) and retail sales Tue 17 Nov are the follow-on gates.
