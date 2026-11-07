@@ -2333,6 +2333,30 @@ events:
       odds sentence dated to its clause), CNBC 2y/10y/30y/DXY/@GC.1 --fresh, actionforex ~+50; read against the stance's
       flip lines AS OF THE RUN; tape clause from the print on the settle and the row; close-out at the Sat 7 Nov brief.
       The Sat 31 Oct brief re-verifies date and time on TE and MarketWatch and rebooks if they disagree.
+  - date: 2026-11-09
+    time_dubai: "Mon 9-Fri 13 Nov, verified Sat 7 Nov 03:34Z on TE (UTC) + MarketWatch (ET); ET = UTC-5; Globex close 22:00Z; Wed 11 Nov Veterans Day (US bond market closed, no 2y close - rule 25)"
+    title: Week of 9-13 Nov - CPI (#78) / PPI / 3y-10y-30y auctions / fourteen Fed slots; scan markers, rule-24 venue checks by the day's brief
+    why: >
+      Mon: Bowman 13:40Z (TE only, venue unknown - Board probes 404), Goolsbee 15:00Z (Leadership Greater
+      Chicago), NY Fed consumer expectations 16:00Z (1y prev 3.9%), Barkin 17:15Z (Greer Chamber) + Bowman
+      17:15Z (TE), 3y auction 18:00Z, Goolsbee 01:00Z Tue (blind). Tue: Waller 09:00Z (TE; the Board index
+      lists an undated 'Signaling Value of the SEP' at the Istanbul Economic Forum - a guidance title if it is
+      this slot), CPI 13:30Z (TE cons headline 0.3 vs 0.6 prev, core 0.2 vs 0.3, y/y 3.7, core y/y 2.5 vs 2.6;
+      MW agrees on date/time), Logan 15:50Z, 10y auction 18:00Z, Schmid 18:30Z, Bowman CFR 20:30Z + 23:30Z,
+      Paulson 23:30Z (blind -> Wed brief), CoreWeave earnings. Wed: Veterans Day - a Wednesday gap is
+      positioning until Thu. Thu: claims 13:30Z, Hammack 14:00Z (students - plumbing), Barr 15:00Z (AI &
+      inequality), 30y auction 18:00Z, Daly 18:10Z, Williams 23:30Z (blind), Nebius earnings. Fri: PPI 13:30Z
+      (prev headline 1.3% m/m, core 0.7% - October's energy pass-through), Bowman, Daly 17:00Z, Jefferson.
+      December sits at 76.8% (~19.2bp, dated Fri 6 Nov); CPI is the first print that can carry a dated
+      sentence through the rebased 87.5%/67.5% lines (rule 14/23).
+    action: >
+      #78 deepdive 2026-11-10T14:15Z stands (re-verified on two sources today; the Mon brief re-verifies once
+      more). No further deepdive: Waller's slot is a scan marker (11:00Z Tue reads the Board text/relay); the
+      Hammack/Barr/Williams venues are plumbing or panels (rule 24). Scans: 19:00Z Mon/Tue/Thu read the
+      auction tails (rule 7 gate - tail/grade, 2y and 10y same sign by >=0.5 ATR for a chain session);
+      17:00Z Mon reads Goolsbee + NY Fed expectations; a Bowman/Paulson/Williams read landing 19:00Z-03:30Z
+      is the next brief's (rule 13). Rule 20: Mon 9 Nov is the positioning session before CPI - reopen
+      band and structural negatives only.
   - date: 2026-11-16
     time_dubai: "Mon 16 Nov (time TBC) - Federal Reserve field hearing on AI, San Francisco Bay Area (Warsh, Bangkok 16 Oct: 'part of its task force work')"
     title: Fed AI task-force field hearing - a task-force venue (rule 24), scan marker only, no deepdive

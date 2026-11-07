@@ -1,6 +1,7 @@
 watchlist:
   - theme: fed-rate-path
     why: >
+      7 Nov (Sat brief): NFP +165K/UR 4.1/AHE 0.4 -> December 76.8% (~19.2bp, FedWatch via CNBC 13:58Z/actionforex 14:11Z, from 68.4%); 2y 4.459 -> 4.553 high -> 4.512 close (+3.5) after UMich 5y 3.4 (from 3.5) at 15:00Z; DXY +0.72% to 102.28. Daly (2027 voter): 'more is likely to be needed', gradual, backed the Oct hold - no odds sentence, 76.8% operative (rule 14). Lines rebased off the round tens: >=87.5% (21.9bp) + gold DOWN -> 40; <=67.5% (16.9bp) + gold UP >=5 -> 30. Carriers: Mon speakers (hold), Waller Tue 09:00Z (SEP-signalling title), CPI print post Tue (#78). f(2y) 2 of 3 strict (Fri agree at -0.39 ATR, under size); dollar leg 2 of 3.
       6 Nov (Fri brief): December ~70% (~17.5bp) - Reuters implied probability dated Thu via actionforex 02:56Z Fri, from >80% Wed - on the day Hammack (voter: 'need to move to a restrictive stance') and Barkin ('inflation the most important risk', policy near neutral) both backed gradual hikes: the 2y fell 11.45bp to 4.4665 on the Nasdaq 100's -6.36%, not on tone or oil (Brent +3.9%, claims 189K). Rule 6/22: the credit/financial-conditions leg set the front end. Flip check: the figure sat ON the <=70% line with gold DOWN from the 13:50Z first print on both bases - no step; lines rebased: >=80% (20bp) + gold DOWN -> 40 (base 25); <=60% (15bp) + gold UP >=5 -> 30 (base 35). Next dated sentence: the NFP print post (#77 14:15Z Fri); CPI Tue 10 Nov (#78). f(2y) strict 2 of 3.
       5 Nov (Thu brief): December ~83% (~20.75bp) per investinglive 02:12Z Thu citing FedWatch - UP from 76.6% on a day oil fell
       9%: ADP +86K, ISM services employment up, Dow +1,570; the 2y -3.3 vs the 10y -6.4 (long end led). The front end read
@@ -697,6 +698,7 @@ watchlist:
 
   - theme: middle-east-risk-premium
     why: >
+      7 Nov (Sat brief): Velos Tankers on record (Reuters via gcaptain, Fri): one seafarer killed, 'believed to have been caused by a missile attack', Marshall Is. flag, unladen to Bahrain - the first confirmed crew death of the campaign, projectile class. JMIC 111 (5 Nov, Gulf News): four Hormuz attacks/96h (1-3 Nov, Musandam), two Arabian Gulf (eight since 7 Oct), independent transits single/low-double digits, 31 US-assisted/day. IRGC two-tanker mine claim 13:54Z Fri unconfirmed at 03:30Z Sat; bf1e1b54 HIT after the time-late check, laid-mine week two written. Brent 98.32 flat Fri, -10% w/w (worst since Apr 2020) on the mediation tone.
       6 Nov (Fri brief): UKMTO 196-26 - product tanker (OSINT: Velos Sapphire, Greek-operated, 75k dwt) hit by two projectiles ~50nm N of Qatar Wed 23:13Z; one seafarer reportedly killed per open-source/security consultancies, operator NOT on record (sources-only, rule 12 - a first operator-confirmed death is a watch item, not a class). JMIC Update 111 (5 Nov): four Hormuz attacks/96h (from three), all 1-3 Nov off Musandam; eight Arabian Gulf attacks since 7 Oct; transits single/low-double digits; 31 US-assisted/day (from 34). Brent settled +3.9% to 98.29 and printed 100.00 in Asia - oil now moving AGAINST the gold bid while the 2y falls (rule 22 divergence). Brent 100 on a settle with gold DOWN = the drain reversing (log); >109.4 -> kinetic +5 back. Iran rejected Putin's mediation (MarEx); South Korea moving naval assets toward Hormuz (deployment = hold).
       Two regimes: IRGC control of Hormuz transit against a US blockade
       with open kinetic exchange since 30-31 Aug, and a Red Sea second
@@ -2091,6 +2093,7 @@ watchlist:
 
   - theme: ai-credit-risk-off
     why: >
+      7 Nov (Sat brief): Friday's bounce held (S&P +0.3%; memory names bid despite the Microsoft/Oracle capacity-cut report); OpenAI $11bn at $1.25tn and the Anthropic IPO report after the close. No third session: credit count 2/3 letter, 1/3 substance; margin setter not re-earned. MarketWatch: 'data centers run on debt... only going to get worse' - the bond-market leg of the theme. Gates: CoreWeave Tue 10 Nov, Nebius Thu 12 Nov earnings.
       6 Nov (Fri brief): THE THEME FIRED. Thu 5 Nov Nasdaq 100 -6.36% (worst since 2020), S&P -4.35%, Russell -4.45%, SOX -16% w/w, Micron -12%; Fri Asia Kospi -9% intraday (SK hynix -10%), Nikkei -6%, TSMC -7%. Named driver: post-midterm data-centre politics (Sanders' national moratorium call; Goldman: 45% of planned capacity faces state pauses) on stretched AI-infrastructure borrowing; Barkin on record: 'you do wonder where in the intermediary sector is the biggest risk'. Transmission: Treasuries the haven (2y -11.45, bull steepener), December >80% -> ~70%; gold +40.5 on the settle in NY (silver/copper DOWN - a haven read) then -54 in Asia with the 2y flat (a margin read). Margin setter (rule 3) NOT re-earned on the settle, met on the row - breach trajectory: a second US session Nasdaq >=2% down + gold <= -0.5 ATR on the settle -> base 35 / kinetic 30. Credit re-arm 2 of 3 letter, 1 of 3 substance. BTC 76K trades like the Nasdaq, not gold.
       The third channel (rule 6) for 'hot print -> gold down': an
       equity/credit risk-off that bids Treasuries and pulls yields DOWN
@@ -2233,6 +2236,7 @@ watchlist:
     since: 2026-10-31
   - theme: us-iran-mediation-track
     why: >
+      7 Nov (Sat brief): sources only, no texts - Al Arabiya (Iranian source, 14:44Z Fri): Tehran 'responding positively' to the mediators' latest proposals, waiting for US 'practical steps'; Times of Israel (US official + diplomat, 16:06Z): Iranian negotiators reviewing proposals to curb the nuclear programme short of dismantlement (HEU stockpile addressed, significant sanctions relief); Trump 20:02Z 'we are talking to Iran, doing very well'. Against: Putin mediation rejected; SNN 'doctrine moving towards aggression'; CENTCOM $20m nuclear-intel reward; Israel urging a 'short, intense' restart (report). 4564d0ca stands - scores Mon 9 Nov.
       5 Nov (Thu brief): Qatar expects feedback 'over the next day or so' (Bloomberg Tue, via gcaptain); no US text, no Tehran
       text. Tehran 'far from a deal', seven conditions; Ghalibaf 'NO TO WAR', a 'nightmare' if mass attacks restart; Pezeshkian:
       the Supreme Leader widened his authority to the 'non-negotiable'; parliament exempts Chinese/Indian/Iraqi/Qatari vessels
@@ -2268,6 +2272,7 @@ watchlist:
     since: 2026-11-01
   - theme: us-unannounced-strike-campaign
     why: >
+      7 Nov (Sat brief): SECOND on-record act of the class - Trump Fri evening (Gulf News Sat 02:33Z, extracted): 'new limited strikes' on an Iranian air-defence system, 'we knocked it out in about 15 minutes, maybe five', 'minor'; IRNA: two explosions, Suza, Qeshm. IRGC claims an MQ-1 downed over Qeshm (17:59Z). Rule 12/21: a reached-class repeat is a count (2 on record + 'several unannounced'), not a step; f7604251/93496971 untouched. Brent closed flat before the confirmation - the Sun reopen reads it first (rule 25).
       4 Nov (Wed brief): CLASS REACHED ON RECORD - Trump to Fox News Tue 3 Nov (Gulf News 23:33Z, extracted): US forces
       struck a Qeshm air-defence facility Mon night, 'we watched it get built... we hit it', a 'limited military action';
       MarEx: Qeshm 'has been hit repeatedly over the course of the months-long conflict'. b4938377 scored MISS; the
@@ -2291,6 +2296,7 @@ watchlist:
     since: 2026-11-03
   - theme: post-midterm-strike-window
     why: >
+      7 Nov (Sat brief): the window produced a reached-class act (Qeshm air defence, Fri, on record) and a parallel mediation round (Al Arabiya/ToI reports, Trump 'very well') - no new class through Sat 03:30Z. f7604251 (energy node) and 93496971 (Israeli class) close Sun 23:59Z -> Mon brief scores after the Gulf News Sat-Sun time-late check. Stephen Miller replaces Wiles as chief of staff; Rubio 'on resignation watch' (report) - personnel, not posture.
       6 Nov (Fri brief): Trump after the first post-midterm NSC meeting on Iran (Axios via Gulf News, extracted): will 'soon decide' whether to 'go further' so the nuclear programme 'can never be revived'; 'I'd rather not destroy the rest of the country, but maybe I'll have to'; 'you'll know soon enough'; options per two US officials: further strikes, continued pressure, or a deal; 18 US service members dead acknowledged. INTENT, not an act (rule 1/2/10) - the class is unnamed, so the f7604251 floor stands as written; the Israeli claim 93496971 unchanged. With Brent at 98 (not 118) a strike's first move is +10% oil and a margin call on gold in a book already being cut. Qatar: no feedback text on the record Thu.
       5 Nov (Thu brief): no act. Trump on record (FT, via gcaptain/Bloomberg extracted): 'getting everything we want... locked and
       loaded if we need to go, but there may be no reason for it'; Fox: 'haven't finished a job, and maybe I will, and maybe I
