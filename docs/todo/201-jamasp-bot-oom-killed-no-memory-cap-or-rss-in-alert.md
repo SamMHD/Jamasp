@@ -61,3 +61,7 @@ log tail is a run of `poll failed (The read operation timed out)` warnings
 over the preceding hours — the same pre-kill shape each time, still no RSS
 figure in the alert. Auto-restart recovered the listener every time; no
 `/brief` was requested this week, so nothing was lost that we know of.
+
+## Update 2026-11-08 (retro)
+
+`systemctl show jamasp-bot.service` at 16:00Z 8 Nov: **`MemoryMax=1073741824` (1G) is now set** on the unit, `MemoryPeak=1073758208` (at the cap), `MemoryCurrent=550813696`, RSS 541M at 15.4 days uptime. No bot failure alert 2–8 Nov. Item 1 (a cap) appears done by someone outside the repo — check whether the unit file in `ops/systemd` carries it (todo-021 pattern) before closing; item 2 (RSS in the alert) still open. The week's nine OOM kills hit the agent units instead (todo-205).

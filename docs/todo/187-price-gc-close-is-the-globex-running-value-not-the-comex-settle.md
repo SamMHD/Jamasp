@@ -124,3 +124,7 @@ intraday. The code side is unchanged: a `GC_SETTLE` row at ~18:30Z and a
 ## Update 2026-11-01 (retro)
 
 `6754924a` (Fri 30 Oct row band 3890–4115): the Fri row 3898.9 (02:46Z Sat) held the floor by 8.9; the COMEX settle 3884.9, the day low 3879.3 and the 20:45Z pre-close row 3885.6 were all below it — a letter-only hit inside the ~25-pt settle/row gap (rule 9 discount). A `GC_SETTLE` row at ~18:30Z ET-equivalent (now 19:30Z post-DST) would have made the band's basis choice explicit in the tool rather than in the claim text.
+
+## Update 2026-11-08 (retro)
+
+The CNBC `@GC.1` "Prev Close" field the briefs read as the SETTLE basis is the **Globex last**, not the COMEX settle: Mon 2 Nov 03:32Z it read 3898.9 (= the Fri GC_CLOSE row) while the relay's COMEX settle was 3884.9 — 14 pts apart on a basis rule 17 called "the settle". Rule 17 now names it the Globex 22:00Z close and reserves "COMEX settle" for the relay's "settled at" sentence; five settle bands 2–6 Nov were scored on the renamed basis. The `GC_SETTLE` row ask (≈18:30Z post-DST, from the relay sentence or the exchange) is now two bases the tool could carry: `GC_GLOBEX_CLOSE` (22:00Z) and `GC_SETTLE` (13:30 ET).

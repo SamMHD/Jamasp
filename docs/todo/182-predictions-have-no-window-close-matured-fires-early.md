@@ -133,3 +133,7 @@ horizon_days`.
 ## Update 2026-11-01 (retro)
 
 `due` printed 0 at every run for a third consecutive week while 17 claims were scored under rule 18 (five Sunday closers at the Mon 26 brief; the FOMC/PCE/BoJ-week bands at each next brief; `872dc8e5` at the 15:00Z scan; `ddf6e395` and `3f88c2b5` at the Wed 13:00Z scan after the brief failed). New shape: `7d5c839b` named a basis that never prints ("first USDJPY row ≥21:00Z Fri" — the FX feed stops 20:59Z) and was scored on the determined outcome from the 20:59Z row; playbook rule 17 now names the FX Friday-close basis. A basis validator at `predictions add` (reject a basis the prices table cannot produce) belongs with the window-close field asked for here.
+
+## Update 2026-11-08 (retro)
+
+`due` printed 0 at every run for a fourth consecutive week while 17 claims were scored under rule 18 (five Sunday closers at the Mon 2 brief; five settle bands at each next brief; `8b3e9d27` at the Tue 05:00Z scan from the RBA relay; `d5d5d159` determinate at the first reopen print and scored Mon; `6d0e9898` on the Brent settle at the Tue brief). Lifetime 258 scored, 8 open.

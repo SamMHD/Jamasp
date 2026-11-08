@@ -216,3 +216,7 @@ first VIOLATION since the 11 Oct fix, and a real one.
 ## Update 2026-11-01 (retro)
 
 1 Nov retro started on the slot (16:00Z, `jamasp-retro.timer`), the third consecutive on-slot run. Record: 8 of the last 10 Sundays on the slot, 9 of 10 counting the 11 Oct make-up. The watchdog's credential probe fired three mornings running (25–27 Oct) and was right — the escalation gap it exposed is todo-204.
+
+## Update 2026-11-08 (retro)
+
+8 Nov retro started on the slot (16:00Z, `jamasp-retro.timer`), the fourth consecutive on-slot run. Record: 9 of the last 11 Sundays on the slot. The retro cap is 1200 s (`config/settings.yaml`); this run's load phase alone took ~14 min — a retro that reads the week's ledger, the fits and the todos is close to its own cap, and a cut at 1200 s would be a failed weekly slot of exactly this item's kind.

@@ -89,3 +89,7 @@ path is alive (todo-012).
 ## Update 2026-11-01 (retro)
 
 `ddf6e395` closed HIT inside 4.68–4.92 after the 25 Oct rule-7 resize to the measured 2y range; `7d5c839b` (USDJPY 156.20–158.70) was sized on a hand-read 10-session range and HIT. Both measurements were manual. New wrinkle: Brent Dec expired 30 Oct at 117.64 with Jan at 113.43 — the Sat brief now names "Brent Jan = the oil basis" by hand; a `BRENT` series needs roll handling (front-month label in the row) or the week's oil comparator jumps 4 dollars on expiry day.
+
+## Update 2026-11-08 (retro)
+
+`d5d5d159` (Brent Jan reopen ABOVE 113.43, MISS) and `6d0e9898` (Brent Jan settle BELOW 109.4, HIT) were both written and scored on hand-read CNBC `@LCO.1 --fresh` quotes; a Brent series with an ATR would have sized the reopen claim's room (3.3 to the drain line, under half a daily range) and rule 20 would have refused it.

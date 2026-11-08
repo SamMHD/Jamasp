@@ -78,5 +78,5 @@ fit:
 pins:
   - key: physical_cb
     value: 1.0
-    reason: "18 Oct retro: beta -0.008 (0.6 sigma) on n=56 hours - the first fit past min_observations, so a noise-sign coefficient fell to the 0.25 floor. The per-month split shows no direction-scoring signal (Sep bull hours +0.28%, Oct n=4). Hold the unfitted 1.0 until the column has a sign worth clamping on; the 15 Nov retro revisits."
-    expires: "2026-11-15"
+    reason: "18 Oct retro pinned a noise-sign beta (-0.008, 0.6 sigma, n=56) at the unfitted 1.0. 8 Nov retro: the sign has flipped (+0.0117, se 0.0142, 0.8 sigma, n=63 hours) and the negative flag is gone, but unpinned the column would publish at ~0.6-0.65 on that noise (beta-ratio against geopolitics, renormalised). Hold 1.0 until n >= 150 or |beta| >= 2 sigma, whichever first; the 13 Dec retro decides."
+    expires: "2026-12-13"

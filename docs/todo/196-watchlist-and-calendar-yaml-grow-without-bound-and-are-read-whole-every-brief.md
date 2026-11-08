@@ -73,3 +73,7 @@ per brief). Both are still read whole by every brief.
 ## Update 2026-11-01 (retro)
 
 `state/watchlist.yaml` 171.4 KB and `state/calendar.yaml` 161.6 KB (155.3 / 150.2 on 25 Oct; 126.8 / 136.4 on 18 Oct). +16 KB and +11 KB in a week with one failed brief day. Still read whole by every brief.
+
+## Update 2026-11-08 (retro)
+
+`state/watchlist.yaml` 194.1 KB and `state/calendar.yaml` 168.7 KB (171.4 / 161.6 on 1 Nov). +23 KB and +7 KB in a week with seven briefs. Still read whole by every brief.

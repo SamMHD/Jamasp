@@ -122,3 +122,7 @@ confined to the cases where the floor actually applies.
 ## Update 2026-11-01 (retro)
 
 0.70 bucket 3/4 this week (62/69 lifetime, 90%); the miss (`5f78f5af`) was a class-definition error (two weapons in one negative), not a ceiling matter. Stated 0.624 vs observed 0.882 on n=17, the ninth underconfident week in ten; Brier 0.174 — 0.164 had all six structural negatives been written at 0.8 (the miss in the family costs most of the gain this week). Structural-negative family 88/92 lifetime.
+
+## Update 2026-11-08 (retro)
+
+0.70 bucket 3/3 this week (65/72 lifetime, 90%); the structural-negative miss (`b4938377`) was at 0.55 with the floor withdrawn, so the ceiling cost nothing this week. Stated 0.629 vs observed 0.824 on n=17, the tenth underconfident week in eleven; Brier 0.164 — 0.153 had the six hits been written at 0.8.

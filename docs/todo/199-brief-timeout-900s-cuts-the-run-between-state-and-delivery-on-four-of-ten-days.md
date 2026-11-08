@@ -186,3 +186,7 @@ the desk most needs the summary on time.
 ## Update 2026-11-01 (retro)
 
 Six briefs 26 Oct–1 Nov all finished under the 900s cap: 854 / 813 / 667 / 684 / 819 / 542 s (Mon–Sun, no Wed — the 28 Oct brief failed on auth, not on time; todo-204). 7 of the last 26 brief days over the cap, none this week. The 28 Oct 13:00Z scan-variant recurrence (506-item delta cut at the scan cap) stands as logged above.
+
+## Update 2026-11-08 (retro)
+
+Seven briefs 2–8 Nov all under the cap: 761 / 833 / ~763 (4 Nov — no ledger row, OOM-killed after its commit, todo-205) / 644 / 817 / 688 / 582 s — the second clean week. **Deepdive variant:** #77 (NFP, 6 Nov) has one `agent_runs` row of 1377 s from 14:15:01Z with status ok, while the deepdive's own report text says "run started 14:30Z (dispatcher +15 vs the 14:15Z slot)" and its single commit is 14:37:26Z — the shape of a first attempt cut at the 900 s deepdive cap having produced nothing visible, and the retry doing the work in ~7 min. Cause of the first attempt's 15 silent minutes unknown (journal unreadable from the run user). One Telegram note (notify_log 404, 14:36:43Z), no duplicate.
