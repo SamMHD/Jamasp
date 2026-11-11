@@ -2444,3 +2444,19 @@ events:
       No new wakeup. #78 stands at 14:15Z. The Wed 11 Nov brief closes out #78 on the CNBC @GC.1 prev-close FIELD as read
       (today it showed the 18:30Z COMEX settlement, not the Globex close - rule 17 lesson filed) AND the ~03:30Z Wed row,
       reads Bowman CFR and Paulson from the relays, and scores the Tue settle band 3955-4295.
+  - date: 2026-11-13
+    time_dubai: "17:30 (13:30Z) print; deepdive #79 at 18:15 (14:15Z)"
+    title: US PPI (Oct) — the 12-month-path carrier after the hot core CPI
+    why: >
+      Added 11 Nov. Prev 1.3 / 0.7 (October's energy pass-through); Waller
+      (10 Nov) says staff see more PPI increases. Tuesday showed the 2y moving
+      on the 12-month hike path (60bp -> 'another hike') while December's 50bp
+      branch faded 13.6% -> 10%; PPI is the next print that can move that
+      path. Collins 14:10Z sits inside the run.
+    action: >
+      Wakeup #79 deepdive 2026-11-13T14:15Z: investinglive body first (largest
+      component + ex-that), CNBC PPI article --fresh, actionforex front; date
+      the December figure in both units AND the 12-month figure; tape clause
+      from the first print on the CNBC field and the row; post-print claim =
+      the 2y retained fraction on the Fri 5:05pm ET line or a Fri settle band.
+      Close-out at the Sat 14 Nov brief.
