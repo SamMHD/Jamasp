@@ -2460,3 +2460,19 @@ events:
       from the first print on the CNBC field and the row; post-print claim =
       the 2y retained fraction on the Fri 5:05pm ET line or a Fri settle band.
       Close-out at the Sat 14 Nov brief.
+  - date: 2026-11-12
+    time_dubai: "Thu 12 Nov - claims 17:30 (13:30Z); Hammack 17:30-18:00; Barr 19:00; Goolsbee 20:15; Nvidia cash open 18:30; 30y auction 22:01 (18:01Z); Daly 22:10; Schmid 22:30; Lagarde 23:30; Williams 03:30 Fri (23:30Z, blind). Fri 13 Nov: PPI 17:30 (#79 18:15), Collins 18:10, LOGAN 18:40 (14:40Z, voter - new on the feed), Bowman 19:50, Daly 21:00, Jefferson Sat 04:00"
+    title: First 2y close since the CPI + 30y auction + five Fed slots + the Nvidia board gap - scan markers, no deepdive (rule 24 venues)
+    why: >
+      Added 12 Nov. Wednesday was a dollar session with no Treasury close (DXY +0.66% to a 52w high, gold through 4,000);
+      Thursday's 5:05pm ET 2y line is f(2y) count two if inverse and the first evidence of whether FX led or lagged the
+      front end. The 30y auction is a rule-7 gate (tail/grade; a chain session only if the 2y and 10y close same-sign
+      >=0.5 ATR; a 30y >=5.50 close with gold UP and DXY DOWN re-opens the debasement tell). Nvidia -10% after hours on
+      the WSJ board report puts the margin setter (Nasdaq >=2% DOWN with gold <= -0.5 ATR on the field) in play at the
+      14:30Z open. Fed venues are students/AI/regional (rule 24) - hold at ~27.5bp December absent a dated sentence;
+      Williams lands in the blind window (Fri brief). Logan's Fri 14:40Z slot is NOT in #79's text - it lands after the
+      deepdive's close and is the 15:00Z scan's.
+    action: >
+      15:00Z scan: claims + Hammack/Barr relays + the Nvidia open on the CNBC field; 17:00Z: Goolsbee; 19:00Z: the 30y
+      tail first, then Daly/Schmid; Fri brief: count f(2y) on the 5:05pm ET line, score the Thu band 3860-4130 on the
+      CNBC field + the 21:59Z GC row, read Williams; #79 stands at 14:15Z Fri; the 15:00Z Fri scan reads Logan.

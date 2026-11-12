@@ -539,6 +539,14 @@ watchlist:
       FedWatch' is a weekend read of Friday's close - inside the hold band (flip >=82% / <=60%). First dated sentence
       this week: ISM relay 15:00Z (cons 54.7 / prices 77.5, 17:00Z scan) or Goolsbee 16:15Z. 2y 4.596 Asia (+1.5).
       RBA Tue 03:30Z (+25bp to 4.85% expected, JPM joined - 8b3e9d27) and BoE Thu are the global-hike pillar.
+      12 NOV THU BRIEF: Wed = a dollar session on the bond holiday (DXY +0.66% to a 52w high 103.08, gold -0.74% field /
+      -1.14% row, NDX +2.34%) - no 2y close; Thu's 5:05pm ET line is f(2y) count two if inverse (Asia 4.767 vs 4.748).
+      December UNCHANGED: UBS relay ~00:16Z Thu 'futures price about 28bp' = inside the 27.5bp margin (rule 14), 50bp
+      'limited FOMC support'; the street moves the 2027 path - DB Dec/Jan/Mar to 4.50-4.75% (50bp not base case), Goldman
+      +1 hike (Wed), UBS Dec+Mar. Goldman cuts gold to 4,150 end-26 / 4,800 end-27 (CB buying ~60 t/mo); TD: 3,900
+      retest, CB bid below 4,000. 30y auction Thu 18:01Z (30y 5.329); Hammack/Barr/Goolsbee/Daly/Schmid Thu, Williams
+      23:30Z; PPI Fri (#79) with Collins 14:10Z and Logan 14:40Z (voter, new on the feed). Lines (a)/(b) rebased to the
+      Wed field 4000.5 / row 3994.3.
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -1285,6 +1293,12 @@ watchlist:
       'fire after a Yemeni attack' a claim with no Saudi text. Brent Jan opened 111.69, 110.14 at 03:32Z (-2.9%) on
       the Doha track, not the sea - the drain line 109.4 (settle, gold UP) is 0.7 below the quote; kinetic held 37.5.
       Successors written: arrangement week six 0.65, Houthi supply-node week four 0.6, Iraqi-export week two 0.7.
+      12 NOV THU BRIEF: India's shipping minister Sonowal on record - the Liberia-flag VLCC Fujairah Energy hit by a
+      PROJECTILE 10 Nov in the Arabian Gulf, four crew injured (reached class); ADNOC L&S hull in UAE waters still has no
+      name or weapon class; Reuters (gcaptain): a Navig8 (ADNOC L&S-majority) tanker on fire off Oman Sun, one of three
+      IRIB says were hit; IRGC 'two tankers hit naval mines' x10 (rule 12). IMO: 130 incidents, >=25 seafarers killed;
+      WINEP: 37 ships attacked in October (war high). Eisenkot letter (Wed) urges the caretaker PM to 'refrain from
+      dangerous moves'; Channel 12: Zamir opposed proposed action against Iran - intent reports, 1960394a holds.
     since: 2026-07-31
 
   - theme: kinetic-transmission-inverted
@@ -1673,6 +1687,10 @@ watchlist:
       2 NOV MON BRIEF: Katayama - the US-Japan FX statement is 'alive', warns on disorderly yen moves; USDJPY 157.94
       (+0.26% Asia), DXY 101.95 (+0.07). A MoF line is a marker; the leg still states the DXY move it requires (>=0.3
       or a cross of 100, rule 22) - count 0. Japan factory PMI 53.3 (seven-month low, cost pressures up).
+      12 NOV THU BRIEF: USDJPY 159.84 high Wed (200DMA 158.70 and 100DMA ~159.00 broken; Sep high 160.37), 159.77 Asia;
+      Mimura 'moves are too rapid' = verbal stage one (two interventions above 160 this year); Japan PPI 7.1% y/y firms
+      the BoJ December hike, Asada cautious on pace. The leg's bar stands (DXY >=0.3 or a cross of 100) - an
+      intervention on a 52w-high dollar is a dollar-down shock: dollar leg re-read, base +5 if gold UP on it.
     since: 2026-09-03
 
   - theme: energy-pce-passthrough
@@ -2168,6 +2186,11 @@ watchlist:
       Credit leg stays KILLED (needed settle UP with the 2y down; got -20.2);
       net line on the Fri settle vs 4031.4 (UP >=5 re-arms; DOWN with 2y down
       demotes f(2y)). MSFT $25bn bond, Nvidia/Nscale/Anthropic guarantee next.
+      12 NOV THU BRIEF: Wed NDX +2.34% (CoreWeave +24%, Anthropic book covered, $90bn listing 19 Nov) then Nvidia -10%
+      AH on the WSJ 'board preparing to oust Huang' report (NYT second allegation), Nasdaq futures -0.8%, S&P -0.3%,
+      AMD +3.8% (rotation inside chips). Margin setter live for the Thu US session: Nasdaq >=2% DOWN AND gold <= -0.5
+      ATR on the CNBC field (<= ~3,955 vs 4000.5) -> base 35 / kinetic 30 the same run; a board statement naming an
+      orderly succession reverses it; results 17 Nov. Credit leg still killed (2/3 letter, 1/3 substance).
     since: 2026-10-15
   - theme: hormuz-limpet-class-reached
     why: >
@@ -2236,6 +2259,14 @@ watchlist:
       Jan -2.9% at the open, 2y +1.5, gold +10 - the premium is pricing in oil before any text; the drain reaches gold
       on the settle (rule 22). Both principals have stated intent -> the week-six negative is written at 0.65 (rule 10
       floor withdrawn). Scoring format unchanged: a named US official AND Tehran, or an IRGC regime lift via UKMTO/JMIC.
+      12 NOV THU BRIEF: WSJ (officials) - Vance considering face-to-face talks with a top Iranian security official,
+      Trump 'empowered him to negotiate', 'preliminary', no meeting confirmed (sources - not a half of 4db18820).
+      Ghalibaf to Al Jazeera (on record, 16:47Z relay): 'our priority is peace if they accept our conditions'; Washington
+      'has not yet provided an official and specific response to our letter'; seven conditions to open Hormuz AND resume
+      talks; 'the Americans visited Moscow and asked Putin to... arrange direct negotiations'; understanding with Oman on
+      the lane/TSS; 'the ball is in the Americans' court'. Rubio Tue 'not close'. Tape: Brent Jan 92.76 Wed settle
+      (+1.4%) then 91.64 Asia (-1.2%) on the report - the drain channel is live, nothing printed. An on-record US half
+      (Vance/Rubio/WH naming a meeting or terms) is substance toward the MISS; both halves needed for the letter.
     since: 2026-11-01
   - theme: us-unannounced-strike-campaign
     why: >
