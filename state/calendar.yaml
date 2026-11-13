@@ -13,6 +13,18 @@
 # (wakeup #30 cancelled → #32 at 19 Aug 18:45Z). Trust-but-verify the
 # hand-built entries below against the feed for another week.
 events:
+  - date: 2027-01-08
+    time_dubai: "8-14 Jan 2027 (annual BCOM / S&P GSCI reweighting window)"
+    title: Commodity index rebalance - ~$3.3bn net gold-futures buying (SocGen)
+    why: >
+      Added 13 Nov. Societe Generale (investinglive 13 Nov, extracted): gold's BCOM
+      weight +~3pts, GSCI +~1pt; funds sell ~$17bn Feb and buy ~$20.5bn Apr gold
+      futures over 8-14 Jan, April buying >half of normal daily volume. A dated,
+      mechanical bid - a January prop, not a regime input; energy is trimmed in the
+      same window.
+    action: >
+      The first brief of January names the window in the stance's base bullet and
+      sizes nothing on it before the 2y's sign; watch the Feb/Apr spread for the roll.
   - date: 2026-08-03
     time_dubai: "~22:00-02:00 (Mon afternoon US time; unscheduled)"
     title: US-Iran denuclearisation talks convene — the checkable marker
