@@ -13,6 +13,57 @@
 # (wakeup #30 cancelled → #32 at 19 Aug 18:45Z). Trust-but-verify the
 # hand-built entries below against the feed for another week.
 events:
+  - date: 2026-11-18
+    time_dubai: "Wed 18 Nov 23:00 (19:00Z) - FOMC minutes of the 27-28 Oct meeting"
+    title: FOMC minutes - the week's Fed-pricing carrier; deepdive #80 at 19:45Z
+    why: >
+      Added 14 Nov (Sat brief). The minutes are the only scheduled FOMC text before the
+      8-9 Dec meeting. actionforex week-ahead (13 Nov): a 25bp December hike is the
+      minimum with 'around a 10% probability' of 50bp; the minutes are 'unlikely to
+      reveal any discussion about a double hike, but any indication that there is a
+      growing sense of urgency... would lift those odds'. The 50bp branch (>=25%) and
+      the 12-month path (>=92.5bp) are the stance's line (a') carriers. Lands at
+      19:00Z - after the last scan (rule 13), so a wakeup, not a scan.
+    action: >
+      Deepdive #80 Wed 18 Nov 19:45Z: investinglive minutes post body -> CNBC minutes
+      article --fresh -> actionforex front; date December in both units AND the
+      12-month figure; apply the stance's lines on the CNBC @GC.1 field and the 21:59Z
+      row with the comparator = the last GC row before 19:00Z; third channel (long end,
+      credit leg, oil) enumerated; close-out at the Thu 19 Nov brief.
+  - date: 2026-11-17
+    time_dubai: "Tue 17 Nov 17:30 (13:30Z) retail sales; Nvidia Q3 results after the US close (~01:20 Wed Dubai)"
+    title: Retail sales (the scheduled thing that can take heat off hike pricing) + Nvidia results (the margin leg)
+    why: >
+      Added 14 Nov. Retail sales consensus 0.2 m/m / ex-autos 0.4 (actionforex summary,
+      MarketWatch) - actionforex: 'a negative surprise could take the heat off hawkish
+      expectations'. Nvidia reports without Huang (removed by the board; -27% MTD);
+      actionforex: 'disappointing guidance could trigger a new AI rout, potentially
+      triggering another round of forced liquidations for gold and Bitcoin' - the
+      stance's margin setter (Nasdaq >=2% down AND gold <= -0.5 ATR on the field).
+    action: >
+      15:00Z scan reads the retail-sales print post body, then CNBC, then actionforex
+      front for a dated December / 12-month clause (rule 14) - lines applied, no
+      deepdive (tier-2). Nvidia: the Wed 18 Nov brief reads the Asia session - Nasdaq
+      futures sign first, then gold on the ~03:30Z row; the margin setter is scored on
+      the Wed CNBC field at the Thu brief. Also Tue: Waller 14:10Z (venue unverified -
+      Board probe Mon), Hammack 14:30Z Brookings (Treasury-market resilience - plumbing,
+      rule 24, marker only), Williams 19:25Z (Wed brief).
+  - date: 2026-11-19
+    time_dubai: "Thu 19 Nov (Shenzhen; APEC 18-19 Nov) - Trump-Xi-Putin trilateral, Iran on the agenda; Paulson 02:30 Fri Dubai (22:30Z) Money Marketeers"
+    title: Shenzhen trilateral - the drain channel's first scheduled venue since the Qatar PM meeting; Paulson policy dinner in the blind window
+    why: >
+      Added 14 Nov. A senior US official (anonymous; Gulf News/AFP 14 Nov): Trump 'does
+      intend to talk about Iran in the trilateral meeting with Xi Jinping and Vladimir
+      Putin' Thursday in Shenzhen. A venue where a US half of an arrangement could print
+      (4db18820's falsifier needs Tehran's half too - rule 8); a report of intent, not a
+      schedule for a text (rule 16). Paulson at the Money Marketeers of NYU (MarketWatch
+      5:30 PM ET) is a classic monetary-policy venue landing in the 19:00Z-03:30Z blind
+      window.
+    action: >
+      Thu 15:00Z/17:00Z scans read any US-half text from Shenzhen (Trump/Rubio/Bessent on
+      record) and Tehran's separately; no directional claim on one half. Fri 20 Nov
+      brief reads the Paulson relay for a dated December / 12-month sentence (rule 14
+      hold at the prior figure if none).
   - date: 2027-01-08
     time_dubai: "8-14 Jan 2027 (annual BCOM / S&P GSCI reweighting window)"
     title: Commodity index rebalance - ~$3.3bn net gold-futures buying (SocGen)
@@ -2370,7 +2421,7 @@ events:
       is the next brief's (rule 13). Rule 20: Mon 9 Nov is the positioning session before CPI - reopen
       band and structural negatives only.
   - date: 2026-11-16
-    time_dubai: "Mon 16 Nov (time TBC) - Federal Reserve field hearing on AI, San Francisco Bay Area (Warsh, Bangkok 16 Oct: 'part of its task force work')"
+    time_dubai: "Mon 16 Nov 21:00 Dubai (17:00Z; MarketWatch 12:00 PM ET 'Fed Chairman Kevin Warsh speaks', no venue listed - the AI field hearing per the 13 Nov entry; Board probe /speech/warsh20261116a.htm Mon) - Federal Reserve field hearing on AI, San Francisco Bay Area (Warsh, Bangkok 16 Oct: 'part of its task force work')"
     title: Fed AI task-force field hearing - a task-force venue (rule 24), scan marker only, no deepdive
     why: >
       Named by the chair himself at the IMF/WB meetings; it sits between the 28 Oct and
