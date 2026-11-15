@@ -50,3 +50,15 @@ word "tanker" in both headlines is suggestive of a related-content widget.
 Read the same facts from the Gulf News wrap
 (`us-iran-war-tanker-strikes-open-dangerous-new-phase…-1.500664548`),
 which extracted correctly and carries the six-vessel claim.
+
+## Update 2026-11-15 (retro) — second host, same shape
+
+14 Nov 19:00Z scan: `extract --fresh` on the gcaptain slug
+`/oil-tanker-on-fire-after-hitting-mine-in-hormuz/` (a one-paragraph Reuters
+snippet post) returned the FRIDAY article's title and lede ("Iran Says Tanker
+Carrying LNG Hit Mine…") — the snippet post extracts as its "related" block.
+The `?s=mine` index lede carried the real text. Playbook rule 4 now requires
+the extracted title to match the feed headline before a gcaptain extract is
+used to classify an incident; the code side is the same readability
+mis-selection as the Gulf News case above — the extractor picks the largest
+text block on the page, which on a short post is the related-article module.

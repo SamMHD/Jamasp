@@ -72,3 +72,13 @@ task template should say "poll the table until the row prints (up to
 ## Update 2026-10-04 (retro)
 
 4 Oct retro: #620 (PCE close-out, booked 23:35Z Wed 30 Sep on a 23:30Z assumption) exited `empty` at 23:38Z; the row printed 23:46:21Z; #621 (23:40Z) caught it. #642 (NFP close-out) was booked at 00:35Z Sat on the cadence observed Friday (rows 00:02 / 06:15 / 12:16 / 18:17 / 00:31, ~6h14 per slot) and read the 00:31:08Z row four minutes later. Playbook rule 14 now books the close-out as an absolute time from that day's observed cadence (next ≥23:00Z slot + one ingest tick; a Friday's lands Saturday) with "poll until the row prints" — the analysis-side workaround until the interval is clock-anchored.
+
+## Update 2026-11-15 (retro)
+
+12 Nov: the GC_CLOSE cadence had drifted to :46 (03:31 / 09:32 / 15:45 /
+21:46Z), so the 21:46Z row sat BEFORE the 22:00Z Globex close and the next
+row landed ~03:46Z, after the Thu brief's read; `2ccf8856` was scored on the
+21:59Z GC row instead (HIT either way). 13 Nov the row printed 22:00:41Z — the
+drift was one day. Playbook rule 17 (15 Nov retro) now names the 21:59Z GC row
+(fixed time) as every band's second basis and demotes the GC_CLOSE row to
+context, which removes the analysis-side dependency on this interval.
