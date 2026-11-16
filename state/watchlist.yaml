@@ -550,6 +550,13 @@ watchlist:
       retest, CB bid below 4,000. 30y auction Thu 18:01Z (30y 5.329); Hammack/Barr/Goolsbee/Daly/Schmid Thu, Williams
       23:30Z; PPI Fri (#79) with Collins 14:10Z and Logan 14:40Z (voter, new on the feed). Lines (a)/(b) rebased to the
       Wed field 4000.5 / row 3994.3.
+      16 NOV MON BRIEF: weekend speakers on PACE, not direction - Schmid (Sun, Hawaii, non-voter) inflation ~3% ex-energy,
+      rejects supply-shock and AI-demand excuses; Collins (Sat) 'steady, gradual', cool on 50bp but the year's path 'somewhat
+      higher'; Jefferson PCE 3.6%. No dated figure anywhere (relays: 'fully priced 25bp, small chance of a larger move') -
+      operative stays 28.5bp Dec / ~10% for 50 / 86bp 12m (13:30Z Fri body). Goldman end-27 4,650 (from 4,800; third hike
+      Mar 2027), ETF-selling risk flagged; a European bank: yields 'have not risen enough to fully explain the slide'.
+      Warsh Mon 17:00Z = task-force opening remarks (SF Fed host; Board probe 404) - rule 24 marker, 19:00Z scan reads the relay.
+      Next carriers: retail sales Tue 13:30Z, minutes Wed 19:00Z (#80), Paulson Thu 23:30Z.
     since: 2026-07-31
 
   - theme: central-bank-gold-buying
@@ -2014,6 +2021,9 @@ watchlist:
       stress signature in the shape - the intermediate curve led (5y -19.2) on a growth/credit scare. The
       both-up pair claim 7ea8a0de scored HIT (family 6/6): the long-end-setter shape never appeared. Next
       gates: 2y Mon 26 17:00Z, 5y Tue 27, 7y Thu 29 (gate claims only if the WI prints).
+      16 NOV MON BRIEF (Monday prune check): last annotation 23 Oct (3.4 weeks). Debasement tell CLOSED (2 for / 19 against);
+      the only live hook is the re-open condition - a 30y >=5.50 CLOSE with gold UP and DXY DOWN (30y 5.47 Fri, high 5.502).
+      Kept one more week on that hook alone; REMOVE at the Mon 23 Nov brief unless the tell re-opens.
     since: 2026-08-20
 
   - theme: euro-sovereign-stress
@@ -2405,3 +2415,16 @@ watchlist:
       a pumping station is listed, the line is not). Watch: an SPA/ministry/al-Malki attribution; a pumping-station damage or
       throughput text; a Yanbu loading change; Aramco's repair timeline. Gold (rule 22): a bypass interruption is the most
       oil-bullish node in the theatre - Brent first, then the 2y's sign; a hike-and-margin read with December at ~19bp.
+  - theme: bahrain-iranian-attack-attributed
+    since: 2026-11-16
+    why: >
+      16 Nov (Mon brief): the first host-state ATTRIBUTION of a direct Iranian attack on GCC territory. Bahrain Defence Force
+      on record Sun 15 Nov: air defences 'intercepted and destroyed several Iranian aerial attacks'; Bahrain MoFA: a
+      'resumption of Iranian attacks against the Kingdom', Article 51, the GCC Joint Defence Agreement ('an attack against
+      one member an attack against all'), UNSC Res 2817; UAE MoFA condemned 'the renewed hostile attack by Iran targeting
+      Bahrain with drones'; IRGC claimed six drones on the Al-Riffa radar (CENTCOM had denied the 13 Nov radar hit). US
+      Embassy Manama alert 15 Nov. Classes (rule 21): attribution REACHED (intercepted); host-state-confirmed IMPACT
+      unreached = the stance's reopen/settle-band breaker. Watch: a BDF/MoI damage or casualty text, a CENTCOM impact text
+      at NSA Bahrain/Al-Riffa, a GCC Joint Defence Council convening, Saudi/UAE attribution of their own interceptions to
+      Iran rather than the Houthis. Gold: an impact text is Brent first, then the 2y's sign (rule 22) - a hike and a margin
+      call before any haven bid; kinetic +5 with the tape clause (rule 23).
