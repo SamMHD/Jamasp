@@ -12,3 +12,8 @@ dist/
 # state/.stance.fa.md.XXXX.tmp behind, and the next agent run commits
 # everything under CLAUDE.md rule 4 — including that.
 .*.tmp
+
+# The live database is not versioned: its committed snapshots grew .git to
+# 9 GB and the repack OOM-killed agent runs (Nov 2026, todo 205 on live).
+# jamasp-backup.timer keeps daily snapshots instead. Covers -journal and locks.
+state/jamasp.db*

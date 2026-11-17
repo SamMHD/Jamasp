@@ -3,13 +3,14 @@ from __future__ import annotations
 
 import json
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import click
 import httpx
 
 from jamasp import authd as authd_mod
+from jamasp import backup as backup_mod
 from jamasp import bot as bot_mod
 from jamasp import calendarview as calendarview_mod
 from jamasp import cluster as cluster_mod
@@ -143,6 +144,21 @@ def inbox(mark_read, cap, db_path, config_dir):
         click.echo(f"marked {inbox_mod.mark_read(conn)} items read")
         return
     click.echo(inbox_mod.render(conn, cap or settings["inbox_cap"]))
+
+
+@main.command()
+@click.option("--dest", default=None, help="snapshot directory (default: settings backup.dir)")
+@db_opt
+@cfg_opt
+def backup(dest, db_path, config_dir):
+    """Snapshot the DB to a gzipped, checked copy. Deterministic; no agent run."""
+    conn, _, settings = _common(db_path, config_dir)
+    cfg = settings["backup"]
+    out = backup_mod.snapshot(
+        conn, Path(dest or cfg["dir"]), datetime.now(timezone.utc), int(cfg["keep"])
+    )
+    db_mod.set_meta(conn, "last_backup_at", db_mod.utcnow())
+    click.echo(f"backup: {out}")
 
 
 @main.command()

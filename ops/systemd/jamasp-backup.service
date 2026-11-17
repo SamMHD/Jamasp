@@ -1,0 +1,18 @@
+[Unit]
+Description=Jamasp backup — daily gzipped snapshot of state/jamasp.db
+OnFailure=jamasp-alert@%n.service
+
+[Service]
+Type=oneshot
+# VACUUM INTO + quick_check + gzip of a ~60 MB DB takes a few seconds; the
+# ceiling only stops a wedged disk from holding the timer down forever.
+TimeoutStartSec=600
+WorkingDirectory=%h/Jamasp
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+EnvironmentFile=-%h/.config/jamasp/env
+# Deterministic pipeline stage, not an agent run: no `jamasp run` wrapper, so
+# it consumes none of the daily agent-run cap — same as the weights refit.
+#
+# The DB is not in git (it outgrew it: todo 205 on live); these snapshots in
+# ~/backups/jamasp-db are its only copies, so a failure here alerts the desk.
+ExecStart=%h/.local/bin/uv run jamasp backup

@@ -97,8 +97,8 @@ flash pass disables itself and logs to `source_errors`; ingestion, briefs, and
 scans are unaffected.
 
 ### 5. systemd units
-All 18 unit files (9 services + 9 timers: ingest, brief, scan, dispatch,
-retro, watchdog, flash-rollup, weights, translate) live in `ops/systemd/` in
+All 20 unit files (10 services + 10 timers: ingest, brief, scan, dispatch,
+retro, watchdog, flash-rollup, weights, translate, backup) live in `ops/systemd/` in
 this repo — copy them onto the
 host rather than hand-writing units. Use **system** units
 (`/etc/systemd/system/`, `User=jamasp`) when you have root; use **user**
@@ -136,7 +136,7 @@ Enable in two stages — the deterministic infra first, the agentic runs
 after the human handoff:
 ```bash
 # (drop --user for system units)
-systemctl --user enable --now jamasp-ingest.timer jamasp-dispatch.timer jamasp-watchdog.timer jamasp-flash-rollup.timer jamasp-weights.timer
+systemctl --user enable --now jamasp-ingest.timer jamasp-dispatch.timer jamasp-watchdog.timer jamasp-flash-rollup.timer jamasp-weights.timer jamasp-backup.timer
 # jamasp-brief.timer, jamasp-scan.timer, jamasp-retro.timer stay DISABLED
 # until the human steps below are done
 ```
@@ -278,8 +278,53 @@ journalctl -u jamasp-retro.service -n 40
 ```
 A transient inbox `WARNING` about source `digest` just means Claude isn't
 logged in yet; it clears on the first successful digest. The box commits
-state locally each run but can't push to GitHub without a write credential —
-add a deploy key if you want the history mirrored.
+reports and state files locally on every run. To mirror them to GitHub, give
+the box a deploy key with write access and add a brief drop-in,
+`/etc/systemd/system/jamasp-brief.service.d/push.conf`:
+
+```ini
+[Service]
+ExecStartPost=-/usr/bin/git -C /home/jamasp/Jamasp push origin live
+```
+
+That pushes `live` once a day, after a successful brief. The database is
+never part of that push, because it is gitignored. See **Backups** below.
+
+### Backups
+
+`state/jamasp.db` is not in git. Its committed copies grew `.git` to 9 GB, and
+the repack OOM-killed agent runs in Nov 2026. `jamasp-backup.timer` runs
+`jamasp backup` daily at 06:15 Dubai instead: a `VACUUM INTO` copy that must
+pass `PRAGMA quick_check`, gzipped (~17 MB) into `~/backups/jamasp-db/`, keeping
+the newest 14 (`backup:` in `config/settings.yaml`). The watchdog reports a
+backup that never ran or is older than 36h. These copies sit on the same disk
+as the database, so they don't survive losing the box. See `docs/todo/207`.
+
+To restore, stop **every** writer first. Stopping a timer doesn't stop a run
+already in progress, and the panel and bot are always on. The DB runs
+`journal_mode=delete`, so a leftover `state/jamasp.db-journal` from whatever
+went wrong would be rolled *into* the restored file the first time it opens.
+
+```bash
+# as root: record what's running, stop it, and wait for in-flight runs
+systemctl list-units 'jamasp-*.timer' --state=active --no-legend --plain | awk '{print $1}' > /root/jamasp-timers.txt
+systemctl stop 'jamasp-*.timer' jamasp-panel jamasp-bot
+systemctl list-units 'jamasp-*.service' --state=active --no-legend   # repeat until empty
+
+# as jamasp, in ~/Jamasp: drop the journal, decompress beside the live file,
+# check the copy, and only then swap it in
+rm -f state/jamasp.db-journal
+gunzip -c ~/backups/jamasp-db/jamasp-<stamp>.db.gz > state/jamasp.db.restore
+uv run python -c "import sqlite3,sys; r=sqlite3.connect('state/jamasp.db.restore').execute('PRAGMA quick_check').fetchone()[0]; print(r); sys.exit(r != 'ok')" \
+  && mv state/jamasp.db.restore state/jamasp.db
+
+# as root: bring everything back
+systemctl start $(cat /root/jamasp-timers.txt) jamasp-panel jamasp-bot
+```
+
+The temp name `state/jamasp.db.restore` matches the `state/jamasp.db*` ignore
+rule. If the check fails and the file is left behind, no agent run can commit
+it.
 
 ## Panel (optional web control panel)
 
@@ -933,10 +978,11 @@ As of this writing, two on-host checkouts are not simply "at main":
 - `/home/jamasp/Jamasp` is on branch `live`, which tracks `origin/live` and
   runs hundreds of commits ahead of `main` with its own per-run state
   commits. **Never `git pull` there** — the convention is
-  `git merge origin/main` into `live` (verified 2026-09-05: `git status`
-  stays clean apart from the expected ` M state/jamasp.db`, which every run
-  rewrites and which must never be staged, stashed or reverted). The host
-  has no git write credential, so nothing can be pushed back from it.
+  `git merge origin/main` into `live`. `git status` stays clean, because
+  `state/jamasp.db` is gitignored (since Nov 2026; before that it showed as
+  ` M` after every run and must never be staged, stashed or reverted). The
+  host pushes `live` daily after the brief via the `push.conf` drop-in
+  described above.
   *Resolved:* the `next.config.ts` drift this section used to warn about —
   a byte-identical file that git still reported as modified — is gone as of
   2026-09-05; `git status --porcelain panel/next.config.ts` is empty.

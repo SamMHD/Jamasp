@@ -287,11 +287,11 @@ def store_bars(
     byte-identical row gets a fresh rowid, which rewrites every b-tree page
     it touches for zero information. `backfill` re-walks all history on
     every run by design (it is both the initial backfill and the daily
-    refresh), and `state/jamasp.db` is git-tracked and committed at the end
-    of every run (CLAUDE.md hard rule 4) — so a delete+insert here means
-    megabytes of new, immutable git objects every day forever for rows that
-    did not change. Updating in place touches no row, and so no page, unless
-    a value actually differs.
+    refresh), so a delete+insert here would rewrite megabytes of pages every
+    day for rows that did not change. That churn used to land in git as new,
+    immutable objects (the DB was committed every run until Nov 2026). It
+    still bloats the file and every daily backup. Updating in place touches no
+    row, and so no page, unless a value actually differs.
 
     An UPDATE still runs on every conflict, unconditionally, rather than
     only when a value differs: Yahoo revises the most recent bar while it is

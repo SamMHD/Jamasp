@@ -70,3 +70,13 @@ rather than lazily from whichever test gets there first; that is what removes
 the race rather than hiding it.
 
 Afterwards, confirm a full `npm test` leaves `git status` clean.
+
+## Update 2026-11-17
+
+`state/jamasp.db` is no longer tracked: it is gitignored on `main`, and the
+seed was removed with `git rm --cached` (plan
+`docs/superpowers/plans/2026-11-04-db-out-of-git.md`). The tracked-seed half of
+this item is gone, so a test run no longer dirties `git status` and nothing
+can commit a mutated fixture. The parallel-build race is unchanged: vitest
+files that trigger `build-fixture.mjs` at once still share one path. That is
+what remains open here.

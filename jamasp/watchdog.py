@@ -62,6 +62,13 @@ _WEIGHTS = "check jamasp-weights.service"
 TRANSLATE_BACKLOG_MINUTES = 45
 _TRANSLATE = "check jamasp-translate.service and `jamasp translate --check`"
 
+# The daily DB snapshot (jamasp-backup.timer) is the database's only safety net
+# now that it is out of git. A failed run alerts through OnFailure, but a timer
+# that was never enabled, or was disabled, fails silently, and only this
+# heartbeat notices. 36h: one missed night is tolerated, a second is not.
+BACKUP_STALE_HOURS = 36
+_BACKUP = "check jamasp-backup.service"
+
 # What to do about it, appended to every credentials violation. An alert that
 # names the fix ends the incident; one that does not costs days (docs/todo/007).
 _REAUTH = "run `claude` as the service user to re-authenticate"
@@ -158,6 +165,14 @@ def check(
         violations.append("ingest has never recorded a heartbeat (meta.last_ingest_at missing)")
     elif now_dt - _parse(last_ingest) > timedelta(minutes=INGEST_STALE_MINUTES):
         violations.append(f"ingest stale: last ran {last_ingest} (> {INGEST_STALE_MINUTES} min ago)")
+
+    last_backup = get_meta(conn, "last_backup_at")
+    if last_backup is None:
+        violations.append(f"DB backup has never run (meta.last_backup_at missing) — {_BACKUP}")
+    elif now_dt - _parse(last_backup) > timedelta(hours=BACKUP_STALE_HOURS):
+        violations.append(
+            f"DB backup stale: last ran {last_backup} (> {BACKUP_STALE_HOURS}h ago) — {_BACKUP}"
+        )
 
     yesterday = (now_dt.astimezone(DUBAI) - timedelta(days=1)).strftime("%Y-%m-%d")
     y, m, _ = yesterday.split("-")
