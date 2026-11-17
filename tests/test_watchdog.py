@@ -43,6 +43,7 @@ def _seed_weights_pipeline(conn, *, bar_ts="2026-07-31T00:00:00Z",
 def healthy(tmp_path):
     conn = db.connect(tmp_path / "j.db")
     db.set_meta(conn, "last_ingest_at", "2026-08-01T05:30:00Z")
+    db.set_meta(conn, "last_backup_at", "2026-08-01T02:15:00Z")
     _seed_weights_pipeline(conn)
     reports = tmp_path / "reports"
     (reports / "2026" / "07").mkdir(parents=True)
@@ -613,3 +614,25 @@ def test_abandoned_probe_mirrors_scored_only(tmp_path):
     _add_score(conn, "i2")
     violations = watchdog.check(conn, tmp_path, **kw)
     assert any("gave up on 1 items" in v for v in violations), violations
+
+
+def test_missing_backup_meta(tmp_path):
+    conn, reports, creds = healthy(tmp_path)
+    conn.execute("DELETE FROM meta WHERE key='last_backup_at'")
+    conn.commit()
+    assert any(v.startswith("DB backup has never run") for v in _check(conn, reports, creds))
+
+
+def test_stale_backup(tmp_path):
+    conn, reports, creds = healthy(tmp_path)
+    db.set_meta(conn, "last_backup_at", "2026-07-30T17:59:00Z")  # 36h01m before NOW
+    assert any(
+        v.startswith("DB backup stale: last ran 2026-07-30T17:59:00Z")
+        for v in _check(conn, reports, creds)
+    )
+
+
+def test_backup_inside_the_window_is_silent(tmp_path):
+    conn, reports, creds = healthy(tmp_path)
+    db.set_meta(conn, "last_backup_at", "2026-07-30T19:00:00Z")  # 35h before NOW
+    assert not any("DB backup" in v for v in _check(conn, reports, creds))
