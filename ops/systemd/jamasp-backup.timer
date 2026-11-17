@@ -1,0 +1,12 @@
+[Unit]
+Description=Snapshot the Jamasp database daily at 06:15 Dubai
+
+[Timer]
+# Between the last scan (23:00 Dubai) and the 07:30 brief: the quietest hour
+# for writers, and the morning's first read starts from a fresh safety copy.
+OnCalendar=*-*-* 06:15:00 Asia/Dubai
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target

@@ -17,8 +17,9 @@ for the sage-advisor of the Shahnameh: measured, far-sighted, never breathless.
    concise Persian (numbers and tickers stay Latin); repo reports are English.
    One exception: urgent `/scan` alerts append 1–2 English lines after the
    Persian for desk clarity.
-4. **Commit at the end of every run**: reports, state files, and
-   `state/jamasp.db`, with message `jamasp: <run-type> <date>`.
+4. **Commit at the end of every run**: reports and state files, with message
+   `jamasp: <run-type> <date>`. `state/jamasp.db` is **not** committed — it
+   is gitignored and snapshotted daily by `jamasp backup`.
 5. **Keep state small.** `state/stance.md` must stay under one page; rewrite
    it, don't append.
 6. **No trading instructions.** You advise on market conditions; humans
@@ -38,6 +39,7 @@ for the sage-advisor of the Shahnameh: measured, far-sighted, never breathless.
 | `uv run jamasp flash-rollup [--dry-run]` | send one Persian roundup of held middle-tier items (own timer, 4x/day) |
 | `uv run jamasp translate` | fill Persian renderings for the panel (own timer, 10-min) |
 | `uv run jamasp calendar` | upcoming economic events (UTC + Dubai), high/medium impact |
+| `uv run jamasp backup` | snapshot `state/jamasp.db` to `~/backups/jamasp-db` (own timer, daily) |
 | `uv run jamasp farsi-brief [--dry-run]` | independent codex Persian brief to the desk (normally triggered by `/brief` via `jamasp-bot`) |
 | `uv run jamasp bars backfill` | refresh OHLC bars (idempotent; also the daily refresh) |
 | `uv run jamasp signals refresh` | recompute current technical signal states |
@@ -54,10 +56,10 @@ for the sage-advisor of the Shahnameh: measured, far-sighted, never breathless.
 
 ## Deployment
 
-Jamasp runs on an always-on Linux host: nine systemd timers — 15-minute
+Jamasp runs on an always-on Linux host: ten systemd timers — 15-minute
 ingest, 5-minute dispatcher, daily brief + daily watchdog, 2-hourly scan,
-weekly retro, the 4x-daily news-channel rollup, a daily weights refit, and
-the 10-minute translate pass — drive `jamasp` CLI commands, with every agent run
+weekly retro, the 4x-daily news-channel rollup, a daily weights refit,
+the 10-minute translate pass, and a daily DB backup — drive `jamasp` CLI commands, with every agent run
 (fixed timers and dispatched wakeups alike) wrapped by `jamasp run`, which
 enforces the daily run cap, retry-with-one-retry, and per-run-type
 timeouts. The full runbook — including the two things that will bite you
