@@ -297,10 +297,34 @@ the repack OOM-killed agent runs in Nov 2026. `jamasp-backup.timer` runs
 `jamasp backup` daily at 06:15 Dubai instead: a `VACUUM INTO` copy that must
 pass `PRAGMA quick_check`, gzipped (~17 MB) into `~/backups/jamasp-db/`, keeping
 the newest 14 (`backup:` in `config/settings.yaml`). The watchdog reports a
-backup that never ran or is older than 36h. To restore, stop the timers, run
-`gunzip -c ~/backups/jamasp-db/jamasp-<stamp>.db.gz > state/jamasp.db`, then
-start the timers again. These copies sit on the same disk as the database, so
-they don't survive losing the box. See `docs/todo/207`.
+backup that never ran or is older than 36h. These copies sit on the same disk
+as the database, so they don't survive losing the box. See `docs/todo/207`.
+
+To restore, stop **every** writer first. Stopping a timer doesn't stop a run
+already in progress, and the panel and bot are always on. The DB runs
+`journal_mode=delete`, so a leftover `state/jamasp.db-journal` from whatever
+went wrong would be rolled *into* the restored file the first time it opens.
+
+```bash
+# as root: record what's running, stop it, and wait for in-flight runs
+systemctl list-units 'jamasp-*.timer' --state=active --no-legend --plain | awk '{print $1}' > /root/jamasp-timers.txt
+systemctl stop 'jamasp-*.timer' jamasp-panel jamasp-bot
+systemctl list-units 'jamasp-*.service' --state=active --no-legend   # repeat until empty
+
+# as jamasp, in ~/Jamasp: drop the journal, decompress beside the live file,
+# check the copy, and only then swap it in
+rm -f state/jamasp.db-journal
+gunzip -c ~/backups/jamasp-db/jamasp-<stamp>.db.gz > state/jamasp.db.restore
+uv run python -c "import sqlite3,sys; r=sqlite3.connect('state/jamasp.db.restore').execute('PRAGMA quick_check').fetchone()[0]; print(r); sys.exit(r != 'ok')" \
+  && mv state/jamasp.db.restore state/jamasp.db
+
+# as root: bring everything back
+systemctl start $(cat /root/jamasp-timers.txt) jamasp-panel jamasp-bot
+```
+
+The temp name `state/jamasp.db.restore` matches the `state/jamasp.db*` ignore
+rule. If the check fails and the file is left behind, no agent run can commit
+it.
 
 ## Panel (optional web control panel)
 
