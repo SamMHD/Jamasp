@@ -938,3 +938,15 @@ def test_translate_check_fails_when_the_translator_will_not_answer(tmp_path,
          "--config-dir", str(cfgdir)],
     )
     assert ok.exit_code == 0, ok.output
+
+
+def test_backup_writes_snapshot_and_heartbeat(tmp_path):
+    dbp = tmp_path / "j.db"
+    db.connect(dbp).close()
+    result = CliRunner().invoke(
+        main, ["backup", "--db", str(dbp), "--dest", str(tmp_path / "bk")]
+    )
+    assert result.exit_code == 0, result.output
+    assert result.output.startswith("backup: ")
+    assert len(list((tmp_path / "bk").glob("jamasp-*.db.gz"))) == 1
+    assert db.get_meta(db.connect(dbp), "last_backup_at") is not None

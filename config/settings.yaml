@@ -158,3 +158,8 @@ farsi_brief:
   # writes the whole brief, so it gets a far longer ceiling than a
   # translate batch.
   timeout_seconds: 600
+# Daily snapshot of state/jamasp.db (`jamasp backup`, jamasp-backup.timer).
+# The DB is not in git; these gzipped copies are its safety net.
+backup:
+  dir: ~/backups/jamasp-db
+  keep: 14
