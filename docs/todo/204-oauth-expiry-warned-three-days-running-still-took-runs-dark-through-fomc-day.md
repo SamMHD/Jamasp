@@ -68,3 +68,25 @@ from a phone. The next lapse falls on whatever the token's lifetime is from
 - `reports/2026/10/2026-10-28-brief.md` header (written by #882 in place of
   the brief).
 - `jamasp/watchdog.py` lines 17–24 (the 3-day constant and its rationale).
+
+## Recurrence — 17–19 Nov 2026 (different cause, same shape; next lapse now dated)
+
+- **Tue 17 Nov 09:00Z → Thu 19 Nov 13:00Z: 23 consecutive agent runs failed**
+  in ~3 s each (`agent_runs` 1059–1081: 19 scans, the Wed 18 and Thu 19
+  briefs, the FOMC-minutes deepdive ×2) on
+  `API Error: Your account can't receive replies from Claude right now. You
+  can find the next step in the Anthropic Verification Portal` — an
+  account-side verification block, not the OAuth expiry. 54 hours dark
+  through retail sales, Nvidia, Waller's 50bp call, the FOMC minutes and
+  gold's break of 3,800 (3,880 → 3,707); ~46 identical failure alerts to the
+  desk. First run back: the Thu 15:00Z scan (1,076 unread; alert sent;
+  catch-up deepdive #81 booked for 22:20Z).
+- The credential probe cannot see this failure class (the token was valid);
+  the alert text carried the portal URL but nothing marked it "human action
+  on the account, not the host". The credential fallback (fix 4) would
+  have helped only if the API key sits on a different account/org from the
+  blocked one.
+- **The same failure output carries the next dated lapse:** "this sign-in
+  ends between 2026-11-22 and 2026-11-25 … Run `claude auth login` before
+  then, or use `claude setup-token` for unattended jobs." The Thu 15:00Z scan
+  alert relayed it to the desk in Persian. 22 Nov is a Sunday (retro day).
