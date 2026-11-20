@@ -13,6 +13,19 @@
 # (wakeup #30 cancelled → #32 at 19 Aug 18:45Z). Trust-but-verify the
 # hand-built entries below against the feed for another week.
 events:
+  - date: 2026-12-04
+    time_dubai: "Fri 4 Dec 17:30 (13:30Z) - US employment report (Nov)"
+    title: November payrolls - the last tier-1 labour print before the 8-9 Dec FOMC (inside the blackout)
+    why: >
+      Added 20 Nov (Fri brief). Date from the investinglive Paulson post (Thu 19 Nov 23:49Z: 'the 4 December
+      payrolls report') - a relay, not a primary (BLS 403s): the Sat 28 Nov brief re-verifies on Trading
+      Economics / MarketWatch (rule 16). Paulson's three triggers for faster hikes - inflation expectations,
+      wage growth, underlying inflation - make average hourly earnings the component the 50bp branch reads.
+      Lands inside the Fed blackout (from Sat 28 Nov), so the print post's odds sentence is the only carrier.
+    action: >
+      Deepdive at print+45 (14:15Z): investinglive print post body -> CNBC jobs article --fresh -> actionforex
+      front; date December in both units and the 12-month figure; apply the stance's flip lines as of the run
+      on the CNBC @GC.1 field and the 21:59Z row (rule 14/23); name the largest component and AHE.
   - date: 2026-11-18
     time_dubai: "Wed 18 Nov 23:00 (19:00Z) - FOMC minutes of the 27-28 Oct meeting"
     title: FOMC minutes - the week's Fed-pricing carrier; deepdive #80 at 19:45Z
