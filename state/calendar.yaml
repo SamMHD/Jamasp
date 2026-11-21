@@ -13,6 +13,20 @@
 # (wakeup #30 cancelled → #32 at 19 Aug 18:45Z). Trust-but-verify the
 # hand-built entries below against the feed for another week.
 events:
+  - date: 2026-11-25
+    time_dubai: "Wed 25 Nov 17:30 (13:30Z) - core PCE (Oct), Q3 GDP second estimate, durable goods, jobless claims; Beige Book 23:00 (19:00Z)"
+    title: Core PCE - the last tier-1 inflation print before Thanksgiving and the Sat 28 Nov blackout
+    why: >
+      Added 21 Nov (Sat brief). Date and consensus from the actionforex calendar summary 23-27 Nov (GMT) and
+      TD's Weekly Bottom Line - secondary sources, BEA not read: the Sunday/Monday brief re-verifies on Trading
+      Economics / MarketWatch (rule 16). Consensus as read: core PCE 0.3 m/m / 3.2 y/y (prev 0.3 / 3.1),
+      headline 0.3 m/m (prev 0.5), GDP 3.5 (prev 3.4), claims 200K. Lands in a week where positioning, not
+      rates, has set gold's price for five sessions (2y -13bp with gold -4% on Fri 20 Nov) - the print tests
+      whether the 2y regains the wheel; the equity/margin leg is the third channel to reject first.
+    action: >
+      Deepdive #84 at print+45 (14:15Z): investinglive print post body -> CNBC PCE article --fresh ->
+      actionforex front; December odds in both units and any 12-month figure; the stance's flip lines as of the
+      run on the CNBC @GC.1 field and the 21:59Z row. Beige Book 19:00Z is the Thu 26 Nov brief's read.
   - date: 2026-12-04
     time_dubai: "Fri 4 Dec 17:30 (13:30Z) - US employment report (Nov)"
     title: November payrolls - the last tier-1 labour print before the 8-9 Dec FOMC (inside the blackout)
