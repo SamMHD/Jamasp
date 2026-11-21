@@ -70,3 +70,8 @@ and read the rows the listing did not show before exiting.
   above and means "marked N > listed" is **not** a clean race signal —
   option 3 should report rows *fetched after the listing*, not the raw
   difference. None of the five was gold-relevant.
+- **Scan 2026-11-21 11:00Z — same pattern, again no race.** Listed 16 at
+  11:00:06Z; mark at 11:00:27Z reported **23**. All seven extras are
+  actionforex FX-pair "Weekly Outlook/Report" rows with `fetched_at`
+  09:01:31Z / 09:31:35Z — 90+ minutes before the listing, so hidden by
+  the listing, not late arrivals. None gold-relevant.
