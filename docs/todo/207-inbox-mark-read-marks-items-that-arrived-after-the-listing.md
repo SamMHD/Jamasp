@@ -56,3 +56,17 @@ Add a test: insert an item after the listing, assert it stays unread.
 When "marked N" exceeds the listed count, query
 `select published_at, fetched_at, source, headline from items where read_at like '<mark ts>%'`
 and read the rows the listing did not show before exiting.
+
+## Recurrence log
+
+- **Scan 2026-11-21 09:00Z — count mismatch without a race.** Listed 15
+  at 09:00:06Z and again 15 at 09:00:24Z (re-list immediately before the
+  mark, no new ids); mark at 09:00:25Z reported **20**. All five extras
+  have `fetched_at = 08:31:29Z` — 29 minutes *before* the listing: four
+  actionforex "EUR/xxx Weekly Outlook" rows and a second mehr_en copy of
+  the CITEX photo item (the listed row carried it under `also`). So the
+  listing hides rows on its own (cluster duplicates, and apparently
+  FX-cross technical outlooks), which settles the unverified fourth row
+  above and means "marked N > listed" is **not** a clean race signal —
+  option 3 should report rows *fetched after the listing*, not the raw
+  difference. None of the five was gold-relevant.
