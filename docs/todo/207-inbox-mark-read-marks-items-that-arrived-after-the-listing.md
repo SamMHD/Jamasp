@@ -81,3 +81,22 @@ and read the rows the listing did not show before exiting.
   11:00Z, same `cluster_id`, `fetched_at` 12:45:57Z — 14 minutes before
   the listing, so hidden as a duplicate of an already-read cluster head
   (no `also` to show it under). Not a race; not gold-relevant.
+- **Scan 2026-11-21 17:00Z — same pattern, first content-bearing hidden
+  row.** Listed 18 at 17:00:07Z; mark at 17:00:25Z reported **20**. Both
+  extras were fetched before the listing (16:16:26Z, 16:45:46Z) — not a
+  race. One is a northern_miner re-headline of the Angola / De Beers row
+  (same `cluster_id`, head read 03:35Z; not gold-relevant). The other is
+  Gulf News "Middle East war: 8 things UAE residents need to know
+  tonight, November 21" (`1113b3e6020910aa`), clustered
+  (`c73a6ed9bffffbb3`) with the **20 Nov** edition "6 key updates … this
+  evening, November 20" and hidden as a duplicate of that already-read
+  head. That is a false cluster: a dated daily digest whose body is new
+  every day. Its body carried the day's Gulf items (UKMTO: two tanker
+  incidents near Khasab on Saturday; CENTCOM's denial of the F-16 claim;
+  an Iranian navy mine claim). None met the scan's alert test, but this
+  is the first hidden row that was gold-relevant, and the scan read it
+  only because of the manual count check. For the fix: besides reporting
+  hidden rows, either the clusterer should not merge serial digests
+  across dates (date token in the headline differs, `published_at` ~24h
+  apart), or the listing should show an unread row whose cluster head is
+  already read.
