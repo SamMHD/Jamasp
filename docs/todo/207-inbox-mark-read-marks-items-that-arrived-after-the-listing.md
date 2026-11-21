@@ -75,3 +75,9 @@ and read the rows the listing did not show before exiting.
   actionforex FX-pair "Weekly Outlook/Report" rows with `fetched_at`
   09:01:31Z / 09:31:35Z — 90+ minutes before the listing, so hidden by
   the listing, not late arrivals. None gold-relevant.
+- **Scan 2026-11-21 13:00Z — same pattern, cluster-duplicate kind.** Listed
+  15 at 13:00:05Z; mark at 13:00:16Z reported **16**. The extra is a
+  mehr_en re-headline ("…recent two wars") of a row already read at
+  11:00Z, same `cluster_id`, `fetched_at` 12:45:57Z — 14 minutes before
+  the listing, so hidden as a duplicate of an already-read cluster head
+  (no `also` to show it under). Not a race; not gold-relevant.
