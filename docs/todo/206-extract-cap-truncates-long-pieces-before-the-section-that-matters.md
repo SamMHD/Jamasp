@@ -35,3 +35,5 @@ and is what rule 14's subagent dispatch actually needs.
 
 Subagent reads the truncated text; the missing section is logged as "cut by
 the extract cap" in the brief's sourcing-health line.
+
+- Recurrence 22 Nov (Sun brief): the actionforex weekly report (661652, Sat 21 Nov) extracted `--fresh` ends mid-sentence in the DXY weekly-chart paragraph with `[truncated]`; any gold section after it was not readable - second Sunday running.
