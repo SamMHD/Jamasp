@@ -90,3 +90,19 @@ from a phone. The next lapse falls on whatever the token's lifetime is from
   ends between 2026-11-22 and 2026-11-25 … Run `claude auth login` before
   then, or use `claude setup-token` for unattended jobs." The Thu 15:00Z scan
   alert relayed it to the desk in Persian. 22 Nov is a Sunday (retro day).
+
+### 2026-11-22 (retro, 16:01Z)
+
+- `~/.claude/.credentials.json` read in this run (expiry fields only):
+  `refreshTokenExpiresAt` = **2026-11-25T10:04Z**; access-token `expiresAt`
+  2026-11-23T00:00Z (file mtime 16:00Z today, so the access token is still
+  refreshing). The retro itself ran, so the "22–25 Nov" lapse has not
+  started.
+- Without a human `claude auth login` (or `claude setup-token`) before Wed
+  25 Nov 10:04Z, the first runs at risk are the 11:00Z scan and deepdive
+  #84 (core PCE / GDP, 14:15Z) — the same shape as 28 Oct (FOMC day) and
+  17–19 Nov (minutes, the 3,800 break).
+- Week's ledger from `agent_runs`, 15 Nov 16:00Z → 22 Nov 16:00Z: scans 37
+  ok / 19 failed, briefs 5 / 2, deepdives 2 / 2, retro 1 / 0. All 23
+  failures sit in 17 Nov 09:00Z → 19 Nov 13:00Z and each died in 3–4 s.
+- Stance and the retro's desk summary both carry the dated figure.

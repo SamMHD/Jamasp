@@ -150,3 +150,15 @@ the sign.
 ## Update 2026-11-08 (retro)
 
 7 Nov 23:33Z fit, theme n=1110. rates_dollar β +0.0278 (se 0.0144, 1.9σ, n=1020) multiplier **1.44** (0.91 on 1 Nov, 1.23 on 24 Oct); geopolitics +0.0143 (1.0σ, n=1033) 0.74 (1.11); physical_cb **+0.0117** (0.8σ, n=63) — the `negative:` flag is gone, pin renewed to 13 Dec; supply_mining −0.0106 and other −0.0120 at the floor. The two live columns swapped order back on a +5% gold week — the pooled 24h fit follows the week's trend whichever column was busiest. Per-week split re-run (same method, reproduces the October rows): **wk 45 (2–8 Nov) rates_dollar bull n=33 +0.61% / bear n=26 +0.44%** — the November row named as the trigger does NOT invert (first correctly ordered week since wk 40), but it is a trend week like wks 43–44 the other way. No scorer change; the demeaned-by-day variant is still the only read that separates relay-lag from trend.
+
+### 2026-11-22 (retro)
+
+21 Nov 23:35Z fit, theme n=1306. In one week the published ranking swapped:
+geopolitics β +0.0207 (1.4σ) → **+0.0428 (2.8σ)**, multiplier 1.00 →
+**1.54**; rates_dollar multiplier 1.24 → **1.07** (β +0.0296, 2.0σ). The
+week was gold −8.3% on forced selling with the 2y −17.8bp and a worse
+kinetic record every day — the stance names neither channel as the setter
+of any session. supply_mining swung −0.0278 (17 Nov) → −0.0155 (19 Nov) →
+−0.0256 (20 Nov) on ~24 new hours per fit. One liquidation week is moving
+pooled columns by 0.7–1.4σ; a windowed fit (or a per-regime split) would
+show whether any of it is signal. No scoring change taken on it.
