@@ -17,6 +17,9 @@ events:
     time_dubai: "Wed 25 Nov 17:30 (13:30Z) - core PCE (Oct), Q3 GDP second estimate, durable goods, jobless claims; Beige Book 23:00 (19:00Z)"
     title: Core PCE - the last tier-1 inflation print before Thanksgiving and the Sat 28 Nov blackout
     why: >
+      VERIFIED 22 Nov (Sun brief, MarketWatch calendar fetched 03:31Z; Trading Economics did not render): Wed 25 Nov
+      8:30 ET = 13:30Z holds - core PCE 0.3 m/m / 3.2 y/y, headline 0.3 m/m / 3.8 y/y (prev 3.6), GDP 3.6 (actionforex 3.5),
+      durables 1.1 (prev 1.8), income 0.4 / spending 0.4, claims 200K (prev 203K); Beige Book 19:00Z. BEA still unread.
       Added 21 Nov (Sat brief). Date and consensus from the actionforex calendar summary 23-27 Nov (GMT) and
       TD's Weekly Bottom Line - secondary sources, BEA not read: the Sunday/Monday brief re-verifies on Trading
       Economics / MarketWatch (rule 16). Consensus as read: core PCE 0.3 m/m / 3.2 y/y (prev 0.3 / 3.1),
