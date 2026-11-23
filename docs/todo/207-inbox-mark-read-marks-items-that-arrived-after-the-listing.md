@@ -134,3 +134,18 @@ and read the rows the listing did not show before exiting.
   different country's print. Read after the fact from `items` by
   `read_at`; none met the alert test (the 15:00Z alert already covered
   the move and the PMI).
+
+- **Recurrence — scan 2026-11-23 19:00.** Listed 39 at 19:00:09Z;
+  `--mark-read` at 19:00:56Z reported **"marked 45 items read"**. Both
+  variants in one run. Four extras are the on-the-hour race (fetched
+  19:00:31–32Z, after the listing: two MarketWatch items, and mining.com's
+  AngloGold / Sitka and Springpole pieces). Two are cluster-hidden unread
+  rows: a gcaptain Costa Concordia item and the **investing.com oil wrap
+  "Oil drops more than 3% on increased Middle East flows, Libyan pipeline
+  restart" (17:30Z)** — the one row in the delta that bears on a live
+  stance clause (Monday's Brent settle vs 92.10), and it was not in the
+  listing. All six were read from `items` *before* marking this time (a
+  count check between the listing and `--mark-read`); none met the alert
+  test. The Tue brief will not get the oil wrap from `inbox`; it reads the
+  Brent settle directly, but the "increased Middle East flows" reason
+  reaches it only if it sweeps `items` by keyword.
