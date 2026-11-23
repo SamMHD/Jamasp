@@ -121,3 +121,16 @@ and read the rows the listing did not show before exiting.
   in the listing. Read after the fact from `items` by `read_at`; none met
   the alert test. Same on-the-hour collision of the scan and ingest
   timers as at 11:00.
+
+- **Recurrence — scan 2026-11-23 17:00.** Listed 24 at 17:00:07Z;
+  `--mark-read` at 17:00:23Z reported **"marked 31 items read"**. Not a
+  race this time (all seven extras were fetched 15:15Z–16:01Z): every one
+  is an unread row hidden behind a cluster head already read at 11:00Z,
+  13:00Z or 15:03Z — four Nvidia / Huang re-headlines, the investing.com
+  gold and oil wraps, and the **US flash services PMI print post
+  (forexlive, 54.7 vs 55.7), which was clustered under the France /
+  eurozone flash PMI head read at 11:00Z**. That last one is the
+  mis-cluster variant: a scan-marker print hidden from the listing by a
+  different country's print. Read after the fact from `items` by
+  `read_at`; none met the alert test (the 15:00Z alert already covered
+  the move and the PMI).
