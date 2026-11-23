@@ -100,3 +100,16 @@ and read the rows the listing did not show before exiting.
   across dates (date token in the headline differs, `published_at` ~24h
   apart), or the listing should show an unread row whose cluster head is
   already read.
+- **Scan 2026-11-23 11:00Z — largest gap so far, and the first true race.**
+  Listed 35 at 11:00:08Z; `--mark-read` at 11:00:17Z reported **"marked
+  58 items read"**. Of the 23 extra rows, ~19 carry `published_at`
+  10:23Z–10:58Z and were not in the listing at all: an ingest pass landed
+  inside the nine seconds between the two commands (the scan and ingest
+  timers both fire on the hour). The rest are cluster duplicates (UK /
+  eurozone flash PMI siblings, the MarketWatch re-headline). Read after
+  the fact from the `items` table by `read_at`; none met the alert test
+  (Ackman on a Fed-hike recession, Nvidia / Huang rehiring, Saxo COT, ECB
+  DLT collateral). The brief will not see them either. For the fix: this
+  is the case the title describes — `--mark-read` should take the
+  listing's cut-off (max `fetched_at` or an explicit `--until`) rather
+  than marking everything unread at call time.
