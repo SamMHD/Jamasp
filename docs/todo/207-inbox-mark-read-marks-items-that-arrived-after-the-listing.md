@@ -113,3 +113,11 @@ and read the rows the listing did not show before exiting.
   is the case the title describes — `--mark-read` should take the
   listing's cut-off (max `fetched_at` or an explicit `--until`) rather
   than marking everything unread at call time.
+
+- **Recurrence — scan 2026-11-23 13:00.** Listed 27 at 13:00:06Z;
+  `--mark-read` at 13:00:18Z reported **"marked 33 items read"**. The six
+  extra rows are actionforex pair outlooks (EUR/USD, USD/JPY, GBP/USD,
+  USD/CHF, USD/CAD, GBP/JPY; `published_at` 11:01Z–11:48Z) that were not
+  in the listing. Read after the fact from `items` by `read_at`; none met
+  the alert test. Same on-the-hour collision of the scan and ingest
+  timers as at 11:00.
