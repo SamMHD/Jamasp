@@ -1,6 +1,7 @@
 watchlist:
   - theme: fed-rate-path
     why: >
+      23 Nov (Mon brief): reopen - gold +1.9 to +2.6% WITH equity futures (S&P +2.2, Nasdaq-100 +2.8) and indicative yields UP ~4bp (CNBC 2y 4.649 / 10y 4.95 quoted 23:30Z Sun against prev-close fields 4.613 / 4.912 - Friday's 2y close is 4.649 or 4.613 by field, unresolved; Japan shut, no cash trading in Asia): rates not the setter again. Operative December stays 24.0bp / 95.8% (Fri 17:21Z); context: actionforex front (undated, fetched 03:31Z Mon) 'CME FedWatch shows 99.5% for a 25bps December hike and just 0.5% for 50bps, down from 9.3% on Thursday' (~25.1bp, inside the margin) - the 50bp branch is gone; no 12-month level in any text. Bessent (CBS Face the Nation, Sun): the Fed 'may be making a policy mistake if they over-tighten'; Kelly (JPM): one hike then a pause, Waller 'a lonely voice' for 50bp; Ackman: 3% target. Growth-scare inputs: Australia flash PMI 46.1, OCBC 'AI rout becomes a growth shock'. Setter test written as one net line over Mon+Tue (2 of 2 -> bearish-rates +5 / base -5; 0 of 2 -> bearish-rates -5 / base +5). (a')/(b') not met: 30/40/30 held. Week: US flash PMIs Mon 14:45Z, Williams 21:00Z (community venue), confidence Tue 15:00Z, core PCE Wed 13:30Z (#84), Thanksgiving Thu, blackout from Sat 28 Nov.
       22 Nov (Sun brief, market closed): no new dated December figure - operative stays 24.0bp / 95.8% (investinglive Cook post Fri 17:21Z). The actionforex weekly (Sat 07:08Z, by subagent) carried NO FedWatch split this week - OIS only: net 12-month Fed tightening -20.5bp between its Tuesday and Saturday snapshots (level not stated), 'December pricing has held', 10y -18.9bp w/w to 4.950 (support 4.814), DXY 103.840 +0.42% w/w (resistance 103.78 / 104.58 / 105.44), Nasdaq -10.02% w/w, VIX 35.90; gold section cut by the extract cap (todo-206). A change without a level is context - (b') not readable and gold was DOWN: hold 30/40/30; the 12-month LEVEL is unknown (86bp is 13 Nov), the first dated level this week is the comparator. Week verified on MarketWatch (TE did not render): flash PMIs Mon 14:45Z; Williams Mon 21:00Z at the University of Mount Saint Vincent (Bronx regional visit - community venue, blind window, Tue brief, marker only); confidence Tue 15:00Z (92.8, prev 91.7); core PCE Wed 25 Nov 13:30Z CONFIRMED (0.3 / 3.2 y/y; headline 0.3 / 3.8 y/y; GDP 3.6; durables 1.1; income 0.4 / spending 0.4; claims 200K) -> #84 stands; Beige Book 19:00Z; no other Fed speaker listed through 4 Dec; NFP Fri 4 Dec 13:30Z confirmed (prev 165K, forecast not shown) -> #83 stands; auction slots not listed.
       21 Nov (Sat brief): Fri close 2y 4.649 (-13.0bp, CNBC 5:05pm line), 10y 4.95 (-10.2), 30y 5.337 (-6.4), DXY 103.84 flat - and gold -3.98% on the field / -88.9 on the row with the Nasdaq -5.28%: a same-sign session (re-earn 0 of 2), a de-grossing with the haven bid in Treasuries. Operative December 24.0bp / 95.8% (investinglive Cook post Fri 17:21Z); the Americas wrap 22:21Z 'chance the Fed stands pat in December close to 9%' (~22.75bp) is inside the margin and (b') needs gold UP - hold 30/40/30. TD weekly: December 'overwhelmingly priced', minutes 'nearly all' expect more hikes, Waller 50bp unless January is signalled, Williams no drama. Barkin Fri: no relay. Final UMich 1y 3.7 / 5y 3.3. Week (actionforex summary, GMT; TE/MarketWatch re-verification owed Sunday): flash PMIs Mon 14:45Z (54.6/55.8), confidence Tue 15:00Z (92.1), core PCE Wed 25 Nov 13:30Z (0.3 m/m, 3.2 y/y; headline 0.3 from 0.5) + GDP 3.5 + durables + claims 200K -> deepdive #84 14:15Z, Beige Book Wed 19:00Z, Thanksgiving Thu, blackout from Sat 28 Nov.
       20 Nov (Fri brief): no new dated figure - operative December 27bp / ~5% for 50bp / 61-62bp over three meetings (investinglive Wed-Thu), no 12-month figure since 86bp (13 Nov); (a')/(b') not met -> 30/40/30 held. Paulson (Money Marketeers Thu): no steer, 'October's pause was never a stop', three triggers to go faster (expectations, wages, underlying inflation); J.P. Morgan drops 'December and done' for Dec/Jan/Mar to 4.50-4.75 (joins DB, BofA); Barclays back-to-back 25s; Goolsbee 'no clear path back to 2%'; actionforex round-up: 50bp 'once again dismissed', Waller read as 25+25; the Americas wrap carried no odds sentence. TAPE: 2y 4.741 in Asia (-3.8bp; prev close 4.779; Mon 4.827 = -8.6bp on the week) with gold -8.5% on the week - rates set the price on no session; f(2y) a hypothesis, re-earn 0 of 2. NFP Fri 4 Dec 13:30Z (investinglive; re-verify Sat 28 Nov) - deepdive at print+45. Blackout from Sat 28 Nov.
@@ -1714,6 +1715,7 @@ watchlist:
 
   - theme: energy-pce-passthrough
     why: >
+      23 Nov (Mon brief, weekly prune - KEPT): Wednesday's core PCE (13:30Z; 0.3 m/m / 3.2 y/y, headline 0.3 / 3.8) is this theme's gate; Brent 92.30, about -4% last week and lower again at the reopen despite the Bahrain attack - the oil leg into the print is fading, not building.
       The bridge from the war to the Fed: oil into CPI is the live hike-
       odds channel, and oil is gold's price-setter on non-Fed days - in
       BOTH directions. 15 Sep settles WTI 105.83 / Brent 108.75 (109.97
@@ -1869,6 +1871,7 @@ watchlist:
 
   - theme: us-fiscal-dominance
     why: >
+      23 Nov (Mon brief, weekly prune - KEPT): flagged for removal on 16 Nov, but the theme's live channel printed on Sunday - Treasury Secretary Bessent on CBS: the Fed 'may be making a policy mistake if they over-tighten', two weeks before the 8-9 Dec decision. The tell is unchanged (30y >=5.50 close with gold UP and DXY DOWN -> base +5); 30y 5.337 Fri. Remove at the 21 Dec brief if neither the tell nor a second Treasury/White House statement on the Fed prints.
       Treasury's expanded long-dated buybacks (19 Aug) are de facto
       yield-curve control and the market read them as debasement - gold's
       trend regime began as US debt passed $40tn. The tool FAILED IN
@@ -2028,68 +2031,6 @@ watchlist:
       the only live hook is the re-open condition - a 30y >=5.50 CLOSE with gold UP and DXY DOWN (30y 5.47 Fri, high 5.502).
       Kept one more week on that hook alone; REMOVE at the Mon 23 Nov brief unless the tell re-opens.
     since: 2026-08-20
-
-  - theme: euro-sovereign-stress
-    why: >
-      France repriced as a non-core sovereign: OAT-Bund 10y spread ~110bp
-      (24 Sep) -> ~130 (1 Oct) -> >140bp (Reuters, 2012 wides), ABOVE
-      Italy's; Vanguard 'degrading credit' (FT); the CAC 40 broke its
-      multi-year rising support with no buying response (investinglive 4
-      Oct); EUR/USD 1.1380 -> 1.1165 low (actionforex: 1.1150 / 1.1080
-      below, 1.1275 / 1.1320 above); MUFG short EUR/JPY. This is what put
-      the DXY at a 52-wk high (102.53, Sun 4 Oct session) while the US 2y
-      FELL - an ex-US dollar bid. For gold: (a) the DXY leg of the chain
-      (oil -> 2y -> DXY -> gold, rule 22) carries less information when the
-      move is euro-driven - gold rose +0.2% through the new high on the
-      Sunday open; (b) gold in EUR terms sits near its highs - a European
-      safe-haven bid the paper tape will not show until the SGE/London desks
-      are back (Thu 8 Oct, LBMA conference week); (c) a disorderly OAT move
-      is the 'other central bank' channel (rule 6) for the ECB - accounts
-      Thu 11:30Z. Markers: OAT-Bund 150 / 160bp; EUR/USD 1.1150 / 1.1080;
-      DXY 103; CAC follow-through. Stance line: spread >=160bp with DXY
-      >=103 and gold DOWN -> the dollar leg is back in the chain; gold UP
-      through it -> the ex-US read stands. Not a weight input by itself;
-      enters via the DXY/2y sign test. Kill if the spread closes <120bp for
-      a week.
-      7 OCT: Mon the CAC -0.8% alone in Europe, EUR/USD 1.1217 (-0.3%), DXY
-      102.1-102.5; Tue the French government took deficit steps, the OAT-Bund
-      spread narrowed and EUR rebounded (investinglive 11:19Z), DXY closed
-      101.83 with gold UP - the ex-US-dollar read held both ways. Spread level
-      not relayed in figures; <120bp for a week kills the theme.
-      8 OCT: French relief lasted one day - the euro slid again Wed
-      (actionforex), European yields led the morning rout that took gold to
-      4094.7; a report that France is weighing more short-dated issuance
-      reversed global yields in the US afternoon; DXY closed 102.24 (+0.41;
-      Reuters: an 18-month high), 'some shift away from euros on debt worries'
-      (wrap). Gold followed the France dollar DOWN this time (-43.7 with the
-      2y down) - the 6 Oct marker ('gold ignores a France dollar, follows a 2y
-      dollar') is contradicted once; a second print makes the dollar leg a
-      chain input again.
-      9 OCT: Europe led the Thu morning rout again (US 10y ~5.35 in Europe
-      hours per actionforex; EUR/GBP breakdown - investinglive chart of the
-      day; ECB accounts 11:30Z: higher long-term yields 'could do part of
-      its tightening work') before the US afternoon reversed it. The Thu
-      dollar fall (DXY 102.138, -0.10) was AI-flows (the OpenAI revenue
-      report; wrap: 'AI flows have been a big part of the USD outperformance')
-      - not euro. Gold followed a non-2y dollar for the SECOND session (Wed
-      euro-up / gold-down, Thu AI-down / gold-up, the 2y down both days):
-      the written DXY >=0.3 trigger is unmet on 0.10, logged as substance; a
-      third session writes DXY -> gold into base. Spread level still not
-      relayed in figures.
-      20 OCT: OAT 10y 4.866% (+7.8bp), Bund 3.42 (+1), spread ~145bp (two-week high);
-      BlackRock: France 'near 5%', +100bp since August, Moody's the next catalyst; UBS sees
-      EUR 1.16 by year-end (1.11 an overshoot). DXY +0.20 with the 2y the same sign - not
-      a dollar-leg session (count 0). France led the global duration sell-off that set the
-      2y and gold Monday.
-      23 OCT FRI BRIEF: European stocks tumbled Thu on French debt worries and bond yields (investinglive
-      European wrap); MUFG ECB preview: October hold BECAUSE of the sell-off and French fiscal risk, Dec + Q1
-      hikes to 3.00%, base case OAT-Bund ~170bp / EUR 1.08-1.14 (45%), credibility crisis >200bp / EUR
-      1.02-1.10 (15%), EUR/USD 1.12 year-end; Panetta (Turin 21 Oct): rising yields 'a drag on growth, not a
-      crisis', France and Italy the stress points. EUR/USD 1.1213 (-0.17%); DXY -0.17 with the 2y DOWN - not a
-      dollar-leg session (count 0). ECB 29 Oct added to calendar (slot unverified).
-      28 OCT WED OUTAGE DEEPDIVE: French spreads widened again Tue (actionforex 12:51Z: euro weakest; investinglive
-      17:07Z: French yields climb) - no OAT-Bund level read; ECB Thu 13:15Z/13:45Z carries the spread (15:00Z scan).
-    since: 2026-10-05
 
   - theme: ai-credit-risk-off
     why: >
@@ -2422,6 +2363,7 @@ watchlist:
   - theme: bahrain-iranian-attack-attributed
     since: 2026-11-16
     why: >
+      23 Nov (Mon brief): the class's tape clause is on a no-step trajectory - Brent 92.30 at 03:22Z (-0.29% vs 92.57; low 91.57) with gold UP on equity relief: not the haven read. Clause rewritten with a margin before the session: Brent settle >=93.05 AND gold UP >=5 on both bases -> kinetic +5 / base -5; 92.11-93.04 inside the margin; <=92.10 with gold up = relief read, the class becomes a count; closes at the Tue 24 Nov brief. Facility still unnamed in anything read this run, no CENTCOM text; 'two injured, Pakistani resident critical' and the UAE condemnation are Gulf News headlines of 22 Nov, not extracted here.
       22 Nov (Sun brief): IMPACT CLASS REACHED ON RECORD. Bahrain Interior Ministry / Civil Defence official statement, Sat night 21 Nov (Gulf News 19:49Z, extracted): 'A fire broke out at a civilian industrial facility in Bahrain on Saturday night following an Iranian attack' - material damage, no injuries, facility NOT identified; state TV: air defences intercepted Iranian aerial attacks. AFP residents: smoke over Sitra Island 'including a refinery run by state oil company Bapco' - witnesses, not a Bapco/government text (no energy-node hit on record). Fars/Mehr: IRGC 'attacked two US bases, Sheikh Isa and Juffair' - claim, no CENTCOM or Bahraini impact text. Market closed: the kinetic +5 / base -5 step waits for the tape clause from the Sun 23:00Z reopen (Mon Brent settle UP vs 92.57 AND gold UP >=5 on the field and the 21:59Z row vs 3539.0; Brent up with gold DOWN = hike-and-margin, no step, the class becomes a count). Watch: a Bapco/BNA facility name (Sitra refinery = an Iranian hit on a GCC supply node), a CENTCOM/DoD text on NSA Bahrain / Sheikh Isa, a GCC Joint Defence convening.
       16 Nov (Mon brief): the first host-state ATTRIBUTION of a direct Iranian attack on GCC territory. Bahrain Defence Force
       on record Sun 15 Nov: air defences 'intercepted and destroyed several Iranian aerial attacks'; Bahrain MoFA: a
