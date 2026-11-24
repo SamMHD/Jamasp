@@ -149,3 +149,14 @@ and read the rows the listing did not show before exiting.
   test. The Tue brief will not get the oil wrap from `inbox`; it reads the
   Brent settle directly, but the "increased Middle East flows" reason
   reaches it only if it sweeps `items` by keyword.
+- **Recurrence — brief 2026-11-24.** Listed 109 at 03:30:17Z;
+  `--mark-read` at ~03:35:50Z reported 130. All 21 extra rows were
+  published before the listing (23 Nov 11:08Z – 24 Nov 02:25Z), so this is
+  the cluster-hidden kind, not a race. Read from `items` *after* marking
+  this time (the brief did not run the count check first). Three carried
+  content the brief had not seen: the PBoC fix 6.7111 against a 6.6757
+  estimate (forexlive 01:16Z), Mehr's "Iran dismisses reports about move to
+  break US blockade" (bears on prediction `843b39e4`), and the Investing.com
+  oil wrap's "increased Middle East flows" reason — the same wrap the 19:00Z
+  scan flagged as one the brief would miss. Added to the report as an
+  addendum, headline-only.
