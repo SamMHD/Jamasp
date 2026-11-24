@@ -286,3 +286,45 @@ and read the rows the listing did not show before exiting.
   Riyadh financial-district tower hit, 11 injured (Saudi civil defence
   via SPA, Gulf News) — the office-tower class, not a supply node. Both
   margin-setter legs were met intraday at 17:00Z; the closes decide.
+- **Recurrence — scan 2026-11-24 19:00 (silent).** Listed 24 at
+  19:00:12Z; the mark reported **37**. Three were listing-hidden (fetched
+  17:46Z): Investing.com "Iraqi PM orders federal government to manage
+  oilfields under control of Kurds, Kurds reject move" (403, not read);
+  Gulf News ×2 (Oman school-bus crash; "8 things UAE residents need to
+  know tonight" — not read). **Ten were race rows** (fetched
+  19:00:32–34Z, twenty seconds after the listing; seen in a second
+  listing at 19:01:41Z, enumerated before the mark): gcaptain ×3 — "Four
+  More Ships Attacked as Iran Widens Hormuz Crackdown to Tugboats"
+  (read), "Swedish Club Urges Ships to Avoid Strait of Hormuz as Security
+  Situation Deteriorates" (headline only), the OPEC+ decision piece; Mehr
+  "Cargo ship strikes sea mine, catches fire in south of Hormuz" (read);
+  Maritime Executive ×2 (the WSJ cyber report, now headlined "US
+  Investigates Iran"; a ports cyber op-ed); fed_press "Minutes of the
+  Board's discount rate meetings on October 19 and October 28" (the
+  release page is a stub; the PDF with the Reserve Bank request count is
+  NOT read — Wed brief); CNBC Kalshi ×2; MarketWatch Las Vegas. This is
+  the item's worst case in practice: the two rows that mattered most to
+  a kinetic stance were race rows, visible only because the run re-listed.
+  No alert. **Trace for the Wed brief:** gcaptain resolves Monday's
+  "fresh attacks on shipping" reference — UKMTO warnings for **22 Nov**:
+  three tankers struck by unidentified projectiles eastbound in the
+  Strait (one warning reclassified as three; all continued, crews
+  accounted for) and a bulk carrier at anchor off Khor Fakkan struck by
+  a projectile, onboard fire, no casualties; vessels unnamed. JMIC's
+  seven tankers since 16 Nov becomes 10; "Iranian claims that tankers
+  have been struck by mines have not been independently confirmed"
+  (Orbital: no evidence); PGSA added 26 tugboats to its non-compliance
+  list (240 → ~266); IMO 141 incidents / 25 seafarer deaths as of 23 Nov;
+  114 US-facilitated transits 19–21 Nov (38/day vs 27). Projectile
+  class, reached — a count, not a new class. Mehr: an IRGC Navy statement
+  that a cargo ship running dark "north of Khasab Port" on an
+  "unauthorized route", "with support from US military aircraft", struck
+  a naval mine (explosion, fire, halted) — an IRGC claim, no vessel
+  name, no UKMTO / operator text: outside `4cab4fd3`, held. Tape
+  ~19:01Z: GC **3555.6** at 18:50Z (new day low; −2.1% vs the brief's
+  3633.5, −78.8 vs the Mon row 3634.4, −0.4% since the 17:00Z alert);
+  Brent 91.09 (+1.92%, high 91.17); DXY 103.823 (−0.47%); Nasdaq
+  Composite 23,684.8 (**−1.68%** at 2:00 PM ET — back inside the −2%
+  margin-setter leg, the close decides); 2y 4.687 on a page stamped
+  11:17 AM EST (stale; prev-close field 4.613 unrolled). Brent up with
+  gold down: the kinetic tape clause is not met.
