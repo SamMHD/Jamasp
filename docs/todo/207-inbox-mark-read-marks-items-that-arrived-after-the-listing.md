@@ -265,3 +265,24 @@ and read the rows the listing did not show before exiting.
   errored) — the relay post lands unread for the 17:00Z scan. Tape two
   minutes after the print: 2y 4.677 (+1.1bp vs 4.666), DXY 103.80
   (−0.50%), GC 3629.5 at 14:50Z (−4.9 vs the Mon row 3634.4).
+- **Recurrence — scan 2026-11-24 17:00 (ALERT scan).** Listed 44 at
+  17:00:06Z; the mark reported **52**. Six were listing-hidden (fetched
+  15:16Z–16:46Z, enumerated from `items` before marking): MarketWatch
+  401(k) millionaires; mining_weekly Transalloys; mining.com ×2 (Osisko
+  Gaspé; a cyberattack on Peninsula's Wyoming uranium mine); Gulf News
+  Ras Al Khaimah bus crash; fxempire "U.S. Dollar Retreats On Tariff
+  Hike". Two were race rows (fetched 17:00:29Z, seen in a second listing
+  before the mark): gcaptain "Used Supertankers Now Cost More Than New
+  Ships…" and Mehr "Relocation of US bases will not make them secure"
+  (rhetoric, not an act). None changed the alert. **Trace for the Wed
+  brief (the alert itself is `notify_log` 17:0xZ):** GC 3569.6 at 16:50Z,
+  day low 3563.9 at 16:21Z (−1.9% vs the brief's 3633.5; high 3642.5 at
+  12:44Z — a touch above 3638, not a close); Nasdaq Composite −2.35%
+  (23,524) at 12:00 ET, 2y 4.662 (−0.4bp vs 4.666; range 4.629–4.699),
+  DXY 103.835 (−0.46%), Brent 90.29 (+1.03%). Consumer confidence 103.3
+  vs 92.5 (prior 91.9 rev.). **Dated rates sentence:** investinglive
+  "Stock markets fall as Trump pivots…" (Tue 24 Nov ~16:00Z) — "priced
+  for 26 bps in December and 58 bps through March" (no 12-month level).
+  Riyadh financial-district tower hit, 11 injured (Saudi civil defence
+  via SPA, Gulf News) — the office-tower class, not a supply node. Both
+  margin-setter legs were met intraday at 17:00Z; the closes decide.
