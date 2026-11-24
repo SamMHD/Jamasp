@@ -223,3 +223,25 @@ and read the rows the listing did not show before exiting.
   relay — date-check before counting toward the "further UKMTO hull hit"
   leg). Projectile class is reached: a count, no alert. Gold 3624.6 at
   11:00Z.
+- **Recurrence — scan 2026-11-24 13:00.** Listed 44 at 13:00:30Z;
+  "marked 52 items read" at 13:01:00Z. Six extras were fetched *before*
+  the listing (11:01:02Z–12:45:55Z) — hidden by the listing, read before
+  marking; two were a race (fetched 13:00:37Z / 13:00:39Z), read after.
+  **The listing hid, and the race swallowed, the only kinetic rows in the
+  delta — both Mehr:** (1) hidden, published 10:02Z: Iranian Army PR — two
+  "violating" tankers that entered a restricted zone east of Hormuz with
+  AIS off "caught fire and were left immobilized following a collision
+  with a naval mine" (the text says "early on Wednesday" — today is
+  Tuesday; date unverified), plus "the Strait of Hormuz will not open
+  until Iran's objectives and demands are met"; (2) race, published
+  12:50Z: IRGC Navy — a **fourth** tanker exploded east of Hormuz early
+  Tuesday on an "unauthorized shipping route", two others turned back
+  after a radio warning. Both are principal claims with no UKMTO /
+  operator / flag-state text, so neither scores `4cab4fd3` and the
+  laid-mine class stays a held claim (UKMTO attributes the week's hits to
+  projectiles — 09:00 entry above); a count for the Wed brief, no alert.
+  Other hidden rows, benign: investing_commodities "Oil touches
+  three-month lows before recovering on Hormuz threat" and "Oil prices
+  inch higher…" (Investing.com 403s, not read), MarketWatch BofA 2027
+  bull/bear cases, Gulf News ×2 (RAK); race row MarketWatch beef prices.
+  Gold 3642.5 at 12:44Z (+9 vs the stance's 3633.5).
