@@ -160,3 +160,9 @@ and read the rows the listing did not show before exiting.
   oil wrap's "increased Middle East flows" reason — the same wrap the 19:00Z
   scan flagged as one the brief would miss. Added to the report as an
   addendum, headline-only.
+- **Recurrence — scan 2026-11-24 05:00.** Listed 26 at 05:00:06Z;
+  `--mark-read` at 05:00:43Z reported **"marked 27 items read"**. One
+  cluster-hidden row, no race row this slot (count check at 05:00:33Z,
+  before marking): gulf_news "How an Abu Dhabi teacher turned childhood
+  anxiety into books that help children feel seen" (published 02:00Z,
+  fetched 03:46:10Z — after the brief's mark, before this listing). Benign.
