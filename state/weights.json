@@ -1,8 +1,8 @@
 {
- "fitted_at": "2026-11-22T23:38:43Z",
+ "fitted_at": "2026-11-23T23:40:14Z",
  "fits": {
   "technical": {
-   "n": 6862,
+   "n": 6864,
    "horizon_hours": 24,
    "ridge_alpha": 1.0,
    "flags": [
@@ -34,42 +34,42 @@
    ],
    "coefficients": {
     "sma50@1d": {
-     "beta": 0.15675725304160174,
-     "se": 0.04821051326243106,
-     "multiplier": 1.7369288134844725,
-     "observations": 6862,
+     "beta": 0.15709075145687204,
+     "se": 0.04821204468076026,
+     "multiplier": 1.738399261900853,
+     "observations": 6864,
      "fitted": true,
      "pinned": false
     },
     "sma50@4h": {
-     "beta": 0.043167518835153774,
-     "se": 0.03336970894652997,
-     "multiplier": 0.4783122044854514,
-     "observations": 6741,
+     "beta": 0.04281015125716916,
+     "se": 0.033367824674959454,
+     "multiplier": 0.4737461286367227,
+     "observations": 6743,
      "fitted": true,
      "pinned": false
     },
     "sma50@1w": {
-     "beta": -0.165990346370394,
-     "se": 0.07455181063008892,
+     "beta": -0.16578254926149072,
+     "se": 0.07456366811406152,
      "multiplier": 0.25,
-     "observations": 6862,
+     "observations": 6864,
      "fitted": true,
      "pinned": false
     },
     "sma200@1d": {
-     "beta": 0.39904150700015983,
-     "se": 0.050676534194708654,
+     "beta": 0.39922567979083845,
+     "se": 0.05068099813516081,
      "multiplier": 3.0,
-     "observations": 6862,
+     "observations": 6864,
      "fitted": true,
      "pinned": false
     },
     "sma200@4h": {
-     "beta": 0.03063919851892993,
-     "se": 0.024295214559574948,
-     "multiplier": 0.33949374397034526,
-     "observations": 6339,
+     "beta": 0.030633230366504036,
+     "se": 0.02429046577423686,
+     "multiplier": 0.33899376357232286,
+     "observations": 6341,
      "fitted": true,
      "pinned": false
     },
@@ -77,255 +77,255 @@
      "beta": 0.0,
      "se": 0.0,
      "multiplier": 0.25,
-     "observations": 6862,
+     "observations": 6864,
      "fitted": true,
      "pinned": false
     },
     "macd@1d": {
-     "beta": -0.20764073619139597,
-     "se": 0.025661826807513582,
+     "beta": -0.20753957406425835,
+     "se": 0.02563153256922305,
      "multiplier": 0.25,
-     "observations": 6862,
+     "observations": 6864,
      "fitted": true,
      "pinned": false
     },
     "macd@4h": {
-     "beta": -0.13238999735964044,
-     "se": 0.020677393920666455,
+     "beta": -0.1326879769747702,
+     "se": 0.020667116128460436,
      "multiplier": 0.25,
-     "observations": 6774,
+     "observations": 6776,
      "fitted": true,
      "pinned": false
     },
     "macd@1w": {
-     "beta": -0.31916921689588745,
-     "se": 0.03406873766547303,
+     "beta": -0.3188175088384978,
+     "se": 0.03404658905787285,
      "multiplier": 0.25,
-     "observations": 6862,
+     "observations": 6864,
      "fitted": true,
      "pinned": false
     },
     "adx@1d": {
-     "beta": -0.10817152336243707,
-     "se": 0.045361498273358045,
+     "beta": -0.10845958185574925,
+     "se": 0.04536766967676054,
      "multiplier": 0.25,
-     "observations": 6862,
+     "observations": 6864,
      "fitted": true,
      "pinned": false
     },
     "adx@4h": {
-     "beta": -0.0800236940425643,
-     "se": 0.0331742845620349,
+     "beta": -0.07985709133608535,
+     "se": 0.03317562798076124,
      "multiplier": 0.25,
-     "observations": 6741,
+     "observations": 6743,
      "fitted": true,
      "pinned": false
     },
     "adx@1w": {
-     "beta": -0.18516994151985544,
-     "se": 0.04225356374393959,
+     "beta": -0.18515527761748202,
+     "se": 0.042253248351949435,
      "multiplier": 0.25,
-     "observations": 6862,
+     "observations": 6864,
      "fitted": true,
      "pinned": false
     },
     "rsi14@1d": {
-     "beta": -0.302027261420216,
-     "se": 0.05471159293212481,
+     "beta": -0.3017147428085617,
+     "se": 0.054711361275728856,
      "multiplier": 0.25,
-     "observations": 6862,
+     "observations": 6864,
      "fitted": true,
      "pinned": false
     },
     "rsi14@4h": {
-     "beta": -0.07342865476485784,
-     "se": 0.03665615688807981,
+     "beta": -0.07358779112491193,
+     "se": 0.036659212037204285,
      "multiplier": 0.25,
-     "observations": 6837,
+     "observations": 6839,
      "fitted": true,
      "pinned": false
     },
     "rsi14@1w": {
-     "beta": -0.17714864716471834,
-     "se": 0.06960532358310895,
+     "beta": -0.17645086807646906,
+     "se": 0.0695447378165366,
      "multiplier": 0.25,
-     "observations": 6862,
+     "observations": 6864,
      "fitted": true,
      "pinned": false
     },
     "stoch@1d": {
-     "beta": 0.016193682905902264,
-     "se": 0.01651364456246156,
+     "beta": 0.016310212029513535,
+     "se": 0.01651222714937927,
      "multiplier": 0.25,
-     "observations": 6862,
+     "observations": 6864,
      "fitted": true,
      "pinned": false
     },
     "stoch@4h": {
-     "beta": -0.05405190229186023,
-     "se": 0.014287195332677657,
+     "beta": -0.05413861396503016,
+     "se": 0.014287370925647738,
      "multiplier": 0.25,
-     "observations": 6841,
+     "observations": 6843,
      "fitted": true,
      "pinned": false
     },
     "stoch@1w": {
-     "beta": -0.004105940734858058,
-     "se": 0.023674790371437122,
+     "beta": -0.004252913335516285,
+     "se": 0.02367625389275183,
      "multiplier": 0.25,
-     "observations": 6862,
+     "observations": 6864,
      "fitted": true,
      "pinned": false
     },
     "willr@1d": {
-     "beta": 0.01619368290560946,
-     "se": 0.016513644562423452,
+     "beta": 0.016310212029293104,
+     "se": 0.01651222714934116,
      "multiplier": 0.25,
-     "observations": 6862,
+     "observations": 6864,
      "fitted": true,
      "pinned": false
     },
     "willr@4h": {
-     "beta": -0.054051902291661465,
-     "se": 0.014287195332673842,
+     "beta": -0.05413861396478859,
+     "se": 0.014287370925686634,
      "multiplier": 0.25,
-     "observations": 6841,
+     "observations": 6843,
      "fitted": true,
      "pinned": false
     },
     "willr@1w": {
-     "beta": -0.004105940734248805,
-     "se": 0.023674790371388182,
+     "beta": -0.004252913333319837,
+     "se": 0.023676253890365213,
      "multiplier": 0.25,
-     "observations": 6862,
+     "observations": 6864,
      "fitted": true,
      "pinned": false
     },
     "fib618@1d": {
-     "beta": 0.050948207718093254,
-     "se": 0.03541117486568926,
-     "multiplier": 0.5645251384793208,
-     "observations": 6862,
+     "beta": 0.050815474193026275,
+     "se": 0.0353950201324462,
+     "multiplier": 0.5623347142403292,
+     "observations": 6864,
      "fitted": true,
      "pinned": false
     },
     "fib618@4h": {
-     "beta": -0.09968968217611575,
-     "se": 0.019940078177397135,
+     "beta": -0.09974539952002301,
+     "se": 0.019940698969124974,
      "multiplier": 0.25,
-     "observations": 6589,
+     "observations": 6591,
      "fitted": true,
      "pinned": false
     },
     "fib618@1w": {
-     "beta": 0.06543085679476045,
-     "se": 0.016090499697465642,
-     "multiplier": 0.7249982903670461,
-     "observations": 6862,
+     "beta": 0.06576930606851496,
+     "se": 0.01617588789708759,
+     "multiplier": 0.7278169597185163,
+     "observations": 6864,
      "fitted": true,
      "pinned": false
     },
     "fib50@1d": {
-     "beta": -0.2207954119759427,
-     "se": 0.03404200272563932,
+     "beta": -0.2207934681190528,
+     "se": 0.03402364583660341,
      "multiplier": 0.25,
-     "observations": 6862,
+     "observations": 6864,
      "fitted": true,
      "pinned": false
     },
     "fib50@4h": {
-     "beta": -0.05673568636546409,
-     "se": 0.024550572719529835,
+     "beta": -0.056664075292974306,
+     "se": 0.02454200376512018,
      "multiplier": 0.25,
-     "observations": 6589,
+     "observations": 6591,
      "fitted": true,
      "pinned": false
     },
     "fib50@1w": {
-     "beta": -0.01242271520945771,
-     "se": 0.030629942246532628,
+     "beta": -0.012475437373937566,
+     "se": 0.030692695668507537,
      "multiplier": 0.25,
-     "observations": 6862,
+     "observations": 6864,
      "fitted": true,
      "pinned": false
     },
     "pivot@1d": {
-     "beta": -0.028729154238773164,
-     "se": 0.015314529274319418,
+     "beta": -0.0285961926064818,
+     "se": 0.015312842756812948,
      "multiplier": 0.25,
-     "observations": 6862,
+     "observations": 6864,
      "fitted": true,
      "pinned": false
     },
     "pivot@4h": {
-     "beta": -0.013009499014924512,
-     "se": 0.0105265782125764,
+     "beta": -0.013067862314012876,
+     "se": 0.01052134643401518,
      "multiplier": 0.25,
-     "observations": 6857,
+     "observations": 6859,
      "fitted": true,
      "pinned": false
     },
     "pivot@1w": {
-     "beta": -0.02718486371793029,
-     "se": 0.016664212865070836,
+     "beta": -0.027138282248648542,
+     "se": 0.0166644752915161,
      "multiplier": 0.25,
-     "observations": 6862,
+     "observations": 6864,
      "fitted": true,
      "pinned": false
     },
     "bollinger@1d": {
-     "beta": -0.021961918898035875,
-     "se": 0.03634107013581681,
+     "beta": -0.022201530314186493,
+     "se": 0.03634333666174194,
      "multiplier": 0.25,
-     "observations": 6862,
+     "observations": 6864,
      "fitted": true,
      "pinned": false
     },
     "bollinger@4h": {
-     "beta": -0.00048482393396462656,
-     "se": 0.03007013295326537,
+     "beta": -0.0005986675440005165,
+     "se": 0.03006929676606048,
      "multiplier": 0.25,
-     "observations": 6819,
+     "observations": 6821,
      "fitted": true,
      "pinned": false
     },
     "bollinger@1w": {
-     "beta": -0.06575359725961942,
-     "se": 0.06448359155214237,
+     "beta": -0.06585456284880552,
+     "se": 0.06447127913699582,
      "multiplier": 0.25,
-     "observations": 6862,
+     "observations": 6864,
      "fitted": true,
      "pinned": false
     },
     "atr14@1d": {
-     "beta": 0.06342459889594125,
-     "se": 0.016359593645755472,
-     "multiplier": 0.702768204778502,
-     "observations": 6862,
+     "beta": 0.0634394450980105,
+     "se": 0.016353744383597324,
+     "multiplier": 0.7020342286926958,
+     "observations": 6864,
      "fitted": true,
      "pinned": false
     },
     "atr14@4h": {
-     "beta": 0.09857208763762174,
-     "se": 0.01057636030661278,
-     "multiplier": 1.0922154854146602,
-     "observations": 6704,
+     "beta": 0.09815861050294265,
+     "se": 0.01057767455918118,
+     "multiplier": 1.0862438078945489,
+     "observations": 6706,
      "fitted": true,
      "pinned": false
     },
     "atr14@1w": {
-     "beta": -0.1464926241392732,
-     "se": 0.020745509177231947,
+     "beta": -0.146560335920991,
+     "se": 0.020739786337768705,
      "multiplier": 0.25,
-     "observations": 6862,
+     "observations": 6864,
      "fitted": true,
      "pinned": false
     },
     "gvz@1d": {
-     "beta": 0.052377780883167906,
-     "se": 0.009954524981984687,
-     "multiplier": 0.5803653421906182,
-     "observations": 1421,
+     "beta": 0.05345383914278872,
+     "se": 0.009982373564108853,
+     "multiplier": 0.5915314151202745,
+     "observations": 1423,
      "fitted": true,
      "pinned": false
     },
@@ -340,7 +340,7 @@
    }
   },
   "theme": {
-   "n": 1306,
+   "n": 1308,
    "horizon_hours": 24,
    "ridge_alpha": 1.0,
    "flags": [
@@ -349,50 +349,50 @@
    ],
    "coefficients": {
     "rates_dollar": {
-     "beta": 0.029606512662021293,
-     "se": 0.014565551782835414,
-     "multiplier": 1.0655570834254726,
-     "observations": 1157,
+     "beta": 0.029545320859937788,
+     "se": 0.014554240676633742,
+     "multiplier": 1.0687435047580722,
+     "observations": 1159,
      "fitted": true,
      "pinned": false
     },
     "geopolitics": {
-     "beta": 0.04276533405591696,
-     "se": 0.015213736432345632,
-     "multiplier": 1.539151373501476,
-     "observations": 1176,
+     "beta": 0.04242314649288758,
+     "se": 0.01520137871519457,
+     "multiplier": 1.5345733586922117,
+     "observations": 1178,
      "fitted": true,
      "pinned": false
     },
     "physical_cb": {
-     "beta": 0.0204485642949747,
-     "se": 0.014272578421051355,
+     "beta": 0.020208262086539575,
+     "se": 0.014257827992255959,
      "multiplier": 1.0,
      "observations": 67,
      "fitted": true,
      "pinned": true
     },
     "etf_flows": {
-     "beta": 0.018319623144035294,
-     "se": 0.014241141637610323,
+     "beta": 0.018402921256620745,
+     "se": 0.014227556676058762,
      "multiplier": 1.0,
      "observations": 26,
      "fitted": false,
      "pinned": false
     },
     "supply_mining": {
-     "beta": -0.02563560143735888,
-     "se": 0.014363921762898718,
+     "beta": -0.025823825706779404,
+     "se": 0.014351617923416642,
      "multiplier": 0.25,
      "observations": 417,
      "fitted": true,
      "pinned": false
     },
     "other": {
-     "beta": -0.0003911184319368211,
-     "se": 0.014630934008426572,
+     "beta": -0.00012677750960527623,
+     "se": 0.014618137620198954,
      "multiplier": 0.25,
-     "observations": 894,
+     "observations": 896,
      "fitted": true,
      "pinned": false
     }
