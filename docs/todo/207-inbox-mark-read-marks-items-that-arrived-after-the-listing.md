@@ -208,3 +208,18 @@ and read the rows the listing did not show before exiting.
   Iraqi PM orders federal takeover of Kurdistan oil exports, border
   crossings and disputed-area oilfields (escalates the 07:00Z oil-minister
   row; Kurdistan nodes are outside `72c244f9`). Gold 3622.6 at 08:50Z.
+- **Recurrence — scan 2026-11-24 11:00.** Listed 32 at 11:00:07Z;
+  "marked 37 items read" at 11:00:34Z. All five extras were fetched
+  *before* the listing (09:31:28Z ×4, 09:46:02Z ×1) — hidden by the
+  listing, not a race: four actionforex daily technical outlooks
+  (EUR/USD, USD/JPY, GBP/USD, USD/CHF) and investing_commodities "Oil
+  touches three-month lows as rising supply offsets Hormuz threat"
+  (consistent with the stance; not read — Investing.com 403s). Read
+  before marking; none urgent. Also listed and marked, for the Wed brief's
+  owed hull reference: Mehr 09:35Z relays a **UKMTO time-late report — a
+  bulk carrier struck on the port side by an unknown projectile while
+  anchored at Dibba OPL, 23 nm NE of Khor Fakkan, UAE; fire onboard, no
+  casualties** (no warning number, vessel name or incident date in the
+  relay — date-check before counting toward the "further UKMTO hull hit"
+  leg). Projectile class is reached: a count, no alert. Gold 3624.6 at
+  11:00Z.
