@@ -166,3 +166,21 @@ and read the rows the listing did not show before exiting.
   before marking): gulf_news "How an Abu Dhabi teacher turned childhood
   anxiety into books that help children feel seen" (published 02:00Z,
   fetched 03:46:10Z — after the brief's mark, before this listing). Benign.
+- **Recurrence — scan 2026-11-24 07:00.** Listed 38 at 07:00:06Z;
+  `--mark-read` at 07:00:55Z reported **"marked 50 items read"**. Ten race
+  rows (fetched 07:00:41–48Z, mid-run) and two cluster-hidden rows
+  (national_business "US deepens Gulf partnerships with Qatar critical
+  minerals agreement"; investing_commodities "Oil prices near three-month
+  lows as rising supply offsets Hormuz threat"). Count check ran before
+  marking; all twelve read by headline, none met the alert test. Race rows
+  the Wed brief will not get from `inbox`: gulf_news "Brent drops to $88,
+  WTI at $79: Why oil is sliding despite Iran's tanker attacks" (extracted
+  — flows/supply piece, no UKMTO or operator text on the IRGC three-tanker
+  mine claim), mehr_en "Iran not to engage in talks till its conditions
+  met: Ghalibaf", gulf_news "Israeli transport ministry approves resumption
+  of flydubai flights after attack", national_business "Iraqi oil minister
+  demands federal control of northern fields held by Kurdistan region",
+  gold_eagle "Gold SWOT: UBS and Goldman Sachs see gold recovering by late
+  2027". The mine claim itself (Mehr 04:02Z, IRGC Navy PR; investinglive
+  03:58Z "not independently confirmed") bears on prediction `4cab4fd3` —
+  an Iranian claim, not scoring; Brent 89.08 (−0.32%), gold 3617.3.
