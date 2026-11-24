@@ -184,3 +184,27 @@ and read the rows the listing did not show before exiting.
   2027". The mine claim itself (Mehr 04:02Z, IRGC Navy PR; investinglive
   03:58Z "not independently confirmed") bears on prediction `4cab4fd3` —
   an Iranian claim, not scoring; Brent 89.08 (−0.32%), gold 3617.3.
+- **Recurrence — scan 2026-11-24 09:00.** Listed 120 (the cap) of a
+  header "158 unread" at 09:00:06Z; 242 rows unread at the 09:02:39Z count
+  check, before marking. Of the 122 unlisted: 94 are 2012–13
+  `national_business` archive rows (38 cut by the cap, 56 landed
+  09:00:16Z — todo 209), 20 race rows fetched 09:00:16–17Z (Gulf News
+  local, Maritime Executive corporate, actionforex daily pair outlooks,
+  national_business "Manus on Markets: Nvidia's $1 trillion man braces for
+  Congress grilling" and a duplicate of the Iraqi-PM Kurdistan takeover
+  order) and 8 cluster-hidden rows. All read by headline; none met the
+  alert test. One cluster-hidden row the Wed brief will not get from
+  `inbox` and should: gulf_news "Mid-East war: What IRGC claimed, what
+  JMIC reported…" (published 07:05Z, fetched 07:30:56Z; extracted
+  `--fresh`) — **JMIC's log lists "unknown projectiles" and says Iran's
+  mine claims remain unverified**, so the IRGC three-tanker mine claim
+  does not score `4cab4fd3`; it names hulls for the stance's owed
+  "fresh attacks on shipping" reference — *Torkel* (stern, 11 nm N of
+  Khasab, fire), *Arina* (engine room, 17 nm E of Khasab), a third
+  unidentified 8 nm N of Khasab — within JMIC's seven tanker attacks
+  16–21 Nov (incident dates per hull not given: date-check before
+  counting); threat level "severe", further attacks on the Omani side
+  "highly likely" within 24–48 h. Also listed and marked: The National,
+  Iraqi PM orders federal takeover of Kurdistan oil exports, border
+  crossings and disputed-area oilfields (escalates the 07:00Z oil-minister
+  row; Kurdistan nodes are outside `72c244f9`). Gold 3622.6 at 08:50Z.
