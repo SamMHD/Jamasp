@@ -245,3 +245,23 @@ and read the rows the listing did not show before exiting.
   inch higher…" (Investing.com 403s, not read), MarketWatch BofA 2027
   bull/bear cases, Gulf News ×2 (RAK); race row MarketWatch beef prices.
   Gold 3642.5 at 12:44Z (+9 vs the stance's 3633.5).
+- **Recurrence — scan 2026-11-24 15:00.** Listed 48 at 15:00:07Z;
+  "marked 59 items read" at ~15:02Z. Four extras were fetched *before*
+  the listing (hidden by it, enumerated from the DB before marking):
+  investing_commodities "Oil rebounds from three-month lows on Hormuz
+  threat" (14:37Z) and "Oil prices choppy amid improving supplies,
+  Mideast disruption fears" (13:25Z) — Investing.com 403s, not read;
+  fxempire "Crude Oil Price Forecast: Rising Supplies Threaten WTI and
+  Brent"; an actionforex ETH Elliott-wave duplicate. The other seven were
+  this scan's own `ingest` (run to look for the 15:00Z consumer-confidence
+  print): Mehr ×2 (IRGC chief — "war will not be 'merely regional'",
+  intent not an act; Pezeshkian tribute), gcaptain ×3 (Healy; Ukraine /
+  Russian ships off Libya and in the Gulf of Finland), MarketWatch ×2.
+  All 59 enumerated before marking — no unseen race row this time. None
+  urgent. **The print itself was not readable by ~15:02Z** (forexlive /
+  actionforex inside the ingest interval until ~15:15Z; MarketWatch
+  calendar actual still blank, consensus 92.2 / prior 91.7; Trading
+  Economics calendar returned boilerplate only; conference-board.org
+  errored) — the relay post lands unread for the 17:00Z scan. Tape two
+  minutes after the print: 2y 4.677 (+1.1bp vs 4.666), DXY 103.80
+  (−0.50%), GC 3629.5 at 14:50Z (−4.9 vs the Mon row 3634.4).
