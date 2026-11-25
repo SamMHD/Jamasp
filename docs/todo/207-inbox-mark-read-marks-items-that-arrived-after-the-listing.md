@@ -328,3 +328,16 @@ and read the rows the listing did not show before exiting.
   margin-setter leg, the close decides); 2y 4.687 on a page stamped
   11:17 AM EST (stale; prev-close field 4.613 unrolled). Brent up with
   gold down: the kinetic tape clause is not met.
+- **Recurrence — brief 2026-11-25.** Listed 110 at 03:30:22Z;
+  `--mark-read` at 03:35:19Z marked **125**. The 15 rows outside the
+  listing all carry `published_at` between 24 Nov 14:25Z and 25 Nov
+  01:41Z — older than the listing, so listing-hidden (clustered or
+  filtered rows) rather than arrivals during the run; the ingest inside
+  the run reported 0 new items. Traced after the mark, all benign:
+  mining.com ×5 (Marimaca / Sprott, "China extends reprieve" ×2, Tudor
+  Treaty Creek, KSM), Northern Miner silver supply gap, The National ×2
+  on Nvidia, Investing.com "Oil rises $1 on Hormuz ship attacks" (same
+  story as the listed 20:00Z settle item) and soybeans, MarketWatch
+  holiday spending, actionforex ×3 (eco data, CADJPY, Australia CPI
+  quick take — the print itself was listed), investinglive PBoC
+  estimate (the fix was listed). Nothing that changes the brief.
